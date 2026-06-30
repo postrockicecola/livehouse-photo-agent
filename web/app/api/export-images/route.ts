@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const GALLERY_ORIGIN = (process.env.GALLERY_API_ORIGIN || "http://127.0.0.1:8080").replace(/\/$/, "");
 
-/** Batch film export can run many minutes (RAW develop + grade); avoid dev rewrite/proxy cutting the connection. */
-export const maxDuration = 600;
+/** Batch film export can run many minutes (RAW develop + grade); avoid dev rewrite/proxy cutting the connection.
+ *  Capped at 300s — the max allowed for Vercel Serverless Functions on the hobby plan. */
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
