@@ -28,8 +28,17 @@ export const LANDING_HERO = {
   ctaSecondary: { label: "See workflow", href: "#workflow" },
 } as const;
 
+/** Keys on the live `/api/landing/stats` payload a scale stat can bind to. */
+export type LandingStatKey =
+  | "sessions_total"
+  | "photos_total"
+  | "analyzed_photos_total"
+  | "exported_photos_total";
+
 export type LandingScaleStat = {
   id: string;
+  /** Live-stats field this cell binds to; live value (when present) overrides `value`. */
+  statKey: LandingStatKey;
   value: number;
   suffix?: string;
   label: string;
@@ -50,6 +59,7 @@ export const LANDING_SCALE_INTRO = {
 export const LANDING_SCALE_STATS: LandingScaleStat[] = [
   {
     id: "sessions",
+    statKey: "sessions_total",
     value: 50,
     suffix: "+",
     label: "Live Sessions",
@@ -60,6 +70,7 @@ export const LANDING_SCALE_STATS: LandingScaleStat[] = [
   },
   {
     id: "archived",
+    statKey: "photos_total",
     value: 27000,
     suffix: "+",
     label: "Photos Archived",
@@ -68,6 +79,7 @@ export const LANDING_SCALE_STATS: LandingScaleStat[] = [
   },
   {
     id: "evaluations",
+    statKey: "analyzed_photos_total",
     value: 8000,
     suffix: "+",
     label: "AI Evaluations",
@@ -76,6 +88,7 @@ export const LANDING_SCALE_STATS: LandingScaleStat[] = [
   },
   {
     id: "brain",
+    statKey: "exported_photos_total",
     value: 573,
     label: "Photos In Brain DB",
     caption: "纳入记忆库的精选记录",
