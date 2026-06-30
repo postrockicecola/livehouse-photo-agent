@@ -1,0 +1,41 @@
+# Celery broker (db 0) + result backend (db 1). Also the source of truth KEDA polls:
+# the broker stores the default queue as a Redis LIST named "celery" in db 0, so the
+# autoscaler scales on LLEN celery (see 60-keda-scaledobject.yaml).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: livehouse
+  labels: { app: redis, livehouse.role: broker }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: redis }
+  template:
+    metadata:
+      labels: { app: redis, livehouse.role: broker }
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args: ["--save", "", "--appendonly", "no"]  # ephemeral broker; demo only
+          ports:
+            - containerPort: 6379
+          readinessProbe:
+            exec: { command: ["redis-cli", "ping"] }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: livehouse
+spec:
+  selector: { app: redis }
+  ports:
+    - port: 6379
+      targetPort: 6379

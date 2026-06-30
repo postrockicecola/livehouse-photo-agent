@@ -1,0 +1,29 @@
+# Container defaults — mount archive at /data/archive (see deploy/docker-compose.yml).
+# Override gallery previews: env LIVEHOUSE_GALLERY_PREVIEWS_DIR=/data/archive/YYYY-MM-DD/Previews
+
+paths:
+  source_dir: "/data/archive"
+  work_dir: "/data/work"
+
+  folders:
+    best: "AI_Best_90+"
+    keep: "AI_Keep_60-90"
+    trash: "AI_Trash_Below60"
+
+  log_file: "aesthetic_audit.jsonl"
+  progress_file: ".processing_progress.json"
+  detailed_audit: "detailed_audit.txt"
+  selected_folder: "AI_Selected_Final"
+  manual_selected_folder: "manual_selected"
+
+# Host Ollama (Mac/ Linux): host.docker.internal. Linux without that alias: set OLLAMA_HOST env on api/celery.
+model:
+  provider: "ollama"
+  endpoint: "http://host.docker.internal:11434"
+  model_name: "llava"
+  timeout: 300
+  max_concurrent_requests: 4
+  max_inference_queue_size: 4
+  inference_batch_size: 1
+  queue_wait_timeout_seconds: 120
+  fallback_model_name: ""

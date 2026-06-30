@@ -1,0 +1,17 @@
+{
+  "export_dir": "showcase",
+  "images": [
+    { "path": "/demo/demo-01.jpg" },
+    { "path": "/demo/demo-02.jpg" },
+    { "path": "/demo/demo-03.jpg" },
+    { "path": "/demo/demo-04.jpg" },
+    { "path": "/demo/demo-05.jpg" },
+    { "path": "/demo/demo-06.jpg" },
+    { "path": "/demo/demo-07.jpg" },
+    { "path": "/demo/demo-08.jpg" },
+    { "path": "/demo/demo-09.jpg" },
+    { "path": "/demo/demo-10.jpg" },
+    { "path": "/demo/demo-11.jpg" },
+    { "path": "/demo/demo-12.jpg" }
+  ]
+}

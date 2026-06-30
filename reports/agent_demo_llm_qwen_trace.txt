@@ -1,0 +1,98 @@
+INFO loaded 12 candidates
+INFO Inference queue started | lanes=['llava'] total_workers=4 total_max_inflight=4 hard_timeout=120 batch=1 window_ms=0.0
+INFO Pipeline initialized | Source: ./data/agent_demo
+INFO using LLM planner (LLMPlanner) model=qwen2.5:3b-instruct
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO LLM planner action out of contract; using fallback
+INFO wrote result JSON to reports/agent_demo_result.json
+#1   [auto_inspect] inspect 20260130__DSC02506.jpg :: auto-inspect 20260130__DSC02506.jpg -> {'image_id': '20260130__DSC02506.jpg', 'tech_score': 91.0, 'fast_score': 76.99614295194635, 'blur_type': 'none'}
+#2   [auto_inspect] inspect 20260130__DSC02509.jpg :: auto-inspect 20260130__DSC02509.jpg -> {'image_id': '20260130__DSC02509.jpg', 'tech_score': 86.0, 'fast_score': 71.9543194955918, 'blur_type': 'slight_blur'}
+#3   [auto_inspect] inspect 20260130__DSC02513.jpg :: auto-inspect 20260130__DSC02513.jpg -> {'image_id': '20260130__DSC02513.jpg', 'tech_score': 86.0, 'fast_score': 53.94899181179598, 'blur_type': 'slight_blur'}
+#4   [auto_inspect] inspect 20260130__DSC02519.jpg :: auto-inspect 20260130__DSC02519.jpg -> {'image_id': '20260130__DSC02519.jpg', 'tech_score': 86.0, 'fast_score': 67.98028748382744, 'blur_type': 'slight_blur'}
+#5   [auto_inspect] inspect 20260130__DSC02563.jpg :: auto-inspect 20260130__DSC02563.jpg -> {'image_id': '20260130__DSC02563.jpg', 'tech_score': 91.0, 'fast_score': 64.13027392453195, 'blur_type': 'none'}
+#6   [auto_inspect] inspect 20260130__DSC02564.jpg :: auto-inspect 20260130__DSC02564.jpg -> {'image_id': '20260130__DSC02564.jpg', 'tech_score': 91.0, 'fast_score': 77.24674413884321, 'blur_type': 'none'}
+#7   [auto_inspect] inspect 20260130__DSC02591.jpg :: auto-inspect 20260130__DSC02591.jpg -> {'image_id': '20260130__DSC02591.jpg', 'tech_score': 91.0, 'fast_score': 71.20227049834196, 'blur_type': 'none'}
+#8   [auto_inspect] inspect 20260130__DSC02595.jpg :: auto-inspect 20260130__DSC02595.jpg -> {'image_id': '20260130__DSC02595.jpg', 'tech_score': 86.0, 'fast_score': 61.038524362850985, 'blur_type': 'slight_blur'}
+#9   [auto_inspect] inspect 20260131__DSC02829.jpg :: auto-inspect 20260131__DSC02829.jpg -> {'image_id': '20260131__DSC02829.jpg', 'tech_score': 100.0, 'fast_score': 84.3803527328188, 'blur_type': 'none'}
+#10  [auto_inspect] inspect 20260131__DSC02832.jpg :: auto-inspect 20260131__DSC02832.jpg -> {'image_id': '20260131__DSC02832.jpg', 'tech_score': 91.0, 'fast_score': 81.12477835261706, 'blur_type': 'none'}
+#11  [auto_inspect] inspect 20260131__DSC02841.jpg :: auto-inspect 20260131__DSC02841.jpg -> {'image_id': '20260131__DSC02841.jpg', 'tech_score': 100.0, 'fast_score': 79.79070688265216, 'blur_type': 'none'}
+#12  [auto_inspect] inspect 20260131__DSC02848.jpg :: auto-inspect 20260131__DSC02848.jpg -> {'image_id': '20260131__DSC02848.jpg', 'tech_score': 91.0, 'fast_score': 87.80681105961001, 'blur_type': 'none'}
+#13  [llm] analyze 20260130__DSC02563.jpg :: ... -> {'image_id': '20260130__DSC02563.jpg', 'tier': 'fast', 'score': 74.875, 'confidence': 0.92, 'verdict': '红色灯光强烈勾出歌手轮廓', 'error': False}  [queue escalation: score 74.9 in ambiguous band [65,75]]
+#14  [reflection] analyze 20260130__DSC02563.jpg :: escalate 20260130__DSC02563.jpg to full after reflection -> {'image_id': '20260130__DSC02563.jpg', 'tier': 'full', 'score': 72.5, 'confidence': 0.92, 'verdict': '红色的侧光在洒漫的幽影中镁出歌手轮廓', 'error': False}
+#15  [llm_fallback] analyze 20260131__DSC02848.jpg :: [llm_invalid_action] analyze top fast_score candidate 20260131__DSC02848.jpg (87.8) -> {'image_id': '20260131__DSC02848.jpg', 'tier': 'fast', 'score': 73.5, 'confidence': 0.92, 'verdict': '红色黏光灯使用者轮廓', 'error': False}  [queue escalation: score 73.5 in ambiguous band [65,75]]
+#16  [reflection] analyze 20260131__DSC02848.jpg :: escalate 20260131__DSC02848.jpg to full after reflection -> {'image_id': '20260131__DSC02848.jpg', 'tier': 'full', 'score': 76.625, 'confidence': 0.92, 'verdict': '高精度的主题轮廓', 'error': False}
+#17  [llm] analyze 20260130__DSC02563.jpg :: ... -> {'image_id': '20260130__DSC02563.jpg', 'tier': 'fast', 'score': 72.125, 'confidence': 0.92, 'verdict': '红色衍光彻底雕出了演员轮廓', 'error': False}
+#18  [llm_fallback] analyze 20260131__DSC02829.jpg :: [llm_invalid_action] analyze top fast_score candidate 20260131__DSC02829.jpg (84.4) -> {'image_id': '20260131__DSC02829.jpg', 'tier': 'fast', 'score': 73.375, 'confidence': 0.92, 'verdict': '深色前景与背景闪光', 'error': False}
+#19  [llm_fallback] finalize  :: [llm_invalid_action] no affordable work remaining; commit keepers -> {'selected': ['20260131__DSC02848.jpg', '20260131__DSC02829.jpg', '20260130__DSC02563.jpg'], 'count': 3}
+
+=== curation agent result ===
+{
+  "steps": 19,
+  "inferences_used": 6,
+  "max_inferences": 6,
+  "budget_exhausted": true,
+  "escalations": 2,
+  "llm_fallback_calls": 3,
+  "llm_decision_rate": 0.4,
+  "candidates_total": 12,
+  "candidates_analyzed": 3,
+  "selected_count": 3,
+  "action_counts": {
+    "inspect": 12,
+    "analyze": 6,
+    "finalize": 1
+  },
+  "planner_source_counts": {
+    "auto_inspect": 12,
+    "llm": 2,
+    "reflection": 2,
+    "llm_fallback": 3
+  }
+}
+
+selected:
+  20260131__DSC02848.jpg  score=76.625  conf=0.92  tier=full
+  20260131__DSC02829.jpg  score=73.375  conf=0.92  tier=fast
+  20260130__DSC02563.jpg  score=72.125  conf=0.92  tier=fast

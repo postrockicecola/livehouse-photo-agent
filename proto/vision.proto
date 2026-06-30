@@ -1,0 +1,11 @@
+message AnalysisResponse {
+    float composition = 1;
+    float energy = 2;
+    float technical = 3;
+    float total_score = 4;
+    string reason = 5;
+    // --- 新增下面三个字段 ---
+    float emotion = 6;
+    float lighting = 7;
+    float subject = 8;
+}

@@ -1,0 +1,15 @@
+{
+  "counts": {
+    "jobs": 1284,
+    "events": 9712,
+    "artifacts": 3460,
+    "sessions": 50,
+    "photos": 573,
+    "snapshots": 1284
+  },
+  "trace": [
+    { "id": 1, "job_id": 1842, "from_status": "QUEUED", "to_status": "CLAIMED", "created_at": null },
+    { "id": 2, "job_id": 1842, "from_status": "CLAIMED", "to_status": "INFERENCING", "created_at": null },
+    { "id": 3, "job_id": 1842, "from_status": "INFERENCING", "to_status": "SUCCEEDED", "created_at": null }
+  ]
+}

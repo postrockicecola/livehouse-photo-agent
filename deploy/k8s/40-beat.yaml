@@ -1,0 +1,44 @@
+# Scheduler: Celery beat. Owns the two periodic envelopes (dispatch runnable jobs +
+# scan/requeue stuck jobs). Exactly one replica — beat must be a singleton.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beat
+  namespace: livehouse
+  labels: { app: beat, livehouse.role: scheduler }
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # never two beats at once
+  selector:
+    matchLabels: { app: beat }
+  template:
+    metadata:
+      labels: { app: beat, livehouse.role: scheduler }
+    spec:
+      initContainers:
+        - name: init-dirs
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p /data/brain /data/work /data/archive"]
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      containers:
+        - name: beat
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          args: ["celery-beat"]
+          env:
+            - { name: CELERY_BROKER_URL, value: redis://redis:6379/0 }
+            - { name: CELERY_RESULT_BACKEND, value: redis://redis:6379/1 }
+            - { name: LUMA_BRAIN_DB, value: /data/brain/luma_brain.db }
+            - { name: LUMA_ARCHIVE_ROOT, value: /data/archive }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          resources:
+            requests: { cpu: "50m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: livehouse-data

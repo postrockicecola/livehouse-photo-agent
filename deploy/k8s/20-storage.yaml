@@ -1,0 +1,18 @@
+# Shared state for the jobs SSOT (SQLite at /data/brain/luma_brain.db), work dir and archive.
+#
+# RWO is deliberate: on a single-node kind cluster every pod (api, beat, all worker
+# replicas) lands on the same node, and a ReadWriteOnce volume can be mounted by many
+# pods *on one node*. This is the honest single-host limit — see README "Scaling notes"
+# for what would change (RWX / Postgres) on a real multi-node cluster.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: livehouse-data
+  namespace: livehouse
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi
+  # kind's default provisioner; omit to use the cluster default StorageClass.
+  storageClassName: standard

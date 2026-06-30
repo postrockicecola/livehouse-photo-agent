@@ -1,0 +1,313 @@
+# Livehouse Photography AI Processing Pipeline Configuration
+# Configuration synced from tests/test_ai.py
+
+# ==============================================================
+# PATHS & DIRECTORIES
+# ==============================================================
+paths:
+  # Previews root (gallery + pipeline). Override API dir only: env LIVEHOUSE_GALLERY_PREVIEWS_DIR
+  source_dir: "/path/to/Livehouse_Archive/session/Previews"
+  work_dir: "./data/livehouse_session"
+  
+  # Output folders for categorized results
+  folders:
+    best: "AI_Best_90+"          # Score >= 90
+    keep: "AI_Keep_60-90"        # Score 60-90
+    trash: "AI_Trash_Below60"    # Score < 60
+  
+  # Log and tracking files
+  log_file: "aesthetic_audit.jsonl"
+  progress_file: ".processing_progress.json"
+  detailed_audit: "detailed_audit.txt"
+  selected_folder: "AI_Selected_Final"
+  manual_selected_folder: "manual_selected"
+
+# ==============================================================
+# PROCESSING & FILTERING THRESHOLDS (OpenCV Stage 1 & 2)
+# ==============================================================
+quality_thresholds:
+  # Sharpness/Blur Detection
+  laplacian_variance_min: 30          # Minimum for non-severe blur
+  laplacian_variance_slight_blur: 50  # Threshold for slight blur penalty
+  laplacian_variance_medium: 120      # Medium blur level
+  laplacian_variance_high: 200        # High quality baseline
+  
+  # Motion Blur Detection (Sobel gradient asymmetry)
+  motion_blur_ratio_threshold: 1.5    # Gradient ratio bounds [0.67, 1.5]
+  
+  # Exposure Detection
+  overexposed_threshold: 0.25         # Max 25% pixels > 230
+  overexposed_penalty: 0.15           # Minor penalty threshold
+  underexposed_threshold: 0.50        # Max 50% pixels < 30
+  underexposed_penalty: 0.35          # Minor penalty threshold
+  
+  # Contrast Detection
+  contrast_min: 10                    # Minimum std deviation
+  contrast_penalty: 20                # Penalty threshold
+  
+  # Content Validation
+  brightness_min: 5
+  brightness_max: 250
+  
+  # Edge Detection
+  edge_ratio_min: 0.005               # Minimum edge pixels ratio
+
+# ==============================================================
+# FAST AESTHETIC ASSESSMENT THRESHOLDS (Stage 2)
+# ==============================================================
+fast_aesthetic:
+  tech_score_min: 32                  # Stage2: stricter technical floor (aggressive cull)
+  fast_aesthetic_score_min: 22       # Stage2: stricter fast-aesthetic floor
+
+# ==============================================================
+# AI MODEL CONFIGURATION (Ollama + LLaVA)
+# ==============================================================
+model:
+  # provider: ollama | vllm | openai | mock. vllm/openai hit an OpenAI-compatible
+  # /v1/chat/completions endpoint (continuous batching server-side); usage tokens are
+  # recorded into model_runs just like Ollama. Example vLLM block:
+  #   provider: "vllm"
+  #   endpoint: "http://localhost:8000"        # or .../v1 ; vllm_endpoints: [...] to round-robin
+  #   model_name: "Qwen/Qwen2-VL-7B-Instruct"
+  #   api_key: ""                               # only for hosted OpenAI-compatible APIs
+  provider: "ollama"
+  endpoint: "http://localhost:11434"
+  model_name: "llava"
+  # Optional: dedicated chat model for the Gallery copilot (text ReAct / tool-calling).
+  # ``llava`` is a vision model and follows the tool protocol poorly (skips tools / makes
+  # up data); point this at a small instruct model on the SAME provider/endpoint. Empty =
+  # reuse ``model_name``. This does NOT affect the VLM scoring pipeline.
+  agent_chat_model: "qwen2.5:3b-instruct"
+  # Read timeout per HTTP attempt (seconds). LLaVA + 512 tokens often needs 180–300s on CPU.
+  timeout: 300
+  # Parallel Ollama HTTP workers + admission slots (match single-process LLaVA throughput; avoid fake concurrency).
+  # Raise only if Ollama can sustain parallel decodes (e.g. multiple GPU workers / instances).
+  max_concurrent_requests: 4
+  max_inference_queue_size: 4
+  # Optional: per-Ollama-model lanes (lane id must match ``model_name`` on requests, or router primary).
+  # Omit for single-lane behavior (defaults to primary ``model_name`` with max_* above).
+  # inference_lanes:
+  #   llava:
+  #     num_workers: 2
+  #     max_queue_size: 4
+  #   "qwen2.5vl:7b":
+  #     num_workers: 1
+  #     max_queue_size: 2
+  # Future: batch multi-image prompts when backend supports it (currently 1 image per call).
+  inference_batch_size: 1
+  # Optional: multiple Ollama listeners — requests round-robin across instances (see RoundRobinInferenceRouter).
+  # ollama_endpoints:
+  #   - "http://localhost:11434"
+  #   - "http://localhost:11435"
+  # Shorthand (same host):
+  # ollama_ports: [11434, 11435, 11436]
+  # ollama_host: "http://127.0.0.1"
+  # If a job waits longer than this (seconds) before a worker *starts* it, degrade (see below).
+  queue_wait_timeout_seconds: 120
+  # When queue wait exceeded: use this Ollama model tag (e.g. smaller llava). Empty = return error only.
+  fallback_model_name: ""
+  # Optional token cap when using fallback model (omit = min(num_predict, 256)).
+  fallback_num_predict:
+  
+  # Generation options
+  temperature: 0.8                    # Higher temperature for varied scores
+  num_predict: 512                    # Max tokens (JSON+comments needs headroom; 180 truncates mid-string)
+  
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 1.0                    # Seconds between retries after timeout
+
+# ==============================================================
+# EVALUATION WEIGHTS & DIMENSIONS
+# ==============================================================
+evaluation:
+  # Default weights (8-dim Stage 3; sum normalized at runtime if needed)
+  default_weights:
+    focus_sharpness: 0.125
+    exposure_control: 0.125
+    noise_cleanliness: 0.125
+    composition_framing: 0.125
+    light_color_character: 0.125
+    moment_peak: 0.125
+    atmosphere_impact: 0.125
+    deliverable_subject: 0.125
+
+  # Artistic motion blur: mood + moment over tack-sharp technicals
+  artistic_motion_blur_weights:
+    focus_sharpness: 0.07
+    exposure_control: 0.10
+    noise_cleanliness: 0.08
+    composition_framing: 0.12
+    light_color_character: 0.13
+    moment_peak: 0.18
+    atmosphere_impact: 0.22
+    deliverable_subject: 0.10
+  
+  # Final score composition
+  ai_weight: 0.80                      # 80% AI score
+  technical_weight: 0.20               # 20% technical/OpenCV score
+
+# ==============================================================
+# CLASSIFICATION THRESHOLDS
+# ==============================================================
+classification:
+  best_threshold: 90                   # Score >= 90 → "Best"
+  keep_threshold: 60                   # 60 <= Score < 90 → "Keep"
+  selected_threshold: 70               # Score >= 70 for selected collection
+
+# ==============================================================
+# PROCESSING CONFIGURATION
+# ==============================================================
+processing:
+  # Stage3 thread cap uses min(max_workers, model.max_inference_queue_size). Stage1/2 can use more CPUs.
+  max_workers: 6
+  # Optional: fast | balanced | strict | delivery — Stage3 presets (delivery → delivery_mode block)
+  # CLI ``--mode`` overrides this after load. Omit both pipeline_mode and stage3_gating fields to admit all.
+  # pipeline_mode: balanced
+
+  # Optional override for OpenCV + Stage 2 decode pool (defaults: max( max_workers, min(8, cpu) ))
+  stage12_max_workers: 8
+
+  # Enable checkpoint/resume
+  enable_checkpoint: true
+
+  # Gallery batch export: ``graded_from_raw/`` = rawpy develop + user film variant (slow, high quality).
+  # Override: LIVEHOUSE_EXPORT_FILM_FROM_RAW=0|1
+  export_film_from_raw: true
+  export_film_jpeg_max_side: 3200
+  export_film_raw_max_side: 3200
+
+  # Session vibe (homepage natural language → film_* preset). Persisted: Previews/runtime/session_vibe.json
+  vibe_film:
+    enabled: true
+    # When keyword rules miss (rules:fallback), call Ollama text-only → JSON film_variant.
+    # Override: LIVEHOUSE_VIBE_LLM_ON_MISS=0|1
+    llm_on_miss: true
+    llm_num_predict: 160
+    llm_timeout: 90
+
+  # Aggressive Stage2 pre-VLM filters (single decode with fast aesthetic). Prefer false negatives.
+  stage2_prefilter:
+    enabled: true
+    laplacian_var_min: 72.0           # Extra blur guard vs Stage1 soft penalties
+    max_highlight_frac: 0.38         # Reject heavy blowout highlights (Stage1 debug highlight_frac)
+    max_shadow_frac: 0.58             # Reject crushed shadows
+    reject_motion_blur: true          # Stage1 blur_type == motion_blur → skip VLM pool
+    hard_highlight_frac: 0.44         # Stricter blowout than max_highlight_frac
+    crowd_obstruction_max_faces: 8    # Too many faces → likely obstructed subject (0 to disable)
+    composition_min: 36.0             # OpenCV composition proxy; low → clipping / no clear subject
+    tiny_subject_bright_frac_min: 0.0035   # Bright-subject mask area; below → tiny subject
+    require_face: true                # Haar frontal face; set false for atmosphere-only selects
+    face_min_neighbors: 5
+    phash_near_dup:
+      enabled: true
+      max_hamming: 10                # perceptual hash (pHash) distance for burst / near-dup clustering
+      keep_per_cluster: 2            # Keep up to this many images per similarity cluster
+
+  # Homepage / ``GET /api/gallery/results``: fold burst frames for browsing (disk unchanged).
+  gallery_view_dedupe:
+    enabled: true
+    max_hamming: 10
+    keep_per_cluster: 5              # At most this many frames per near-dup cluster in the grid
+
+  # Learn dim weights from homepage selections → ``Previews/runtime/taste_profile.json``
+  taste_profile:
+    min_liked: 5                     # Min selected images before rebuild / personalized sort
+
+  # Stage3 VLM: skip duplicate inference for burst / similar frames (`imagehash.phash` in debug_info.phash).
+  stage3_vlm_cache:
+    enabled: true
+    max_hamming: 7                 # reuse if Hamming distance <= this (< 8); same metric as stage2 phash
+    persist_path: null             # e.g. ".luma_pipeline_staged/stage3_vlm_cache.json" to survive restarts
+    load_on_start: true            # when persist_path is set, merge on cache construction
+
+  # Reduce Stage3 calls: after Stage2 + dedupe, sort by normalized score, then threshold + top fraction.
+  stage3_gating:
+    dynamic_batch_gating: true        # scale top-k by job size + distribution-based threshold
+    stage3_threshold: 0.66
+    top_k_ratio: 0.24                 # multiplied by batch scale (>1000 → tighter); see max_candidates
+    max_candidates: 16                # hard cap after dynamic top-k (set null to disable)
+    estimated_vlm_seconds_per_image: 22.0   # for est. GPU time saved in logs
+    # Optional overrides: dynamic_percentile_floor, dynamic_z_sigma, dynamic_threshold_cap
+
+  # Stage routing
+  stages:
+    stage1_description: "OpenCV strict quality filtering (blur, exposure, contrast)"
+    stage2_description: "Fast aesthetic assessment (low-quality rejection)"
+    stage3_description: "Deep AI analysis (dimensional scoring)"
+
+# ==============================================================
+# STAGE 3 VLM — DUAL MODE (fast scoring + selective full rubric)
+# ==============================================================
+stage3:
+  # fast_first: fast VLM on every Stage3 candidate; full 8-dim only when early-exit rules say so
+  # full_only: legacy — dimensional prompt on every candidate (higher latency)
+  strategy: fast_first
+  # Cap on how many images may run full dimensional VLM per batch (among those that pass early-exit rules).
+  full_analysis_top_k: 5
+  # Legacy YAML field; fast-first full routing uses code rules (score ≥85, tags, dimensions), not this value.
+  full_analysis_score_threshold: 85
+  fast_num_predict: 220
+
+# Stage4: optional follow-up VLM for Lightroom/Photoshop editing_suggestions (after full Stage3 rubric).
+stage4_editing:
+  enabled: true
+  mode: numeric                   # numeric = machine-appliable grade (Automated); text = human suggestions
+  num_predict: 384
+  min_score: 0                    # skip Stage4 when Stage3 score below this
+  skip_on_fallback_defaults: true # skip when Stage3 used neutral dimension fallback
+  skip_on_cache_hit: true         # do not re-run Stage4 when Stage3 VLM cache hit
+
+# ==============================================================
+# DELIVERY MODE (--mode delivery) — opt-in throughput preset
+# ==============================================================
+# Stage1: unchanged strict OpenCV thresholds. Stage2: aggressive cull then keep top
+# ``stage2_target_ratio`` of survivors for VLM. Stage3: fast_first; dimensional
+# FULL on at most ``full_top_k``. Set ``quiet_logs: false`` for verbose stdout.
+delivery_mode:
+  stage2_target_ratio: 0.12
+  stage3_normalized_threshold: 0.72    # Stage2 norm floor before top-k slice (0–1)
+  stage3_fast_only: true               # use fast_first (not full_only); still up to full_top_k FULL
+  full_top_k: 5
+  fast_num_predict: 180                # optional: shorter fast VLM generations
+  quiet_logs: true
+
+# ==============================================================
+# OBSERVABILITY — per-image pipeline traces (JSONL) + optional OTEL
+# ==============================================================
+# Enable tracing: observability.pipeline_tracing.enabled: true
+# Or env LIVEHOUSE_PIPELINE_TRACE=1
+# Debug single image: LIVEHOUSE_PIPELINE_TRACE_DEBUG=1 and LIVEHOUSE_PIPELINE_TRACE_IMAGE=IMG_123.jpg
+observability:
+  pipeline_tracing:
+    enabled: false
+    emit_jsonl: true
+    debug: false
+    debug_image: ""
+  opentelemetry:
+    enabled: false
+    tracer_name: "livehouse.pipeline"
+
+# ==============================================================
+# AI EVALUATION PROMPT
+# ==============================================================
+ai_prompt: |
+  You are a professional music photographer critic evaluating Livehouse photos.
+  Score eight dimensions 0-10 with varied numbers (not flat 7,7,7,...).
+
+  1. focus_sharpness — focus/readability; intentional motion blur can still score fairly if readable.
+  2. exposure_control — exposure, highlight/shadow detail, harsh stage contrast.
+  3. noise_cleanliness — noise, banding, artifacts, mushy denoise.
+  4. composition_framing — framing, horizon, balance, accidental crops.
+  5. light_color_character — light sculpting + color mood (beyond exposure correctness).
+  6. moment_peak — decisive instant, gesture/expression peak.
+  7. atmosphere_impact — crowd/stage energy, emotional storytelling.
+  8. deliverable_subject — client-ready subject: face usable, pose, blocking/occlusion.
+
+  Livehouse: moment_peak + atmosphere_impact are crucial; do not over-penalize intentional blur.
+
+  Return compact JSON only:
+  {"focus_sharpness": <0-10>, "exposure_control": <0-10>, "noise_cleanliness": <0-10>,
+   "composition_framing": <0-10>, "light_color_character": <0-10>, "moment_peak": <0-10>,
+   "atmosphere_impact": <0-10>, "deliverable_subject": <0-10>,
+   "strongest_aspect": "<detail>", "tags": ["tag1"]}

@@ -1,0 +1,14 @@
+# Used when build context is repo root (dockerfile: deploy/Dockerfile.*)
+.venv
+**/__pycache__
+**/*.pyc
+.runtime
+runtime
+.git
+web/node_modules
+web/.next
+*.db-journal
+*.db-wal
+*.db-shm
+agent-transcripts
+.cursor

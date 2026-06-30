@@ -1,0 +1,117 @@
+# Stage1 escape-hatch smoke: production Stage1/2 thresholds, eval-style Stage3 (temp 0, full_only).
+#
+#   python run_pipeline.py --config configs/stage1_smoke.yaml \
+#       --source-dir data/eval/_stage1_smoke --no-serve --no-checkpoint
+
+paths:
+  source_dir: "data/eval/_stage1_smoke"
+  work_dir: "./data/livehouse_session"
+  folders:
+    best: "AI_Best_90+"
+    keep: "AI_Keep_60-90"
+    trash: "AI_Trash_Below60"
+  log_file: "aesthetic_audit.jsonl"
+  progress_file: ".processing_progress.json"
+  detailed_audit: "detailed_audit.txt"
+  selected_folder: "AI_Selected_Final"
+  manual_selected_folder: "manual_selected"
+
+quality_thresholds:
+  laplacian_variance_min: 30
+  laplacian_variance_slight_blur: 50
+  laplacian_variance_medium: 120
+  laplacian_variance_high: 200
+  motion_blur_ratio_threshold: 1.5
+  overexposed_threshold: 0.25
+  overexposed_penalty: 0.15
+  underexposed_threshold: 0.50
+  underexposed_penalty: 0.35
+  contrast_min: 10
+  contrast_penalty: 20
+  brightness_min: 5
+  brightness_max: 250
+  edge_ratio_min: 0.005
+
+fast_aesthetic:
+  tech_score_min: 32
+  fast_aesthetic_score_min: 22
+
+model:
+  provider: "ollama"
+  endpoint: "http://localhost:11434"
+  model_name: "llava"
+  timeout: 300
+  max_concurrent_requests: 4
+  max_inference_queue_size: 4
+  inference_batch_size: 1
+  queue_wait_timeout_seconds: 120
+  fallback_model_name: ""
+  fallback_num_predict:
+  temperature: 0.0
+  num_predict: 512
+  max_retries: 3
+  retry_delay: 1.0
+
+evaluation:
+  default_weights:
+    focus_sharpness: 0.125
+    exposure_control: 0.125
+    noise_cleanliness: 0.125
+    composition_framing: 0.125
+    light_color_character: 0.125
+    moment_peak: 0.125
+    atmosphere_impact: 0.125
+    deliverable_subject: 0.125
+  artistic_motion_blur_weights:
+    focus_sharpness: 0.07
+    exposure_control: 0.10
+    noise_cleanliness: 0.08
+    composition_framing: 0.12
+    light_color_character: 0.13
+    moment_peak: 0.18
+    atmosphere_impact: 0.22
+    deliverable_subject: 0.10
+  ai_weight: 0.80
+  technical_weight: 0.20
+
+classification:
+  best_threshold: 90
+  keep_threshold: 60
+  selected_threshold: 70
+
+processing:
+  max_workers: 4
+  stage12_max_workers: 4
+  enable_checkpoint: false
+  export_film_from_raw: false
+  vibe_film:
+    enabled: false
+    llm_on_miss: false
+  stage2_prefilter:
+    enabled: false
+  gallery_view_dedupe:
+    enabled: false
+  stage3_vlm_cache:
+    enabled: false
+  stages:
+    stage1_description: "OpenCV strict quality filtering (blur, exposure, contrast)"
+    stage2_description: "Fast aesthetic assessment (low-quality rejection)"
+    stage3_description: "Deep AI analysis (dimensional scoring)"
+
+stage3:
+  strategy: full_only
+  full_analysis_top_k: 999999
+  full_analysis_score_threshold: 0
+  fast_num_predict: 220
+
+stage4_editing:
+  enabled: false
+
+observability:
+  pipeline_tracing:
+    enabled: false
+
+ai_prompt: |
+  You are a professional music photographer critic evaluating Livehouse photos.
+  Score eight dimensions 0-10 with varied numbers (not flat 7,7,7,...).
+  Return compact JSON only with the eight dimension keys plus strongest_aspect and tags.

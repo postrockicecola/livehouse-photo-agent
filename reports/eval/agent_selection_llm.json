@@ -1,0 +1,165 @@
+{
+  "eval_set_size": 60,
+  "human_keepers": 20,
+  "budget": 15,
+  "arms": {
+    "random": {
+      "analyzed_count": 15,
+      "analyzed_keeper_recall": 0.0602,
+      "selection_size": 15,
+      "selection_precision": 0.3333,
+      "selection_keeper_hits": 5,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.4,
+          "recall": 0.8,
+          "overlap": 4
+        },
+        "15": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "overlap": 5
+        }
+      },
+      "metrics": {
+        "steps": 76,
+        "inferences_used": 15,
+        "max_inferences": 15,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 60,
+        "candidates_analyzed": 15,
+        "selected_count": 15,
+        "action_counts": {
+          "inspect": 60,
+          "analyze": 15,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 76
+        }
+      }
+    },
+    "heuristic": {
+      "analyzed_count": 15,
+      "analyzed_keeper_recall": 0.0602,
+      "selection_size": 15,
+      "selection_precision": 0.3333,
+      "selection_keeper_hits": 5,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.4,
+          "recall": 0.8,
+          "overlap": 4
+        },
+        "15": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "overlap": 5
+        }
+      },
+      "metrics": {
+        "steps": 76,
+        "inferences_used": 15,
+        "max_inferences": 15,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 60,
+        "candidates_analyzed": 15,
+        "selected_count": 15,
+        "action_counts": {
+          "inspect": 60,
+          "analyze": 15,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 76
+        }
+      }
+    },
+    "oracle": {
+      "analyzed_count": 15,
+      "analyzed_keeper_recall": 0.1807,
+      "selection_size": 15,
+      "selection_precision": 1.0,
+      "selection_keeper_hits": 15,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 1.0,
+          "recall": 0.6667,
+          "overlap": 10
+        },
+        "15": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "overlap": 15
+        }
+      },
+      "metrics": {
+        "steps": 76,
+        "inferences_used": 15,
+        "max_inferences": 15,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 60,
+        "candidates_analyzed": 15,
+        "selected_count": 15,
+        "action_counts": {
+          "inspect": 60,
+          "analyze": 15,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 76
+        }
+      }
+    },
+    "llm": {
+      "analyzed_count": 14,
+      "analyzed_keeper_recall": 0.0602,
+      "selection_size": 14,
+      "selection_precision": 0.3571,
+      "selection_keeper_hits": 5,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.4,
+          "recall": 0.8,
+          "overlap": 4
+        },
+        "15": {
+          "precision": 0.3571,
+          "recall": 1.0,
+          "overlap": 5
+        }
+      },
+      "metrics": {
+        "steps": 76,
+        "inferences_used": 15,
+        "max_inferences": 15,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 15,
+        "llm_decision_rate": 0.0625,
+        "candidates_total": 60,
+        "candidates_analyzed": 14,
+        "selected_count": 14,
+        "action_counts": {
+          "inspect": 60,
+          "analyze": 15,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "auto_inspect": 60,
+          "llm_fallback": 15,
+          "llm": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+# InstantID API workflow
+
+Comfy 里跑通 InstantID 后：**Save (API Format)** 保存为同目录下的：
+
+`portrait_cartoon_instantid.api.json`
+
+然后运行：
+
+`python3 configs/comfy/scripts/print_workflow_node_map.py configs/comfy/workflows/portrait_cartoon_instantid.api.json`
+
+并更新 `configs/comfy/portrait_cartoon_instantid.yaml` 的 `nodes` 与 `checkpoint_name`。

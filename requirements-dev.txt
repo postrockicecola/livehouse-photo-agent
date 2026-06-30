@@ -1,0 +1,5 @@
+# Test / lint toolchain (CI lane); runtime deps live in requirements.txt
+pytest>=8.0
+pytest-timeout>=2.3
+httpx>=0.27        # fastapi TestClient transport
+ruff>=0.4

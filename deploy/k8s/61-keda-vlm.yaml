@@ -1,0 +1,30 @@
+# KEDA: scale the "vlm" worker pool on the depth of the "vlm" queue (independent of general).
+# listLength=3 (tighter than general's 5) because each vlm pod runs concurrency=1 and tasks
+# are longer — a smaller per-replica target reacts sooner.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-vlm
+  namespace: livehouse
+spec:
+  scaleTargetRef:
+    name: worker-vlm
+  pollingInterval: 5
+  cooldownPeriod: 30
+  minReplicaCount: 1
+  maxReplicaCount: 4      # vlm pods are heavier; cap lower than general on a 24GB host
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+        scaleDown:
+          stabilizationWindowSeconds: 30
+  triggers:
+    - type: redis
+      metadata:
+        address: redis.livehouse.svc.cluster.local:6379
+        listName: vlm
+        listLength: "3"
+        databaseIndex: "0"
+        enableTLS: "false"

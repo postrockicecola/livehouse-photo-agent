@@ -1,0 +1,46 @@
+{
+  "schema_version": "1",
+  "tool": "quant_compare",
+  "baseline": "fp16",
+  "arms": [
+    {
+      "arm": "fp16",
+      "spearman": 0.368,
+      "pearson": 0.803,
+      "mae": 6.5,
+      "rmse": 10.08,
+      "quality_n": 250,
+      "concurrency": 8,
+      "throughput_rps": 12.0,
+      "latency_p99_ms": 740.0,
+      "decode_tokens_per_sec": 900.0,
+      "est_cost_per_1k_usd": 0.0278,
+      "cost_basis": "gpu_hourly"
+    },
+    {
+      "arm": "int4_awq",
+      "spearman": 0.359,
+      "pearson": 0.791,
+      "mae": 6.71,
+      "rmse": 10.42,
+      "quality_n": 250,
+      "concurrency": 8,
+      "throughput_rps": 19.4,
+      "latency_p99_ms": 520.0,
+      "decode_tokens_per_sec": 1460.0,
+      "est_cost_per_1k_usd": 0.0172,
+      "cost_basis": "gpu_hourly"
+    }
+  ],
+  "deltas": [
+    {
+      "arm": "int4_awq",
+      "d_spearman": -0.009,
+      "d_mae": 0.21,
+      "throughput_speedup_x": 1.617,
+      "decode_speedup_x": 1.622,
+      "p99_change_pct": -29.73,
+      "cost_savings_pct": 38.13
+    }
+  ]
+}

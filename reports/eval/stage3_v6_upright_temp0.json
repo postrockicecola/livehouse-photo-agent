@@ -1,0 +1,89 @@
+{
+  "matched": 250,
+  "labels_unmatched": [],
+  "predictions_unmatched_count": 0,
+  "overall": {
+    "n": 250,
+    "spearman": 0.3033019901473857,
+    "pearson": 0.8066961095874535,
+    "mae": 6.444,
+    "rmse": 9.906510990252825
+  },
+  "per_dimension": {
+    "focus_sharpness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "exposure_control": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "noise_cleanliness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "composition_framing": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "light_color_character": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "moment_peak": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "atmosphere_impact": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "deliverable_subject": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    }
+  },
+  "macro_dim_mae": NaN,
+  "calibration": {},
+  "selection": {
+    "n": 247,
+    "n_positives": 83,
+    "mean_pred_keep": 75.16385542168675,
+    "mean_pred_discard": 69.69146341463413,
+    "score_gap": 5.472392007052619,
+    "at_k": [
+      {
+        "k": 10,
+        "precision": 0.7,
+        "recall": 0.08433734939759036,
+        "overlap": 7
+      },
+      {
+        "k": 30,
+        "precision": 0.4,
+        "recall": 0.14457831325301204,
+        "overlap": 12
+      },
+      {
+        "k": 50,
+        "precision": 0.32,
+        "recall": 0.1927710843373494,
+        "overlap": 16
+      },
+      {
+        "k": 83,
+        "precision": 0.3493975903614458,
+        "recall": 0.3493975903614458,
+        "overlap": 29
+      }
+    ]
+  }
+}

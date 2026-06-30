@@ -1,0 +1,41 @@
+# Load generator for the VLM pool: enqueues `tasks.demo_vlm_load`, which task_routes sends
+# to the "vlm" queue — so only worker-vlm scales, proving the two pools are independent.
+#
+#   kubectl -n livehouse delete job demo-load-vlm --ignore-not-found
+#   kubectl -n livehouse create -f deploy/k8s/load-demo-vlm.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo-load-vlm
+  namespace: livehouse
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 120
+  template:
+    metadata:
+      labels: { app: demo-load-vlm, livehouse.role: loadgen }
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: loadgen
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: CELERY_BROKER_URL, value: redis://redis:6379/0 }
+            - { name: CELERY_RESULT_BACKEND, value: redis://redis:6379/1 }
+            - { name: DEMO_TASKS, value: "30" }
+            - { name: DEMO_SECONDS, value: "6" }
+          args:
+            - python
+            - -c
+            - |
+              import os
+              from celery_app import celery_app
+              n = int(os.getenv("DEMO_TASKS", "30"))
+              secs = float(os.getenv("DEMO_SECONDS", "6"))
+              for _ in range(n):
+                  celery_app.send_task("tasks.demo_vlm_load", args=[secs])
+              print(f"enqueued {n} demo_vlm_load tasks @ {secs}s each → routed to queue 'vlm'")
+          resources:
+            requests: { cpu: "50m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }

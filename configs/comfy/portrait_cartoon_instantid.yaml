@@ -1,0 +1,41 @@
+# InstantID（cubiq / SDXL）— 大头照锁脸 + 文生场景
+# 启用：export LIVEHOUSE_PORTRAIT_CONFIG=configs/comfy/portrait_cartoon_instantid.yaml
+# 完整步骤：configs/comfy/GUIDE_INSTANTID_STEP_BY_STEP.md
+
+backend: instantid_sdxl
+base_url: "http://127.0.0.1:8188"
+# 在 Comfy 打开 InstantID_basic → Dev mode → Save (API Format) 后填此路径：
+workflow_path: "configs/comfy/workflows/portrait_cartoon_instantid.api.json"
+timeout_seconds: 1800
+poll_interval_seconds: 2
+
+max_reference_long_edge: 1024
+
+# SDXL  checkpoint（放 ComfyUI/models/checkpoints/），卡通向可换社区 XL+LoRA（在 workflow 内加载）
+checkpoint_name: "sd_xl_base_1.0.safetensors"
+
+nodes:
+  # 以下 id 必须与你导出的 API JSON 一致；用 scripts/print_workflow_node_map.py 生成草稿后人工改
+  load_image: "19"
+  load_image_input: "image"
+  positive_prompt: "5"
+  positive_prompt_input: "text"
+  negative_prompt: "6"
+  negative_prompt_input: "text"
+  ksampler: "3"
+  seed_input: "seed"
+  denoise_input: "denoise"
+
+style_seed:
+
+defaults:
+  steps: 28
+  cfg: 4.5
+  denoise: 1.0
+  sampler_name: "euler"
+  scheduler: "normal"
+
+negative_prompt: "low quality, blurry, deformed, bad anatomy, watermark, text, ugly"
+
+prompt_prefix: "2D cartoon illustration, anime cel shading, vibrant colors, full body, "
+prompt_suffix: ", dynamic pose, detailed environment background, masterpiece"

@@ -1,0 +1,19 @@
+# A declarative RL training run. `kubectl apply` this and the operator reconciles it
+# into a Kubernetes Job that runs scripts/rl/train_curation_policy.py, then mirrors the
+# Job's lifecycle back into this resource's status (Pending -> Running -> Succeeded).
+apiVersion: rl.livehouse.ai/v1alpha1
+kind: RolloutJob
+metadata:
+  name: curation-demo
+  namespace: livehouse
+spec:
+  # Default path: a self-contained synthetic environment (no data mounts), so the
+  # Job is reproducible anywhere — keepers are the lowest-fast_score photos, so the
+  # policy must learn to flip its prefer-high init (greedy recall 0.0 -> 1.0).
+  synthetic: true
+  syntheticN: 120
+  syntheticKeepers: 30
+  budget: 30
+  iterations: 40
+  batch: 12
+  learningRate: "0.6"

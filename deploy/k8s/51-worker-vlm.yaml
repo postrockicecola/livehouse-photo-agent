@@ -1,0 +1,63 @@
+# Celery worker pool "vlm" — a second, independently-scaled pool that consumes ONLY the
+# "vlm" queue (LIVEHOUSE_WORKER_QUEUES=vlm → celery worker -Q vlm). Tasks routed to that
+# queue (celery_app.task_routes: tasks.demo_vlm_load → vlm) never touch the general pool,
+# so each pool's KEDA ScaledObject reacts to its own backlog.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-vlm
+  namespace: livehouse
+  labels:
+    app: worker-vlm
+    livehouse.role: compute
+    livehouse.pool: vlm
+spec:
+  replicas: 1  # KEDA owns this number at runtime (min..max in the ScaledObject)
+  selector:
+    matchLabels: { app: worker-vlm }
+  template:
+    metadata:
+      labels:
+        app: worker-vlm
+        livehouse.role: compute
+        livehouse.pool: vlm
+    spec:
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        - name: init-dirs
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p /data/brain /data/work /data/archive"]
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      containers:
+        - name: worker
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          args: ["celery-worker"]
+          env:
+            - name: CELERY_BROKER_URL
+              value: redis://redis:6379/0
+            - name: CELERY_RESULT_BACKEND
+              value: redis://redis:6379/1
+            - name: LIVEHOUSE_EXECUTOR_CLASS
+              value: vlm
+            - name: LIVEHOUSE_WORKER_QUEUES
+              value: vlm
+            - name: LIVEHOUSE_WORKER_CONCURRENCY
+              value: "1"           # VLM work is heavy; one in-flight per pod
+            - name: LUMA_BRAIN_DB
+              value: /data/brain/luma_brain.db
+            - name: LUMA_STUCK_SCAN_ENABLED
+              value: "0"
+            - name: LUMA_DISPATCH_BEAT_ENABLED
+              value: "0"
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: livehouse-data

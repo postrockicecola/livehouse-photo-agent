@@ -1,0 +1,52 @@
+# FLUX.1 dev（拆分版：UNET + DualCLIP + VAE）— 对应 flux1-dev.safetensors + ae.safetensors
+# 启用：export LIVEHOUSE_PORTRAIT_CONFIG=configs/comfy/portrait_cartoon_flux.yaml 后重启 gallery_server
+# 模型目录说明见 GUIDE_FLUX_STEP_BY_STEP.md
+
+backend: flux_dev
+base_url: "http://127.0.0.1:8188"
+workflow_path: "configs/comfy/workflows/portrait_cartoon_flux_dev.template.json"
+timeout_seconds: 1800
+poll_interval_seconds: 2
+
+max_reference_long_edge: 768
+
+# 以下文件名须与 Comfy 各 models 子目录内一致
+unet_name: "flux1-dev.safetensors"
+vae_name: "ae.safetensors"
+clip_l_name: "clip_l.safetensors"
+clip_t5_name: "t5xxl_fp16.safetensors"
+
+# 若只有 fp8 单文件在 checkpoints/，可改回 portrait_cartoon_flux_fp8.template.json + checkpoint_name
+
+nodes:
+  unet_loader: "1"
+  unet_name_input: "unet_name"
+  dual_clip_loader: "2"
+  clip_l_input: "clip_name1"
+  clip_t5_input: "clip_name2"
+  vae_loader: "3"
+  vae_name_input: "vae_name"
+  load_image: "6"
+  load_image_input: "image"
+  positive_prompt: "4"
+  positive_prompt_input: "text"
+  negative_prompt: "5"
+  negative_prompt_input: "text"
+  ksampler: "8"
+  seed_input: "seed"
+  denoise_input: "denoise"
+
+style_seed:
+
+defaults:
+  steps: 28
+  cfg: 1.0
+  denoise: 0.76
+  sampler_name: "euler"
+  scheduler: "normal"
+
+negative_prompt: "photograph, photorealistic, realistic photo, dslr, skin texture, 3d render, low quality, blurry, deformed, bad anatomy, extra limbs, watermark, text"
+
+# FLUX 听英文更稳；用户描述里写清动作+场景（页面预设已是英文）
+prompt_prefix: "2D cartoon illustration, anime cel shading, flat vibrant colors, NOT a photograph, "
+prompt_suffix: ", dynamic pose and action as described, full environment and background, coherent anatomy, illustration masterpiece"

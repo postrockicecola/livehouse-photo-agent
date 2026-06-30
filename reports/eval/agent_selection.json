@@ -1,0 +1,124 @@
+{
+  "eval_set_size": 250,
+  "human_keepers": 83,
+  "budget": 40,
+  "arms": {
+    "random": {
+      "analyzed_count": 40,
+      "analyzed_keeper_recall": 0.2048,
+      "selection_size": 30,
+      "selection_precision": 0.4,
+      "selection_keeper_hits": 12,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.4,
+          "recall": 0.2353,
+          "overlap": 4
+        },
+        "30": {
+          "precision": 0.4,
+          "recall": 0.7059,
+          "overlap": 12
+        }
+      },
+      "metrics": {
+        "steps": 291,
+        "inferences_used": 40,
+        "max_inferences": 40,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 250,
+        "candidates_analyzed": 40,
+        "selected_count": 30,
+        "action_counts": {
+          "inspect": 250,
+          "analyze": 40,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 291
+        }
+      }
+    },
+    "heuristic": {
+      "analyzed_count": 40,
+      "analyzed_keeper_recall": 0.1566,
+      "selection_size": 30,
+      "selection_precision": 0.3,
+      "selection_keeper_hits": 9,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.4,
+          "recall": 0.3077,
+          "overlap": 4
+        },
+        "30": {
+          "precision": 0.3,
+          "recall": 0.6923,
+          "overlap": 9
+        }
+      },
+      "metrics": {
+        "steps": 291,
+        "inferences_used": 40,
+        "max_inferences": 40,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 250,
+        "candidates_analyzed": 40,
+        "selected_count": 30,
+        "action_counts": {
+          "inspect": 250,
+          "analyze": 40,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 291
+        }
+      }
+    },
+    "oracle": {
+      "analyzed_count": 40,
+      "analyzed_keeper_recall": 0.4578,
+      "selection_size": 30,
+      "selection_precision": 0.9333,
+      "selection_keeper_hits": 28,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.8,
+          "recall": 0.2105,
+          "overlap": 8
+        },
+        "30": {
+          "precision": 0.9333,
+          "recall": 0.7368,
+          "overlap": 28
+        }
+      },
+      "metrics": {
+        "steps": 291,
+        "inferences_used": 40,
+        "max_inferences": 40,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 250,
+        "candidates_analyzed": 40,
+        "selected_count": 30,
+        "action_counts": {
+          "inspect": 250,
+          "analyze": 40,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 291
+        }
+      }
+    }
+  }
+}

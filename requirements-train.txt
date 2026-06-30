@@ -1,0 +1,7 @@
+# Optional: SigLIP overall-score regressor (scripts/eval/train_siglip_regressor.py)
+# Install: pip install -r requirements-train.txt
+# On macOS conda, if OpenMP clashes: export KMP_DUPLICATE_LIB_OK=TRUE
+
+torch>=2.2
+torchvision>=0.17
+transformers>=4.40

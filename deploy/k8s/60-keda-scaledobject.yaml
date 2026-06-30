@@ -1,0 +1,33 @@
+# KEDA: scale the "general" worker pool on broker queue depth.
+#
+# Trigger reads LLEN of the Celery default queue list ("celery") in Redis db 0.
+# listLength is the *target backlog per replica*: KEDA drives
+#   desiredReplicas = ceil(LLEN(celery) / listLength), clamped to [min, max].
+# So with listLength=5 a backlog of ~30 messages asks for ~6 replicas.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-general
+  namespace: livehouse
+spec:
+  scaleTargetRef:
+    name: worker-general
+  pollingInterval: 5      # how often KEDA checks LLEN (seconds)
+  cooldownPeriod: 30      # wait before scaling back toward minReplicaCount
+  minReplicaCount: 1
+  maxReplicaCount: 6      # cap for a 24GB host: 6 * 512Mi limit = ~3Gi worst case
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+        scaleDown:
+          stabilizationWindowSeconds: 30
+  triggers:
+    - type: redis
+      metadata:
+        address: redis.livehouse.svc.cluster.local:6379
+        listName: celery
+        listLength: "5"
+        databaseIndex: "0"
+        enableTLS: "false"

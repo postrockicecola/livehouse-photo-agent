@@ -1,0 +1,32 @@
+# API + Celery workers (same image, different commands via deploy/docker-entrypoint.sh)
+FROM python:3.11-slim-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    exiftool \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+RUN chmod +x deploy/docker-entrypoint.sh
+
+ENV PYTHONUNBUFFERED=1 \
+    LIVEHOUSE_CONFIG=configs/livehouse.docker.yaml \
+    CELERY_BROKER_URL=redis://redis:6379/0 \
+    CELERY_RESULT_BACKEND=redis://redis:6379/1 \
+    LUMA_BRAIN_DB=/data/brain/luma_brain.db \
+    LUMA_ARCHIVE_ROOT=/data/archive
+
+RUN mkdir -p /data/brain /data/work /data/archive
+
+VOLUME ["/data/brain", "/data/archive", "/data/work"]
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app/deploy/docker-entrypoint.sh"]
+CMD ["api"]

@@ -1,0 +1,47 @@
+# One-shot load generator: floods the broker with synthetic `tasks.demo_load` envelopes
+# so the "celery" list grows and KEDA scales worker-general up, then back down once drained.
+#
+# Tune the burst without editing this file:
+#   kubectl -n livehouse delete job demo-load --ignore-not-found
+#   kubectl -n livehouse create -f deploy/k8s/load-demo.yaml          # 60 tasks x 3s (default)
+# or override via env on an ad-hoc run:
+#   kubectl -n livehouse run demo-load --rm -it --image=livehouse-python:local \
+#     --image-pull-policy=IfNotPresent --restart=Never \
+#     --env CELERY_BROKER_URL=redis://redis:6379/0 --env DEMO_TASKS=120 --env DEMO_SECONDS=4 \
+#     -- python -c 'import os;from celery_app import celery_app;[celery_app.send_task("tasks.demo_load",args=[float(os.getenv("DEMO_SECONDS","3"))]) for _ in range(int(os.getenv("DEMO_TASKS","60")))]'
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo-load
+  namespace: livehouse
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 120
+  template:
+    metadata:
+      labels: { app: demo-load, livehouse.role: loadgen }
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: loadgen
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: CELERY_BROKER_URL, value: redis://redis:6379/0 }
+            - { name: CELERY_RESULT_BACKEND, value: redis://redis:6379/1 }
+            - { name: DEMO_TASKS, value: "60" }
+            - { name: DEMO_SECONDS, value: "3" }
+          args:
+            - python
+            - -c
+            - |
+              import os
+              from celery_app import celery_app
+              n = int(os.getenv("DEMO_TASKS", "60"))
+              secs = float(os.getenv("DEMO_SECONDS", "3"))
+              for _ in range(n):
+                  celery_app.send_task("tasks.demo_load", args=[secs])
+              print(f"enqueued {n} demo_load tasks @ {secs}s each on queue 'celery'")
+          resources:
+            requests: { cpu: "50m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }

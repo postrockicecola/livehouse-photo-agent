@@ -1,0 +1,2 @@
+# Bundled demo gallery images (web-resolution, EXIF-stripped) go here.
+# Populate with: python scripts/build_demo_gallery.py --src /path/to/your/photos

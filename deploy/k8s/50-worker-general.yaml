@@ -1,0 +1,66 @@
+# Celery worker pool "general" — the target KEDA scales horizontally.
+#
+# Image is built locally and side-loaded into kind (see README): there is no registry,
+# so imagePullPolicy must be IfNotPresent. Per-pod concurrency is pinned low
+# (LIVEHOUSE_WORKER_CONCURRENCY=2) so backlog accumulates under load and pod-level
+# autoscaling on queue depth is visible rather than being absorbed by one fat worker.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-general
+  namespace: livehouse
+  labels:
+    app: worker-general
+    livehouse.role: compute
+    livehouse.pool: general
+spec:
+  replicas: 1  # KEDA owns this number at runtime (min..max in the ScaledObject)
+  selector:
+    matchLabels: { app: worker-general }
+  template:
+    metadata:
+      labels:
+        app: worker-general
+        livehouse.role: compute
+        livehouse.pool: general
+    spec:
+      terminationGracePeriodSeconds: 30  # let acks_late tasks finish before SIGKILL
+      initContainers:
+        - name: init-dirs
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p /data/brain /data/work /data/archive"]
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      containers:
+        - name: worker
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          args: ["celery-worker"]
+          env:
+            - name: CELERY_BROKER_URL
+              value: redis://redis:6379/0
+            - name: CELERY_RESULT_BACKEND
+              value: redis://redis:6379/1
+            - name: LIVEHOUSE_EXECUTOR_CLASS
+              value: general
+            - name: LIVEHOUSE_WORKER_QUEUES
+              value: celery        # default queue; VLM-routed tasks go to the vlm pool
+            - name: LIVEHOUSE_WORKER_CONCURRENCY
+              value: "2"
+            - name: LUMA_BRAIN_DB
+              value: /data/brain/luma_brain.db
+            # Workers don't schedule; only beat does. Keep them lean for the scaling demo.
+            - name: LUMA_STUCK_SCAN_ENABLED
+              value: "0"
+            - name: LUMA_DISPATCH_BEAT_ENABLED
+              value: "0"
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: livehouse-data

@@ -1,0 +1,138 @@
+INFO loaded 15 candidates
+INFO Inference queue started | lanes=['llava'] total_workers=4 total_max_inflight=4 hard_timeout=120 batch=1 window_ms=0.0
+INFO Pipeline initialized | Source: ./data/agent_demo
+INFO using LLM planner (LLMPlanner)
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue batch degraded=0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO inference queue periodic | pool_workers=4 max_inflight=4 window_sec=5.0
+INFO LLM planner action out of contract; using fallback
+#1   [llm_fallback] inspect 20260130__DSC02506.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02506.jpg -> {'image_id': '20260130__DSC02506.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#2   [llm_fallback] inspect 20260130__DSC02509.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02509.jpg -> {'image_id': '20260130__DSC02509.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#3   [llm_fallback] inspect 20260130__DSC02513.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02513.jpg -> {'image_id': '20260130__DSC02513.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#4   [llm_fallback] inspect 20260130__DSC02519.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02519.jpg -> {'image_id': '20260130__DSC02519.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#5   [llm_fallback] inspect 20260130__DSC02563.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02563.jpg -> {'image_id': '20260130__DSC02563.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#6   [llm_fallback] inspect 20260130__DSC02564.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02564.jpg -> {'image_id': '20260130__DSC02564.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#7   [llm_fallback] inspect 20260130__DSC02591.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02591.jpg -> {'image_id': '20260130__DSC02591.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#8   [llm_fallback] inspect 20260130__DSC02595.jpg :: [llm_invalid_action] inspect cheap features for 20260130__DSC02595.jpg -> {'image_id': '20260130__DSC02595.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#9   [llm_fallback] inspect 20260131__DSC02829.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC02829.jpg -> {'image_id': '20260131__DSC02829.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#10  [llm_fallback] inspect 20260131__DSC02832.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC02832.jpg -> {'image_id': '20260131__DSC02832.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#11  [llm_fallback] inspect 20260131__DSC02841.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC02841.jpg -> {'image_id': '20260131__DSC02841.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#12  [llm_fallback] inspect 20260131__DSC02848.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC02848.jpg -> {'image_id': '20260131__DSC02848.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#13  [llm_fallback] inspect 20260131__DSC02902.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC02902.jpg -> {'image_id': '20260131__DSC02902.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#14  [llm_fallback] inspect 20260131__DSC03008.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC03008.jpg -> {'image_id': '20260131__DSC03008.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#15  [llm_fallback] inspect 20260131__DSC03009.jpg :: [llm_invalid_action] inspect cheap features for 20260131__DSC03009.jpg -> {'image_id': '20260131__DSC03009.jpg', 'tech_score': None, 'fast_score': None, 'blur_type': None}
+#16  [llm_fallback] analyze 20260130__DSC02506.jpg :: [llm_invalid_action] analyze top fast_score candidate 20260130__DSC02506.jpg (0.0) -> {'image_id': '20260130__DSC02506.jpg', 'tier': 'fast', 'score': 71.5, 'confidence': 0.92, 'verdict': '艾特色的红烛光照亮歌手轮廓', 'error': False}  [queue escalation: score 71.5 in ambiguous band [65,75]]
+#17  [llm_fallback] analyze 20260130__DSC02506.jpg :: [llm_invalid_action] escalate 20260130__DSC02506.jpg to full after reflection -> {'image_id': '20260130__DSC02506.jpg', 'tier': 'full', 'score': 72.625, 'confidence': 0.92, 'verdict': '红色昇落光线高效、形影深邃', 'error': False}
+#18  [llm_fallback] analyze 20260130__DSC02509.jpg :: [llm_invalid_action] analyze top fast_score candidate 20260130__DSC02509.jpg (0.0) -> {'image_id': '20260130__DSC02509.jpg', 'tier': 'fast', 'score': 69.875, 'confidence': 0.92, 'verdict': '红色的灯光勾出了歌手的轮廓和表情', 'error': False}  [queue escalation: score 69.9 in ambiguous band [65,75]]
+#19  [llm_fallback] analyze 20260130__DSC02509.jpg :: [llm_invalid_action] escalate 20260130__DSC02509.jpg to full after reflection -> {'image_id': '20260130__DSC02509.jpg', 'tier': 'full', 'score': 72.25, 'confidence': 0.92, 'verdict': '红色高光与侧光勾出艺人轮廓', 'error': False}
+#20  [llm_fallback] analyze 20260130__DSC02513.jpg :: [llm_invalid_action] analyze top fast_score candidate 20260130__DSC02513.jpg (0.0) -> {'image_id': '20260130__DSC02513.jpg', 'tier': 'fast', 'score': 77.375, 'confidence': 0.92, 'verdict': '红色锅烟、光泽勾出演员轮廓', 'error': False}
+#21  [llm_fallback] analyze 20260130__DSC02519.jpg :: [llm_invalid_action] analyze top fast_score candidate 20260130__DSC02519.jpg (0.0) -> {'image_id': '20260130__DSC02519.jpg', 'tier': 'fast', 'score': 73.25, 'confidence': 0.92, 'verdict': '红色勾出歌手轮廓', 'error': False}
+#22  [llm_fallback] finalize  :: [llm_invalid_action] no affordable work remaining; commit keepers -> {'selected': ['20260130__DSC02513.jpg', '20260130__DSC02519.jpg', '20260130__DSC02506.jpg', '20260130__DSC02509.jpg'], 'count': 4}
+
+=== curation agent result ===
+{
+  "steps": 22,
+  "inferences_used": 6,
+  "max_inferences": 6,
+  "budget_exhausted": true,
+  "escalations": 2,
+  "llm_fallback_calls": 22,
+  "llm_decision_rate": 0.0,
+  "candidates_total": 15,
+  "candidates_analyzed": 4,
+  "selected_count": 4,
+  "action_counts": {
+    "inspect": 15,
+    "analyze": 6,
+    "finalize": 1
+  },
+  "planner_source_counts": {
+    "llm_fallback": 22
+  }
+}
+
+selected:
+  20260130__DSC02513.jpg  score=77.375  conf=0.92  tier=fast
+  20260130__DSC02519.jpg  score=73.25  conf=0.92  tier=fast
+  20260130__DSC02506.jpg  score=72.625  conf=0.92  tier=full
+  20260130__DSC02509.jpg  score=72.25  conf=0.92  tier=full

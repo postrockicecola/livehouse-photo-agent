@@ -1,0 +1,19 @@
+# Cut indexing / @-context noise (large trees, not source)
+web/node_modules/
+web/.next/
+**/__pycache__/
+**/.pytest_cache/
+.venv*/
+venv/
+.git/
+*.raw
+*.png
+*.jpg
+build/
+dist/
+__pycache__/
+*.log
+
+# Optional: local archive or runtime under repo (uncomment if present and huge)
+# Livehouse_Archive/
+# .runtime/

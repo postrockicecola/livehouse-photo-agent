@@ -1,0 +1,72 @@
+.env
+.env.local
+web/.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv-*/
+*.egg-info/
+.pytest_cache/
+
+# Node / Next
+web/node_modules/
+web/.next/
+web/out/
+web/tsconfig.tsbuildinfo
+web/next_dev.log
+
+# Runtime / local data (do not commit)
+.runtime/
+runtime/
+*.db
+*.db-wal
+*.db-shm
+dump.rdb
+web/dump.rdb
+pipeline.log
+luma_brain.db
+
+# Local studio ingest config (machine-specific paths); commit studio_ingest.example.json instead
+configs/studio_ingest.json
+
+# Stray pipeline eval outputs
+evaluation_*.json
+
+# OS / IDE
+.DS_Store
+.idea/
+*.swp
+
+# Data layout: data/raw is local-only; data/eval (labels) and data/fixtures (small samples) are tracked
+data/raw/
+data/eval/images/
+data/eval/_*/
+data/eval/*.log
+models/eval/
+*.ARW
+
+# Pipeline render outputs / scratch images at repo root (curated demos live in docs/images, web/public)
+outputs/
+/*.jpg
+/*.jpeg
+/*.png
+
+# Compiled Go binaries
+/ingest_worker
+/arw_extractor
+
+# Backups (e.g. luma_brain.db.bak-YYYYMMDD-HHMMSS) — never commit; *.db alone misses .db.bak
+*.bak
+*.db.bak*
+
+# Real-people photos moved out of repo for privacy (originals kept locally outside the repo).
+# Re-add intentionally with `git add -f` only after confirming consent / portrait rights.
+data/agent_demo/*.jpg
+demo_gallery/**/*.jpg
+docs/images/*.jpg
+web/public/showcase/**/*.jpg
+
+# Markdown docs (currently messy; excluded from VCS. Use `git add -f <file>.md` to track specific ones)
+*.md

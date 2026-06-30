@@ -1,0 +1,2006 @@
+{
+ "seed": 20260611,
+ "target": 250,
+ "items": [
+  {
+   "file": "20260130__DSC02519.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02519.jpg",
+   "session": "2026-01-30",
+   "sha256": "c9f44f766d0727405b8c32f6158eb883d581f41a10ad2a8460715872a76ab164",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02506.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02506.jpg",
+   "session": "2026-01-30",
+   "sha256": "9a75ab9b65e22b4714a17f913ff607333f947edea48c5f9074e5fd1d6f58ae9e",
+   "stage2_overall_score": 15.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02509.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02509.jpg",
+   "session": "2026-01-30",
+   "sha256": "dba0d2e0e6417e6c9e0b1419b25adad552dfb6551fbc640f6e12cb90d2c6a369",
+   "stage2_overall_score": 22.5,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02563.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02563.jpg",
+   "session": "2026-01-30",
+   "sha256": "f738ff963ed36fad89a5a901d84d4f4e11cf63f8bc9b60cda440a27502e5e5b8",
+   "stage2_overall_score": 38.2,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02591.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02591.jpg",
+   "session": "2026-01-30",
+   "sha256": "58a0e1d6595e253e526d6fcd8b9bdea93e9f2a5ec1a13fbd5b536cb0310b6eec",
+   "stage2_overall_score": 65.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02564.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02564.jpg",
+   "session": "2026-01-30",
+   "sha256": "7f5c58e5e60c5a6a1f9395c94593bb168dd472489d235e26080468644dec1186",
+   "stage2_overall_score": 75.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02513.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02513.jpg",
+   "session": "2026-01-30",
+   "sha256": "d522b6bf20bf41799fe76f27fbea5946dd18678e5bca9ebaa7f6971caa8ac26e",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260130__DSC02595.jpg",
+   "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02595.jpg",
+   "session": "2026-01-30",
+   "sha256": "f756ccaac0f70e577b7cd486972b6ac79648107d80d92d2a8e5a01d71e731d13",
+   "stage2_overall_score": 15.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC03061.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC03061.jpg",
+   "session": "2026-01-31",
+   "sha256": "7e3fa79bb9ed77ef425da5543ff334db91da427ed6d23c4dfeb2d40e647e2eae",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC02848.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC02848.jpg",
+   "session": "2026-01-31",
+   "sha256": "14743141e2a2ea71037d99f83fefdd38138f33de33af950fafb470066f989658",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC02829.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC02829.jpg",
+   "session": "2026-01-31",
+   "sha256": "f6073240f4fe302ebf05ee8289c702db70a2e21db36d3baa42290136a1ddcb8f",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC02902.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC02902.jpg",
+   "session": "2026-01-31",
+   "sha256": "46d924cfddf7955db737e5158731ffebd2144c5bad5ebd18f6a2e95febe79e0d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC03009.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC03009.jpg",
+   "session": "2026-01-31",
+   "sha256": "025b64beb9aca594d892febeda9d78615cf34072f07705e530ca2556b846b88b",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC03008.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC03008.jpg",
+   "session": "2026-01-31",
+   "sha256": "b69f85878e9139c73183d6e6a0385863716d5cac47c9d9eea639e92ebb1477c3",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260131__DSC02832.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC02832.jpg",
+   "session": "2026-01-31",
+   "sha256": "2506256267907affbc968e7c4dc8a862e53a9a102ffb2f6e0ccb828af96b9548",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03193.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03193.jpg",
+   "session": "2026-02-01",
+   "sha256": "ba94d21f63a2b081008d90696909d9e8a1b2ad65f0f6a232b0bae020624d6715",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03266.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03266.jpg",
+   "session": "2026-02-01",
+   "sha256": "3f0ec53e39f4873db8d8c75b7acc372ec87dae8164a19540c5357db28d426241",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03369.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03369.jpg",
+   "session": "2026-02-01",
+   "sha256": "90035d90881120ee64020d614c2f9ec89a20552b00e6f4bc26b62a37e81a4502",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03234.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03234.jpg",
+   "session": "2026-02-01",
+   "sha256": "58fe02a3b8d8c7a9ecd43527f586f06d9c34d0c4085d40c4879ce7f5b7f7c14d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03282.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03282.jpg",
+   "session": "2026-02-01",
+   "sha256": "d20348d08e40475106b1cd7792e963c71694243c1a58a1e3969e394ae706631d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03248.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03248.jpg",
+   "session": "2026-02-01",
+   "sha256": "17dfe68d103130676a025d66e6cbe01b017a39a323e9b6425fdee10d6ab476b5",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03374.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03374.jpg",
+   "session": "2026-02-01",
+   "sha256": "373173f7f02ec5cd7fad2a0fad5698262d4e31cd1e9739a09ad35bd4620b29f2",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260201__DSC03359.jpg",
+   "source_path": "Livehouse_Archive/2026-02-01/Previews/DSC03359.jpg",
+   "session": "2026-02-01",
+   "sha256": "0a2391e60377fcc2ce12ae010edc58fdc2a088bf1a73d91cf20bbc32054dcbe3",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260207__DSC03819.jpg",
+   "source_path": "Livehouse_Archive/2026-02-07/Previews/DSC03819.jpg",
+   "session": "2026-02-07",
+   "sha256": "f51ce24be620e4a0d2bcf403b4dcbf22808f0440fda932ddc038becd5f74091d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04029.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04029.jpg",
+   "session": "2026-02-08",
+   "sha256": "9894338f0df3913e5068eef3373a316afdbed19a58997491ff746a56d44fe557",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04060.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04060.jpg",
+   "session": "2026-02-08",
+   "sha256": "3d4c1f5c10c8e3f2672f6f1d63de63a8a0636ea37543ee06896f0d78800faa39",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04045.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04045.jpg",
+   "session": "2026-02-08",
+   "sha256": "b3552cef647065e0882c963625118e0d85046785122ca5016bf054eedfa683c6",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04012.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04012.jpg",
+   "session": "2026-02-08",
+   "sha256": "fe5e37fe1573c4a7fc9f439070323a1abdee4ff263ab3fc2c4d088ce32dee9b1",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04034.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04034.jpg",
+   "session": "2026-02-08",
+   "sha256": "1da29a92f95e2966c8100478bf491df23aa83fd2125b4d99f95f6ee981f7937b",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC03935.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC03935.jpg",
+   "session": "2026-02-08",
+   "sha256": "4439da97d61b5d4f0b14ef0e65b7bb75cf5d26f014c0b43df1a50600bfa11362",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04053.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04053.jpg",
+   "session": "2026-02-08",
+   "sha256": "c1a1d27983dde3cd9e388c0b507e30d06c410e36750d7b68b85b1570a6879833",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260208__DSC04050.jpg",
+   "source_path": "Livehouse_Archive/2026-02-08/Previews/DSC04050.jpg",
+   "session": "2026-02-08",
+   "sha256": "07d009dcec69af3f607b8c425a39928329c55265abf1c0e51f85e073d442b664",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04494.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04494.jpg",
+   "session": "2026-03-06",
+   "sha256": "2aab3cb6722195aec5cb454cbc238ddbb33b0ae96920092445f2d9edb20b12d5",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04573.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04573.jpg",
+   "session": "2026-03-06",
+   "sha256": "be8653244fe3ca5d83b49a7e01462aaf1bb8d3210d7d1bcea1df3325c4782415",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04734.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04734.jpg",
+   "session": "2026-03-06",
+   "sha256": "eec9adfee5bb1434ccf87b5ce73bc452293d28d5691bad66b10c9b535454ced5",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04977.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04977.jpg",
+   "session": "2026-03-06",
+   "sha256": "eea4e4963347bac42ee500eddf9905195e3558836354b7c7c618e41c3e3485ac",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04492.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04492.jpg",
+   "session": "2026-03-06",
+   "sha256": "4386d9ed468411dcb105aab40ea85060974223245e7e54788bffa2215710106b",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC05065.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC05065.jpg",
+   "session": "2026-03-06",
+   "sha256": "0720948a04af6eb8f1744f997e8dc98f927baa6e080e6eb9399d0e7bcf4877c0",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04531.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04531.jpg",
+   "session": "2026-03-06",
+   "sha256": "46230bf2741a3dc117baeb0bd5823178bd7c59068897103cd7cbfd8825fab964",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260306__DSC04851.jpg",
+   "source_path": "Livehouse_Archive/2026-03-06/Previews/DSC04851.jpg",
+   "session": "2026-03-06",
+   "sha256": "ed2d7bb4b5cd7b5bcc2d4423fa4766e2a40222961d0c7ef68374eb312f5766a5",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05490.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05490.jpg",
+   "session": "2026-03-07",
+   "sha256": "0101fd7ed8c0a15595278b77c98fb9549e3c18b5c3f3083c7d4bccfe7f2e80f4",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05086.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05086.jpg",
+   "session": "2026-03-07",
+   "sha256": "0d5e562523b991cfc50f1ebc419beb6e44ec88f8efd3a34e25492b9174b3aded",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05198.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05198.jpg",
+   "session": "2026-03-07",
+   "sha256": "9d520b48451aec1d9cff2b89a4ae7256b0c7f80bab689a314dbed92b60885062",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05090.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05090.jpg",
+   "session": "2026-03-07",
+   "sha256": "9f15967f1da894fa0355d23925944a2c594454736baa5d253e25862fd635a956",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05611.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05611.jpg",
+   "session": "2026-03-07",
+   "sha256": "10ae67aa2f0fd7cbacd457267d112e2ae3e7ba0793eab7f5b5740788436b3063",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05452.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05452.jpg",
+   "session": "2026-03-07",
+   "sha256": "7a18fd4d064287b8f0fad26be240583c29e61a9cfdcd9aa789610f905683552b",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05256.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05256.jpg",
+   "session": "2026-03-07",
+   "sha256": "7448422f3bcade3b94eb40be70884135572b0a93c9846e84693d0c8933b4c993",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260307__DSC05353.jpg",
+   "source_path": "Livehouse_Archive/2026-03-07/Previews/DSC05353.jpg",
+   "session": "2026-03-07",
+   "sha256": "1d55c3ae7f06adb1ac33994a84c9646bf731da368b6fdd5f3fdbe4ad7173a04b",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05981.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05981.jpg",
+   "session": "2026-03-08",
+   "sha256": "0849f6d3fef08fe6f304dfcea49744ecda855d9d990ee77712ecf28f0cbf7850",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05873.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05873.jpg",
+   "session": "2026-03-08",
+   "sha256": "7b1fd7b0435c691f004951fbc1165e7a47d82971c1fbbf4089370afdc0bd0b98",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05903.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05903.jpg",
+   "session": "2026-03-08",
+   "sha256": "809448d67ae0f3afd69006053319b876aa241e252236c233a951e8822d6ebbaf",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05731.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05731.jpg",
+   "session": "2026-03-08",
+   "sha256": "bb635d70fd9fd4f700c26391d66e15dac1cefe1dc2280ec11360aea339b5b8ef",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05919.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05919.jpg",
+   "session": "2026-03-08",
+   "sha256": "db46811cc035e1954b161da11a86908a67920945b9ac2f6b6e92e2f93b60778e",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05824.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05824.jpg",
+   "session": "2026-03-08",
+   "sha256": "ea35ca09bac3fe81bc37ab469c647219ea12ebb8166aec343972a6c151e34e21",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05906.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05906.jpg",
+   "session": "2026-03-08",
+   "sha256": "eb5d8936801d1a962d2680ffe6e2ceaa25fffaa3c6604e3259d12565a12bfd0d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260308__DSC05756.jpg",
+   "source_path": "Livehouse_Archive/2026-03-08/Previews/DSC05756.jpg",
+   "session": "2026-03-08",
+   "sha256": "98f3f1972de385f3aafdad9a8662382c497d659df15f907efab53b48407e48bf",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06044.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06044.jpg",
+   "session": "2026-03-13",
+   "sha256": "6c51c27dae32eda1f478da15bbf9c4ff5d5dbaaad82aa8dfe103215931f042c3",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06303.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06303.jpg",
+   "session": "2026-03-13",
+   "sha256": "31aa269bafbe0bae511d3899739051d5c83ce59e7626ebea900368d1583ff37d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06072.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06072.jpg",
+   "session": "2026-03-13",
+   "sha256": "8a1da98888d25450812d870f7f137b2437aecd2c2ee9d7941029ea257648f7ab",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06178.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06178.jpg",
+   "session": "2026-03-13",
+   "sha256": "3ea73d87c2523dba692123d79fa945788ddd2ff1f51fa64c9d04427d0bf2451a",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06084.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06084.jpg",
+   "session": "2026-03-13",
+   "sha256": "3725a5351f09349ded1d374eb136f88483301d82f3218bd5ce1685012d429f4d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06041.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06041.jpg",
+   "session": "2026-03-13",
+   "sha256": "47d80d012322fcf55576adbf0672bd6d5ec4de82c83e5c3ee8d308d80577f3c9",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06224.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06224.jpg",
+   "session": "2026-03-13",
+   "sha256": "ff994d1acf989f2f406d3ab92a6f46ec634bdffa28871b4715f082531657d5fa",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260313__DSC06076.jpg",
+   "source_path": "Livehouse_Archive/2026-03-13/Previews/DSC06076.jpg",
+   "session": "2026-03-13",
+   "sha256": "b09821e4c5353e072e05630e326387c5c67cfc6675651b5d7e9a5613b9c8d1e9",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC07156.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC07156.jpg",
+   "session": "2026-03-14",
+   "sha256": "fb1383a56ef7c82cdbb362edf6d8e7c44cbf9e419e710a15ea1ff17486fcbe77",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC06662.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC06662.jpg",
+   "session": "2026-03-14",
+   "sha256": "fae55e771b378c9374262e2168215e897db4d9b1d2886d89901b3814dfa72c8f",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC06984.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC06984.jpg",
+   "session": "2026-03-14",
+   "sha256": "9fcfabc82fc779df629835ef47eae7aad7540ef2184796a1c3c220faa5de4607",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC06736.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC06736.jpg",
+   "session": "2026-03-14",
+   "sha256": "98d707a80fd07da149642fe72c7d77d25a089895b0ed827a5d3c30eff747f317",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC06830.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC06830.jpg",
+   "session": "2026-03-14",
+   "sha256": "5a9a5bd3cf63f7fc193c073b001000310817009af4c32ed794622b5ca565e44f",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC07090.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC07090.jpg",
+   "session": "2026-03-14",
+   "sha256": "7e3d0c98f82bf5c44ee42694c346fe6e02077339dcfd0525d1449b6c891d97dc",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC06441.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC06441.jpg",
+   "session": "2026-03-14",
+   "sha256": "95b33c035029733a6dd429528e12db938347be74e73dbbe13a6d58930ee9c4e5",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260314__DSC06571.jpg",
+   "source_path": "Livehouse_Archive/2026-03-14/Previews/DSC06571.jpg",
+   "session": "2026-03-14",
+   "sha256": "a0311ac70e8a08dcb69e41eae9a682771fad580f48bb247f3679193e57a8a894",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07445.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07445.jpg",
+   "session": "2026-03-21",
+   "sha256": "09d3651bbd2d9486861997617c7cb75fa8cf898ddea715781b6d03eb336a15be",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07283.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07283.jpg",
+   "session": "2026-03-21",
+   "sha256": "f64233143ed7738e737e0147d3594b81c53ad67382a01e65fe57f37a04afb02e",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07540.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07540.jpg",
+   "session": "2026-03-21",
+   "sha256": "0f8c70161c8ab1cbb0bfca4613bf09c09883e7b8cdc506aecd1fb702f7c6a8d5",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07617.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07617.jpg",
+   "session": "2026-03-21",
+   "sha256": "efbc7133812eb7f8a453ad4573240d5f53e594242e03627ab517c3c95d31f5ca",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07673.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07673.jpg",
+   "session": "2026-03-21",
+   "sha256": "31eba2223ca264150deccad02b59e26b5be918d646287ab8e14d7a37880a0a06",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07258.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07258.jpg",
+   "session": "2026-03-21",
+   "sha256": "04d94d4902ce56b150a733423b612a06e7492aee7d6935e236580183505fd7f4",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07650.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07650.jpg",
+   "session": "2026-03-21",
+   "sha256": "622bc6083eb5b7b52d20aaf39b71b5aa202f6603a17423db61ac6ba9b793a08e",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260321__DSC07790.jpg",
+   "source_path": "Livehouse_Archive/2026-03-21/Previews/DSC07790.jpg",
+   "session": "2026-03-21",
+   "sha256": "b2f6c06bca7f84c3a929cfa5e047fa3130e1a08272ac91f07792a2d33216dde6",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC08206.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC08206.jpg",
+   "session": "2026-03-22",
+   "sha256": "41c6b4993719f73ebe6903b979ace5b4ac165680cab992a883e061066c043a24",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC07844.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC07844.jpg",
+   "session": "2026-03-22",
+   "sha256": "386317367dd9c5e56a94d2895dce2c34d5e88e85ab2c1e5a167eaea05bdb47fc",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC07975.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC07975.jpg",
+   "session": "2026-03-22",
+   "sha256": "824213878abf36e20ee89ae4f1a6f3c6361c88c107c7fddf66415e3756e6b180",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC08096.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC08096.jpg",
+   "session": "2026-03-22",
+   "sha256": "5666635ceea88cb92ba52521038a9a16ace29015561a0d9172efdcbabfb8a25f",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC07814.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC07814.jpg",
+   "session": "2026-03-22",
+   "sha256": "9c7ef6be772f150d7d8f3661be0569f345909c9fca50e7ac7a3c1c848e7008a9",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC07926.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC07926.jpg",
+   "session": "2026-03-22",
+   "sha256": "14a7c65dda824702f25e2ce6efb20c7386bef023ecd2ef2372156f4b7e7a90c6",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC08051.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC08051.jpg",
+   "session": "2026-03-22",
+   "sha256": "d246c6c8f38d7d06fec8d9bdc5411e9d8a4a0b34533e111064010657a8104b24",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260322__DSC08181.jpg",
+   "source_path": "Livehouse_Archive/2026-03-22/Previews/DSC08181.jpg",
+   "session": "2026-03-22",
+   "sha256": "233a692f37e447fa2350e4a9d4c9dae6eebeb296b3143b17e47680ba611ec09a",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08277.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08277.jpg",
+   "session": "2026-03-25",
+   "sha256": "3cb2e356af636437a1a35c99fe2b8211d3854e95588ce94ead23ba914adc5605",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08283.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08283.jpg",
+   "session": "2026-03-25",
+   "sha256": "7db87d316e00b2c5f82a74231029275cda9bfddcb9d6729ab6b9a7899bad8d99",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08264.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08264.jpg",
+   "session": "2026-03-25",
+   "sha256": "100e270d38b6aaafa39185c96d02a91bd7cef769724f9aae66ef8f00ece5c2f3",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08402.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08402.jpg",
+   "session": "2026-03-25",
+   "sha256": "8ef5306472b7dc1ae108836dc1587fe1b43ed8027248fa9f1860dcbd32ed44ba",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08594.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08594.jpg",
+   "session": "2026-03-25",
+   "sha256": "63a127b18403ee6a00e24646fc0e99bb7d771c425ac221795192d08a657f397f",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08568.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08568.jpg",
+   "session": "2026-03-25",
+   "sha256": "574912f0d00dfb7a5f663bc8feeb2bbed2e7d5131de870bc43717ecad898503d",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08652.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08652.jpg",
+   "session": "2026-03-25",
+   "sha256": "e169c9cdd3e1a62808afff660256ee4dbac6ac26ec96f182a8b3afd556ab4d09",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260325__DSC08328.jpg",
+   "source_path": "Livehouse_Archive/2026-03-25/Previews/DSC08328.jpg",
+   "session": "2026-03-25",
+   "sha256": "959d93c4ef31de5be21cc5e0f19d44c4230729e59d92c91005418b04028f8135",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08502.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08502.jpg",
+   "session": "2026-03-26",
+   "sha256": "2cd5ef4824704d694b52bd05e6bf5477a279ddc79efeca14af22310dd6717510",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08487.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08487.jpg",
+   "session": "2026-03-26",
+   "sha256": "4dc94db456c06e8e34bd9c9aa8f5c976b4f9faa1df5ada5a654b1923f868f11f",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08706.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08706.jpg",
+   "session": "2026-03-26",
+   "sha256": "a3f7fbc077f971ff9ccf8ba601264e9179340e6e92fd0deef0dc0df2509a850b",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08476.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08476.jpg",
+   "session": "2026-03-26",
+   "sha256": "ae7989adaf020d249957d1fbe5f570bd345f6ff541dfea507995b9ab685c0d52",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08641.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08641.jpg",
+   "session": "2026-03-26",
+   "sha256": "2d5411050e468da4d7efe81cd7bf4e53f2b2090b6441a670c0ebb86c593aebf7",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08569.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08569.jpg",
+   "session": "2026-03-26",
+   "sha256": "8a6b69670545a829abf5aee09b9c16148022354a50695f65c4493e185055b526",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08609.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08609.jpg",
+   "session": "2026-03-26",
+   "sha256": "8ca991870ded6524b1223a3c724a992cc880a4709cab5d43dc8b7fe772c74a85",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260326__DSC08457.jpg",
+   "source_path": "Livehouse_Archive/2026-03-26/Previews/DSC08457.jpg",
+   "session": "2026-03-26",
+   "sha256": "c9427f2a25d4dc96a4048a8d41f9e3a74d98fe72edaafd71ced21afcc8f09f76",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260327__DSC08755.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Trash_Below60/DSC08755.jpg",
+   "session": "2026-03-27",
+   "sha256": "578a65d61643237b306c78a6e6ae9c4df6443f2e2ea6918aa2e6b93c4f485ee9",
+   "stage2_overall_score": 0.0,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260327__DSC08881.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Trash_Below60/DSC08881.jpg",
+   "session": "2026-03-27",
+   "sha256": "07d99cd7d472778a0eee80337b82fd281a1e7a8817e3d28f03bde1880ab9504e",
+   "stage2_overall_score": 2.2,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260327__DSC08979.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Trash_Below60/DSC08979.jpg",
+   "session": "2026-03-27",
+   "sha256": "04f24e11b836ba51e0052515286ab3c12df28da92f1446f3086d6cba12e8ad7f",
+   "stage2_overall_score": 3.3,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260327__DSC08872.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Keep_60-90/DSC08872.jpg",
+   "session": "2026-03-27",
+   "sha256": "4d344de240c38a039c40252c3c895796d5b3b1504de209df7584b6e9ff45b34b",
+   "stage2_overall_score": 64.8,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260327__DSC08808.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Keep_60-90/DSC08808.jpg",
+   "session": "2026-03-27",
+   "sha256": "89ee9c38652a96da01aa0097714d6ed66076f290c82096590904450833aa55a8",
+   "stage2_overall_score": 68.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260327__DSC08830.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Keep_60-90/DSC08830.jpg",
+   "session": "2026-03-27",
+   "sha256": "916db8662dbb8c9d521245b546d73fc48a9ee477b90ebc08cac734851a197c91",
+   "stage2_overall_score": 69.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260327__DSC08744.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Keep_60-90/DSC08744.jpg",
+   "session": "2026-03-27",
+   "sha256": "c8f9e04ae00d199ec8cc1ed921b2918f297e98992859cfa9ba0739e2afdc048a",
+   "stage2_overall_score": 71.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260327__DSC08867.jpg",
+   "source_path": "Livehouse_Archive/2026-03-27/Previews/AI_Keep_60-90/DSC08867.jpg",
+   "session": "2026-03-27",
+   "sha256": "d41e5ac022be89809a9b2f630b61e7a0a7d9e0d24b11dd007af3595ab02765f9",
+   "stage2_overall_score": 76.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260328__DSC09014.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Trash_Below60/DSC09014.jpg",
+   "session": "2026-03-28",
+   "sha256": "606e8f0bd05ba61b058b4adc9db4edc168b61cafc9160def56adfde441e6f31b",
+   "stage2_overall_score": 0.0,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260328__DSC09080.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Trash_Below60/DSC09080.jpg",
+   "session": "2026-03-28",
+   "sha256": "b0c330f0c3a4f4401c553c15e1b6f16896db2d2dd07db688b9404cebd22e1fd8",
+   "stage2_overall_score": 0.8,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260328__DSC09078.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Trash_Below60/DSC09078.jpg",
+   "session": "2026-03-28",
+   "sha256": "73c5a55572629d988950ba46fd100cc4a2c04e121677a880561e44933d57c785",
+   "stage2_overall_score": 2.6,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260328__DSC09077.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Keep_60-90/DSC09077.jpg",
+   "session": "2026-03-28",
+   "sha256": "c2f992d67a71be55c6101c69ff39cf87a284876d8aa4d9f63b42f1250b41e15a",
+   "stage2_overall_score": 62.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260328__DSC09047.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Keep_60-90/DSC09047.jpg",
+   "session": "2026-03-28",
+   "sha256": "0edcd849828359df04a03757b45dc6917501ac9901aa5efdbd3a62d2a833c754",
+   "stage2_overall_score": 63.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260328__DSC09056.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Keep_60-90/DSC09056.jpg",
+   "session": "2026-03-28",
+   "sha256": "09fedbea33272d479e42f62b49eb51eca78ef621d3959477fb45228bd7b9061d",
+   "stage2_overall_score": 67.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260328__DSC09057.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Keep_60-90/DSC09057.jpg",
+   "session": "2026-03-28",
+   "sha256": "60c4bc6c0f7294e814a02501a3f55590e367c4ac56e02f2136edf8c19943276b",
+   "stage2_overall_score": 70.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260328__DSC09039.jpg",
+   "source_path": "Livehouse_Archive/2026-03-28/Previews/AI_Keep_60-90/DSC09039.jpg",
+   "session": "2026-03-28",
+   "sha256": "5674230980b3e559e39dd3ba719b981c43bec30ff5109f95af90369b5e5609dc",
+   "stage2_overall_score": 75.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260329__DSC09225.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Trash_Below60/DSC09225.jpg",
+   "session": "2026-03-29",
+   "sha256": "5af1f8fdd65adf690647b68f00dcd00489e3bb59a92339102d5254805cb260bb",
+   "stage2_overall_score": 1.1,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260329__DSC09152.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Trash_Below60/DSC09152.jpg",
+   "session": "2026-03-29",
+   "sha256": "725492a2804e226deb01f38ad77ac2ace0f186bfd3525555f4e9e2f28a8d11a2",
+   "stage2_overall_score": 55.4,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260329__DSC09408.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Keep_60-90/DSC09408.jpg",
+   "session": "2026-03-29",
+   "sha256": "7d203c0380245f8d277c29c4042fb2562a2c9cf7758fbe0c29e86f3dc2335eba",
+   "stage2_overall_score": 62.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260329__DSC09477.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Keep_60-90/DSC09477.jpg",
+   "session": "2026-03-29",
+   "sha256": "1aa0936294bd55c1e39de8aed1e0bdcda5ee173a3e625b3c2293a4af6b738032",
+   "stage2_overall_score": 67.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260329__DSC09485.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Keep_60-90/DSC09485.jpg",
+   "session": "2026-03-29",
+   "sha256": "453c060a2ff8e951131d9f495d18dba2172f386c513881b075a20444524fc09d",
+   "stage2_overall_score": 67.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260329__DSC09350.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Keep_60-90/DSC09350.jpg",
+   "session": "2026-03-29",
+   "sha256": "91e96c03950ae9ff7fe049a9ddb7360cd49b5bfa809a3e98191318cfb255e182",
+   "stage2_overall_score": 70.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260329__DSC09185.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Keep_60-90/DSC09185.jpg",
+   "session": "2026-03-29",
+   "sha256": "a3fb60111d99f5f9db31a0c23db26e00553a299bcb447d0eada65f3a80fbed02",
+   "stage2_overall_score": 75.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260329__DSC09329.jpg",
+   "source_path": "Livehouse_Archive/2026-03-29/Previews/AI_Keep_60-90/DSC09329.jpg",
+   "session": "2026-03-29",
+   "sha256": "fbd836fc7a92f6878cc525cd052f5f06fe01ccd4bfc4d79a24e01065f4efa901",
+   "stage2_overall_score": 77.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260330__DSC09583.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Trash_Below60/DSC09583.jpg",
+   "session": "2026-03-30",
+   "sha256": "956d03bb6745c28111413e1c8609b7c65bd5fcd6feef56deba688043a809b3a6",
+   "stage2_overall_score": 10.0,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260330__DSC09578.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Keep_60-90/DSC09578.jpg",
+   "session": "2026-03-30",
+   "sha256": "af5ff1e28446b6fb901d8ea563fc776077e7359c04f352a50cee801b814f610f",
+   "stage2_overall_score": 65.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260330__DSC09586.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Keep_60-90/DSC09586.jpg",
+   "session": "2026-03-30",
+   "sha256": "dc52a3adfb04ff206d2b7c932c9be56616627c3c959031e4665d9d14f8a15eb8",
+   "stage2_overall_score": 69.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260330__DSC09598.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Keep_60-90/DSC09598.jpg",
+   "session": "2026-03-30",
+   "sha256": "f86fecd99c04c9aa22bde32e6d28af67fb7449cdb890add2f9672ab9ca062a3a",
+   "stage2_overall_score": 74.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260330__DSC09615.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Keep_60-90/DSC09615.jpg",
+   "session": "2026-03-30",
+   "sha256": "15ec730d90264013779f2c46b09a1ef9eb92b494a9dde93f9d0343bcc920c38f",
+   "stage2_overall_score": 80.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260330__DSC09603.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Keep_60-90/DSC09603.jpg",
+   "session": "2026-03-30",
+   "sha256": "5a873c2d44c1823ab057361d2c95b95a662930da4dfb7a21b3ea39b253071c4c",
+   "stage2_overall_score": 86.1,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260330__DSC09618.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Best_90+/DSC09618.jpg",
+   "session": "2026-03-30",
+   "sha256": "0f906ebc980efef175ba718411121129361fa61990d962440411c2c36a2d771a",
+   "stage2_overall_score": 90.2,
+   "stage2_category": "best"
+  },
+  {
+   "file": "20260330__DSC09670.jpg",
+   "source_path": "Livehouse_Archive/2026-03-30/Previews/AI_Best_90+/DSC09670.jpg",
+   "session": "2026-03-30",
+   "sha256": "34ba4c72ff7d08b78daa25986f717c3154eb2dbda8d16a2ab43096a5be3ff2ec",
+   "stage2_overall_score": 92.5,
+   "stage2_category": "best"
+  },
+  {
+   "file": "20260404__DSC09861.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC09861.jpg",
+   "session": "2026-04-04",
+   "sha256": "df66be4161085b00e1ce807df4098e4fed71d8c81f57d1b2b32a9aa5f0bd7f16",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC00111.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC00111.jpg",
+   "session": "2026-04-04",
+   "sha256": "67b563c3b71f39fa464f21a1a3ee998c5700d10c9f02823567abb97fdadcb0f4",
+   "stage2_overall_score": 15.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC00091.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC00091.jpg",
+   "session": "2026-04-04",
+   "sha256": "c94b8efd3e8b53cd87ca69b935d5aa14b6290bbdcdc272d7ca57143f37cdf080",
+   "stage2_overall_score": 41.8,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC00007.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC00007.jpg",
+   "session": "2026-04-04",
+   "sha256": "dc8e9193e27b7131affaa2f120d2b47eb59e3e5db5e16f6109e2cfa48039cc43",
+   "stage2_overall_score": 47.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC00087.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC00087.jpg",
+   "session": "2026-04-04",
+   "sha256": "a56da62ef9cdcc56faaeccea05dbb88ad036f4a6809da8c2b17c4f8400f9111d",
+   "stage2_overall_score": 69.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC09896.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC09896.jpg",
+   "session": "2026-04-04",
+   "sha256": "b4e4663da53011064e8e21f1f9e7fd2136a1edce9ee38f1c84dff6f41dd17fa7",
+   "stage2_overall_score": 72.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC09980.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC09980.jpg",
+   "session": "2026-04-04",
+   "sha256": "8b9c5df27be1fdfb7abd8a8b5a70053dce41183ed1e64d900ee4b1456804e0e9",
+   "stage2_overall_score": 76.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260404__DSC09989.jpg",
+   "source_path": "Livehouse_Archive/2026-04-04/Previews/DSC09989.jpg",
+   "session": "2026-04-04",
+   "sha256": "55d29d648a1ea7610a4f7bd50bba770e257994daef900cd379c60def416a2d90",
+   "stage2_overall_score": 80.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00841.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00841.jpg",
+   "session": "2026-04-05",
+   "sha256": "29c76ac051a94acc54f207606c759684cad862a437dd5f9e055ce8e827fbd089",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00240.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00240.jpg",
+   "session": "2026-04-05",
+   "sha256": "9c2b44d1003aaf43b5116830984354c6e079dfccbcfa1de6edf88fa60104232b",
+   "stage2_overall_score": 15.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00646.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00646.jpg",
+   "session": "2026-04-05",
+   "sha256": "833101a0f7dd5f39aa7af4d68a2143adebc05a5f791050f3ca27ebd72eb573f7",
+   "stage2_overall_score": 64.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00158.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00158.jpg",
+   "session": "2026-04-05",
+   "sha256": "85103ace38cbd71ac2f53c431e1f119085c76915da1535bcef439db3039d6a8c",
+   "stage2_overall_score": 71.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00733.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00733.jpg",
+   "session": "2026-04-05",
+   "sha256": "235c5751e74064fa1b290c3e191f7cd182d24cce097e5d4a6ba3281d28f4bd6a",
+   "stage2_overall_score": 74.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00663.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00663.jpg",
+   "session": "2026-04-05",
+   "sha256": "430ab1d264d6d49adb849a212b365a91900593d42bdb8544353821ed36d252d6",
+   "stage2_overall_score": 77.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00379.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00379.jpg",
+   "session": "2026-04-05",
+   "sha256": "9381851905c331bffb13ff80c07c38b4e474c7f2430661e421c3b160b7bc2f8d",
+   "stage2_overall_score": 78.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260405__DSC00239.jpg",
+   "source_path": "Livehouse_Archive/2026-04-05/Previews/DSC00239.jpg",
+   "session": "2026-04-05",
+   "sha256": "b42f4ed2ae3fe8dbe979767f9db7610316de4a73cb6d2380a52d68a19869cf4b",
+   "stage2_overall_score": 82.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC01094.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC01094.jpg",
+   "session": "2026-04-06",
+   "sha256": "aa09b371dde9c4c07587ddad2de465efa85c85b21de5ec32b01de4f3619afaa2",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC01089.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC01089.jpg",
+   "session": "2026-04-06",
+   "sha256": "2c637eae52d7f24b06cb20c0e6610d9d4820a58fa098291c6bab92089359fbd6",
+   "stage2_overall_score": 15.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC01019.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC01019.jpg",
+   "session": "2026-04-06",
+   "sha256": "b4c6b1b78bccece4c0f67fcb16c9bb97a8900400aaa2fa6796a1d1daaf876446",
+   "stage2_overall_score": 27.8,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC00943.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC00943.jpg",
+   "session": "2026-04-06",
+   "sha256": "703f47af550e2a1ece6e14ec8630897db6d8b86b37fca8826e9aeb93f6996146",
+   "stage2_overall_score": 38.2,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC01180.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC01180.jpg",
+   "session": "2026-04-06",
+   "sha256": "c0c166ca0de34a6bdf36164ffef5b9fbec59db4a99f32e9a7a9cf57424e77884",
+   "stage2_overall_score": 41.8,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC00973.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC00973.jpg",
+   "session": "2026-04-06",
+   "sha256": "73fb0406624f25868df9d85309a3ba694658190a9e14f880e8634aecdcbc3da0",
+   "stage2_overall_score": 57.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC00931.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC00931.jpg",
+   "session": "2026-04-06",
+   "sha256": "6947f616356d4bd0b45ef0fc9edeec9f0a25dc6a79974d650ffc1e8c0a61577e",
+   "stage2_overall_score": 84.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260406__DSC00945.jpg",
+   "source_path": "Livehouse_Archive/2026-04-06/Previews/DSC00945.jpg",
+   "session": "2026-04-06",
+   "sha256": "985c490f4388522f16d3f7a038bf7918ad786d373a23bdcc2af16a08f5e7c577",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01291.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01291.jpg",
+   "session": "2026-04-10",
+   "sha256": "29762d032fa8ed65392307ef627c3f9f69f639f62429954cf26f59cccbbf5e01",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01355.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01355.jpg",
+   "session": "2026-04-10",
+   "sha256": "8eccf1e2eecd9369314f9b780a4162303494111ccb0b2a4aef833e950e8780de",
+   "stage2_overall_score": 15.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01388.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01388.jpg",
+   "session": "2026-04-10",
+   "sha256": "4d1bf0a31524b2f7460193a5f4db4dbc0ebe7acd9e9aa9c436241f95cf5c4f7b",
+   "stage2_overall_score": 38.2,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01373.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01373.jpg",
+   "session": "2026-04-10",
+   "sha256": "71be81d434bf334e433c4d50cdcb40b09c2c0b50e443e4b4e825da5fee8573a8",
+   "stage2_overall_score": 41.8,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC02196.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC02196.jpg",
+   "session": "2026-04-10",
+   "sha256": "9a68f65d214f109361e78f46bd57c0616ff3c098a15c39e375a4877c47ebc789",
+   "stage2_overall_score": 45.2,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01443.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01443.jpg",
+   "session": "2026-04-10",
+   "sha256": "9d88920b09ef2eb11f534f5a8ea29df91c9c5592bcd7f4a968dcc9033c1f30a8",
+   "stage2_overall_score": 72.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01877.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01877.jpg",
+   "session": "2026-04-10",
+   "sha256": "aed94d00d0fccea31b13b77c5c6bfead144072a868a0177930f600f47c628923",
+   "stage2_overall_score": 10.0,
+   "stage2_category": null
+  },
+  {
+   "file": "20260416__DSC02885.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Trash_Below60/DSC02885.jpg",
+   "session": "2026-04-16",
+   "sha256": "110d339a9a3b4c369ca1af2dcde58a875319b74e2de4c0372f5541854e0b20c2",
+   "stage2_overall_score": 51.8,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260416__DSC03020.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC03020.jpg",
+   "session": "2026-04-16",
+   "sha256": "3ce2754524be1e0605a02b7d3077e15ceada16074ee8e43c7f23be8fe2abdd02",
+   "stage2_overall_score": 64.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260416__DSC03102.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC03102.jpg",
+   "session": "2026-04-16",
+   "sha256": "c19ad9605ee33bb661feffb976085edfe5e6afa020671c34b557037cc2c32b78",
+   "stage2_overall_score": 66.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260416__DSC02933.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC02933.jpg",
+   "session": "2026-04-16",
+   "sha256": "0d4ebbdf2861fd0ea0fde0bebe9605aacdc00f80617cc381d669011b8ee0b236",
+   "stage2_overall_score": 69.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260416__DSC03663.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC03663.jpg",
+   "session": "2026-04-16",
+   "sha256": "fdcbcaecbe84065125ee38de815428ee4f9e68c8a7df00ae8f88958693cf9a7e",
+   "stage2_overall_score": 73.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260416__DSC03525.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC03525.jpg",
+   "session": "2026-04-16",
+   "sha256": "e9f337f383726a1108b78205f308784a04b9ca584cb1d0e07def939a3f618e94",
+   "stage2_overall_score": 74.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260416__DSC02812.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC02812.jpg",
+   "session": "2026-04-16",
+   "sha256": "c1d1611033d023715eab03880a9378d2848c54e687c0b16f3ad95968fe43898a",
+   "stage2_overall_score": 75.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260416__DSC03362.jpg",
+   "source_path": "Livehouse_Archive/2026-04-16/Previews/AI_Keep_60-90/DSC03362.jpg",
+   "session": "2026-04-16",
+   "sha256": "197a258fce775b8359d13bd0401df1810c2b127c547d89cbfcfc5faecb4cf557",
+   "stage2_overall_score": 76.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC04160.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC04160.jpg",
+   "session": "2026-04-24",
+   "sha256": "d873da860453856cc31b276f4b672f84cda1ff72552464c59279f959da043eec",
+   "stage2_overall_score": 68.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC03880.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC03880.jpg",
+   "session": "2026-04-24",
+   "sha256": "c730997974a7ce12a321a6211cef50a4706e7294c3acac1c95d56bbdf6252028",
+   "stage2_overall_score": 71.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC03953.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC03953.jpg",
+   "session": "2026-04-24",
+   "sha256": "5f867d4491557e05577fca036a66c22fd60338622ad066a65860b1fd4d5ec5b7",
+   "stage2_overall_score": 71.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC04030.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC04030.jpg",
+   "session": "2026-04-24",
+   "sha256": "389555f2646eb3ee018a2061b5bd115bd59749744f3eff53772185ba6c11015a",
+   "stage2_overall_score": 74.1,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC03879.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC03879.jpg",
+   "session": "2026-04-24",
+   "sha256": "8bd96e2f5ae3d52b1d9f8a7eba814a072fc7cf935bc8c8d1bfec7ca327970e57",
+   "stage2_overall_score": 74.8,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC04199.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC04199.jpg",
+   "session": "2026-04-24",
+   "sha256": "5c055d1732661b5afa16e49e1b703de094f4d01bb9bb9d6d2c7b7cf0402d3ef9",
+   "stage2_overall_score": 75.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC04132.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC04132.jpg",
+   "session": "2026-04-24",
+   "sha256": "437bb7ab889d59ff1f2658b994b4f6b84c8c2af064f72b9e7da719ce27dec05b",
+   "stage2_overall_score": 76.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260424__DSC04000.jpg",
+   "source_path": "Livehouse_Archive/2026-04-24/Previews/AI_Keep_60-90/DSC04000.jpg",
+   "session": "2026-04-24",
+   "sha256": "4684642156084214f0ad6a253e0e9e058d3528283aa64007d3736e8acb1ee32b",
+   "stage2_overall_score": 78.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04335.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Trash_Below60/DSC04335.jpg",
+   "session": "2026-04-25",
+   "sha256": "6205acaabcd6bded6b0b98a22971f9192a1ba07ca2893db9b15aa6de6e973fbc",
+   "stage2_overall_score": 0.9,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260425__DSC04456.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04456.jpg",
+   "session": "2026-04-25",
+   "sha256": "11573cb483be7759d0a2925f34daa866909bb73d8570bb7d23a691509d779ce8",
+   "stage2_overall_score": 66.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04214.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04214.jpg",
+   "session": "2026-04-25",
+   "sha256": "70362c6ad0afdac4397cfcf00c3e03da441826c7f8c61b58a6f4008168d95abc",
+   "stage2_overall_score": 75.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04281.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04281.jpg",
+   "session": "2026-04-25",
+   "sha256": "b38f38f5d8773db9145138d01539bfe94c00d6258583050ff6a102ff64d3f4d6",
+   "stage2_overall_score": 76.1,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04278.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04278.jpg",
+   "session": "2026-04-25",
+   "sha256": "b2a78ac3ee9ad21be8826555d171a12a9eccd9604f41796ea750f1eebbc2852b",
+   "stage2_overall_score": 78.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04447.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04447.jpg",
+   "session": "2026-04-25",
+   "sha256": "1d3312160f024af2203cf7912a4ac6ac5ef42a20124df0d4d61995df6ae7b582",
+   "stage2_overall_score": 80.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04459.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04459.jpg",
+   "session": "2026-04-25",
+   "sha256": "a8636d9104927c84d01fe5d7fcdbcd4ae129dbaf01cae4e469dcf7a186985241",
+   "stage2_overall_score": 82.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260425__DSC04429.jpg",
+   "source_path": "Livehouse_Archive/2026-04-25/Previews/AI_Keep_60-90/DSC04429.jpg",
+   "session": "2026-04-25",
+   "sha256": "684d46115bfe5f2917bc6f4a1de8779758ccee32c7335cd6b7bfc75fa1b41f79",
+   "stage2_overall_score": 83.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC05021.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC05021.jpg",
+   "session": "2026-04-26",
+   "sha256": "3773e4a865a7c34b1a48d42aab9fe8fa02fb97e1f0c2759245d32fe6c471680e",
+   "stage2_overall_score": 60.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04921.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04921.jpg",
+   "session": "2026-04-26",
+   "sha256": "adc0195b8ca732306174d3d039938d79ff32a5c1b9ae0081d37bad3fe9ad457e",
+   "stage2_overall_score": 67.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04859.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04859.jpg",
+   "session": "2026-04-26",
+   "sha256": "be104e754a01b498b1d1f1ecf9f3d7c1c6f9dde5c8c3ba14894924d8ce8ba32e",
+   "stage2_overall_score": 69.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04655.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04655.jpg",
+   "session": "2026-04-26",
+   "sha256": "9e4ef3ad3a582d144e121eed171d46a5315bde7f53fadbf2f5fe14c6fd078d73",
+   "stage2_overall_score": 71.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04803.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04803.jpg",
+   "session": "2026-04-26",
+   "sha256": "0de6d5a1db505021913543228493bb76a4e59944c94a5bac0944b21343c05eaf",
+   "stage2_overall_score": 72.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04736.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04736.jpg",
+   "session": "2026-04-26",
+   "sha256": "4a16689109c13d031f0fff6e090e7254d8519d9857b5af864c76a6a6f6649261",
+   "stage2_overall_score": 75.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04674.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04674.jpg",
+   "session": "2026-04-26",
+   "sha256": "2f45afae116c10490a7521053da23d90ce346365fbf1314f6be76e5d1424ff5f",
+   "stage2_overall_score": 76.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260426__DSC04608.jpg",
+   "source_path": "Livehouse_Archive/2026-04-26/Previews/AI_Keep_60-90/DSC04608.jpg",
+   "session": "2026-04-26",
+   "sha256": "1eb524a14c84c6a18a890fdc95cfe6cd0b2423af33eea209fe1213084e471d9e",
+   "stage2_overall_score": 77.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260502__DSC05307.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Trash_Below60/DSC05307.JPG",
+   "session": "2026-05-02",
+   "sha256": "05b79c2837949892592ada41eed965b4086092d474ece1a52ce205946187523d",
+   "stage2_overall_score": 53.8,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260502__DSC05335.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Trash_Below60/DSC05335.JPG",
+   "session": "2026-05-02",
+   "sha256": "a18f55eef2101d0a64611ed2b472bc69f97f8402aadfb65b3fdb0229ab36d158",
+   "stage2_overall_score": 57.9,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260502__DSC05411.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Keep_60-90/DSC05411.JPG",
+   "session": "2026-05-02",
+   "sha256": "f16982ba88deb83ad9effbc3e0e9b0cdffc8d262476910bbf569c03752803f60",
+   "stage2_overall_score": 60.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260502__DSC05395.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Keep_60-90/DSC05395.JPG",
+   "session": "2026-05-02",
+   "sha256": "c29ac27a400b9a0e12e5fb9ddbeb9b1b61fa1df62847ddce592e7c21d719527c",
+   "stage2_overall_score": 64.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260502__DSC05468.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Keep_60-90/DSC05468.JPG",
+   "session": "2026-05-02",
+   "sha256": "2be6523bb0795b927287672d22587e182395b64c63029eff72ea305ab18ff605",
+   "stage2_overall_score": 73.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260502__DSC05368.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Keep_60-90/DSC05368.JPG",
+   "session": "2026-05-02",
+   "sha256": "e7e6c354df82f20cb8ca1092e7505fcd689059b08714e39720520399fb05c694",
+   "stage2_overall_score": 76.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260502__DSC05289.JPG",
+   "source_path": "Livehouse_Archive/2026-05-02/Previews/AI_Keep_60-90/DSC05289.JPG",
+   "session": "2026-05-02",
+   "sha256": "cc03b342e4027fc8e8183cdd029d75921b728f85934e75681498c96ce62c7b24",
+   "stage2_overall_score": 77.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC05913.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC05913.jpg",
+   "session": "2026-05-09",
+   "sha256": "79921f8470fa1dc00c930c4b346a3ad96c76e612b1fadafbbb93b457ba013d9b",
+   "stage2_overall_score": 65.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC05960.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC05960.jpg",
+   "session": "2026-05-09",
+   "sha256": "077964b6c81a37fdcc6c907c38d79e8e15f3a76c3d7b38e0f1f2f69706b85a06",
+   "stage2_overall_score": 69.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC06068.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC06068.jpg",
+   "session": "2026-05-09",
+   "sha256": "e4a4489ad644df178dc1c635eea39e7d1c63db1f22a0bd6aefa9cbf0ae19e2f4",
+   "stage2_overall_score": 73.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC05925.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC05925.jpg",
+   "session": "2026-05-09",
+   "sha256": "cb9b1415453597c2e0cd1261ef0d7dc2f3fe94f0440f9c2787d84f35f5f5a45e",
+   "stage2_overall_score": 77.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC06243.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC06243.jpg",
+   "session": "2026-05-09",
+   "sha256": "377def78ead9f419b10e9a4be17fff11653514d6da5c8f8a7eb5ce504bf16da7",
+   "stage2_overall_score": 79.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC06346.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC06346.jpg",
+   "session": "2026-05-09",
+   "sha256": "0497258a98467881f4a10957e1391fb3959d5730cd9b25586be56af8232a55a7",
+   "stage2_overall_score": 81.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260509__DSC05792.jpg",
+   "source_path": "Livehouse_Archive/2026-05-09/Previews/AI_Keep_60-90/DSC05792.jpg",
+   "session": "2026-05-09",
+   "sha256": "4fadfd0e18a590449a7629639c18f217bb0999ba1af0ae37be966e1c17484061",
+   "stage2_overall_score": 83.1,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260515__DSC07692.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Trash_Below60/DSC07692.jpg",
+   "session": "2026-05-15",
+   "sha256": "fe0c71da823e03031ea5007b95986c64bf8f69b9be83172766766fbcf3c65a7d",
+   "stage2_overall_score": 55.7,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260515__DSC07100.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Keep_60-90/DSC07100.jpg",
+   "session": "2026-05-15",
+   "sha256": "9971cd9b41a21ce02f35ff3d298b48ccf2b832bc4b0fb0b0aed0049c9f1d14c6",
+   "stage2_overall_score": 70.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260515__DSC06943.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Keep_60-90/DSC06943.jpg",
+   "session": "2026-05-15",
+   "sha256": "1517e36533711e6f0581cc7d19529da39e1455242e804f1a817c2610ac5b288e",
+   "stage2_overall_score": 72.8,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260515__DSC07227.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Keep_60-90/DSC07227.jpg",
+   "session": "2026-05-15",
+   "sha256": "accae5b3f94aa5432ff49f6c7589e7a3ed12a4ab56cbe19e7f4bb70914fa97ad",
+   "stage2_overall_score": 74.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260515__DSC07048.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Keep_60-90/DSC07048.jpg",
+   "session": "2026-05-15",
+   "sha256": "ba45eb89331c6980ba23f52099e9ffdaa3f56bcf56f702b7fd9c186b26104ec5",
+   "stage2_overall_score": 75.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260515__DSC07408.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Keep_60-90/DSC07408.jpg",
+   "session": "2026-05-15",
+   "sha256": "027fbd5666cd2c016e1e7be5680a23594717b954b8bf496ad02fe8183b001d52",
+   "stage2_overall_score": 77.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260515__DSC07381.jpg",
+   "source_path": "Livehouse_Archive/2026-05-15/Previews/AI_Keep_60-90/DSC07381.jpg",
+   "session": "2026-05-15",
+   "sha256": "888039dd2b1c3dc113740c569823f32887bc3fe1a01b8cab60aa897508fee66a",
+   "stage2_overall_score": 78.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07773.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07773.jpg",
+   "session": "2026-05-21",
+   "sha256": "1a75a0c8839718926bba86c4148025c1b99b96b9d8c835b44e526b32d9f5a729",
+   "stage2_overall_score": 65.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07787.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07787.jpg",
+   "session": "2026-05-21",
+   "sha256": "03a4df4e3791a211ce2b6cf7680bf6509a45673914d46fb1c45a62df093bcbf2",
+   "stage2_overall_score": 73.8,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07726.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07726.jpg",
+   "session": "2026-05-21",
+   "sha256": "48107a159583c061d6ceb25352a3ccd4074f300887a952e4f3e990ae675e71dd",
+   "stage2_overall_score": 76.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07789.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07789.jpg",
+   "session": "2026-05-21",
+   "sha256": "91c2c699e4c830c55c92035d46b5c8358e0cecfad887ff78e7c69a284e67905e",
+   "stage2_overall_score": 78.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07953.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07953.jpg",
+   "session": "2026-05-21",
+   "sha256": "5199de5a441effbf7982ab04303c2cd863c57262c317ba2997dd1f1873e24685",
+   "stage2_overall_score": 82.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07758.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07758.jpg",
+   "session": "2026-05-21",
+   "sha256": "d692749b579817c257a9ff4ebaf226f2988e544954016355e54ef97170f45c47",
+   "stage2_overall_score": 82.2,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260521__DSC07757.jpg",
+   "source_path": "Livehouse_Archive/2026-05-21/Previews/AI_Keep_60-90/DSC07757.jpg",
+   "session": "2026-05-21",
+   "sha256": "3d7f946cbd4381e01636e7d77652d38da265817280d39b600eca645b94d0d5ef",
+   "stage2_overall_score": 84.9,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260523__DSC09807.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Trash_Below60/DSC09807.jpg",
+   "session": "2026-05-23",
+   "sha256": "0f84e67de89c126e43237cba810b0a157095b03a0b1fc451e051b03819e80e03",
+   "stage2_overall_score": 0.9,
+   "stage2_category": "trash"
+  },
+  {
+   "file": "20260523__DSC00001.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Keep_60-90/DSC00001.jpg",
+   "session": "2026-05-23",
+   "sha256": "7cd6df21af211ffe4d170886c4f0d5b70cd8a7f72899f93d887d24f37dd3f3cd",
+   "stage2_overall_score": 67.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260523__DSC09980.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Keep_60-90/DSC09980.jpg",
+   "session": "2026-05-23",
+   "sha256": "f920107aebc9809d003e8b0ca9452deec4b6b5f9251632cdeb0eb814e14e6524",
+   "stage2_overall_score": 70.4,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260523__DSC08978.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Keep_60-90/DSC08978.jpg",
+   "session": "2026-05-23",
+   "sha256": "b0a00f5c4cda3bdda6c15a2352d320e0c9db40d3e9f10374365cb465cf7a66c1",
+   "stage2_overall_score": 75.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260523__DSC08268.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Keep_60-90/DSC08268.jpg",
+   "session": "2026-05-23",
+   "sha256": "fd17a0ba49c991ed64786a2e919ac6d73211d8c0c88c78700ffb6081d96075b0",
+   "stage2_overall_score": 77.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260523__DSC09450.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Keep_60-90/DSC09450.jpg",
+   "session": "2026-05-23",
+   "sha256": "af01a38df5b45010c75765f45426538c567063a43faf6813552931d9e7deee3b",
+   "stage2_overall_score": 79.1,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260523__DSC08682.jpg",
+   "source_path": "Livehouse_Archive/2026-05-23/Previews/AI_Keep_60-90/DSC08682.jpg",
+   "session": "2026-05-23",
+   "sha256": "c797301b58d70a869746351d295088d2a2131aa0a7e83b6b3b1f4087a5d22816",
+   "stage2_overall_score": 82.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC01036.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC01036.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "2c436a0f9de4d2dccc2a7184239f0a8348c59fc1547ad49ea8868888f61f2234",
+   "stage2_overall_score": 74.8,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC01005.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC01005.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "d5ab01dfbe0865cb4e6976e4bcb2b2c0bdeed2a5251935ccf74a5b372dfa9423",
+   "stage2_overall_score": 76.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC00298.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC00298.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "17b1ab61cb17a3356fd45d27570a28694664578bced53d7c8ed6d01b9d7962f9",
+   "stage2_overall_score": 77.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC01045.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC01045.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "6d7b1d90f994902706f210b2f6284acd12c361ecbac2222b1e7e1fcf62099b52",
+   "stage2_overall_score": 80.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC00846.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC00846.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "c7d936c4016d74318bbcb6ff42c74e6795625f6416922b240b08dd2abfb07520",
+   "stage2_overall_score": 81.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC00285.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC00285.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "6986c5e2b7a5a4a510e905f53fcdf94068bbeda5860d019e400586fa310744ec",
+   "stage2_overall_score": 83.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260524Chinesefootball__DSC00920.jpg",
+   "source_path": "Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Keep_60-90/DSC00920.jpg",
+   "session": "2026-05-24_Chinesefootball",
+   "sha256": "7b45540c00e9cccf5a7abcc7db2ef7da42f4a356b22acb4fba0165f7e7bd42b9",
+   "stage2_overall_score": 84.8,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC04899.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC04899.jpg",
+   "session": "2026-06-06",
+   "sha256": "04527b14b77da78123f180b5bd1d5388845384f5f39f35b3665d16894b93d7df",
+   "stage2_overall_score": 60.6,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC05315.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC05315.jpg",
+   "session": "2026-06-06",
+   "sha256": "63d62c260e9e2fff8b7046c242c392f2940c680d70ac845563726092a8059096",
+   "stage2_overall_score": 68.0,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC04991.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC04991.jpg",
+   "session": "2026-06-06",
+   "sha256": "a71855ae11ddda8656f1010cc48734ac6bf8594a01364aa96c9caa99cb667d9f",
+   "stage2_overall_score": 71.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC04391.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC04391.jpg",
+   "session": "2026-06-06",
+   "sha256": "37ae672772f607e6b1d6cfa45b94e31344294cf992f9475dc9ee88f2a9a735a9",
+   "stage2_overall_score": 72.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC05026.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC05026.jpg",
+   "session": "2026-06-06",
+   "sha256": "8b6546ad72a6b9af130276220523b84a42a90df712b8aaaa64b5abdfc644437f",
+   "stage2_overall_score": 74.5,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC05400.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC05400.jpg",
+   "session": "2026-06-06",
+   "sha256": "c23b7bc2d1838ab6c7cdfd594c4c6ef3cad5969d00477acf0ed8b2d55a8500f3",
+   "stage2_overall_score": 77.3,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260606__DSC04278.jpg",
+   "source_path": "Livehouse_Archive/2026-06-06/Previews/AI_Keep_60-90/DSC04278.jpg",
+   "session": "2026-06-06",
+   "sha256": "ba2486e793ed7bcb71604070c2b822d67e8a924af69a29b0d4595e2beaf8bf6d",
+   "stage2_overall_score": 78.7,
+   "stage2_category": "keep"
+  },
+  {
+   "file": "20260131__DSC02841.jpg",
+   "source_path": "Livehouse_Archive/2026-01-31/Previews/DSC02841.jpg",
+   "session": "2026-01-31",
+   "sha256": "e9569ba94fdfab71f7eb2cc825a4bef0ce1ce331eafead085b864533fe7d59f3",
+   "stage2_overall_score": null,
+   "stage2_category": null
+  },
+  {
+   "file": "20260410__DSC01383.jpg",
+   "source_path": "Livehouse_Archive/2026-04-10/Previews/DSC01383.jpg",
+   "session": "2026-04-10",
+   "sha256": "fdb8f4988ff323b96a5d211174b0adf514d6b2c80b189e6c567aff66705665c0",
+   "stage2_overall_score": 47.0,
+   "stage2_category": "keep"
+  }
+ ]
+}

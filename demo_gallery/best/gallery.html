@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 优质照片 (评分 ≥ 90) - Livehouse Photography</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #764ba2;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 250px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            word-break: break-all;
+            font-size: 0.95em;
+        }
+        
+        .score-section {
+            background: #f8f8f8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .score-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .overall-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .dimensions {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .dimension {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .dimension-name {
+            flex: 1;
+        }
+        
+        .dimension-bar {
+            flex: 0 0 100px;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        
+        .dimension-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            color: #999;
+        }
+        
+        .empty-state h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="preview.html" class="back-link">← 返回预览</a>
+        
+        <div class="header">
+            <h1>🌟 优质照片 (评分 ≥ 90)</h1>
+            <p>共 2 张照片</p>
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">照片总数</div>
+                </div>
+            </div>
+        </div>
+<div class="gallery">
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="livehouse_001.jpg" alt="livehouse_001.jpg" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-name" title="livehouse_001.jpg">livehouse_001.jpg</div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">95</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                    <div class="dimension">
+                        <span class="dimension-name">主体清晰: 94/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    <div class="dimension">
+                        <span class="dimension-name">光线质量: 96/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 96%"></div>
+                        </div>
+                    </div>
+                    <div class="dimension">
+                        <span class="dimension-name">动作捕捉: 93/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 93%"></div>
+                        </div>
+                    </div>
+                    <div class="dimension">
+                        <span class="dimension-name">氛围感: 97/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 97%"></div>
+                        </div>
+                    </div>
+                    
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="livehouse_002.jpg" alt="livehouse_002.jpg" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-name" title="livehouse_002.jpg">livehouse_002.jpg</div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">92</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                    <div class="dimension">
+                        <span class="dimension-name">主体清晰: 90/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    <div class="dimension">
+                        <span class="dimension-name">光线质量: 92/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div class="dimension">
+                        <span class="dimension-name">动作捕捉: 91/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 91%"></div>
+                        </div>
+                    </div>
+                    <div class="dimension">
+                        <span class="dimension-name">氛围感: 94/100</span>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+    </div>
+</body>
+</html>
+            

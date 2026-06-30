@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>LumaKernel // 后摇审美决策</title>
+    <style>
+        body { background: #121212; color: #e0e0e0; font-family: sans-serif; padding: 20px; }
+        .photo-entry { display: flex; border: 1px solid #333; margin-bottom: 30px; background: #1a1a1a; border-radius: 4px; overflow: hidden; }
+        .photo-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        .photo-left img { max-width: 100%; max-height: 500px; object-fit: contain; }
+        .photo-right { flex: 1; padding: 20px; border-left: 1px solid #333; }
+        .total-score { font-size: 3em; color: #ff5722; font-weight: 100; }
+        .scores-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+        .score-item { background: #222; padding: 10px; text-align: center; border: 1px solid #333; }
+        .critique { font-style: italic; color: #b0b0b0; border-top: 1px solid #333; padding-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>LumaKernel // 审美画廊</h1>
+    <div id="gallery"></div>
+    <script>
+        async function load() {
+            const res = await fetch('luma_results.json');
+            const data = await res.json();
+            const container = document.getElementById('gallery');
+            data.forEach(p => {
+                let sHtml = '';
+                for (const [k, v] of Object.entries(p.scores)) {
+                    sHtml += `<div class="score-item"><div style="font-size:12px;color:#888">${k}</div><div>${v}</div></div>`;
+                }
+                container.innerHTML += `
+                    <div class="photo-entry">
+                        <div class="photo-left"><img src="photos/${p.filename}"></div>
+                        <div class="photo-right">
+                            <div style="color:#888">${p.filename}</div>
+                            <div class="total-score">${p.total_score}</div>
+                            <div class="scores-grid">${sHtml}</div>
+                            <div class="critique">【慢慢的笔记】<br>${p.critique}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+        load();
+    </script>
+</body>
+</html>

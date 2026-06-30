@@ -1,0 +1,83 @@
+{
+  "matched": 250,
+  "labels_unmatched": [],
+  "predictions_unmatched_count": 0,
+  "overall": {
+    "n": 250,
+    "spearman": 0.325831971611624,
+    "pearson": 0.7892670590154346,
+    "mae": 7.0687999999999995,
+    "rmse": 10.593643377044556
+  },
+  "per_dimension": {
+    "focus_sharpness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "exposure_control": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "noise_cleanliness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "composition_framing": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "light_color_character": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "moment_peak": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "atmosphere_impact": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "deliverable_subject": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    }
+  },
+  "macro_dim_mae": NaN,
+  "calibration": {},
+  "selection": {
+    "n": 247,
+    "n_positives": 83,
+    "mean_pred_keep": 72.8144578313253,
+    "mean_pred_discard": 66.80243902439024,
+    "score_gap": 6.01201880693506,
+    "at_k": [
+      {
+        "k": 3,
+        "precision": 0.6666666666666666,
+        "recall": 0.024096385542168676,
+        "overlap": 2
+      },
+      {
+        "k": 5,
+        "precision": 0.6,
+        "recall": 0.03614457831325301,
+        "overlap": 3
+      },
+      {
+        "k": 10,
+        "precision": 0.6,
+        "recall": 0.07228915662650602,
+        "overlap": 6
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+# Control plane: FastAPI gallery + infra API (/api/infra/*, /healthz, /metrics).
+# Same image/entrypoint as compose ("api"). Exposed on NodePort 30080 → localhost:8080
+# (mapped by deploy/k8s/kind-cluster.yaml).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: livehouse
+  labels: { app: api, livehouse.role: control-plane }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: api }
+  template:
+    metadata:
+      labels: { app: api, livehouse.role: control-plane }
+    spec:
+      initContainers:
+        - name: init-dirs
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p /data/brain /data/work /data/archive"]
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      containers:
+        - name: api
+          image: livehouse-python:local
+          imagePullPolicy: IfNotPresent
+          args: ["api"]
+          env:
+            - { name: CELERY_BROKER_URL, value: redis://redis:6379/0 }
+            - { name: CELERY_RESULT_BACKEND, value: redis://redis:6379/1 }
+            - { name: LUMA_BRAIN_DB, value: /data/brain/luma_brain.db }
+            - { name: LUMA_ARCHIVE_ROOT, value: /data/archive }
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: livehouse-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: livehouse
+spec:
+  type: NodePort
+  selector: { app: api }
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080

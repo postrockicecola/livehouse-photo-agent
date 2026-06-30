@@ -1,0 +1,13 @@
+# LumaKernel - Street Strategy
+paths:
+  source_dir: "/path/to/Pictures/Street_Shanghai"
+  work_dir: "./data/street_session"
+  model_id: "mlx-community/llava-1.5-7b-4bit-mlx"
+
+filter:
+  top_k: 50
+  sharpness_weight: 1.0
+
+ai_eval:
+  scenario: "street"
+  prompt: "评价这张街拍的叙事感、决定性瞬间和画面张力，并给出 1-10 的评分。"

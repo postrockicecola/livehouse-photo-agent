@@ -1,0 +1,32 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='820' height='460' font-family='sans-serif'>
+<rect width='820' height='460' fill='#0b0b0c'/>
+<text x='64' y='28' font-size='16' font-weight='bold' fill='#e5e7eb'>Serial vs Concurrent VLM Batch — GPU Saturation</text>
+<text x='64' y='46' font-size='11' fill='#9ca3af'>GPU source: estimate · y=GPU util % · x=seconds</text>
+<line x1='64' y1='404' x2='600' y2='404' stroke='#3f3f46'/>
+<line x1='64' y1='56' x2='64' y2='404' stroke='#3f3f46'/>
+<line x1='64' y1='404.0' x2='600' y2='404.0' stroke='#1f1f23'/>
+<text x='56' y='408.0' text-anchor='end' font-size='10' fill='#6b7280'>0</text>
+<line x1='64' y1='317.0' x2='600' y2='317.0' stroke='#1f1f23'/>
+<text x='56' y='321.0' text-anchor='end' font-size='10' fill='#6b7280'>25</text>
+<line x1='64' y1='230.0' x2='600' y2='230.0' stroke='#1f1f23'/>
+<text x='56' y='234.0' text-anchor='end' font-size='10' fill='#6b7280'>50</text>
+<line x1='64' y1='143.0' x2='600' y2='143.0' stroke='#1f1f23'/>
+<text x='56' y='147.0' text-anchor='end' font-size='10' fill='#6b7280'>75</text>
+<line x1='64' y1='56.0' x2='600' y2='56.0' stroke='#1f1f23'/>
+<text x='56' y='60.0' text-anchor='end' font-size='10' fill='#6b7280'>100</text>
+<polyline points='104.4,400.9 124.4,400.9 145.1,398.3 165.3,398.3 185.6,393.6 205.6,393.6 225.9,393.6 245.7,389.5 266.4,389.5 287.0,385.5 307.7,385.5 328.4,381.5 348.8,381.5 368.7,377.2 388.4,377.2 407.8,374.2 427.6,374.2 447.4,374.2 467.1,369.3 487.8,369.3 507.3,365.7 528.0,365.7 548.3,361.6 568.8,361.6 589.5,361.6' fill='none' stroke='#9ca3af' stroke-width='2.5'/>
+<line x1='64' y1='381.0' x2='600' y2='381.0' stroke='#9ca3af' stroke-width='1' stroke-dasharray='4 4' opacity='0.5'/>
+<polyline points='75.1,392.2 95.6,391.6 116.0,388.7 135.6,387.1 155.1,386.0 174.9,383.4 195.6,383.4' fill='none' stroke='#10b981' stroke-width='2.5'/>
+<line x1='64' y1='387.5' x2='600' y2='387.5' stroke='#10b981' stroke-width='1' stroke-dasharray='4 4' opacity='0.5'/>
+<text x='624' y='62' font-size='12' font-weight='bold' fill='#e5e7eb'>Results</text>
+<rect x='624' y='74' width='11' height='11' rx='2' fill='#9ca3af'/>
+<text x='642' y='84' font-size='12' fill='#e5e7eb'>serial (w=1)</text>
+<text x='642' y='102' font-size='11' fill='#9ca3af'>4.1s · 2.94 img/s</text>
+<text x='642' y='118' font-size='11' fill='#9ca3af'>GPU avg 7% · peak 12%</text>
+<rect x='624' y='132' width='11' height='11' rx='2' fill='#10b981'/>
+<text x='642' y='142' font-size='12' fill='#e5e7eb'>concurrent (w=4)</text>
+<text x='642' y='160' font-size='11' fill='#9ca3af'>1.0s · 11.45 img/s</text>
+<text x='642' y='176' font-size='11' fill='#9ca3af'>GPU avg 5% · peak 6%</text>
+<text x='624' y='208' font-size='13' fill='#e5e7eb'>Speedup</text>
+<text x='624' y='244' font-size='34' font-weight='bold' fill='#10b981'>3.89×</text>
+</svg>

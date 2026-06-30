@@ -1,0 +1,161 @@
+# Stage3 EVAL config — derived from livehouse.yaml with all admission gates opened
+# so every sampled image receives a full dimensional VLM score.
+#
+# Differences vs production (configs/livehouse.yaml):
+#   - Stage1/Stage2 thresholds floored: nothing is culled before Stage3.
+#   - stage2_prefilter / phash dedupe / stage3_vlm_cache disabled: every frame
+#     gets an independent prediction (burst frames are NOT score-shared).
+#   - stage3_gating omitted entirely (admit all) and strategy = full_only.
+#   - stage4_editing / vibe LLM / RAW film export disabled (irrelevant to eval).
+# Model generation params are intentionally IDENTICAL to production — this
+# evaluates the production scoring behavior, not a tuned-for-eval variant.
+#
+# Usage:
+#   python run_pipeline.py --config configs/eval_stage3.yaml \
+#       --source-dir data/eval/images --no-serve
+
+paths:
+  source_dir: "data/eval/images"
+  work_dir: "./data/livehouse_session"
+  folders:
+    best: "AI_Best_90+"
+    keep: "AI_Keep_60-90"
+    trash: "AI_Trash_Below60"
+  log_file: "aesthetic_audit.jsonl"
+  progress_file: ".processing_progress.json"
+  detailed_audit: "detailed_audit.txt"
+  selected_folder: "AI_Selected_Final"
+  manual_selected_folder: "manual_selected"
+
+# Stage1 floors opened: admit everything (eval wants VLM scores on bad frames too).
+quality_thresholds:
+  laplacian_variance_min: 0
+  laplacian_variance_slight_blur: 50
+  laplacian_variance_medium: 120
+  laplacian_variance_high: 200
+  motion_blur_ratio_threshold: 1000
+  overexposed_threshold: 1.0
+  overexposed_penalty: 0.15
+  underexposed_threshold: 1.0
+  underexposed_penalty: 0.35
+  contrast_min: 0
+  contrast_penalty: 20
+  brightness_min: 0
+  brightness_max: 255
+  edge_ratio_min: 0.0
+
+# Stage2 floors opened.
+fast_aesthetic:
+  tech_score_min: 0
+  fast_aesthetic_score_min: 0
+
+model:
+  provider: "ollama"
+  endpoint: "http://localhost:11434"
+  model_name: "llava"
+  timeout: 300
+  max_concurrent_requests: 4
+  max_inference_queue_size: 4
+  inference_batch_size: 1
+  queue_wait_timeout_seconds: 120
+  fallback_model_name: ""
+  fallback_num_predict:
+  # eval 必须可复现:A/A 实验显示 temp=0.8 时单图重测平均漂移 3.5 分、
+  # Spearman 单次运行波动 ±0.05,足以淹没 prompt 迭代的真实差异
+  temperature: 0.0
+  num_predict: 512
+  max_retries: 3
+  retry_delay: 1.0
+
+evaluation:
+  default_weights:
+    focus_sharpness: 0.125
+    exposure_control: 0.125
+    noise_cleanliness: 0.125
+    composition_framing: 0.125
+    light_color_character: 0.125
+    moment_peak: 0.125
+    atmosphere_impact: 0.125
+    deliverable_subject: 0.125
+  artistic_motion_blur_weights:
+    focus_sharpness: 0.07
+    exposure_control: 0.10
+    noise_cleanliness: 0.08
+    composition_framing: 0.12
+    light_color_character: 0.13
+    moment_peak: 0.18
+    atmosphere_impact: 0.22
+    deliverable_subject: 0.10
+  ai_weight: 0.80
+  technical_weight: 0.20
+
+classification:
+  best_threshold: 90
+  keep_threshold: 60
+  selected_threshold: 70
+
+processing:
+  max_workers: 6
+  stage12_max_workers: 8
+  enable_checkpoint: true
+  export_film_from_raw: false
+  vibe_film:
+    enabled: false
+    llm_on_miss: false
+  stage2_prefilter:
+    enabled: false
+  gallery_view_dedupe:
+    enabled: false
+  taste_profile:
+    min_liked: 5
+  stage3_vlm_cache:
+    enabled: false
+  # NOTE: stage3_gating intentionally omitted → admit all candidates to Stage3.
+  stages:
+    stage1_description: "OpenCV strict quality filtering (blur, exposure, contrast)"
+    stage2_description: "Fast aesthetic assessment (low-quality rejection)"
+    stage3_description: "Deep AI analysis (dimensional scoring)"
+
+stage3:
+  strategy: full_only
+  full_analysis_top_k: 999999
+  full_analysis_score_threshold: 0
+  fast_num_predict: 220
+
+stage4_editing:
+  enabled: false
+  num_predict: 384
+  min_score: 0
+  skip_on_fallback_defaults: true
+  skip_on_cache_hit: true
+
+observability:
+  pipeline_tracing:
+    enabled: false
+    emit_jsonl: true
+    debug: false
+    debug_image: ""
+  opentelemetry:
+    enabled: false
+    tracer_name: "livehouse.pipeline"
+
+ai_prompt: |
+  You are a professional music photographer critic evaluating Livehouse photos.
+  Score eight dimensions 0-10 with varied numbers (not flat 7,7,7,...).
+
+  1. focus_sharpness — focus/readability; intentional motion blur can still score fairly if readable.
+  2. exposure_control — exposure, highlight/shadow detail, harsh stage contrast.
+  3. noise_cleanliness — noise, banding, artifacts, mushy denoise.
+  4. composition_framing — framing, horizon, balance, accidental crops.
+  5. light_color_character — light sculpting + color mood (beyond exposure correctness).
+  6. moment_peak — decisive instant, gesture/expression peak.
+  7. atmosphere_impact — crowd/stage energy, emotional storytelling.
+  8. deliverable_subject — client-ready subject: face usable, pose, blocking/occlusion.
+
+  Livehouse: moment_peak + atmosphere_impact are crucial; do not over-penalize intentional blur.
+
+  Return compact JSON only:
+  {"focus_sharpness": <0-10>, "exposure_control": <0-10>, "noise_cleanliness": <0-10>,
+   "composition_framing": <0-10>, "light_color_character": <0-10>, "moment_peak": <0-10>,
+   "atmosphere_impact": <0-10>, "deliverable_subject": <0-10>,
+   "strongest_aspect": "<detail>", "tags": ["tag1"]}

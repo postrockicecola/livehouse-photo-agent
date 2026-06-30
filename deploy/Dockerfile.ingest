@@ -1,0 +1,31 @@
+# SD / brain ingest node (Go) — optional compose profile "ingest"
+FROM golang:1.22-bookworm AS build
+
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY *.go luma_brain_schema.sql ./
+RUN CGO_ENABLED=1 go build -o /out/ingest_worker .
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    exiftool \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=build /out/ingest_worker /usr/local/bin/ingest_worker
+COPY luma_brain_schema.sql /app/luma_brain_schema.sql
+
+ENV LUMA_REPO_ROOT=/app \
+    LUMA_ARCHIVE_ROOT=/data/archive \
+    GALLERY_HOOK=http://api:8080/api/ingest/check_new_images
+
+VOLUME ["/data/archive", "/data/brain"]
+
+# Default: idle (override in compose). Real runs pass --sd-mount.
+CMD ["sleep", "infinity"]

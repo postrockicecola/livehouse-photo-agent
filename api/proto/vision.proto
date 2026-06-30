@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package luma;
+
+message AnalysisRequest {
+  string image_path = 1;
+  string prompt = 2;
+}
+
+message AestheticScores {
+  float composition = 1;
+  float energy = 2;
+  float technical = 3;
+  float total_score = 4;
+  string reason = 5;
+  // --- 新增的艺术维度 ---
+  float emotion = 6;
+  float lighting = 7;
+  float subject = 8;
+}
+
+service VisionService {
+  rpc AnalyzeImage (AnalysisRequest) returns (AestheticScores);
+}

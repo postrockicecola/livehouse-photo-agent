@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rollout-operator
+  namespace: livehouse
+  labels:
+    app: rollout-operator
+    livehouse.role: controlplane
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: rollout-operator }
+  template:
+    metadata:
+      labels: { app: rollout-operator, livehouse.role: controlplane }
+    spec:
+      serviceAccountName: rollout-operator
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: manager
+          image: rollout-operator:local
+          imagePullPolicy: IfNotPresent
+          args: ["--leader-elect=false"]
+          ports:
+            - { name: metrics, containerPort: 8080 }
+            - { name: health, containerPort: 8081 }
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8081 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: { path: /readyz, port: 8081 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }

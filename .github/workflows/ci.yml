@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    name: Python (pytest + ruff + chaos smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      # Critical-rules-only gate: syntax errors and undefined names (F821-class bugs).
+      - run: ruff check --select E9,F63,F7,F82 --exclude archive .
+      # External-service tests (Ollama / Redis) are marker-excluded; see pytest.ini.
+      - run: pytest -m "not requires_ollama and not requires_redis" -q
+      # Reliability scenarios on an isolated temp SQLite (no broker needed).
+      - run: python scripts/chaos_runtime.py --report-dir reports/ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reliability-report
+          path: reports/ci/
+          if-no-files-found: ignore
+
+  web:
+    name: Web (tsc + next build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm build
+
+  go:
+    name: Go (vet + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go build ./...

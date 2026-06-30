@@ -1,0 +1,241 @@
+# Livehouse — single-host "cluster" (Compose service DNS, shared volumes, multiple workers).
+#
+# Quick start (from repo root):
+#   cp deploy/.env.example deploy/.env
+#   docker compose -f deploy/docker-compose.yml up --build
+#
+# With SD ingest node:
+#   SD_MOUNT=/Volumes/YOUR_SD docker compose -f deploy/docker-compose.yml --profile ingest up --build
+#
+# Scale compute workers (same pool):
+#   docker compose -f deploy/docker-compose.yml up --build --scale celery-worker-general=2
+
+name: livehouse
+
+networks:
+  livehouse-net:
+    driver: bridge
+
+volumes:
+  livehouse-brain:
+  livehouse-work:
+  ollama-models:
+  vllm-cache:
+
+services:
+  redis:
+    image: redis:7-alpine
+    networks: [livehouse-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.python
+    image: livehouse-python:local
+    command: ["api"]
+    networks: [livehouse-net]
+    ports:
+      - "${FASTAPI_PORT:-8080}:8080"
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      LUMA_BRAIN_DB: /data/brain/luma_brain.db
+      LUMA_ARCHIVE_ROOT: /data/archive
+      LIVEHOUSE_CONFIG: configs/livehouse.docker.yaml
+      LIVEHOUSE_GALLERY_PREVIEWS_DIR: ${LIVEHOUSE_GALLERY_PREVIEWS_DIR:-}
+      LIVEHOUSE_INGEST_TOKEN: ${LIVEHOUSE_INGEST_TOKEN:-}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+    volumes:
+      - livehouse-brain:/data/brain
+      - livehouse-work:/data/work
+      - ${LUMA_ARCHIVE_HOST_PATH:-../Livehouse_Archive}:/data/archive
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      livehouse.role: control-plane
+
+  celery-beat:
+    image: livehouse-python:local
+    command: ["celery-beat"]
+    networks: [livehouse-net]
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      LUMA_BRAIN_DB: /data/brain/luma_brain.db
+      LIVEHOUSE_CONFIG: configs/livehouse.docker.yaml
+    volumes:
+      - livehouse-brain:/data/brain
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+    labels:
+      livehouse.role: scheduler
+
+  celery-worker-general:
+    image: livehouse-python:local
+    command: ["celery-worker"]
+    networks: [livehouse-net]
+    hostname: celery-general
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      LUMA_BRAIN_DB: /data/brain/luma_brain.db
+      LUMA_ARCHIVE_ROOT: /data/archive
+      LIVEHOUSE_CONFIG: configs/livehouse.docker.yaml
+      LIVEHOUSE_EXECUTOR_CLASS: general
+      LIVEHOUSE_GALLERY_PREVIEWS_DIR: ${LIVEHOUSE_GALLERY_PREVIEWS_DIR:-}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+    volumes:
+      - livehouse-brain:/data/brain
+      - livehouse-work:/data/work
+      - ${LUMA_ARCHIVE_HOST_PATH:-../Livehouse_Archive}:/data/archive
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+    labels:
+      livehouse.role: compute
+      livehouse.pool: general
+
+  celery-worker-vlm:
+    image: livehouse-python:local
+    command: ["celery-worker"]
+    networks: [livehouse-net]
+    hostname: celery-vlm
+    profiles: [cluster]
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      LUMA_BRAIN_DB: /data/brain/luma_brain.db
+      LUMA_ARCHIVE_ROOT: /data/archive
+      LIVEHOUSE_CONFIG: configs/livehouse.docker.yaml
+      LIVEHOUSE_EXECUTOR_CLASS: vlm
+      LIVEHOUSE_GALLERY_PREVIEWS_DIR: ${LIVEHOUSE_GALLERY_PREVIEWS_DIR:-}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+    volumes:
+      - livehouse-brain:/data/brain
+      - livehouse-work:/data/work
+      - ${LUMA_ARCHIVE_HOST_PATH:-../Livehouse_Archive}:/data/archive
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+    labels:
+      livehouse.role: compute
+      livehouse.pool: vlm
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    networks: [livehouse-net]
+    ports:
+      - "${NEXT_PORT:-3000}:3000"
+    environment:
+      GALLERY_API_ORIGIN: http://api:8080
+    depends_on:
+      - api
+    restart: unless-stopped
+    labels:
+      livehouse.role: edge
+
+  ingest:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.ingest
+    profiles: [ingest]
+    networks: [livehouse-net]
+    environment:
+      GALLERY_HOOK: http://api:8080/api/ingest/check_new_images
+      LUMA_ARCHIVE_ROOT: /data/archive
+      DEVICE_ID: ${DEVICE_ID:-docker-ingest-1}
+    volumes:
+      - livehouse-brain:/data/brain
+      - ${LUMA_ARCHIVE_HOST_PATH:-../Livehouse_Archive}:/data/archive
+      - ${SD_MOUNT:-/tmp/livehouse-sd-empty}:/sd:ro
+    depends_on:
+      api:
+        condition: service_started
+    command:
+      - ingest_worker
+      - --sd-mount
+      - /sd
+      - --archive-root
+      - /data/archive
+      - --repo-root
+      - /app
+      - --brain-db
+      - /data/brain/luma_brain.db
+      - --device-id
+      - ${DEVICE_ID:-docker-ingest-1}
+      - --gallery-hook
+      - http://api:8080/api/ingest/check_new_images
+      - --workers
+      - "4"
+    restart: unless-stopped
+    labels:
+      livehouse.role: ingest-edge
+
+  # Optional: run Ollama inside the compose network (heavy). Default: host Ollama via host.docker.internal.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: [ollama]
+    networks: [livehouse-net]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    labels:
+      livehouse.role: inference
+
+  # Optional: OpenAI-compatible vLLM server (continuous batching, GPU). Requires NVIDIA runtime.
+  # Point the app at it with: model.provider=vllm + endpoint=http://vllm:8000 (see configs/livehouse.yaml).
+  #   docker compose -f deploy/docker-compose.yml --profile vllm up --build
+  vllm:
+    image: vllm/vllm-openai:latest
+    profiles: [vllm]
+    networks: [livehouse-net]
+    ports:
+      - "${VLLM_PORT:-8000}:8000"
+    volumes:
+      - vllm-cache:/root/.cache/huggingface
+    command:
+      - --model
+      - ${VLLM_MODEL:-Qwen/Qwen2-VL-7B-Instruct}
+      - --port
+      - "8000"
+      - --max-model-len
+      - "${VLLM_MAX_MODEL_LEN:-8192}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    labels:
+      livehouse.role: inference
+      livehouse.backend: vllm

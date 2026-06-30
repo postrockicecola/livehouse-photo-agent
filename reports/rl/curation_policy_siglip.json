@@ -1,0 +1,984 @@
+{
+  "pool_size": 250,
+  "human_keepers": 83,
+  "budget": 40,
+  "reference_arms": {
+    "heuristic_fast_score": 0.1566,
+    "random": 0.0964,
+    "oracle_by_human_overall": 0.4578
+  },
+  "training": {
+    "feature_keys": [
+      "fast_score",
+      "siglip_rank"
+    ],
+    "init_greedy_recall": 0.1566,
+    "final_greedy_recall": 0.2771,
+    "final_weights": [
+      0.8833,
+      3.1331
+    ],
+    "history": [
+      {
+        "iteration": 1,
+        "reward_mean": 0.3688,
+        "recall_mean": 0.1777,
+        "baseline": 0.3688,
+        "grad_norm": 0.10599,
+        "weights": [
+          1.0015,
+          0.0636
+        ],
+        "greedy_recall": 0.1687
+      },
+      {
+        "iteration": 2,
+        "reward_mean": 0.3656,
+        "recall_mean": 0.1762,
+        "baseline": 0.3684,
+        "grad_norm": 0.11331,
+        "weights": [
+          0.9952,
+          0.1313
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 3,
+        "reward_mean": 0.3812,
+        "recall_mean": 0.1837,
+        "baseline": 0.3697,
+        "grad_norm": 0.10108,
+        "weights": [
+          0.9991,
+          0.1918
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 4,
+        "reward_mean": 0.3734,
+        "recall_mean": 0.18,
+        "baseline": 0.3701,
+        "grad_norm": 0.1071,
+        "weights": [
+          0.9929,
+          0.2558
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 5,
+        "reward_mean": 0.3469,
+        "recall_mean": 0.1672,
+        "baseline": 0.3678,
+        "grad_norm": 0.10108,
+        "weights": [
+          1.0078,
+          0.3146
+        ],
+        "greedy_recall": 0.2048
+      },
+      {
+        "iteration": 6,
+        "reward_mean": 0.3891,
+        "recall_mean": 0.1875,
+        "baseline": 0.3699,
+        "grad_norm": 0.13529,
+        "weights": [
+          1.0075,
+          0.3957
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 7,
+        "reward_mean": 0.3875,
+        "recall_mean": 0.1867,
+        "baseline": 0.3717,
+        "grad_norm": 0.10095,
+        "weights": [
+          1.0075,
+          0.4563
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 8,
+        "reward_mean": 0.4109,
+        "recall_mean": 0.198,
+        "baseline": 0.3756,
+        "grad_norm": 0.09562,
+        "weights": [
+          1.0013,
+          0.5133
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 9,
+        "reward_mean": 0.4156,
+        "recall_mean": 0.2003,
+        "baseline": 0.3796,
+        "grad_norm": 0.12837,
+        "weights": [
+          0.9959,
+          0.5902
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 10,
+        "reward_mean": 0.4,
+        "recall_mean": 0.1928,
+        "baseline": 0.3816,
+        "grad_norm": 0.09539,
+        "weights": [
+          0.9977,
+          0.6474
+        ],
+        "greedy_recall": 0.2289
+      },
+      {
+        "iteration": 11,
+        "reward_mean": 0.3984,
+        "recall_mean": 0.192,
+        "baseline": 0.3833,
+        "grad_norm": 0.10953,
+        "weights": [
+          1.0007,
+          0.713
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 12,
+        "reward_mean": 0.4313,
+        "recall_mean": 0.2078,
+        "baseline": 0.3881,
+        "grad_norm": 0.09843,
+        "weights": [
+          0.9982,
+          0.772
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 13,
+        "reward_mean": 0.4219,
+        "recall_mean": 0.2033,
+        "baseline": 0.3915,
+        "grad_norm": 0.06785,
+        "weights": [
+          0.9943,
+          0.8126
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 14,
+        "reward_mean": 0.4156,
+        "recall_mean": 0.2003,
+        "baseline": 0.3939,
+        "grad_norm": 0.08932,
+        "weights": [
+          0.9907,
+          0.866
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 15,
+        "reward_mean": 0.4188,
+        "recall_mean": 0.2018,
+        "baseline": 0.3964,
+        "grad_norm": 0.08793,
+        "weights": [
+          0.9971,
+          0.9184
+        ],
+        "greedy_recall": 0.241
+      },
+      {
+        "iteration": 16,
+        "reward_mean": 0.4406,
+        "recall_mean": 0.2123,
+        "baseline": 0.4008,
+        "grad_norm": 0.07913,
+        "weights": [
+          0.9987,
+          0.9658
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 17,
+        "reward_mean": 0.4266,
+        "recall_mean": 0.2056,
+        "baseline": 0.4034,
+        "grad_norm": 0.0944,
+        "weights": [
+          0.9998,
+          1.0225
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 18,
+        "reward_mean": 0.4625,
+        "recall_mean": 0.2229,
+        "baseline": 0.4093,
+        "grad_norm": 0.06947,
+        "weights": [
+          1.0031,
+          1.064
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 19,
+        "reward_mean": 0.4328,
+        "recall_mean": 0.2086,
+        "baseline": 0.4116,
+        "grad_norm": 0.08788,
+        "weights": [
+          1.0017,
+          1.1167
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 20,
+        "reward_mean": 0.4344,
+        "recall_mean": 0.2093,
+        "baseline": 0.4139,
+        "grad_norm": 0.07546,
+        "weights": [
+          0.9984,
+          1.1619
+        ],
+        "greedy_recall": 0.241
+      },
+      {
+        "iteration": 21,
+        "reward_mean": 0.4406,
+        "recall_mean": 0.2123,
+        "baseline": 0.4166,
+        "grad_norm": 0.09645,
+        "weights": [
+          1.0096,
+          1.2186
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 22,
+        "reward_mean": 0.4562,
+        "recall_mean": 0.2199,
+        "baseline": 0.4206,
+        "grad_norm": 0.06239,
+        "weights": [
+          1.0171,
+          1.2553
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 23,
+        "reward_mean": 0.4734,
+        "recall_mean": 0.2282,
+        "baseline": 0.4258,
+        "grad_norm": 0.07909,
+        "weights": [
+          1.0156,
+          1.3028
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 24,
+        "reward_mean": 0.4516,
+        "recall_mean": 0.2176,
+        "baseline": 0.4284,
+        "grad_norm": 0.06332,
+        "weights": [
+          1.0108,
+          1.3404
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 25,
+        "reward_mean": 0.4562,
+        "recall_mean": 0.2199,
+        "baseline": 0.4312,
+        "grad_norm": 0.0739,
+        "weights": [
+          1.0097,
+          1.3848
+        ],
+        "greedy_recall": 0.253
+      },
+      {
+        "iteration": 26,
+        "reward_mean": 0.4797,
+        "recall_mean": 0.2312,
+        "baseline": 0.436,
+        "grad_norm": 0.07693,
+        "weights": [
+          1.0116,
+          1.4309
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 27,
+        "reward_mean": 0.4875,
+        "recall_mean": 0.2349,
+        "baseline": 0.4412,
+        "grad_norm": 0.08099,
+        "weights": [
+          1.0052,
+          1.4791
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 28,
+        "reward_mean": 0.4391,
+        "recall_mean": 0.2116,
+        "baseline": 0.441,
+        "grad_norm": 0.08229,
+        "weights": [
+          1.0047,
+          1.5284
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 29,
+        "reward_mean": 0.4703,
+        "recall_mean": 0.2267,
+        "baseline": 0.4439,
+        "grad_norm": 0.08008,
+        "weights": [
+          1.0009,
+          1.5763
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 30,
+        "reward_mean": 0.4813,
+        "recall_mean": 0.2319,
+        "baseline": 0.4476,
+        "grad_norm": 0.06896,
+        "weights": [
+          0.9943,
+          1.6172
+        ],
+        "greedy_recall": 0.2651
+      },
+      {
+        "iteration": 31,
+        "reward_mean": 0.4797,
+        "recall_mean": 0.2312,
+        "baseline": 0.4509,
+        "grad_norm": 0.05946,
+        "weights": [
+          0.9943,
+          1.6528
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 32,
+        "reward_mean": 0.4969,
+        "recall_mean": 0.2395,
+        "baseline": 0.4555,
+        "grad_norm": 0.05739,
+        "weights": [
+          0.9931,
+          1.6873
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 33,
+        "reward_mean": 0.4766,
+        "recall_mean": 0.2297,
+        "baseline": 0.4576,
+        "grad_norm": 0.0787,
+        "weights": [
+          0.9857,
+          1.7339
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 34,
+        "reward_mean": 0.5,
+        "recall_mean": 0.241,
+        "baseline": 0.4618,
+        "grad_norm": 0.06948,
+        "weights": [
+          0.979,
+          1.775
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 35,
+        "reward_mean": 0.4781,
+        "recall_mean": 0.2304,
+        "baseline": 0.4634,
+        "grad_norm": 0.07463,
+        "weights": [
+          0.9689,
+          1.8187
+        ],
+        "greedy_recall": 0.2771
+      },
+      {
+        "iteration": 36,
+        "reward_mean": 0.4875,
+        "recall_mean": 0.2349,
+        "baseline": 0.4658,
+        "grad_norm": 0.06962,
+        "weights": [
+          0.9566,
+          1.8586
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 37,
+        "reward_mean": 0.5,
+        "recall_mean": 0.241,
+        "baseline": 0.4693,
+        "grad_norm": 0.06165,
+        "weights": [
+          0.9574,
+          1.8956
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 38,
+        "reward_mean": 0.4422,
+        "recall_mean": 0.2131,
+        "baseline": 0.4666,
+        "grad_norm": 0.08132,
+        "weights": [
+          0.9551,
+          1.9443
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 39,
+        "reward_mean": 0.5016,
+        "recall_mean": 0.2417,
+        "baseline": 0.4701,
+        "grad_norm": 0.06262,
+        "weights": [
+          0.9533,
+          1.9818
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 40,
+        "reward_mean": 0.5016,
+        "recall_mean": 0.2417,
+        "baseline": 0.4732,
+        "grad_norm": 0.06423,
+        "weights": [
+          0.9468,
+          2.0198
+        ],
+        "greedy_recall": 0.2771
+      },
+      {
+        "iteration": 41,
+        "reward_mean": 0.5,
+        "recall_mean": 0.241,
+        "baseline": 0.4759,
+        "grad_norm": 0.06484,
+        "weights": [
+          0.9395,
+          2.058
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 42,
+        "reward_mean": 0.5016,
+        "recall_mean": 0.2417,
+        "baseline": 0.4785,
+        "grad_norm": 0.05558,
+        "weights": [
+          0.9418,
+          2.0913
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 43,
+        "reward_mean": 0.5094,
+        "recall_mean": 0.2455,
+        "baseline": 0.4815,
+        "grad_norm": 0.04178,
+        "weights": [
+          0.9391,
+          2.1162
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 44,
+        "reward_mean": 0.5266,
+        "recall_mean": 0.2538,
+        "baseline": 0.486,
+        "grad_norm": 0.05427,
+        "weights": [
+          0.9331,
+          2.1482
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 45,
+        "reward_mean": 0.5203,
+        "recall_mean": 0.2508,
+        "baseline": 0.4895,
+        "grad_norm": 0.04477,
+        "weights": [
+          0.9273,
+          2.1745
+        ],
+        "greedy_recall": 0.2771
+      },
+      {
+        "iteration": 46,
+        "reward_mean": 0.4906,
+        "recall_mean": 0.2364,
+        "baseline": 0.4896,
+        "grad_norm": 0.04165,
+        "weights": [
+          0.9316,
+          2.1991
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 47,
+        "reward_mean": 0.5109,
+        "recall_mean": 0.2462,
+        "baseline": 0.4917,
+        "grad_norm": 0.04841,
+        "weights": [
+          0.9368,
+          2.2277
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 48,
+        "reward_mean": 0.5,
+        "recall_mean": 0.241,
+        "baseline": 0.4926,
+        "grad_norm": 0.04421,
+        "weights": [
+          0.9352,
+          2.2542
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 49,
+        "reward_mean": 0.5203,
+        "recall_mean": 0.2508,
+        "baseline": 0.4953,
+        "grad_norm": 0.05703,
+        "weights": [
+          0.9285,
+          2.2877
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 50,
+        "reward_mean": 0.5203,
+        "recall_mean": 0.2508,
+        "baseline": 0.4978,
+        "grad_norm": 0.04638,
+        "weights": [
+          0.9302,
+          2.3155
+        ],
+        "greedy_recall": 0.2771
+      },
+      {
+        "iteration": 51,
+        "reward_mean": 0.5047,
+        "recall_mean": 0.2432,
+        "baseline": 0.4985,
+        "grad_norm": 0.05554,
+        "weights": [
+          0.9221,
+          2.3478
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 52,
+        "reward_mean": 0.5312,
+        "recall_mean": 0.256,
+        "baseline": 0.5018,
+        "grad_norm": 0.04561,
+        "weights": [
+          0.921,
+          2.3751
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 53,
+        "reward_mean": 0.525,
+        "recall_mean": 0.253,
+        "baseline": 0.5041,
+        "grad_norm": 0.06774,
+        "weights": [
+          0.9174,
+          2.4156
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 54,
+        "reward_mean": 0.5203,
+        "recall_mean": 0.2508,
+        "baseline": 0.5057,
+        "grad_norm": 0.05468,
+        "weights": [
+          0.9136,
+          2.4482
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 55,
+        "reward_mean": 0.5094,
+        "recall_mean": 0.2455,
+        "baseline": 0.5061,
+        "grad_norm": 0.04522,
+        "weights": [
+          0.917,
+          2.4751
+        ],
+        "greedy_recall": 0.2892
+      },
+      {
+        "iteration": 56,
+        "reward_mean": 0.5062,
+        "recall_mean": 0.244,
+        "baseline": 0.5061,
+        "grad_norm": 0.0475,
+        "weights": [
+          0.9131,
+          2.5034
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 57,
+        "reward_mean": 0.5094,
+        "recall_mean": 0.2455,
+        "baseline": 0.5064,
+        "grad_norm": 0.04812,
+        "weights": [
+          0.9161,
+          2.5321
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 58,
+        "reward_mean": 0.5141,
+        "recall_mean": 0.2477,
+        "baseline": 0.5072,
+        "grad_norm": 0.04969,
+        "weights": [
+          0.9084,
+          2.5609
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 59,
+        "reward_mean": 0.5609,
+        "recall_mean": 0.2703,
+        "baseline": 0.5126,
+        "grad_norm": 0.04041,
+        "weights": [
+          0.9078,
+          2.5851
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 60,
+        "reward_mean": 0.5109,
+        "recall_mean": 0.2462,
+        "baseline": 0.5124,
+        "grad_norm": 0.05386,
+        "weights": [
+          0.9128,
+          2.6171
+        ],
+        "greedy_recall": 0.2892
+      },
+      {
+        "iteration": 61,
+        "reward_mean": 0.5406,
+        "recall_mean": 0.2605,
+        "baseline": 0.5152,
+        "grad_norm": 0.05166,
+        "weights": [
+          0.9087,
+          2.6478
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 62,
+        "reward_mean": 0.5312,
+        "recall_mean": 0.256,
+        "baseline": 0.5168,
+        "grad_norm": 0.03273,
+        "weights": [
+          0.9128,
+          2.667
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 63,
+        "reward_mean": 0.5359,
+        "recall_mean": 0.2583,
+        "baseline": 0.5187,
+        "grad_norm": 0.04059,
+        "weights": [
+          0.9093,
+          2.6911
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 64,
+        "reward_mean": 0.5078,
+        "recall_mean": 0.2447,
+        "baseline": 0.5176,
+        "grad_norm": 0.05372,
+        "weights": [
+          0.9115,
+          2.7233
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 65,
+        "reward_mean": 0.5109,
+        "recall_mean": 0.2462,
+        "baseline": 0.517,
+        "grad_norm": 0.04853,
+        "weights": [
+          0.9138,
+          2.7523
+        ],
+        "greedy_recall": 0.2892
+      },
+      {
+        "iteration": 66,
+        "reward_mean": 0.5172,
+        "recall_mean": 0.2492,
+        "baseline": 0.517,
+        "grad_norm": 0.04737,
+        "weights": [
+          0.9072,
+          2.78
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 67,
+        "reward_mean": 0.5156,
+        "recall_mean": 0.2485,
+        "baseline": 0.5169,
+        "grad_norm": 0.04839,
+        "weights": [
+          0.9075,
+          2.809
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 68,
+        "reward_mean": 0.5109,
+        "recall_mean": 0.2462,
+        "baseline": 0.5163,
+        "grad_norm": 0.06001,
+        "weights": [
+          0.9032,
+          2.8447
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 69,
+        "reward_mean": 0.5188,
+        "recall_mean": 0.25,
+        "baseline": 0.5165,
+        "grad_norm": 0.04039,
+        "weights": [
+          0.8965,
+          2.868
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 70,
+        "reward_mean": 0.5328,
+        "recall_mean": 0.2568,
+        "baseline": 0.5181,
+        "grad_norm": 0.03254,
+        "weights": [
+          0.8963,
+          2.8876
+        ],
+        "greedy_recall": 0.2771
+      },
+      {
+        "iteration": 71,
+        "reward_mean": 0.525,
+        "recall_mean": 0.253,
+        "baseline": 0.5188,
+        "grad_norm": 0.04222,
+        "weights": [
+          0.896,
+          2.9129
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 72,
+        "reward_mean": 0.5172,
+        "recall_mean": 0.2492,
+        "baseline": 0.5187,
+        "grad_norm": 0.04629,
+        "weights": [
+          0.8937,
+          2.9406
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 73,
+        "reward_mean": 0.5125,
+        "recall_mean": 0.247,
+        "baseline": 0.5181,
+        "grad_norm": 0.06249,
+        "weights": [
+          0.888,
+          2.9776
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 74,
+        "reward_mean": 0.5219,
+        "recall_mean": 0.2515,
+        "baseline": 0.5184,
+        "grad_norm": 0.03331,
+        "weights": [
+          0.8897,
+          2.9975
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 75,
+        "reward_mean": 0.5172,
+        "recall_mean": 0.2492,
+        "baseline": 0.5183,
+        "grad_norm": 0.04569,
+        "weights": [
+          0.8972,
+          3.0239
+        ],
+        "greedy_recall": 0.2771
+      },
+      {
+        "iteration": 76,
+        "reward_mean": 0.5391,
+        "recall_mean": 0.2598,
+        "baseline": 0.5204,
+        "grad_norm": 0.03682,
+        "weights": [
+          0.8977,
+          3.046
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 77,
+        "reward_mean": 0.5328,
+        "recall_mean": 0.2568,
+        "baseline": 0.5216,
+        "grad_norm": 0.0343,
+        "weights": [
+          0.8898,
+          3.065
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 78,
+        "reward_mean": 0.5375,
+        "recall_mean": 0.259,
+        "baseline": 0.5232,
+        "grad_norm": 0.03512,
+        "weights": [
+          0.8974,
+          3.0846
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 79,
+        "reward_mean": 0.5453,
+        "recall_mean": 0.2628,
+        "baseline": 0.5254,
+        "grad_norm": 0.04257,
+        "weights": [
+          0.8889,
+          3.1087
+        ],
+        "greedy_recall": null
+      },
+      {
+        "iteration": 80,
+        "reward_mean": 0.525,
+        "recall_mean": 0.253,
+        "baseline": 0.5254,
+        "grad_norm": 0.04171,
+        "weights": [
+          0.8833,
+          3.1331
+        ],
+        "greedy_recall": 0.2771
+      }
+    ]
+  }
+}

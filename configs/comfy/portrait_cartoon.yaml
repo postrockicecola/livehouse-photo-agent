@@ -1,0 +1,46 @@
+# Local ComfyUI — personal portrait → cartoon (SD 1.5 img2img).
+# 安装 / checkpoint：见 GUIDE_STEP_BY_STEP.md
+# 改用 FLUX：见 GUIDE_FLUX_STEP_BY_STEP.md，并 export LIVEHOUSE_PORTRAIT_CONFIG=configs/comfy/portrait_cartoon_flux.yaml
+
+backend: sd15_img2img
+# Replace workflow_path with your exported API workflow (InstantID / IP-Adapter) when ready.
+
+base_url: "http://127.0.0.1:8188"
+workflow_path: "configs/comfy/workflows/portrait_cartoon.template.json"
+timeout_seconds: 1200  # 20 min — Mac MPS img2img can exceed 10 min
+poll_interval_seconds: 2
+
+# Longest side sent to ComfyUI (Mac MPS img2img OOM above ~1MP on SD1.5).
+max_reference_long_edge: 768
+
+# Prefer anime-tuned SD1.5 checkpoints when available (e.g. counterfeitV30, anything-v5).
+checkpoint_name: "v1-5-pruned-emaonly.safetensors"
+
+# Node ids in workflow JSON (must match your exported workflow if you change the file)
+nodes:
+  load_image: "8"
+  load_image_input: "image"
+  positive_prompt: "2"
+  positive_prompt_input: "text"
+  negative_prompt: "3"
+  negative_prompt_input: "text"
+  ksampler: "5"
+  seed_input: "seed"
+  denoise_input: "denoise"
+
+# Optional fixed seed for every job in a series (page can override). null = random unless page locks seed.
+style_seed:
+
+defaults:
+  steps: 28
+  cfg: 7.0
+  denoise: 0.68
+  sampler_name: "euler"
+  scheduler: "normal"
+
+# SD 1.5 CLIP is English-first; user prompt = scene/action only (anime style locked below).
+negative_prompt: "nsfw, nude, naked, topless, lingerie, bikini, underwear, cleavage, exposed skin, sexual, erotic, lewd, pornographic, realistic photo, photorealistic, 3d render, abstract, surreal, messy brush strokes, low quality, blurry, deformed, bad anatomy, extra limbs, duplicate face, watermark, text"
+
+# Anime 2D style lock — user prompt only needs scene + action (e.g. jazz dance in studio).
+prompt_prefix: "anime style, 2D illustration, cel shading, clean line art, vibrant colors, sfw, family friendly, "
+prompt_suffix: ", fully clothed, modest dancewear, appropriate attire, sharp focus, coherent anatomy, anime character, high quality"

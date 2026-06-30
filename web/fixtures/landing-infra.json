@@ -1,0 +1,19 @@
+{
+  "metrics": {
+    "queue_depth": 3,
+    "workers_online": 4,
+    "workers_total": 6,
+    "retry_pending": 2,
+    "recovery_requeues": 17,
+    "pipeline_active": 5,
+    "monitoring_snapshots": 1284,
+    "dead_letter": 1
+  },
+  "flow": [
+    { "id": 1, "job_id": 1842, "from_status": "FAILED_RETRYABLE", "to_status": "QUEUED", "created_at": null },
+    { "id": 2, "job_id": 1842, "from_status": "QUEUED", "to_status": "CLAIMED", "created_at": null },
+    { "id": 3, "job_id": 1842, "from_status": "CLAIMED", "to_status": "INFERENCING", "created_at": null },
+    { "id": 4, "job_id": 1842, "from_status": "INFERENCING", "to_status": "SUCCEEDED", "created_at": null },
+    { "id": 5, "job_id": 1851, "from_status": "QUEUED", "to_status": "CLAIMED", "created_at": null }
+  ]
+}

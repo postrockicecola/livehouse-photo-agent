@@ -1,0 +1,48 @@
+{
+  "metrics": {
+    "steps": 19,
+    "inferences_used": 6,
+    "max_inferences": 6,
+    "budget_exhausted": true,
+    "escalations": 2,
+    "llm_fallback_calls": 3,
+    "llm_decision_rate": 0.4,
+    "candidates_total": 12,
+    "candidates_analyzed": 3,
+    "selected_count": 3,
+    "action_counts": {
+      "inspect": 12,
+      "analyze": 6,
+      "finalize": 1
+    },
+    "planner_source_counts": {
+      "auto_inspect": 12,
+      "llm": 2,
+      "reflection": 2,
+      "llm_fallback": 3
+    }
+  },
+  "selected": [
+    {
+      "image_id": "20260131__DSC02848.jpg",
+      "score": 76.625,
+      "confidence": 0.92,
+      "tier": "full",
+      "escalated": true
+    },
+    {
+      "image_id": "20260131__DSC02829.jpg",
+      "score": 73.375,
+      "confidence": 0.92,
+      "tier": "fast",
+      "escalated": false
+    },
+    {
+      "image_id": "20260130__DSC02563.jpg",
+      "score": 72.125,
+      "confidence": 0.92,
+      "tier": "fast",
+      "escalated": true
+    }
+  ]
+}

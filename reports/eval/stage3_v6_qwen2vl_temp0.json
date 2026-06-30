@@ -1,0 +1,135 @@
+{
+  "matched": 250,
+  "labels_unmatched": [],
+  "predictions_unmatched_count": 0,
+  "overall": {
+    "n": 250,
+    "spearman": 0.36248160609111757,
+    "pearson": 0.8425757990990804,
+    "mae": 6.090800000000001,
+    "rmse": 8.659272486762385
+  },
+  "per_dimension": {
+    "focus_sharpness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "exposure_control": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "noise_cleanliness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "composition_framing": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "light_color_character": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "moment_peak": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "atmosphere_impact": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "deliverable_subject": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    }
+  },
+  "macro_dim_mae": NaN,
+  "calibration": {},
+  "selection": {
+    "n": 247,
+    "n_positives": 83,
+    "mean_pred_keep": 72.91204819277107,
+    "mean_pred_discard": 68.05426829268292,
+    "score_gap": 4.857779900088147,
+    "at_k": [
+      {
+        "k": 5,
+        "precision": 0.4,
+        "recall": 0.024096385542168676,
+        "overlap": 2
+      },
+      {
+        "k": 10,
+        "precision": 0.4,
+        "recall": 0.04819277108433735,
+        "overlap": 4
+      },
+      {
+        "k": 20,
+        "precision": 0.55,
+        "recall": 0.13253012048192772,
+        "overlap": 11
+      },
+      {
+        "k": 30,
+        "precision": 0.43333333333333335,
+        "recall": 0.1566265060240964,
+        "overlap": 13
+      }
+    ]
+  },
+  "bias": {
+    "n": 250,
+    "mean_bias": -1.349999999999998,
+    "std_bias": 8.553391140360647,
+    "median_bias": -1.6499999999999986,
+    "pct_overscored": 42.0,
+    "pct_underscored": 56.8
+  },
+  "quintile_calibration": [
+    {
+      "quintile": 1,
+      "range": "0–70",
+      "n": 47,
+      "human_mean": 48.191489361702125,
+      "model_mean": 54.52127659574468,
+      "bias_mean": 6.329787234042552,
+      "bias_std": 12.03420506074632
+    },
+    {
+      "quintile": 3,
+      "range": "70–75",
+      "n": 54,
+      "human_mean": 70.0,
+      "model_mean": 72.26296296296297,
+      "bias_mean": 2.2629629629629657,
+      "bias_std": 4.4044714777857585
+    },
+    {
+      "quintile": 4,
+      "range": "75–80",
+      "n": 66,
+      "human_mean": 75.42424242424242,
+      "model_mean": 74.10151515151514,
+      "bias_mean": -1.3227272727272699,
+      "bias_std": 4.050731151905023
+    },
+    {
+      "quintile": 5,
+      "range": "80–88",
+      "n": 83,
+      "human_mean": 81.3012048192771,
+      "model_mean": 73.2301204819277,
+      "bias_mean": -8.071084337349397,
+      "bias_std": 5.061847134650944
+    }
+  ]
+}

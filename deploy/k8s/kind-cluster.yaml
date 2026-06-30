@@ -1,0 +1,18 @@
+# kind cluster for the Livehouse worker-pool + KEDA autoscaling demo.
+# Single node is enough — KEDA scales *pods on one node*, which is exactly what a
+# 24GB Mac mini can host (inference stays on the host; the cluster only runs the
+# CPU control plane + Celery workers).
+#
+#   kind create cluster --name livehouse --config deploy/k8s/kind-cluster.yaml
+#
+# The api NodePort (30080) is mapped to localhost:8080 so you can curl /metrics
+# and /api/infra/* from the Mac without port-forwarding.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: livehouse
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        protocol: TCP

@@ -1,0 +1,13 @@
+{
+  "sessions_total": 50,
+  "photos_total": 27000,
+  "analyzed_photos_total": 8000,
+  "exported_photos_total": 573,
+  "avg_processing_sec": 2.4,
+  "auto_reject_rate_pct": 71.0,
+  "average_keep_rate_pct": 12.0,
+  "total_runtime_sec": 198000,
+  "total_runtime_hours": 55.0,
+  "auto_filter_rate_pct": 71.0,
+  "source": "showcase"
+}

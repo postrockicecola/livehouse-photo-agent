@@ -1,0 +1,20 @@
+[
+  {"file": "DSC0001_rendered.jpg", "score": 88,
+   "dimensions": {"focus_sharpness": 8, "exposure_control": 7, "noise_cleanliness": 7, "composition_framing": 8, "light_color_character": 9, "moment_peak": 9, "atmosphere_impact": 9, "deliverable_subject": 8},
+   "dimensions_raw": {"focus_sharpness": 9, "exposure_control": 8, "noise_cleanliness": 8, "composition_framing": 8, "light_color_character": 9, "moment_peak": 9, "atmosphere_impact": 9, "deliverable_subject": 8}},
+  {"file": "DSC0002.jpg", "score": 72,
+   "dimensions": {"focus_sharpness": 6, "exposure_control": 6, "noise_cleanliness": 7, "composition_framing": 7, "light_color_character": 7, "moment_peak": 7, "atmosphere_impact": 7, "deliverable_subject": 7},
+   "dimensions_raw": {"focus_sharpness": 8, "exposure_control": 7, "noise_cleanliness": 7, "composition_framing": 7, "light_color_character": 7, "moment_peak": 7, "atmosphere_impact": 7, "deliverable_subject": 7}},
+  {"file": "DSC0003.jpg", "score": 45,
+   "dimensions": {"focus_sharpness": 3, "exposure_control": 5, "noise_cleanliness": 5, "composition_framing": 5, "light_color_character": 4, "moment_peak": 4, "atmosphere_impact": 4, "deliverable_subject": 4},
+   "dimensions_raw": {"focus_sharpness": 6, "exposure_control": 5, "noise_cleanliness": 5, "composition_framing": 5, "light_color_character": 4, "moment_peak": 4, "atmosphere_impact": 4, "deliverable_subject": 4}},
+  {"file": "DSC0004.jpg", "score": 63,
+   "dimensions": {"focus_sharpness": 5, "exposure_control": 6, "noise_cleanliness": 6, "composition_framing": 7, "light_color_character": 6, "moment_peak": 6, "atmosphere_impact": 6, "deliverable_subject": 6},
+   "dimensions_raw": {"focus_sharpness": 7, "exposure_control": 6, "noise_cleanliness": 6, "composition_framing": 7, "light_color_character": 6, "moment_peak": 6, "atmosphere_impact": 6, "deliverable_subject": 6}},
+  {"file": "DSC0005.jpg", "score": 81,
+   "dimensions": {"focus_sharpness": 7, "exposure_control": 8, "noise_cleanliness": 8, "composition_framing": 8, "light_color_character": 8, "moment_peak": 8, "atmosphere_impact": 8, "deliverable_subject": 8},
+   "dimensions_raw": {"focus_sharpness": 8, "exposure_control": 8, "noise_cleanliness": 8, "composition_framing": 8, "light_color_character": 8, "moment_peak": 8, "atmosphere_impact": 8, "deliverable_subject": 8}},
+  {"file": "DSC0006.jpg", "score": 30,
+   "dimensions": {"focus_sharpness": 2, "exposure_control": 3, "noise_cleanliness": 4, "composition_framing": 4, "light_color_character": 3, "moment_peak": 2, "atmosphere_impact": 3, "deliverable_subject": 3},
+   "dimensions_raw": {"focus_sharpness": 5, "exposure_control": 4, "noise_cleanliness": 4, "composition_framing": 4, "light_color_character": 3, "moment_peak": 2, "atmosphere_impact": 3, "deliverable_subject": 3}}
+]

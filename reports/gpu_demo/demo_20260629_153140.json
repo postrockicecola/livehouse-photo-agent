@@ -1,0 +1,184 @@
+{
+  "schema_version": "1",
+  "tool": "gpu_pressure_demo",
+  "generated_at": "2026-06-29T07:31:40.972025+00:00",
+  "config": {
+    "simulate": true,
+    "images": 12,
+    "workers": 4,
+    "num_predict": 64,
+    "sample_interval_ms": 150
+  },
+  "summary": {
+    "speedup_x": 3.89,
+    "serial_total_sec": 4.081,
+    "concurrent_total_sec": 1.048,
+    "serial_gpu_avg": 0.0662,
+    "concurrent_gpu_avg": 0.0474,
+    "gpu_source": "estimate"
+  },
+  "phases": [
+    {
+      "name": "serial",
+      "workers": 1,
+      "concurrency": 1,
+      "images": 12,
+      "total_sec": 4.081,
+      "throughput_img_per_sec": 2.941,
+      "success": 12,
+      "errors": 0,
+      "latency_p50_ms": 350,
+      "latency_p95_ms": 422,
+      "gpu_avg": 0.0662,
+      "gpu_peak": 0.1218,
+      "gpu_source": "estimate",
+      "samples": [
+        {
+          "t": 0.312,
+          "util": 0.0089
+        },
+        {
+          "t": 0.467,
+          "util": 0.0089
+        },
+        {
+          "t": 0.627,
+          "util": 0.0164
+        },
+        {
+          "t": 0.783,
+          "util": 0.0164
+        },
+        {
+          "t": 0.94,
+          "util": 0.03
+        },
+        {
+          "t": 1.094,
+          "util": 0.03
+        },
+        {
+          "t": 1.251,
+          "util": 0.03
+        },
+        {
+          "t": 1.404,
+          "util": 0.0417
+        },
+        {
+          "t": 1.564,
+          "util": 0.0417
+        },
+        {
+          "t": 1.723,
+          "util": 0.0533
+        },
+        {
+          "t": 1.883,
+          "util": 0.0533
+        },
+        {
+          "t": 2.043,
+          "util": 0.0647
+        },
+        {
+          "t": 2.201,
+          "util": 0.0647
+        },
+        {
+          "t": 2.355,
+          "util": 0.077
+        },
+        {
+          "t": 2.507,
+          "util": 0.077
+        },
+        {
+          "t": 2.657,
+          "util": 0.0855
+        },
+        {
+          "t": 2.81,
+          "util": 0.0855
+        },
+        {
+          "t": 2.963,
+          "util": 0.0855
+        },
+        {
+          "t": 3.115,
+          "util": 0.0998
+        },
+        {
+          "t": 3.275,
+          "util": 0.0998
+        },
+        {
+          "t": 3.426,
+          "util": 0.11
+        },
+        {
+          "t": 3.586,
+          "util": 0.11
+        },
+        {
+          "t": 3.743,
+          "util": 0.1218
+        },
+        {
+          "t": 3.901,
+          "util": 0.1218
+        },
+        {
+          "t": 4.061,
+          "util": 0.1218
+        }
+      ]
+    },
+    {
+      "name": "concurrent",
+      "workers": 4,
+      "concurrency": 4,
+      "images": 12,
+      "total_sec": 1.048,
+      "throughput_img_per_sec": 11.446,
+      "success": 12,
+      "errors": 0,
+      "latency_p50_ms": 325,
+      "latency_p95_ms": 385,
+      "gpu_avg": 0.0474,
+      "gpu_peak": 0.0591,
+      "gpu_source": "estimate",
+      "samples": [
+        {
+          "t": 0.086,
+          "util": 0.0339
+        },
+        {
+          "t": 0.244,
+          "util": 0.0357
+        },
+        {
+          "t": 0.402,
+          "util": 0.0441
+        },
+        {
+          "t": 0.553,
+          "util": 0.0486
+        },
+        {
+          "t": 0.704,
+          "util": 0.0516
+        },
+        {
+          "t": 0.857,
+          "util": 0.0591
+        },
+        {
+          "t": 1.017,
+          "util": 0.0591
+        }
+      ]
+    }
+  ]
+}

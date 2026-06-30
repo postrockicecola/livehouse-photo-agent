@@ -1,0 +1,27 @@
+# Core pipeline
+numpy>=1.24
+opencv-python-headless>=4.8
+Pillow>=10.0
+ImageHash>=4.3
+pillow-heif>=0.16.0
+PyYAML>=6.0
+requests>=2.28
+ExifRead>=3.0
+
+# API server
+fastapi>=0.115
+uvicorn>=0.30
+jinja2>=3.1
+
+# Async queue
+celery>=5.4
+redis>=5.0
+
+# Semantic / visual similarity search (optional — enable CLIP embedding pipeline)
+# CPU-only: pip install open-clip-torch; GPU: installs PyTorch with CUDA automatically.
+open-clip-torch>=2.20
+
+# Structured LLM output — Pydantic-validated responses from vLLM / OpenAI-compatible backends
+# Used by VLLMProvider.generate_structured() and the instructor usage example in schemas.py.
+openai>=1.0
+instructor>=1.2

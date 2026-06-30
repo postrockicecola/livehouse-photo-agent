@@ -1,0 +1,104 @@
+{
+  "schema_version": "1",
+  "tool": "load_test",
+  "generated_at": "2026-06-19T07:21:49.468209+00:00",
+  "mode": "simulate",
+  "config": {
+    "model": "llava:7b",
+    "endpoint": null,
+    "requests": 30,
+    "concurrency": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "num_predict": 256,
+    "queue_wait_timeout_seconds": 600.0,
+    "cost": {
+      "input_usd_per_mtok": 0.0,
+      "output_usd_per_mtok": 0.0,
+      "gpu_hourly_usd": 1.2
+    }
+  },
+  "metrics_explained": {
+    "throughput_rps": "Completed predict() per wall-clock second at this concurrency.",
+    "latency_p99_ms": "End-to-end client latency per predict(), 99th percentile.",
+    "decode_tokens_per_sec": "Sum(completion tokens) / Sum(provider eval_duration) — raw decode speed.",
+    "est_cost_per_1k_usd": "Estimated USD per 1000 inferences (token pricing or amortized GPU-hour)."
+  },
+  "scenarios": [
+    {
+      "concurrency": 1,
+      "requests": 30,
+      "total_sec": 8.598,
+      "throughput_rps": 3.489,
+      "success": 30,
+      "errors": 0,
+      "latency_p50_ms": 282,
+      "latency_p95_ms": 347,
+      "latency_p99_ms": 363,
+      "latency_mean_ms": 286,
+      "prompt_tokens": 18600,
+      "completion_tokens": 5400,
+      "decode_tokens_per_sec": 913.8,
+      "avg_completion_tokens": 180.0,
+      "est_cost_per_1k_usd": 0.095528,
+      "cost_basis": "gpu_hourly"
+    },
+    {
+      "concurrency": 2,
+      "requests": 30,
+      "total_sec": 4.475,
+      "throughput_rps": 6.704,
+      "success": 30,
+      "errors": 0,
+      "latency_p50_ms": 282,
+      "latency_p95_ms": 345,
+      "latency_p99_ms": 362,
+      "latency_mean_ms": 287,
+      "prompt_tokens": 18600,
+      "completion_tokens": 5400,
+      "decode_tokens_per_sec": 908.63,
+      "avg_completion_tokens": 180.0,
+      "est_cost_per_1k_usd": 0.049719,
+      "cost_basis": "gpu_hourly"
+    },
+    {
+      "concurrency": 4,
+      "requests": 30,
+      "total_sec": 2.319,
+      "throughput_rps": 12.935,
+      "success": 30,
+      "errors": 0,
+      "latency_p50_ms": 282,
+      "latency_p95_ms": 346,
+      "latency_p99_ms": 347,
+      "latency_mean_ms": 287,
+      "prompt_tokens": 18600,
+      "completion_tokens": 5400,
+      "decode_tokens_per_sec": 908.1,
+      "avg_completion_tokens": 180.0,
+      "est_cost_per_1k_usd": 0.025769,
+      "cost_basis": "gpu_hourly"
+    },
+    {
+      "concurrency": 8,
+      "requests": 30,
+      "total_sec": 1.215,
+      "throughput_rps": 24.682,
+      "success": 30,
+      "errors": 0,
+      "latency_p50_ms": 284,
+      "latency_p95_ms": 347,
+      "latency_p99_ms": 360,
+      "latency_mean_ms": 284,
+      "prompt_tokens": 18600,
+      "completion_tokens": 5400,
+      "decode_tokens_per_sec": 918.26,
+      "avg_completion_tokens": 180.0,
+      "est_cost_per_1k_usd": 0.013505,
+      "cost_basis": "gpu_hourly"
+    }
+  ]
+}
