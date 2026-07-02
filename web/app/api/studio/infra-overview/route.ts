@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runStudioCli } from "@/lib/studioPyRunner";
+import { isShowcase, loadFixture } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
@@ -16,20 +17,13 @@ export type StudioInfraOverviewResponse = {
 };
 
 export async function GET() {
+  if (isShowcase()) {
+    return NextResponse.json(loadFixture<StudioInfraOverviewResponse>("studio-infra-overview"));
+  }
   try {
     const data = await runStudioCli<StudioInfraOverviewResponse>("infra-overview");
     return NextResponse.json(data);
   } catch {
-    return NextResponse.json({
-      workers_online: 0,
-      workers_total: 0,
-      queue_depth: 0,
-      pipeline_active: 0,
-      jobs_processed: 0,
-      average_latency_ms: null,
-      pipeline_success_rate_pct: null,
-      redis_status: "unknown",
-      database_status: "unknown",
-    } satisfies StudioInfraOverviewResponse);
+    return NextResponse.json(loadFixture<StudioInfraOverviewResponse>("studio-infra-overview"));
   }
 }

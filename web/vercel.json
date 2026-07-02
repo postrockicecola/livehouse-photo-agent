@@ -4,6 +4,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "env": {
-    "LANDING_ONLY": "1"
+    "LANDING_ONLY": "1",
+    "SHOWCASE_MODE": "1"
   }
 }

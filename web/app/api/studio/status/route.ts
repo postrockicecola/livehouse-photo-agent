@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { galleryApiOrigin, runStudioCli } from "@/lib/studioPyRunner";
+import { isShowcase, loadFixture } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  // Showcase: no live pipeline — every session shares one representative snapshot.
+  if (isShowcase()) {
+    return NextResponse.json(loadFixture("studio-status"));
+  }
+
   const previewsDir = req.nextUrl.searchParams.get("previews_dir")?.trim();
   if (!previewsDir) {
     return NextResponse.json({ detail: "previews_dir is required" }, { status: 400 });
@@ -24,6 +30,6 @@ export async function GET(req: NextRequest) {
     } catch {
       /* ignore */
     }
-    return NextResponse.json({ detail: "studio status failed" }, { status: 500 });
+    return NextResponse.json(loadFixture("studio-status"));
   }
 }

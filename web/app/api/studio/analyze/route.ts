@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { galleryApiOrigin } from "@/lib/studioPyRunner";
+import { isShowcase } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
 /** Prefer FastAPI ``/api/studio/analyze``; fall back to legacy ``/api/tasks/analyze``. */
 export async function POST(req: NextRequest) {
+  if (isShowcase()) {
+    return NextResponse.json(
+      { detail: "只读演示模式：Vercel 快照不运行分析任务（需本地后端 + GPU）" },
+      { status: 403 },
+    );
+  }
   let previews_dir = "";
   let config_path = "configs/livehouse.yaml";
   try {

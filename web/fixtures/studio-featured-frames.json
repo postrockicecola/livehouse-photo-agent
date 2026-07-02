@@ -1,0 +1,46 @@
+{
+  "previews_dir": "/archive/session-featured/Previews",
+  "frames": [
+    {
+      "path_quoted": "demo-01.jpg",
+      "file": "frame-01.jpg",
+      "highlight": "Aesthetic",
+      "score_label": "Aesthetic",
+      "score_value": 90.5,
+      "score_display": "90.5"
+    },
+    {
+      "path_quoted": "demo-02.jpg",
+      "file": "frame-02.jpg",
+      "highlight": "Composition",
+      "score_label": "Composition",
+      "score_value": 6.5,
+      "score_display": "6.5"
+    },
+    {
+      "path_quoted": "demo-03.jpg",
+      "file": "frame-03.jpg",
+      "highlight": "Emotion",
+      "score_label": "Emotion",
+      "score_value": 0.0,
+      "score_display": "0.0"
+    },
+    {
+      "path_quoted": "demo-04.jpg",
+      "file": "frame-04.jpg",
+      "highlight": "Featured",
+      "score_label": "Aesthetic",
+      "score_value": 89.7,
+      "score_display": "89.7"
+    },
+    {
+      "path_quoted": "demo-05.jpg",
+      "file": "frame-05.jpg",
+      "highlight": "Featured",
+      "score_label": "Aesthetic",
+      "score_value": 89.7,
+      "score_display": "89.7"
+    }
+  ],
+  "count": 5
+}

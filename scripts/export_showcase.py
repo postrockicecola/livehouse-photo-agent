@@ -20,9 +20,26 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+# Safety net: anything that still looks like a real local path / hostname after
+# targeted anonymization gets neutralized here before a fixture is committed.
+_PATH_RE = re.compile(r"/Volumes/\S*?Livehouse_Archive/[^\"\s]*")
+_HOST_RE = re.compile(r"\b[\w-]+\.local\b")
+
+
+def _scrub(obj):
+    """Recursively drop raw payload blobs and neutralize any leaked path/hostname."""
+    if isinstance(obj, dict):
+        return {k: _scrub(v) for k, v in obj.items() if k != "payload_json"}
+    if isinstance(obj, list):
+        return [_scrub(v) for v in obj]
+    if isinstance(obj, str):
+        return _HOST_RE.sub("host.local", _PATH_RE.sub("/archive/session/Previews", obj))
+    return obj
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STUDIO_CLI = REPO_ROOT / "scripts" / "studio_cli.py"
@@ -81,6 +98,139 @@ def export_landing(dry_run: bool) -> int:
     return failed
 
 
+# ── Phase 2: studio (session console) fixtures ────────────────────────────────
+# The live studio_cli output embeds real absolute paths (``/Volumes/.../
+# Livehouse_Archive/2026-06-18/...``) and date-based session names. Those are
+# private, so before committing we anonymize: session_key → "Session NN",
+# every archive path → an opaque ``/archive/session-NN/...`` token, and every
+# featured-frame image → one of the bundled EXIF-stripped demo photos.
+DEMO_IMAGE_COUNT = 12  # web/public/demo/demo-01.jpg … demo-12.jpg
+
+
+def _build_session_map(*key_sources: list) -> tuple[dict, dict]:
+    """Return (label_map, slug_map): real session_key → "Session NN" / "session-NN"."""
+    keys: set[str] = set()
+    for src in key_sources:
+        keys.update(k for k in src if k)
+    ordered = sorted(keys)  # chronological (keys are ISO dates)
+    label_map = {k: f"Session {i + 1:02d}" for i, k in enumerate(ordered)}
+    slug_map = {k: f"session-{i + 1:02d}" for i, k in enumerate(ordered)}
+    return label_map, slug_map
+
+
+def _anon_session_obj(obj: dict, label_map: dict, slug_map: dict) -> dict:
+    """Anonymize one session-shaped dict in place-ish (returns a new dict)."""
+    key = obj.get("session_key") or ""
+    slug = slug_map.get(key, "session-xx")
+    out = dict(obj)
+    if "session_key" in out:
+        out["session_key"] = label_map.get(key, "Session")
+    if "session_dir" in out:
+        out["session_dir"] = f"/archive/{slug}"
+    if "previews_dir" in out:
+        out["previews_dir"] = f"/archive/{slug}/Previews"
+    if "raw_dir" in out:
+        out["raw_dir"] = f"/archive/{slug}/RAW"
+    if "cover_path_quoted" in out:
+        out["cover_path_quoted"] = ""
+    return out
+
+
+def _remap_previews(previews_dir: str, key: str, slug_map: dict) -> str:
+    return f"/archive/{slug_map.get(key, 'session-xx')}/Previews"
+
+
+def export_studio(dry_run: bool) -> int:
+    print("Exporting studio fixtures from local data (anonymized):")
+    failed = 0
+    try:
+        sessions = run_cli("sessions", ["--limit", "500"])
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ✗ studio-sessions: {exc}", file=sys.stderr)
+        return 1
+
+    session_keys = [s.get("session_key", "") for s in sessions.get("sessions", [])]
+    active_key = (sessions.get("active") or {}).get("session_key", "")
+    delivery_keys = [d.get("session_key", "") for d in sessions.get("recent_deliveries", [])]
+    label_map, slug_map = _build_session_map(session_keys, [active_key], delivery_keys)
+
+    # Pick a representative analyzed session for status + featured-frames.
+    rep = None
+    if (sessions.get("active") or {}).get("has_analysis_results"):
+        rep = sessions["active"]
+    if rep is None:
+        rep = next(
+            (s for s in sessions.get("sessions", []) if s.get("has_analysis_results")),
+            None,
+        )
+    rep_previews = (rep or {}).get("previews_dir", "")
+
+    # 1) studio-sessions — anonymize list + active + recent_deliveries.
+    anon_sessions = {
+        "archive_root": "/archive",
+        "count": sessions.get("count", 0),
+        "sessions": [_anon_session_obj(s, label_map, slug_map) for s in sessions.get("sessions", [])],
+        "active": _anon_session_obj(sessions["active"], label_map, slug_map)
+        if sessions.get("active")
+        else None,
+        "recent_deliveries": [
+            {
+                **{k: v for k, v in d.items() if k not in ("previews_dir",)},
+                "session_key": label_map.get(d.get("session_key", ""), "Session"),
+                "previews_dir": _remap_previews(d.get("previews_dir", ""), d.get("session_key", ""), slug_map),
+            }
+            for d in sessions.get("recent_deliveries", [])
+        ],
+    }
+
+    fixtures: list[tuple[str, dict]] = [("studio-sessions", anon_sessions)]
+
+    # 2) studio-status — representative pipeline snapshot for any selected session.
+    if rep_previews:
+        try:
+            status = run_cli("status", [rep_previews])
+            for field in ("active", "session"):
+                if isinstance(status.get(field), dict):
+                    status[field] = _anon_session_obj(status[field], label_map, slug_map)
+            if "archive_root" in status:
+                status["archive_root"] = "/archive"
+            fixtures.append(("studio-status", status))
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ✗ studio-status: {exc}", file=sys.stderr)
+            failed += 1
+
+        # 3) studio-featured-frames — swap real photo paths for bundled demo images.
+        try:
+            ff = run_cli("featured-frames", [rep_previews])
+            frames = ff.get("frames", [])[:6]
+            for i, fr in enumerate(frames):
+                n = (i % DEMO_IMAGE_COUNT) + 1
+                fr["path_quoted"] = f"demo-{n:02d}.jpg"
+                fr["file"] = f"frame-{i + 1:02d}.jpg"
+            fixtures.append((
+                "studio-featured-frames",
+                {"previews_dir": "/archive/session-featured/Previews", "frames": frames, "count": len(frames)},
+            ))
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ✗ studio-featured-frames: {exc}", file=sys.stderr)
+            failed += 1
+
+    # 4) studio-infra-overview — no paths, safe as-is.
+    try:
+        fixtures.append(("studio-infra-overview", run_cli("infra-overview", [])))
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ✗ studio-infra-overview: {exc}", file=sys.stderr)
+        failed += 1
+
+    for name, data in fixtures:
+        data = _scrub(data)  # final path/hostname safety net
+        if dry_run:
+            print(f"  · {name}: {json.dumps(data, ensure_ascii=False)[:120]}…")
+        else:
+            write_fixture(name, data)
+    return failed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export the Vercel showcase snapshot.")
     parser.add_argument(
@@ -91,10 +241,9 @@ def main() -> int:
     args = parser.parse_args()
 
     failed = export_landing(args.dry_run)
+    failed += export_studio(args.dry_run)
 
-    # TODO(step 2): export_session_images(...) -> web/public/showcase/sessions/<sid>/*.webp
-    # TODO(step 3): export_infra_console(...) -> web/fixtures/infra/*.json
-    #               export_session_galleries(...) -> web/fixtures/sessions/<sid>.json
+    # TODO(step 3): export_infra_console(...) -> web/fixtures/infra/*.json (Phase 3)
 
     if failed:
         print(f"\nDone with {failed} failure(s).", file=sys.stderr)

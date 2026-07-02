@@ -14,6 +14,10 @@ import landingGallery from "@/fixtures/landing-gallery.json";
 import landingInfra from "@/fixtures/landing-infra.json";
 import landingBrain from "@/fixtures/landing-brain.json";
 import landingStats from "@/fixtures/landing-stats.json";
+import studioSessions from "@/fixtures/studio-sessions.json";
+import studioStatus from "@/fixtures/studio-status.json";
+import studioFeaturedFrames from "@/fixtures/studio-featured-frames.json";
+import studioInfraOverview from "@/fixtures/studio-infra-overview.json";
 
 /** True when running as the read-only Vercel showcase (set `SHOWCASE_MODE=1`). */
 export function isShowcase(): boolean {
@@ -25,6 +29,10 @@ const FIXTURES = {
   "landing-infra": landingInfra,
   "landing-brain": landingBrain,
   "landing-stats": landingStats,
+  "studio-sessions": studioSessions,
+  "studio-status": studioStatus,
+  "studio-featured-frames": studioFeaturedFrames,
+  "studio-infra-overview": studioInfraOverview,
 } as const;
 
 export type FixtureName = keyof typeof FIXTURES;

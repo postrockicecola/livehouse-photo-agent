@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { galleryApiOrigin, runStudioCli } from "@/lib/studioPyRunner";
+import { isShowcase } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
 export async function PUT(req: NextRequest) {
+  if (isShowcase()) {
+    return NextResponse.json(
+      { detail: "只读演示模式：Vercel 快照不支持切换当前场次" },
+      { status: 403 },
+    );
+  }
   let previews_dir = "";
   try {
     const body = (await req.json()) as { previews_dir?: string };

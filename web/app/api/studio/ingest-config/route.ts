@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { galleryApiOrigin, runStudioCli } from "@/lib/studioPyRunner";
+import { isShowcase } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (isShowcase()) {
+    return NextResponse.json({ config: {}, detail: "只读演示模式：使用默认摄取配置" });
+  }
   try {
     const data = await runStudioCli<Record<string, unknown>>("ingest-config-get");
     return NextResponse.json(data);
@@ -19,6 +23,12 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  if (isShowcase()) {
+    return NextResponse.json(
+      { detail: "只读演示模式：Vercel 快照不支持修改摄取配置" },
+      { status: 403 },
+    );
+  }
   const body = await req.text();
   try {
     const data = await runStudioCli<Record<string, unknown>>("ingest-config-put", [body]);

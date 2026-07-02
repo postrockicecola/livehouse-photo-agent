@@ -1,0 +1,174 @@
+{
+  "archive_root": "/archive",
+  "count": 9,
+  "sessions": [
+    {
+      "session_key": "Session 09",
+      "session_dir": "/archive/session-09",
+      "previews_dir": "/archive/session-09/Previews",
+      "preview_count": 0,
+      "has_analysis_results": false,
+      "cover_path_quoted": "",
+      "brain_session_id": 9,
+      "photos_ingested": 2948,
+      "photos_analyzed": 0,
+      "source": "brain"
+    },
+    {
+      "session_key": "Session 08",
+      "session_dir": "/archive/session-08",
+      "previews_dir": "/archive/session-08/Previews",
+      "preview_count": 2915,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 8,
+      "photos_ingested": 192,
+      "photos_analyzed": 2723,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 07",
+      "session_dir": "/archive/session-07",
+      "previews_dir": "/archive/session-07/Previews",
+      "preview_count": 1104,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 7,
+      "photos_ingested": 0,
+      "photos_analyzed": 1099,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 06",
+      "session_dir": "/archive/session-06",
+      "previews_dir": "/archive/session-06/Previews",
+      "preview_count": 2513,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 6,
+      "photos_ingested": 0,
+      "photos_analyzed": 2508,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 05",
+      "session_dir": "/archive/session-05",
+      "previews_dir": "/archive/session-05/Previews",
+      "preview_count": 2677,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 5,
+      "photos_ingested": 0,
+      "photos_analyzed": 2677,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 04",
+      "session_dir": "/archive/session-04",
+      "previews_dir": "/archive/session-04/Previews",
+      "preview_count": 1323,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 4,
+      "photos_ingested": 0,
+      "photos_analyzed": 1323,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 03",
+      "session_dir": "/archive/session-03",
+      "previews_dir": "/archive/session-03/Previews",
+      "preview_count": 1311,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 3,
+      "photos_ingested": 0,
+      "photos_analyzed": 0,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 02",
+      "session_dir": "/archive/session-02",
+      "previews_dir": "/archive/session-02/Previews",
+      "preview_count": 0,
+      "has_analysis_results": false,
+      "cover_path_quoted": "",
+      "brain_session_id": 2,
+      "photos_ingested": 0,
+      "photos_analyzed": 1107,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    },
+    {
+      "session_key": "Session 01",
+      "session_dir": "/archive/session-01",
+      "previews_dir": "/archive/session-01/Previews",
+      "preview_count": 573,
+      "has_analysis_results": true,
+      "cover_path_quoted": "",
+      "brain_session_id": 1,
+      "photos_ingested": 0,
+      "photos_analyzed": 573,
+      "source": "brain",
+      "last_job_status": "SUCCEEDED"
+    }
+  ],
+  "active": {
+    "session_key": "Session 06",
+    "session_dir": "/archive/session-06",
+    "previews_dir": "/archive/session-06/Previews",
+    "preview_count": 2513,
+    "has_analysis_results": true,
+    "raw_dir": "/archive/session-06/RAW"
+  },
+  "recent_deliveries": [
+    {
+      "session_key": "Session 08",
+      "session_date": "2026-06-26",
+      "photos_exported": 2723,
+      "previews_dir": "/archive/session-08/Previews"
+    },
+    {
+      "session_key": "Session 07",
+      "session_date": "2026-06-19",
+      "photos_exported": 1099,
+      "previews_dir": "/archive/session-07/Previews"
+    },
+    {
+      "session_key": "Session 06",
+      "session_date": "2026-06-18",
+      "photos_exported": 2513,
+      "previews_dir": "/archive/session-06/Previews"
+    },
+    {
+      "session_key": "Session 05",
+      "session_date": "2026-06-13",
+      "photos_exported": 2677,
+      "previews_dir": "/archive/session-05/Previews"
+    },
+    {
+      "session_key": "Session 04",
+      "session_date": "2026-06-12",
+      "photos_exported": 1323,
+      "previews_dir": "/archive/session-04/Previews"
+    },
+    {
+      "session_key": "Session 03",
+      "session_date": "2026-06-06",
+      "photos_exported": 1294,
+      "previews_dir": "/archive/session-03/Previews"
+    },
+    {
+      "session_key": "Session 01",
+      "session_date": "2026-05-24",
+      "photos_exported": 573,
+      "previews_dir": "/archive/session-01/Previews"
+    }
+  ]
+}

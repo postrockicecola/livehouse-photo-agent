@@ -1,0 +1,11 @@
+{
+  "workers_online": 2,
+  "workers_total": 3,
+  "queue_depth": 0,
+  "pipeline_active": 0,
+  "jobs_processed": 55,
+  "average_latency_ms": 409248,
+  "pipeline_success_rate_pct": 90,
+  "redis_status": "offline",
+  "database_status": "online"
+}

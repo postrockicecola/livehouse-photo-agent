@@ -1,0 +1,136 @@
+{
+  "archive_root": "/archive",
+  "active": {
+    "session_key": "Session 06",
+    "session_dir": "/archive/session-06",
+    "previews_dir": "/archive/session-06/Previews",
+    "preview_count": 2513,
+    "has_analysis_results": true,
+    "raw_dir": "/archive/session-06/RAW"
+  },
+  "session": {
+    "session_key": "Session 06",
+    "session_dir": "/archive/session-06",
+    "previews_dir": "/archive/session-06/Previews",
+    "preview_count": 2513,
+    "has_analysis_results": true,
+    "brain_session_id": 6,
+    "activity": "analyzed"
+  },
+  "job": {
+    "id": 61,
+    "job_type": "ANALYZE_SESSION",
+    "status": "SUCCEEDED",
+    "trace_id": "studio_analyze_c1c8452b9f75",
+    "elapsed_sec": 750,
+    "is_running": false
+  },
+  "pipeline": {
+    "labels": [
+      "PREPARE",
+      "S1",
+      "S2",
+      "S3",
+      "WRITE"
+    ],
+    "current_index": 4,
+    "complete": true,
+    "failed": false,
+    "stages": [
+      {
+        "label": "PREPARE",
+        "state": "done",
+        "count_in": 2513,
+        "count_out": 2513,
+        "duration_sec": null
+      },
+      {
+        "label": "S1",
+        "state": "done",
+        "count_in": 2513,
+        "count_out": 2513,
+        "duration_sec": null
+      },
+      {
+        "label": "S2",
+        "state": "done",
+        "count_in": 2513,
+        "count_out": 2513,
+        "duration_sec": null
+      },
+      {
+        "label": "S3",
+        "state": "done",
+        "count_in": 2513,
+        "count_out": 2513,
+        "duration_sec": null
+      },
+      {
+        "label": "WRITE",
+        "state": "done",
+        "count_in": 2513,
+        "count_out": 2513,
+        "duration_sec": null
+      }
+    ],
+    "workflow_stages": [
+      {
+        "label": "Imported",
+        "count": 2513,
+        "state": "done"
+      },
+      {
+        "label": "Filtered",
+        "count": 2513,
+        "state": "done"
+      },
+      {
+        "label": "AI Scored",
+        "count": 2513,
+        "state": "done"
+      },
+      {
+        "label": "Picked",
+        "count": 2513,
+        "state": "done"
+      },
+      {
+        "label": "Exported",
+        "count": 2513,
+        "state": "done"
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 333,
+      "to_status": "QUEUED",
+      "message": "job enqueued",
+      "created_at": 1782706964
+    },
+    {
+      "id": 334,
+      "to_status": "CLAIMED",
+      "message": "job claimed by run_job (from QUEUED or FAILED_RETRYABLE)",
+      "created_at": 1782706964
+    },
+    {
+      "id": 335,
+      "to_status": "PREPROCESSING",
+      "message": "job preprocessing",
+      "created_at": 1782706964
+    },
+    {
+      "id": 336,
+      "to_status": "INFERENCING",
+      "message": "running aesthetic pipeline",
+      "created_at": 1782706964
+    },
+    {
+      "id": 337,
+      "to_status": "SUCCEEDED",
+      "message": "job succeeded",
+      "created_at": 1782707714
+    }
+  ]
+}
