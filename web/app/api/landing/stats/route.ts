@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runStudioCli } from "@/lib/studioPyRunner";
+import { isShowcase, loadFixture } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
@@ -17,21 +18,17 @@ export type LandingStatsResponse = {
 };
 
 export async function GET() {
+  // Showcase (Vercel): no Python/backend — serve the committed snapshot so the
+  // landing page shows real project numbers instead of zeros.
+  if (isShowcase()) {
+    return NextResponse.json(loadFixture<LandingStatsResponse>("landing-stats"));
+  }
   try {
     const data = await runStudioCli<LandingStatsResponse>("stats");
     return NextResponse.json(data);
   } catch {
-    return NextResponse.json({
-      sessions_total: 0,
-      photos_total: 0,
-      exported_photos_total: 0,
-      avg_processing_sec: null,
-      auto_reject_rate_pct: null,
-      average_keep_rate_pct: null,
-      total_runtime_sec: null,
-      total_runtime_hours: null,
-      auto_filter_rate_pct: null,
-      source: "unavailable",
-    });
+    // Backend unreachable (e.g. fresh clone / deploy without SHOWCASE_MODE):
+    // fall back to the snapshot rather than all-zero placeholders.
+    return NextResponse.json(loadFixture<LandingStatsResponse>("landing-stats"));
   }
 }

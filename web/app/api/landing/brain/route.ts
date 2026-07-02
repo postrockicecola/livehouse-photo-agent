@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { LANDING_BRAIN_FALLBACK_COUNTS } from "@/lib/productIa";
 import { runStudioCli } from "@/lib/studioPyRunner";
+import { isShowcase, loadFixture } from "@/lib/dataSource";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,15 @@ export type LandingBrainResponse = {
 };
 
 export async function GET() {
+  // Showcase (Vercel): serve the committed snapshot (real brain counts + trace).
+  if (isShowcase()) {
+    return NextResponse.json(loadFixture<LandingBrainResponse>("landing-brain"));
+  }
   try {
     const data = await runStudioCli<LandingBrainResponse>("landing-brain");
     return NextResponse.json(data);
   } catch {
-    return NextResponse.json({ counts: LANDING_BRAIN_FALLBACK_COUNTS, trace: [] });
+    // Backend unreachable: prefer the snapshot over empty counts.
+    return NextResponse.json(loadFixture<LandingBrainResponse>("landing-brain"));
   }
 }
