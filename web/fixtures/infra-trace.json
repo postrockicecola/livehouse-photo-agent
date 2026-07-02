@@ -1,0 +1,721 @@
+{
+  "job": {
+    "id": 61,
+    "job_type": "ANALYZE_SESSION",
+    "session_id": 6,
+    "photo_id": null,
+    "status": "SUCCEEDED",
+    "priority": 0,
+    "attempt": 1,
+    "max_attempts": 3,
+    "worker_id": 2,
+    "provider": null,
+    "model_name": null,
+    "fallback_used": 0,
+    "enqueued_at": 1782706964,
+    "claimed_at": 1782706964,
+    "started_at": 1782706964,
+    "finished_at": 1782707714,
+    "queue_wait_ms": 0,
+    "preprocess_ms": null,
+    "inference_ms": null,
+    "postprocess_ms": null,
+    "total_latency_ms": 749984,
+    "error_code": null,
+    "error_message": null,
+    "trace_id": "studio_analyze_c1c8452b9f75",
+    "payload_json": null,
+    "root_job_id": null,
+    "parent_job_id": null,
+    "stage_name": null,
+    "stage_order": null,
+    "depends_on_job_id": null,
+    "is_stage": 0,
+    "namespace": "default",
+    "project_key": "default",
+    "created_at": 1782706964,
+    "updated_at": 1782707714,
+    "output_artifacts": [
+      {
+        "artifact_id": 334,
+        "job_id": 61,
+        "kind": "analysis_results_json",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "analysis_results",
+          "role": "structured_output"
+        },
+        "is_primary": true,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      },
+      {
+        "artifact_id": 335,
+        "job_id": 61,
+        "kind": "preview_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "preview",
+          "role": "session_index_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "preview",
+        "role": "session_index_html"
+      },
+      {
+        "artifact_id": 336,
+        "job_id": 61,
+        "kind": "folder_gallery_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "category": "best",
+          "taxonomy": "gallery_html",
+          "role": "folder_gallery_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "category": "best",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      {
+        "artifact_id": 337,
+        "job_id": 61,
+        "kind": "folder_gallery_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "category": "keep",
+          "taxonomy": "gallery_html",
+          "role": "folder_gallery_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "category": "keep",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      {
+        "artifact_id": 338,
+        "job_id": 61,
+        "kind": "folder_gallery_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "category": "trash",
+          "taxonomy": "gallery_html",
+          "role": "folder_gallery_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "category": "trash",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      {
+        "artifact_id": 339,
+        "job_id": 61,
+        "kind": "gallery_launch_script",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "gallery_html",
+          "role": "gallery_launch_shell"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      },
+      {
+        "artifact_id": 340,
+        "job_id": 61,
+        "kind": "gallery_launch_script",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "gallery_html",
+          "role": "gallery_launch_shell"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      }
+    ],
+    "primary_artifact": {
+      "artifact_id": 334,
+      "job_id": 61,
+      "kind": "analysis_results_json",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      },
+      "is_primary": true,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    },
+    "artifact_lineage": {
+      "source": "artifacts_table",
+      "artifact_count": 7,
+      "provenance_job_event_ids": [
+        337
+      ],
+      "primary_artifact_id": 334
+    }
+  },
+  "project_scope": {
+    "namespace": "default",
+    "project_key": "default"
+  },
+  "trace_id": "studio_analyze_c1c8452b9f75",
+  "related_job_ids": [
+    61
+  ],
+  "events": [
+    {
+      "id": 333,
+      "job_id": 61,
+      "from_status": null,
+      "to_status": "QUEUED",
+      "created_at": 1782706964,
+      "message": "job enqueued",
+      "payload_json": "{\"priority\": 0, \"max_attempts\": 3}"
+    },
+    {
+      "id": 334,
+      "job_id": 61,
+      "from_status": "QUEUED",
+      "to_status": "CLAIMED",
+      "created_at": 1782706964,
+      "message": "job claimed by run_job (from QUEUED or FAILED_RETRYABLE)",
+      "payload_json": "{\"worker_id\": 2}"
+    },
+    {
+      "id": 335,
+      "job_id": 61,
+      "from_status": "CLAIMED",
+      "to_status": "PREPROCESSING",
+      "created_at": 1782706964,
+      "message": "job preprocessing",
+      "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\"}"
+    },
+    {
+      "id": 336,
+      "job_id": 61,
+      "from_status": "PREPROCESSING",
+      "to_status": "INFERENCING",
+      "created_at": 1782706964,
+      "message": "running aesthetic pipeline",
+      "payload_json": "{\"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\"}"
+    },
+    {
+      "id": 337,
+      "job_id": 61,
+      "from_status": "INFERENCING",
+      "to_status": "SUCCEEDED",
+      "created_at": 1782707714,
+      "message": "job succeeded",
+      "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\", \"artifacts\": [{\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"preview_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"preview\", \"role\": \"session_index_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"best\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"keep\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"trash\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}], \"artifact_registry_version\": 1, \"primary_artifact\": {\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}}"
+    }
+  ],
+  "model_runs": [],
+  "artifacts": [
+    {
+      "artifact_id": 334,
+      "job_id": 61,
+      "kind": "analysis_results_json",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      },
+      "is_primary": true,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    },
+    {
+      "artifact_id": 335,
+      "job_id": 61,
+      "kind": "preview_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "preview",
+        "role": "session_index_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "preview",
+      "role": "session_index_html"
+    },
+    {
+      "artifact_id": 336,
+      "job_id": 61,
+      "kind": "folder_gallery_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "category": "best",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "category": "best",
+      "taxonomy": "gallery_html",
+      "role": "folder_gallery_html"
+    },
+    {
+      "artifact_id": 337,
+      "job_id": 61,
+      "kind": "folder_gallery_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "category": "keep",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "category": "keep",
+      "taxonomy": "gallery_html",
+      "role": "folder_gallery_html"
+    },
+    {
+      "artifact_id": 338,
+      "job_id": 61,
+      "kind": "folder_gallery_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "category": "trash",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "category": "trash",
+      "taxonomy": "gallery_html",
+      "role": "folder_gallery_html"
+    },
+    {
+      "artifact_id": 339,
+      "job_id": 61,
+      "kind": "gallery_launch_script",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "gallery_html",
+      "role": "gallery_launch_shell"
+    },
+    {
+      "artifact_id": 340,
+      "job_id": 61,
+      "kind": "gallery_launch_script",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "gallery_html",
+      "role": "gallery_launch_shell"
+    }
+  ],
+  "primary_artifact": {
+    "artifact_id": 334,
+    "job_id": 61,
+    "kind": "analysis_results_json",
+    "path": "/archive/redacted",
+    "generated_at": 1782707714,
+    "metadata": {
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    },
+    "is_primary": true,
+    "stage": null,
+    "source": "aesthetic_pipeline",
+    "job_event_id": 337,
+    "created_at": 1782707714,
+    "taxonomy": "analysis_results",
+    "role": "structured_output"
+  },
+  "worker": {
+    "id": 2,
+    "worker_name": "brain@celery@host.local",
+    "worker_type": "general",
+    "status": "OFFLINE",
+    "last_heartbeat": 1782707714,
+    "capacity": 1,
+    "inflight": 0,
+    "created_at": 1779608265,
+    "updated_at": 1782707901
+  },
+  "context": {
+    "queue_wait_ms": 0,
+    "preprocess_ms": null,
+    "inference_ms": null,
+    "postprocess_ms": null,
+    "total_latency_ms": 749984,
+    "job_provider": null,
+    "job_model": null,
+    "namespace": "default",
+    "project_key": "default",
+    "error_code": null,
+    "error_message": null,
+    "payload_json_preview": {},
+    "artifact_lineage": {
+      "source": "artifacts_table",
+      "artifact_count": 7,
+      "provenance_job_event_ids": [
+        337
+      ],
+      "primary_artifact_id": 334
+    }
+  },
+  "spans": [
+    {
+      "id": "je-333",
+      "kind": "job_event",
+      "ts": 1782706964,
+      "label": "job enqueued",
+      "from_status": null,
+      "to_status": "QUEUED",
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "event_id": 333
+      }
+    },
+    {
+      "id": "je-334",
+      "kind": "job_event",
+      "ts": 1782706964,
+      "label": "job claimed by run_job (from QUEUED or FAILED_RETRYABLE)",
+      "from_status": "QUEUED",
+      "to_status": "CLAIMED",
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "event_id": 334
+      }
+    },
+    {
+      "id": "je-335",
+      "kind": "job_event",
+      "ts": 1782706964,
+      "label": "job preprocessing",
+      "from_status": "CLAIMED",
+      "to_status": "PREPROCESSING",
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "event_id": 335
+      }
+    },
+    {
+      "id": "je-336",
+      "kind": "job_event",
+      "ts": 1782706964,
+      "label": "running aesthetic pipeline",
+      "from_status": "PREPROCESSING",
+      "to_status": "INFERENCING",
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "event_id": 336
+      }
+    },
+    {
+      "id": "je-337",
+      "kind": "job_event",
+      "ts": 1782707714,
+      "label": "job succeeded",
+      "from_status": "INFERENCING",
+      "to_status": "SUCCEEDED",
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "event_id": 337
+      }
+    },
+    {
+      "id": "art-334",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "analysis_results_json",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "analysis_results_json",
+        "taxonomy": "analysis_results",
+        "role": "structured_output",
+        "is_primary": true,
+        "artifact_id": 334,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    },
+    {
+      "id": "art-335",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "preview_html",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "preview_html",
+        "taxonomy": "preview",
+        "role": "session_index_html",
+        "is_primary": false,
+        "artifact_id": 335,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    },
+    {
+      "id": "art-336",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "folder_gallery_html",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "folder_gallery_html",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html",
+        "category": "best",
+        "is_primary": false,
+        "artifact_id": 336,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    },
+    {
+      "id": "art-337",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "folder_gallery_html",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "folder_gallery_html",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html",
+        "category": "keep",
+        "is_primary": false,
+        "artifact_id": 337,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    },
+    {
+      "id": "art-338",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "folder_gallery_html",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "folder_gallery_html",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html",
+        "category": "trash",
+        "is_primary": false,
+        "artifact_id": 338,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    },
+    {
+      "id": "art-339",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "gallery_launch_script",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "gallery_launch_script",
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell",
+        "is_primary": false,
+        "artifact_id": 339,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    },
+    {
+      "id": "art-340",
+      "kind": "artifact",
+      "ts": 1782707714,
+      "label": "gallery_launch_script",
+      "from_status": null,
+      "to_status": null,
+      "duration_ms": null,
+      "queue_wait_ms": null,
+      "meta": {
+        "path": "/archive/redacted",
+        "kind": "gallery_launch_script",
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell",
+        "is_primary": false,
+        "artifact_id": 340,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "ledger_link": "succeeded_job_event",
+        "ledger_event_created_at": 1782707714
+      }
+    }
+  ],
+  "time_window": {
+    "t0": 1782706964,
+    "t1": 1782707714,
+    "width_seconds": 750
+  },
+  "job_relationships": {
+    "root_job_id": 61,
+    "parent_job_id": null,
+    "depends_on_job_id": null,
+    "child_job_ids": [],
+    "dependent_job_ids": [],
+    "is_root_of_group": true
+  },
+  "job_graph": {
+    "scope": "stage_group",
+    "root_job_id": 61,
+    "anchor_job_id": 61,
+    "nodes": [
+      {
+        "job_id": 61,
+        "job_type": "ANALYZE_SESSION",
+        "stage_name": null,
+        "stage_order": null,
+        "status": "SUCCEEDED",
+        "total_latency_ms": 749984,
+        "root_job_id": null,
+        "parent_job_id": null,
+        "depends_on_job_id": null,
+        "is_terminal_failure": false,
+        "on_critical_path": true
+      }
+    ],
+    "edges": [],
+    "stage_dag": {
+      "node_count": 1,
+      "edges": []
+    },
+    "critical_path": {
+      "job_ids": [
+        61
+      ],
+      "total_ms": 749984,
+      "method": "weighted_longest_path_depends_on_dag",
+      "note": "latency per node summed on the longest-weight path (not wall-clock overlap)"
+    },
+    "bottleneck": {
+      "job_id": 61,
+      "total_latency_ms": 749984,
+      "share_of_critical_path": 1.0
+    },
+    "failure_impact": []
+  },
+  "agent": null,
+  "anchor_job_id": 61,
+  "job_ids": [
+    61
+  ]
+}

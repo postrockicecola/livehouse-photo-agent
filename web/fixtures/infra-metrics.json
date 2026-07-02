@@ -1,0 +1,878 @@
+{
+  "jobs": {
+    "total": 61,
+    "by_status": {
+      "CANCELLED": 6,
+      "SUCCEEDED": 55
+    },
+    "by_namespace": {
+      "default": 61
+    },
+    "by_namespace_project": [
+      {
+        "namespace": "default",
+        "project_key": "default",
+        "total": 61,
+        "by_status": {
+          "CANCELLED": 6,
+          "SUCCEEDED": 55
+        }
+      }
+    ],
+    "inflight_by_namespace_project": []
+  },
+  "queue_backlog": {
+    "celery_unavailable": true,
+    "workers": 0,
+    "active": 0,
+    "reserved": 0,
+    "scheduled": 0,
+    "redis_list_len": null,
+    "redis_error": "'NoneType' object has no attribute 'Redis'"
+  },
+  "workers": {
+    "total": 3,
+    "fresh_within_120s": 2,
+    "heartbeat_fresh_window_sec": 120,
+    "by_status": {
+      "OFFLINE": 1,
+      "ONLINE": 2
+    },
+    "executor_pools": {
+      "wildcard_headroom": 2,
+      "specific_only_headroom": {
+        "orchestrator": 0,
+        "inference": 0,
+        "reporting": 0,
+        "ingest": 0
+      },
+      "effective_headroom_by_required_pool": {
+        "orchestrator": 2,
+        "inference": 2,
+        "reporting": 2,
+        "ingest": 2
+      }
+    },
+    "pipeline_admission": {
+      "headroom": 2,
+      "total_capacity": 2,
+      "total_inflight": 0,
+      "online_workers": 2,
+      "total_worker_rows": 3
+    },
+    "workers_by_executor_group": [
+      {
+        "executor_pool": "general",
+        "c": 3
+      }
+    ]
+  },
+  "model_runs": {
+    "total": 288,
+    "by_error_type": {},
+    "by_namespace_project": [
+      {
+        "namespace": "default",
+        "project_key": "default",
+        "total": 288
+      }
+    ]
+  },
+  "providers": [],
+  "inference_latency": {
+    "avg_ms": null,
+    "last_ms": null
+  },
+  "latency": {
+    "window_sec": 21600,
+    "sample_count": 0,
+    "total_latency_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    },
+    "queue_wait_ms": {
+      "p50": null,
+      "p95": null
+    },
+    "source": "jobs.total_latency_ms (sqlite_ssot)"
+  },
+  "slo": {
+    "window_sec": 3600,
+    "target_pct": 99.0,
+    "completed": 0,
+    "succeeded": 0,
+    "failed": 0,
+    "success_rate_pct": null,
+    "error_budget_remaining_pct": null
+  },
+  "inference_queue": {
+    "depth": 0,
+    "active_workers": 0,
+    "max_inflight": 0,
+    "num_workers": 1,
+    "avg_job_e2e_ms": null,
+    "last_job_e2e_ms": null,
+    "avg_batch_size": null,
+    "avg_queue_wait_ms": null,
+    "throughput_img_per_sec_30s": null,
+    "gpu_util_estimate_30s": null,
+    "gpu_util_real": null,
+    "gpu_util": null,
+    "gpu_util_source": "none"
+  },
+  "metrics_authority": {
+    "labels": {
+      "jobs": "sqlite_ssot",
+      "workers": "sqlite_ssot",
+      "model_runs": "sqlite_ssot",
+      "inference_from_database": "sqlite_ssot_aggregated",
+      "stage3_fast_first_routing": "process_local_only",
+      "providers": "process_local_only",
+      "inference_latency": "process_local_only",
+      "inference_queue": "process_local_only",
+      "queue_backlog": "broker_best_effort",
+      "runtime_snapshots": "worker_published_best_effort",
+      "prometheus_text": "process_local_when_scraped"
+    },
+    "unreliable_without_context": [
+      "providers",
+      "inference_latency",
+      "inference_queue",
+      "stage3_fast_first_routing",
+      "prometheus exporter values derived from this process"
+    ],
+    "aggregation_model": "Cross-worker inference counters in JSON come from model_runs / model_run_attempts. Optional infra_runtime_snapshots merges per-process queue depth when workers persist."
+  },
+  "inference_from_database": {
+    "scope": {
+      "namespace": null,
+      "project_key": null
+    },
+    "model_runs_inflight_in_db": 1,
+    "terminal_by_provider": [
+      {
+        "provider": "ollama",
+        "terminal_total": 287,
+        "terminal_last_24h": 0,
+        "succeeded_total": 287,
+        "succeeded_last_24h": 0,
+        "failed_total": 0,
+        "failed_last_24h": 0,
+        "fallback_marked_total": 0,
+        "avg_e2e_latency_ms": 15905,
+        "avg_e2e_latency_ms_last_24h": null,
+        "avg_provider_latency_ms": 15905,
+        "avg_provider_latency_ms_last_24h": null,
+        "avg_queue_wait_ms": 0
+      }
+    ],
+    "attempts_by_provider": [
+      {
+        "provider": "ollama",
+        "attempts": 286,
+        "ok": 286,
+        "fail": 0
+      }
+    ],
+    "windows": {
+      "last_24h_since_unix": 1782912734,
+      "as_of_unix": 1782999134
+    }
+  },
+  "runtime_snapshots": {
+    "inference_queue": {
+      "instances": [
+        {
+          "source": "host.local:10821",
+          "updated_at": 1782359615,
+          "age_sec": 639519,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:14094",
+          "updated_at": 1781057964,
+          "age_sec": 1941170,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:15212",
+          "updated_at": 1778465922,
+          "age_sec": 4533212,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:15803",
+          "updated_at": 1781058088,
+          "age_sec": 1941046,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:16703",
+          "updated_at": 1777905951,
+          "age_sec": 5093183,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:17071",
+          "updated_at": 1781058194,
+          "age_sec": 1940940,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:17313",
+          "updated_at": 1781183717,
+          "age_sec": 1815417,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 3,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:18817",
+          "updated_at": 1781853538,
+          "age_sec": 1145596,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 24
+        },
+        {
+          "source": "host.local:19813",
+          "updated_at": 1781058360,
+          "age_sec": 1940774,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:20008",
+          "updated_at": 1781058370,
+          "age_sec": 1940764,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:20871",
+          "updated_at": 1780757661,
+          "age_sec": 2241473,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:21930",
+          "updated_at": 1778039964,
+          "age_sec": 4959170,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:21985",
+          "updated_at": 1782718298,
+          "age_sec": 280836,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:22071",
+          "updated_at": 1778641761,
+          "age_sec": 4357373,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:22331",
+          "updated_at": 1779029319,
+          "age_sec": 3969815,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:23124",
+          "updated_at": 1778729807,
+          "age_sec": 4269327,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:23216",
+          "updated_at": 1781230466,
+          "age_sec": 1768668,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:26205",
+          "updated_at": 1781853662,
+          "age_sec": 1145472,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:28016",
+          "updated_at": 1781853708,
+          "age_sec": 1145426,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 30
+        },
+        {
+          "source": "host.local:28401",
+          "updated_at": 1782444173,
+          "age_sec": 554961,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:29664",
+          "updated_at": 1781188151,
+          "age_sec": 1810983,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:3117",
+          "updated_at": 1782359370,
+          "age_sec": 639764,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:3200",
+          "updated_at": 1778856037,
+          "age_sec": 4143097,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:33842",
+          "updated_at": 1782360449,
+          "age_sec": 638685,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:35359",
+          "updated_at": 1781853813,
+          "age_sec": 1145321,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:35957",
+          "updated_at": 1781853822,
+          "age_sec": 1145312,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:36364",
+          "updated_at": 1782317929,
+          "age_sec": 681205,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:36800",
+          "updated_at": 1782314166,
+          "age_sec": 684968,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:38513",
+          "updated_at": 1781159974,
+          "age_sec": 1839160,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:40190",
+          "updated_at": 1782318006,
+          "age_sec": 681128,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:43398",
+          "updated_at": 1782318268,
+          "age_sec": 680866,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:46829",
+          "updated_at": 1779548917,
+          "age_sec": 3450217,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:47802",
+          "updated_at": 1779374871,
+          "age_sec": 3624263,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:49223",
+          "updated_at": 1782658152,
+          "age_sec": 340982,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:53084",
+          "updated_at": 1782658265,
+          "age_sec": 340869,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:5536",
+          "updated_at": 1781057441,
+          "age_sec": 1941693,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:57049",
+          "updated_at": 1778468548,
+          "age_sec": 4530586,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:58186",
+          "updated_at": 1779981788,
+          "age_sec": 3017346,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:58625",
+          "updated_at": 1782665152,
+          "age_sec": 333982,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:58924",
+          "updated_at": 1782357006,
+          "age_sec": 642128,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:5900",
+          "updated_at": 1781229309,
+          "age_sec": 1769825,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:59617",
+          "updated_at": 1777954419,
+          "age_sec": 5044715,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:61335",
+          "updated_at": 1781854252,
+          "age_sec": 1144882,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:61940",
+          "updated_at": 1781854263,
+          "age_sec": 1144871,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:64617",
+          "updated_at": 1782622921,
+          "age_sec": 376213,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:65059",
+          "updated_at": 1778593405,
+          "age_sec": 4405729,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:66510",
+          "updated_at": 1780712848,
+          "age_sec": 2286286,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:66799",
+          "updated_at": 1778645011,
+          "age_sec": 4354123,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:70705",
+          "updated_at": 1779174101,
+          "age_sec": 3825033,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:72245",
+          "updated_at": 1782460852,
+          "age_sec": 538282,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:73305",
+          "updated_at": 1778771240,
+          "age_sec": 4227894,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:74104",
+          "updated_at": 1781146637,
+          "age_sec": 1852497,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:74171",
+          "updated_at": 1781363731,
+          "age_sec": 1635403,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:74930",
+          "updated_at": 1781151243,
+          "age_sec": 1847891,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:7526",
+          "updated_at": 1779798630,
+          "age_sec": 3200504,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:76064",
+          "updated_at": 1777991638,
+          "age_sec": 5007496,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:7804",
+          "updated_at": 1781057606,
+          "age_sec": 1941528,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:79221",
+          "updated_at": 1778036428,
+          "age_sec": 4962706,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:8176",
+          "updated_at": 1777905207,
+          "age_sec": 5093927,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:81830",
+          "updated_at": 1781796287,
+          "age_sec": 1202847,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:8186",
+          "updated_at": 1777905207,
+          "age_sec": 5093927,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:82048",
+          "updated_at": 1781151773,
+          "age_sec": 1847361,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:8284",
+          "updated_at": 1777905214,
+          "age_sec": 5093920,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:8428",
+          "updated_at": 1777905224,
+          "age_sec": 5093910,
+          "stale": true,
+          "depth": 1,
+          "active_workers": 0,
+          "max_inflight": 16
+        },
+        {
+          "source": "host.local:84469",
+          "updated_at": 1778042769,
+          "age_sec": 4956365,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:86731",
+          "updated_at": 1782486741,
+          "age_sec": 512393,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:87373",
+          "updated_at": 1781163610,
+          "age_sec": 1835524,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:8960",
+          "updated_at": 1781156033,
+          "age_sec": 1843101,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:91466",
+          "updated_at": 1782573508,
+          "age_sec": 425626,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:91596",
+          "updated_at": 1778037499,
+          "age_sec": 4961635,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:93119",
+          "updated_at": 1781880681,
+          "age_sec": 1118453,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:93493",
+          "updated_at": 1779635075,
+          "age_sec": 3364059,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:9395",
+          "updated_at": 1781061617,
+          "age_sec": 1937517,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:97464",
+          "updated_at": 1778341149,
+          "age_sec": 4657985,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        },
+        {
+          "source": "host.local:97630",
+          "updated_at": 1778038051,
+          "age_sec": 4961083,
+          "stale": true,
+          "depth": 0,
+          "active_workers": 0,
+          "max_inflight": 4
+        }
+      ],
+      "totals": {
+        "sum_depth": 18,
+        "sum_active_workers": 3,
+        "instances": 75
+      },
+      "stale_threshold_sec": 120,
+      "note": "Populated when workers run PrioritizedInferenceQueue with DB writes enabled."
+    },
+    "raw_row_count": 75
+  },
+  "stage3_fast_first_routing": {
+    "fast_only_count": 0,
+    "full_count": 0,
+    "early_exit_ratio": 0.0
+  }
+}

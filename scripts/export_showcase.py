@@ -27,18 +27,27 @@ from pathlib import Path
 
 # Safety net: anything that still looks like a real local path / hostname after
 # targeted anonymization gets neutralized here before a fixture is committed.
-_PATH_RE = re.compile(r"/Volumes/\S*?Livehouse_Archive/[^\"\s]*")
+# We keep structural fields (incl. ``payload_json``, which the UI parses) but
+# scrub any absolute path / ``.local`` hostname out of every string — including
+# paths embedded inside JSON-encoded ``payload_json`` blobs.
+_PATH_RES = [
+    re.compile(r"/Volumes/[^\"'\s\\]+"),
+    re.compile(r"/Users/[^\"'\s\\]+"),
+]
 _HOST_RE = re.compile(r"\b[\w-]+\.local\b")
 
 
 def _scrub(obj):
-    """Recursively drop raw payload blobs and neutralize any leaked path/hostname."""
+    """Recursively neutralize any leaked absolute path / hostname in string values."""
     if isinstance(obj, dict):
-        return {k: _scrub(v) for k, v in obj.items() if k != "payload_json"}
+        return {k: _scrub(v) for k, v in obj.items()}
     if isinstance(obj, list):
         return [_scrub(v) for v in obj]
     if isinstance(obj, str):
-        return _HOST_RE.sub("host.local", _PATH_RE.sub("/archive/session/Previews", obj))
+        s = obj
+        for rx in _PATH_RES:
+            s = rx.sub("/archive/redacted", s)
+        return _HOST_RE.sub("host.local", s)
     return obj
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +100,7 @@ def export_landing(dry_run: bool) -> int:
             print(f"  ✗ {name}: {exc}", file=sys.stderr)
             failed += 1
             continue
+        data = _scrub(data)  # neutralize any absolute archive_root path
         if dry_run:
             print(f"  · {name}: {json.dumps(data, ensure_ascii=False)[:120]}…")
         else:
@@ -231,6 +241,102 @@ def export_studio(dry_run: bool) -> int:
     return failed
 
 
+# ── Phase 3: infra console fixtures ───────────────────────────────────────────
+# The /infra dashboard polls ~14 FastAPI endpoints that have no Next route
+# handler (they proxy to FastAPI in full mode). We snapshot each endpoint's real
+# response in-process via FastAPI's TestClient — real routing + response_model
+# serialization — then scrub paths/hostnames. Requires ``fastapi`` installed;
+# import lazily so landing/studio export still works without it.
+#
+# (URL path, query string, fixture name). Drill-downs use one representative id.
+INFRA_ENDPOINTS: list[tuple[str, str, str]] = [
+    ("metrics", "", "infra-metrics"),
+    ("metrics/history", "window_sec=3600&limit=240", "infra-metrics-history"),
+    ("workers", "", "infra-workers"),
+    ("providers", "", "infra-providers"),
+    ("cost", "", "infra-cost"),
+    ("dead-letter", "limit=15&offset=0", "infra-dead-letter"),
+    ("runtime-stream", "events_limit=80", "infra-runtime-stream"),
+    ("brain", "sessions_limit=15&photos_limit=30", "infra-brain"),
+    ("agent/runs", "limit=8", "infra-agent-runs"),
+    ("jobs", "limit=100&offset=0", "infra-jobs"),
+]
+
+
+def export_infra(dry_run: bool) -> int:
+    print("Exporting infra console fixtures from local data (anonymized):")
+    try:
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        sys.path.insert(0, str(REPO_ROOT))
+        from api.infra_routes import router  # noqa: E402
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ✗ infra export skipped (need `pip install fastapi httpx`): {exc}", file=sys.stderr)
+        return 1
+
+    app = FastAPI()
+    app.include_router(router)
+    client = TestClient(app)
+    failed = 0
+
+    def dump(path: str, query: str, name: str) -> dict | None:
+        url = f"/api/infra/{path}" + (f"?{query}" if query else "")
+        res = client.get(url)
+        if res.status_code != 200:
+            print(f"  ✗ {name}: HTTP {res.status_code} {url}", file=sys.stderr)
+            return None
+        data = _scrub(res.json())
+        if dry_run:
+            print(f"  · {name}: {json.dumps(data, ensure_ascii=False)[:110]}…")
+        else:
+            write_fixture(name, data)
+        return data
+
+    for path, query, name in INFRA_ENDPOINTS:
+        try:
+            data = dump(path, query, name)
+            if data is None:
+                failed += 1
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ✗ {name}: {exc}", file=sys.stderr)
+            failed += 1
+
+    # Representative drill-downs: pick the newest job id (+ its trace) from the list.
+    job_id = None
+    trace_id = None
+    try:
+        jobs = client.get("/api/infra/jobs?limit=1&offset=0").json()
+        items = jobs.get("items") or []
+        if items:
+            job_id = items[0].get("id")
+            trace_id = items[0].get("trace_id")
+    except Exception:  # noqa: BLE001
+        pass
+
+    if job_id is not None:
+        for path, name in [
+            (f"jobs/{job_id}", "infra-job-detail"),
+            (f"jobs/{job_id}/stages", "infra-job-stages"),
+            (f"jobs/{job_id}/timeline", "infra-job-timeline"),
+        ]:
+            try:
+                if dump(path, "", name) is None:
+                    failed += 1
+            except Exception as exc:  # noqa: BLE001
+                print(f"  ✗ {name}: {exc}", file=sys.stderr)
+                failed += 1
+    if trace_id:
+        try:
+            if dump(f"traces/{trace_id}", "", "infra-trace") is None:
+                failed += 1
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ✗ infra-trace: {exc}", file=sys.stderr)
+            failed += 1
+
+    return failed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export the Vercel showcase snapshot.")
     parser.add_argument(
@@ -242,8 +348,7 @@ def main() -> int:
 
     failed = export_landing(args.dry_run)
     failed += export_studio(args.dry_run)
-
-    # TODO(step 3): export_infra_console(...) -> web/fixtures/infra/*.json (Phase 3)
+    failed += export_infra(args.dry_run)
 
     if failed:
         print(f"\nDone with {failed} failure(s).", file=sys.stderr)

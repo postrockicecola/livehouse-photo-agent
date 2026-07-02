@@ -5,6 +5,7 @@
   "buildCommand": "pnpm build",
   "env": {
     "LANDING_ONLY": "1",
-    "SHOWCASE_MODE": "1"
+    "SHOWCASE_MODE": "1",
+    "NEXT_PUBLIC_SHOWCASE_MODE": "1"
   }
 }

@@ -18,6 +18,20 @@ import studioSessions from "@/fixtures/studio-sessions.json";
 import studioStatus from "@/fixtures/studio-status.json";
 import studioFeaturedFrames from "@/fixtures/studio-featured-frames.json";
 import studioInfraOverview from "@/fixtures/studio-infra-overview.json";
+import infraMetrics from "@/fixtures/infra-metrics.json";
+import infraMetricsHistory from "@/fixtures/infra-metrics-history.json";
+import infraWorkers from "@/fixtures/infra-workers.json";
+import infraProviders from "@/fixtures/infra-providers.json";
+import infraCost from "@/fixtures/infra-cost.json";
+import infraDeadLetter from "@/fixtures/infra-dead-letter.json";
+import infraRuntimeStream from "@/fixtures/infra-runtime-stream.json";
+import infraBrain from "@/fixtures/infra-brain.json";
+import infraAgentRuns from "@/fixtures/infra-agent-runs.json";
+import infraJobs from "@/fixtures/infra-jobs.json";
+import infraJobDetail from "@/fixtures/infra-job-detail.json";
+import infraJobStages from "@/fixtures/infra-job-stages.json";
+import infraJobTimeline from "@/fixtures/infra-job-timeline.json";
+import infraTrace from "@/fixtures/infra-trace.json";
 
 /** True when running as the read-only Vercel showcase (set `SHOWCASE_MODE=1`). */
 export function isShowcase(): boolean {
@@ -33,6 +47,20 @@ const FIXTURES = {
   "studio-status": studioStatus,
   "studio-featured-frames": studioFeaturedFrames,
   "studio-infra-overview": studioInfraOverview,
+  "infra-metrics": infraMetrics,
+  "infra-metrics-history": infraMetricsHistory,
+  "infra-workers": infraWorkers,
+  "infra-providers": infraProviders,
+  "infra-cost": infraCost,
+  "infra-dead-letter": infraDeadLetter,
+  "infra-runtime-stream": infraRuntimeStream,
+  "infra-brain": infraBrain,
+  "infra-agent-runs": infraAgentRuns,
+  "infra-jobs": infraJobs,
+  "infra-job-detail": infraJobDetail,
+  "infra-job-stages": infraJobStages,
+  "infra-job-timeline": infraJobTimeline,
+  "infra-trace": infraTrace,
 } as const;
 
 export type FixtureName = keyof typeof FIXTURES;

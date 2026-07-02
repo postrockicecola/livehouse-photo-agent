@@ -1,0 +1,53 @@
+{
+  "count": 3,
+  "items": [
+    {
+      "id": 5,
+      "worker_name": "brain@general@dev",
+      "worker_type": "general",
+      "status": "ONLINE",
+      "last_heartbeat": 1782999130,
+      "capacity": 1,
+      "inflight": 0,
+      "created_at": 1782396948,
+      "updated_at": 1782999130,
+      "celery_broker": {
+        "online": false
+      }
+    },
+    {
+      "id": 6,
+      "worker_name": "brain@host.local",
+      "worker_type": "general",
+      "status": "ONLINE",
+      "last_heartbeat": 1782999118,
+      "capacity": 1,
+      "inflight": 0,
+      "created_at": 1782701393,
+      "updated_at": 1782999118,
+      "celery_broker": {
+        "online": false
+      }
+    },
+    {
+      "id": 2,
+      "worker_name": "brain@celery@host.local",
+      "worker_type": "general",
+      "status": "OFFLINE",
+      "last_heartbeat": 1782707714,
+      "capacity": 1,
+      "inflight": 0,
+      "created_at": 1779608265,
+      "updated_at": 1782707901,
+      "celery_broker": {
+        "online": false
+      }
+    }
+  ],
+  "broker": {
+    "celery_unavailable": true,
+    "worker_count": 0,
+    "error": "'NoneType' object has no attribute 'Redis'"
+  },
+  "unmatched_broker_workers": []
+}

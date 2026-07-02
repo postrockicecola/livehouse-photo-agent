@@ -17,6 +17,7 @@ import {
   type StudioSessionSortOrder,
 } from "@/lib/studioSessionSort";
 import { StudioAppNav } from "@/components/studio/StudioAppNav";
+import { ShowcaseBanner } from "@/components/ShowcaseBanner";
 import { StudioCurrentSessionHero } from "@/components/studio/StudioCurrentSessionHero";
 import { StudioFeaturedFrames } from "@/components/studio/StudioFeaturedFrames";
 import { StudioPipelineTimeline } from "@/components/studio/StudioPipelineTimeline";
@@ -241,6 +242,7 @@ export default function StudioPage() {
   return (
     <div className="studio-grain relative flex min-h-[100dvh] flex-col bg-[#0e0e0e] text-[#e8e8e8]">
       <StudioAppNav />
+      <ShowcaseBanner />
 
       {loading ? (
         <p className="px-6 py-4 text-sm text-white/35">Loading sessions…</p>

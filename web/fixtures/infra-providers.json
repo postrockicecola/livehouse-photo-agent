@@ -1,0 +1,27 @@
+{
+  "active_provider": "ollama",
+  "providers": [
+    {
+      "name": "mock",
+      "enabled": false,
+      "endpoint": null,
+      "model_name": "mock-vlm",
+      "fallback_model_name": null,
+      "runtime": null,
+      "display_name": "Mock",
+      "description": "In-process stub for tests and offline pipelines.",
+      "supports_remote_endpoint": false
+    },
+    {
+      "name": "ollama",
+      "enabled": true,
+      "endpoint": "http://localhost:11434",
+      "model_name": "llava",
+      "fallback_model_name": null,
+      "runtime": null,
+      "display_name": "Ollama",
+      "description": "Local or remote Ollama with /api/generate (e.g. LLaVA).",
+      "supports_remote_endpoint": true
+    }
+  ]
+}

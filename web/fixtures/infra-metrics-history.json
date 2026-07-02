@@ -1,0 +1,50 @@
+{
+  "count": 4,
+  "window_sec": 3600,
+  "points": [
+    {
+      "ts": 1782998955,
+      "queued": 0,
+      "running": 0,
+      "failed_total": 0,
+      "succeeded_cumulative": 55,
+      "util_pct": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "throughput_per_min": null
+    },
+    {
+      "ts": 1782999052,
+      "queued": 0,
+      "running": 0,
+      "failed_total": 0,
+      "succeeded_cumulative": 55,
+      "util_pct": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "throughput_per_min": 0.0
+    },
+    {
+      "ts": 1782999070,
+      "queued": 0,
+      "running": 0,
+      "failed_total": 0,
+      "succeeded_cumulative": 55,
+      "util_pct": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "throughput_per_min": 0.0
+    },
+    {
+      "ts": 1782999134,
+      "queued": 0,
+      "running": 0,
+      "failed_total": 0,
+      "succeeded_cumulative": 55,
+      "util_pct": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "throughput_per_min": 0.0
+    }
+  ]
+}

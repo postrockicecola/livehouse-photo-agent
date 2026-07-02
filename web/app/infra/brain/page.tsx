@@ -16,6 +16,7 @@ import type {
 } from "@/components/brain/types";
 import { WorkerPanel } from "@/components/brain/WorkerPanel";
 import { getApiBase } from "@/lib/apiBase";
+import { ShowcaseBanner } from "@/components/ShowcaseBanner";
 
 const API_BASE = getApiBase();
 const POLL_MS = 4000;
@@ -83,6 +84,7 @@ export default function InfraBrainPage() {
 
   return (
     <main className="runtime-shell studio-grain relative min-h-screen px-3 py-4 sm:px-5 sm:py-5">
+      <ShowcaseBanner />
       <header className="relative z-10 mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-zinc-600">

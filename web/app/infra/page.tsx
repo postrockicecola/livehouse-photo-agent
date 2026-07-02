@@ -28,6 +28,7 @@ import {
   type InfraStageFlowItem,
 } from "@/lib/infraControlPlane";
 import { getApiBase } from "@/lib/apiBase";
+import { ShowcaseBanner } from "@/components/ShowcaseBanner";
 
 const API_BASE = getApiBase();
 
@@ -338,6 +339,7 @@ export default function InfraPage() {
 
   return (
     <main className="min-h-screen px-4 py-4 sm:px-6">
+      <ShowcaseBanner />
       <SystemStatusBar
         verdict={health.verdict}
         reason={health.reason}

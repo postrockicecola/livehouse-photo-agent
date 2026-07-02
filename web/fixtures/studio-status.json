@@ -106,31 +106,36 @@
       "id": 333,
       "to_status": "QUEUED",
       "message": "job enqueued",
-      "created_at": 1782706964
+      "created_at": 1782706964,
+      "payload_json": "{\"priority\": 0, \"max_attempts\": 3}"
     },
     {
       "id": 334,
       "to_status": "CLAIMED",
       "message": "job claimed by run_job (from QUEUED or FAILED_RETRYABLE)",
-      "created_at": 1782706964
+      "created_at": 1782706964,
+      "payload_json": "{\"worker_id\": 2}"
     },
     {
       "id": 335,
       "to_status": "PREPROCESSING",
       "message": "job preprocessing",
-      "created_at": 1782706964
+      "created_at": 1782706964,
+      "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\"}"
     },
     {
       "id": 336,
       "to_status": "INFERENCING",
       "message": "running aesthetic pipeline",
-      "created_at": 1782706964
+      "created_at": 1782706964,
+      "payload_json": "{\"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\"}"
     },
     {
       "id": 337,
       "to_status": "SUCCEEDED",
       "message": "job succeeded",
-      "created_at": 1782707714
+      "created_at": 1782707714,
+      "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\", \"artifacts\": [{\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"preview_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"preview\", \"role\": \"session_index_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"best\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"keep\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"trash\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}], \"artifact_registry_version\": 1, \"primary_artifact\": {\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}}"
     }
   ]
 }

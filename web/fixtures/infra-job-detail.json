@@ -1,0 +1,403 @@
+{
+  "job": {
+    "id": 61,
+    "job_type": "ANALYZE_SESSION",
+    "session_id": 6,
+    "photo_id": null,
+    "status": "SUCCEEDED",
+    "priority": 0,
+    "attempt": 1,
+    "max_attempts": 3,
+    "worker_id": 2,
+    "provider": null,
+    "model_name": null,
+    "fallback_used": 0,
+    "enqueued_at": 1782706964,
+    "claimed_at": 1782706964,
+    "started_at": 1782706964,
+    "finished_at": 1782707714,
+    "queue_wait_ms": 0,
+    "preprocess_ms": null,
+    "inference_ms": null,
+    "postprocess_ms": null,
+    "total_latency_ms": 749984,
+    "error_code": null,
+    "error_message": null,
+    "trace_id": "studio_analyze_c1c8452b9f75",
+    "payload_json": null,
+    "root_job_id": null,
+    "parent_job_id": null,
+    "stage_name": null,
+    "stage_order": null,
+    "depends_on_job_id": null,
+    "is_stage": 0,
+    "namespace": "default",
+    "project_key": "default",
+    "created_at": 1782706964,
+    "updated_at": 1782707714,
+    "output_artifacts": [
+      {
+        "artifact_id": 334,
+        "job_id": 61,
+        "kind": "analysis_results_json",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "analysis_results",
+          "role": "structured_output"
+        },
+        "is_primary": true,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      },
+      {
+        "artifact_id": 335,
+        "job_id": 61,
+        "kind": "preview_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "preview",
+          "role": "session_index_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "preview",
+        "role": "session_index_html"
+      },
+      {
+        "artifact_id": 336,
+        "job_id": 61,
+        "kind": "folder_gallery_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "category": "best",
+          "taxonomy": "gallery_html",
+          "role": "folder_gallery_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "category": "best",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      {
+        "artifact_id": 337,
+        "job_id": 61,
+        "kind": "folder_gallery_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "category": "keep",
+          "taxonomy": "gallery_html",
+          "role": "folder_gallery_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "category": "keep",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      {
+        "artifact_id": 338,
+        "job_id": 61,
+        "kind": "folder_gallery_html",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "category": "trash",
+          "taxonomy": "gallery_html",
+          "role": "folder_gallery_html"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "category": "trash",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      {
+        "artifact_id": 339,
+        "job_id": 61,
+        "kind": "gallery_launch_script",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "gallery_html",
+          "role": "gallery_launch_shell"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      },
+      {
+        "artifact_id": 340,
+        "job_id": 61,
+        "kind": "gallery_launch_script",
+        "path": "/archive/redacted",
+        "generated_at": 1782707714,
+        "metadata": {
+          "taxonomy": "gallery_html",
+          "role": "gallery_launch_shell"
+        },
+        "is_primary": false,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 337,
+        "created_at": 1782707714,
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      }
+    ],
+    "primary_artifact": {
+      "artifact_id": 334,
+      "job_id": 61,
+      "kind": "analysis_results_json",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      },
+      "is_primary": true,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    },
+    "artifact_lineage": {
+      "source": "artifacts_table",
+      "artifact_count": 7,
+      "provenance_job_event_ids": [
+        337
+      ],
+      "primary_artifact_id": 334
+    }
+  },
+  "events": [
+    {
+      "id": 333,
+      "job_id": 61,
+      "from_status": null,
+      "to_status": "QUEUED",
+      "created_at": 1782706964,
+      "message": "job enqueued",
+      "payload_json": "{\"priority\": 0, \"max_attempts\": 3}"
+    },
+    {
+      "id": 334,
+      "job_id": 61,
+      "from_status": "QUEUED",
+      "to_status": "CLAIMED",
+      "created_at": 1782706964,
+      "message": "job claimed by run_job (from QUEUED or FAILED_RETRYABLE)",
+      "payload_json": "{\"worker_id\": 2}"
+    },
+    {
+      "id": 335,
+      "job_id": 61,
+      "from_status": "CLAIMED",
+      "to_status": "PREPROCESSING",
+      "created_at": 1782706964,
+      "message": "job preprocessing",
+      "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\"}"
+    },
+    {
+      "id": 336,
+      "job_id": 61,
+      "from_status": "PREPROCESSING",
+      "to_status": "INFERENCING",
+      "created_at": 1782706964,
+      "message": "running aesthetic pipeline",
+      "payload_json": "{\"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\"}"
+    },
+    {
+      "id": 337,
+      "job_id": 61,
+      "from_status": "INFERENCING",
+      "to_status": "SUCCEEDED",
+      "created_at": 1782707714,
+      "message": "job succeeded",
+      "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\", \"artifacts\": [{\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"preview_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"preview\", \"role\": \"session_index_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"best\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"keep\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"trash\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}], \"artifact_registry_version\": 1, \"primary_artifact\": {\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}}"
+    }
+  ],
+  "model_runs": [],
+  "artifacts": [
+    {
+      "artifact_id": 334,
+      "job_id": 61,
+      "kind": "analysis_results_json",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      },
+      "is_primary": true,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    },
+    {
+      "artifact_id": 335,
+      "job_id": 61,
+      "kind": "preview_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "preview",
+        "role": "session_index_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "preview",
+      "role": "session_index_html"
+    },
+    {
+      "artifact_id": 336,
+      "job_id": 61,
+      "kind": "folder_gallery_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "category": "best",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "category": "best",
+      "taxonomy": "gallery_html",
+      "role": "folder_gallery_html"
+    },
+    {
+      "artifact_id": 337,
+      "job_id": 61,
+      "kind": "folder_gallery_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "category": "keep",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "category": "keep",
+      "taxonomy": "gallery_html",
+      "role": "folder_gallery_html"
+    },
+    {
+      "artifact_id": 338,
+      "job_id": 61,
+      "kind": "folder_gallery_html",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "category": "trash",
+        "taxonomy": "gallery_html",
+        "role": "folder_gallery_html"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "category": "trash",
+      "taxonomy": "gallery_html",
+      "role": "folder_gallery_html"
+    },
+    {
+      "artifact_id": 339,
+      "job_id": 61,
+      "kind": "gallery_launch_script",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "gallery_html",
+      "role": "gallery_launch_shell"
+    },
+    {
+      "artifact_id": 340,
+      "job_id": 61,
+      "kind": "gallery_launch_script",
+      "path": "/archive/redacted",
+      "generated_at": 1782707714,
+      "metadata": {
+        "taxonomy": "gallery_html",
+        "role": "gallery_launch_shell"
+      },
+      "is_primary": false,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 337,
+      "created_at": 1782707714,
+      "taxonomy": "gallery_html",
+      "role": "gallery_launch_shell"
+    }
+  ],
+  "primary_artifact": {
+    "artifact_id": 334,
+    "job_id": 61,
+    "kind": "analysis_results_json",
+    "path": "/archive/redacted",
+    "generated_at": 1782707714,
+    "metadata": {
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    },
+    "is_primary": true,
+    "stage": null,
+    "source": "aesthetic_pipeline",
+    "job_event_id": 337,
+    "created_at": 1782707714,
+    "taxonomy": "analysis_results",
+    "role": "structured_output"
+  },
+  "project_scope": {
+    "namespace": "default",
+    "project_key": "default"
+  }
+}
