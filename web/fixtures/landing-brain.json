@@ -1,15 +1,54 @@
 {
   "counts": {
-    "jobs": 1284,
-    "events": 9712,
-    "artifacts": 3460,
-    "sessions": 50,
-    "photos": 573,
-    "snapshots": 1284
+    "jobs": 61,
+    "events": 337,
+    "artifacts": 333,
+    "sessions": 9,
+    "photos": 15150,
+    "snapshots": 75
   },
   "trace": [
-    { "id": 1, "job_id": 1842, "from_status": "QUEUED", "to_status": "CLAIMED", "created_at": null },
-    { "id": 2, "job_id": 1842, "from_status": "CLAIMED", "to_status": "INFERENCING", "created_at": null },
-    { "id": 3, "job_id": 1842, "from_status": "INFERENCING", "to_status": "SUCCEEDED", "created_at": null }
+    {
+      "id": 337,
+      "job_id": 61,
+      "from_status": "INFERENCING",
+      "to_status": "SUCCEEDED",
+      "created_at": 1782707714
+    },
+    {
+      "id": 333,
+      "job_id": 61,
+      "from_status": "",
+      "to_status": "QUEUED",
+      "created_at": 1782706964
+    },
+    {
+      "id": 334,
+      "job_id": 61,
+      "from_status": "QUEUED",
+      "to_status": "CLAIMED",
+      "created_at": 1782706964
+    },
+    {
+      "id": 335,
+      "job_id": 61,
+      "from_status": "CLAIMED",
+      "to_status": "PREPROCESSING",
+      "created_at": 1782706964
+    },
+    {
+      "id": 336,
+      "job_id": 61,
+      "from_status": "PREPROCESSING",
+      "to_status": "INFERENCING",
+      "created_at": 1782706964
+    },
+    {
+      "id": 332,
+      "job_id": 60,
+      "from_status": "INFERENCING",
+      "to_status": "SUCCEEDED",
+      "created_at": 1782704353
+    }
   ]
 }
