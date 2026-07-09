@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -73,9 +74,70 @@ func sdScanOnce(
 		return 0, nil
 	}
 
-	sessionKey := studioSessionFolderName(repoRoot, cands)
-	if sessionKey == "" {
-		sessionKey = time.Now().Format("2006-01-02")
+	// Split the card into per-day sessions by each file's own EXIF date so a
+	// mixed card (e.g. yesterday + today) never collapses into one majority-date
+	// folder. A manual studio override still forces a single session.
+	groups := groupCandidatesBySession(repoRoot, cands)
+	var total int
+	for _, key := range sortedSessionKeys(groups) {
+		n, err := ingestSessionGroup(db, key, groups[key], archiveRoot, deviceID, workers, repoRoot, galleryHook)
+		total += n
+		if err != nil {
+			return total, err
+		}
+	}
+	return total, nil
+}
+
+// groupCandidatesBySession maps sessionKey -> candidates. When Studio pins a
+// session_folder_name, all candidates go into that single folder; otherwise
+// candidates are grouped by their individual EXIF CreateDate (unknown -> today).
+func groupCandidatesBySession(repoRoot string, cands []arwCandidate) map[string][]arwCandidate {
+	groups := make(map[string][]arwCandidate)
+	if cfg, ok := loadStudioIngestConfig(repoRoot); ok && cfg.SessionFolderName != "" {
+		groups[cfg.SessionFolderName] = cands
+		return groups
+	}
+
+	paths := make([]string, 0, len(cands))
+	for _, c := range cands {
+		if c.Path != "" {
+			paths = append(paths, c.Path)
+		}
+	}
+	dates := batchCreateDates(paths, 80)
+	today := time.Now().Format("2006-01-02")
+	for _, c := range cands {
+		key := dates[c.Path]
+		if key == "" || key == "Unknown_Date" || key == "-" {
+			key = today
+		}
+		groups[key] = append(groups[key], c)
+	}
+	return groups
+}
+
+func sortedSessionKeys(groups map[string][]arwCandidate) []string {
+	keys := make([]string, 0, len(groups))
+	for k := range groups {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func ingestSessionGroup(
+	db *sql.DB,
+	sessionKey string,
+	cands []arwCandidate,
+	archiveRoot string,
+	deviceID string,
+	workers int,
+	repoRoot string,
+	galleryHook string,
+) (int, error) {
+	if len(cands) == 0 {
+		return 0, nil
 	}
 	sessionDir := filepath.Join(archiveRoot, sessionKey)
 	rawDir := filepath.Join(sessionDir, "RAW")

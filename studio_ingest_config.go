@@ -51,15 +51,3 @@ func applyStudioIngestCLIDefaults(repoRoot string, sdMount, archiveRoot *string)
 		}
 	}
 }
-
-func studioSessionFolderName(repoRoot string, candidates []arwCandidate) string {
-	cfg, ok := loadStudioIngestConfig(repoRoot)
-	if ok && cfg.SessionFolderName != "" {
-		return cfg.SessionFolderName
-	}
-	key := majorityExifSessionDate(candidates)
-	if key != "" && key != "Unknown_Date" {
-		return key
-	}
-	return ""
-}
