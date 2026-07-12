@@ -5,33 +5,33 @@ to a session's gallery data (read-only skills) with safety guardrails. Tool call
 guardrail triggers are returned alongside the reply so the UI can render the plumbing
 (which tools ran, with what args, and whether a guardrail fired) — the point of the demo.
 
-Session memory is in-process and keyed by ``session_id`` (v1: cleared on restart; bounded
-to avoid unbounded growth). The chat model + skills are built per request so new analyses
-and the active previews dir are always reflected.
+Conversation memory is **persisted** per owner in :mod:`services.agent.store`
+(``owner = user:<id>`` when logged in, else ``anon:<session_id>``), so history survives a
+server restart and is isolated per user. The chat model + skills are built per request so
+new analyses and the active previews dir are always reflected.
 """
 from __future__ import annotations
 
 import json
 import logging
-import threading
-from collections import OrderedDict
+import os
 from typing import Any, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header, HTTPException
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from api.auth_routes import resolve_user
+from services.agent import store
 from services.agent.conversation import ConversationalAgent, ConversationMemory
 from services.agent.guardrails import GuardrailEvent, Guardrails
+from services.agent.skills import agent_workspace_root, general_registry, safe_session_id
+from services.agent.skills.artifacts import sanitize_artifact_name
 from services.agent.skills.gallery import gallery_registry
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-# Bounded in-process session memory store (session_id -> ConversationMemory).
-_MAX_SESSIONS = 200
-_sessions: "OrderedDict[str, ConversationMemory]" = OrderedDict()
-_sessions_lock = threading.Lock()
 
 
 class ChatRequest(BaseModel):
@@ -39,6 +39,8 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000)
     previews_dir: Optional[str] = None
     reset: bool = False
+    # "gallery" = read-only session copilot; "general" = web + sandbox code + artifacts.
+    mode: str = Field(default="gallery")
 
 
 class ChatResponse(BaseModel):
@@ -63,12 +65,16 @@ def _resolve_base_dir(previews_dir: Optional[str]) -> str:
         return os.getcwd()
 
 
-def _system_prompt(registry) -> str:
-    """Instruct the model on the bounded tool-call protocol + advertise the tools."""
+def _tool_catalog(registry) -> str:
     tools = [
         {"name": s["function"]["name"], "description": s["function"]["description"], "args": s["function"]["parameters"].get("properties", {})}
         for s in registry.tool_specs()
     ]
+    return json.dumps(tools, ensure_ascii=False)
+
+
+def _system_prompt(registry) -> str:
+    """Gallery copilot prompt: bounded tool-call protocol + advertised tools."""
     return (
         "You are the Gallery copilot for a livehouse photography curation app. You help the "
         "user explore one shooting session's analyzed photos (scores, tags, keep/discard "
@@ -79,53 +85,203 @@ def _system_prompt(registry) -> str:
         "a tool result appears above, you MUST answer in plain natural language (no JSON, no "
         "further tool calls). Never invent photo data — always get it from a tool. Keep "
         "answers concise and reference real file names/scores.\n\n"
-        f"AVAILABLE TOOLS:\n{json.dumps(tools, ensure_ascii=False)}"
+        f"AVAILABLE TOOLS:\n{_tool_catalog(registry)}"
     )
 
 
-def _get_memory(session_id: str, registry, *, reset: bool) -> ConversationMemory:
-    with _sessions_lock:
-        if reset:
-            _sessions.pop(session_id, None)
-        mem = _sessions.get(session_id)
-        if mem is None:
-            mem = ConversationMemory(system_prompt=_system_prompt(registry), max_tokens=3000)
-            _sessions[session_id] = mem
-            while len(_sessions) > _MAX_SESSIONS:
-                _sessions.popitem(last=False)
+def _general_system_prompt(registry) -> str:
+    """General-purpose agent prompt: web + sandboxed code + artifact tools."""
+    return (
+        "You are a helpful general-purpose AI agent. You can search and read the web, run "
+        "sandboxed Python, and save deliverables as downloadable artifacts.\n\n"
+        "TOOLS: to use a tool, reply with ONLY a single JSON object on its own line:\n"
+        '{\"tool\": \"<tool_name>\", \"args\": { ... }}\n'
+        "Work step by step: use ONE tool per step, read its result (shown above), then "
+        "decide the next step. When you have enough information, answer the user in plain "
+        "natural language (no JSON). Ground factual claims in web_fetch results rather than "
+        "guessing, and when the user wants a concrete deliverable, save it with write_artifact "
+        "and share the returned URL.\n\n"
+        f"AVAILABLE TOOLS:\n{_tool_catalog(registry)}"
+    )
+
+
+def _build_registry(mode: str, session_id: str, base_dir: str):
+    """Return ``(registry, system_prompt)`` for the requested mode."""
+    if str(mode or "").strip().lower() == "general":
+        reg = general_registry(session_id)
+        return reg, _general_system_prompt(reg)
+    reg = gallery_registry(base_dir)
+    return reg, _system_prompt(reg)
+
+
+def _build_memory(system_prompt: str, history: list[dict[str, Any]]) -> ConversationMemory:
+    """Rebuild working memory from persisted messages (budget trimming still applies)."""
+    mem = ConversationMemory(system_prompt=system_prompt, max_tokens=3000)
+    for m in history:
+        role = m.get("role")
+        content = m.get("content") or ""
+        if role == "user":
+            mem.add_user(content)
+        elif role == "assistant":
+            mem.add_assistant(content)
+        elif role == "tool":
+            mem.add_tool_result(m.get("name") or "tool", content)
+    return mem
+
+
+def _load_conversation(owner: str, req: ChatRequest, system_prompt: str):
+    """Return ``(conversation_id, ConversationMemory)`` for this owner/session/mode.
+
+    Honors ``req.reset`` by clearing persisted messages first. A fresh connection is
+    used and closed here; persistence of the new turn opens its own connection later.
+    """
+    conn = store.store_connect()
+    try:
+        conv_id = store.get_or_create_conversation(conn, owner, req.session_id, req.mode)
+        if req.reset:
+            store.reset_conversation(conn, owner, req.session_id, req.mode)
+            history: list[dict[str, Any]] = []
         else:
-            _sessions.move_to_end(session_id)
-        return mem
+            history = store.load_messages(conn, conv_id)
+    finally:
+        conn.close()
+    return conv_id, _build_memory(system_prompt, history)
 
 
-@router.post("/api/agent/chat", response_model=ChatResponse)
-def agent_chat(req: ChatRequest) -> ChatResponse:
-    base_dir = _resolve_base_dir(req.previews_dir)
-    registry = gallery_registry(base_dir)
+def _persist_turn(conv_id: int, user_text: str, reply: str) -> int:
+    """Append the user message + assistant reply; return the total message count."""
+    conn = store.store_connect()
+    try:
+        store.append_messages(conn, conv_id, [
+            {"role": "user", "content": user_text},
+            {"role": "assistant", "content": reply},
+        ])
+        return store.message_count(conn, conv_id)
+    finally:
+        conn.close()
 
-    # Build the chat backend from the same model.* config the rest of the app uses,
-    # but prefer a dedicated instruct model (model.agent_chat_model) for tool-calling.
+
+def _build_chat_fn(base_dir: str):
+    """Build the non-streaming ``ChatFn`` from the shared ``model.*`` config.
+
+    Returns ``(chat_fn, error)`` — exactly one is non-None. Prefers a dedicated
+    instruct model (``model.agent_chat_model``) for reliable tool-calling.
+    """
     try:
         from services.agent.chat_backend import build_chat_fn
         from utils.config_loader import ConfigLoader
 
         model_cfg = ConfigLoader.get_model_config(ConfigLoader.load())
         chat_model = str(model_cfg.get("agent_chat_model") or "").strip() or None
-        chat_fn = build_chat_fn(model_cfg, model_name=chat_model)
+        return build_chat_fn(model_cfg, model_name=chat_model), None
     except ValueError as exc:
-        return ChatResponse(reply="", base_dir=base_dir,
-                            error=f"chat model unavailable: {exc} (set model.provider to ollama/vllm/openai)")
+        return None, f"chat model unavailable: {exc} (set model.provider to ollama/vllm/openai)"
     except Exception as exc:
         logger.exception("failed to build chat backend")
-        return ChatResponse(reply="", base_dir=base_dir, error=f"chat backend error: {exc}")
+        return None, f"chat backend error: {exc}"
 
+
+def _build_stream_fn(base_dir: str):
+    """Best-effort streaming ``StreamChatFn``; ``None`` if it can't be built (the
+    agent then falls back to chunking a one-shot completion)."""
+    try:
+        from services.agent.chat_backend import build_stream_chat_fn
+        from utils.config_loader import ConfigLoader
+
+        model_cfg = ConfigLoader.get_model_config(ConfigLoader.load())
+        chat_model = str(model_cfg.get("agent_chat_model") or "").strip() or None
+        return build_stream_chat_fn(model_cfg, model_name=chat_model)
+    except Exception:
+        logger.info("streaming chat backend unavailable; using chunked fallback")
+        return None
+
+
+def _max_rounds(mode: str) -> int:
+    """General tasks are multi-step (search → read → code → write); allow more rounds."""
+    return 6 if str(mode or "").strip().lower() == "general" else 3
+
+
+def _sse(obj: dict[str, Any]) -> str:
+    return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
+
+
+@router.post("/api/agent/chat/stream")
+def agent_chat_stream(
+    req: ChatRequest, authorization: Optional[str] = Header(default=None)
+) -> StreamingResponse:
+    """Server-Sent Events variant of :func:`agent_chat`.
+
+    Streams ``tool_call`` events as skills run and ``token`` events as the final
+    answer is generated, then a terminal ``done`` (with guardrail events + base_dir)
+    or ``error`` event. History is loaded from / persisted to the per-owner store.
+    """
+    base_dir = _resolve_base_dir(req.previews_dir)
+    headers = {
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",  # disable nginx/proxy buffering so tokens flush
+        "Connection": "keep-alive",
+    }
+
+    chat_fn, err = _build_chat_fn(base_dir)
+    if err is not None:
+        def _err_gen():
+            yield _sse({"type": "error", "error": err, "base_dir": base_dir})
+        return StreamingResponse(_err_gen(), media_type="text/event-stream", headers=headers)
+
+    user = resolve_user(authorization)
+    owner = store.owner_key(user, req.session_id)
+    registry, system_prompt = _build_registry(req.mode, req.session_id, base_dir)
+    stream_fn = _build_stream_fn(base_dir)
     events: list[GuardrailEvent] = []
     guardrails = Guardrails(on_event=events.append)
-    memory = _get_memory(req.session_id, registry, reset=req.reset)
+    conv_id, memory = _load_conversation(owner, req, system_prompt)
+    agent = ConversationalAgent(
+        chat_fn, memory=memory, skills=registry, guardrails=guardrails,
+        wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
+    )
+
+    def _gen():
+        try:
+            for ev in agent.stream_chat(req.message, stream_fn=stream_fn):
+                if ev.get("type") == "done":
+                    turns = _persist_turn(conv_id, req.message, str(ev.get("reply") or ""))
+                    ev = {
+                        **ev,
+                        "base_dir": base_dir,
+                        "memory_turns": turns,
+                        "user": user,
+                        "guardrail_events": [
+                            {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
+                            for e in events if e.triggered
+                        ],
+                    }
+                yield _sse(ev)
+        except Exception as exc:
+            logger.exception("agent stream failed")
+            yield _sse({"type": "error", "error": f"model call failed: {exc}", "base_dir": base_dir})
+
+    return StreamingResponse(_gen(), media_type="text/event-stream", headers=headers)
+
+
+@router.post("/api/agent/chat", response_model=ChatResponse)
+def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=None)) -> ChatResponse:
+    base_dir = _resolve_base_dir(req.previews_dir)
+
+    chat_fn, err = _build_chat_fn(base_dir)
+    if err is not None:
+        return ChatResponse(reply="", base_dir=base_dir, error=err)
+
+    user = resolve_user(authorization)
+    owner = store.owner_key(user, req.session_id)
+    registry, system_prompt = _build_registry(req.mode, req.session_id, base_dir)
+    events: list[GuardrailEvent] = []
+    guardrails = Guardrails(on_event=events.append)
+    conv_id, memory = _load_conversation(owner, req, system_prompt)
     # Gallery skills read our own DB → trusted; don't fence their output as untrusted
     # (the fence hurts weaker chat models). Injection scanning still runs for observability.
     agent = ConversationalAgent(
-        chat_fn, memory=memory, skills=registry, guardrails=guardrails, wrap_tool_output=False
+        chat_fn, memory=memory, skills=registry, guardrails=guardrails,
+        wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
     )
 
     try:
@@ -135,6 +291,7 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
         return ChatResponse(reply="", base_dir=base_dir, memory_turns=memory.turn_count,
                             error=f"model call failed: {exc}")
 
+    turns = _persist_turn(conv_id, req.message, result.reply)
     return ChatResponse(
         reply=result.reply,
         tool_calls=result.tool_calls,
@@ -142,6 +299,49 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
             {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
             for e in events if e.triggered
         ],
-        memory_turns=memory.turn_count,
+        memory_turns=turns,
         base_dir=base_dir,
     )
+
+
+@router.get("/api/agent/history")
+def agent_history(
+    session_id: str,
+    mode: str = "gallery",
+    authorization: Optional[str] = Header(default=None),
+) -> dict[str, Any]:
+    """Return the persisted user/assistant transcript for this owner/session/mode.
+
+    Lets the UI restore a conversation after a reload — the visible proof that memory
+    is durable and per-user (a different token sees a different transcript).
+    """
+    user = resolve_user(authorization)
+    owner = store.owner_key(user, session_id)
+    conn = store.store_connect()
+    try:
+        conv_id = store.get_or_create_conversation(conn, owner, session_id, mode)
+        msgs = store.load_messages(conn, conv_id)
+    finally:
+        conn.close()
+    return {
+        "messages": [{"role": m["role"], "content": m["content"]} for m in msgs],
+        "memory_turns": len(msgs),
+    }
+
+
+@router.get("/api/agent/artifacts/{session_id}/{name}")
+def agent_artifact(session_id: str, name: str) -> FileResponse:
+    """Serve an artifact written by the general agent's ``write_artifact`` skill.
+
+    The path is reconstructed from the sanitized session id + sanitized file name, so
+    a request can only ever address a file inside that session's workspace directory.
+    """
+    safe = safe_session_id(session_id)
+    fname = sanitize_artifact_name(name)
+    session_dir = os.path.join(agent_workspace_root(), safe)
+    path = os.path.join(session_dir, fname)
+    real_root = os.path.realpath(session_dir)
+    real_path = os.path.realpath(path)
+    if os.path.commonpath([real_path, real_root]) != real_root or not os.path.isfile(real_path):
+        raise HTTPException(status_code=404, detail="artifact not found")
+    return FileResponse(real_path, filename=fname)

@@ -14,6 +14,7 @@ Design notes
 from __future__ import annotations
 
 import logging
+import re
 import time
 from typing import Any, Callable, Mapping, Optional, Protocol
 
@@ -32,6 +33,9 @@ logger = logging.getLogger(__name__)
 AnalyzeFn = Callable[[str, str], dict[str, Any]]
 # Injected cheap feature source: image_id -> {tech_score, fast_score, blur_type, ...}.
 FeatureProvider = Callable[[str], Mapping[str, Any]]
+# Injected gallery/memory lookup: image_id -> a prior committed analysis dict (at least
+# {score, confidence?}) or None. Lets the agent *recall* a score instead of re-analyzing.
+GalleryProvider = Callable[[str], Optional[Mapping[str, Any]]]
 
 
 class Tool(Protocol):
@@ -121,6 +125,157 @@ class AnalyzeTool:
         )
 
 
+def _score_signal(cand: Candidate) -> tuple[float, str]:
+    """Best available quality signal for a candidate: analyzed score > cheap fast_score."""
+    if cand.analyzed and cand.score is not None:
+        return float(cand.score), "score"
+    return cand.fast_score(), "fast_score"
+
+
+class CompareTool:
+    """Zero-cost relative judgement between two candidates (tie-break helper).
+
+    Uses each candidate's best available signal (a real analyzed ``score`` if present,
+    otherwise the cheap ``fast_score``). Costs no inference — it only reads state — so
+    the planner can weigh two close candidates before deciding which one is worth a VLM
+    call, or which of a near-duplicate pair to keep.
+    """
+
+    name = "compare"
+
+    def run(self, state: AgentState, call: ToolCall) -> ToolResult:
+        a_id = str(call.args.get("a_id") or "")
+        b_id = str(call.args.get("b_id") or "")
+        ca = state.candidates.get(a_id)
+        cb = state.candidates.get(b_id)
+        if ca is None or cb is None or a_id == b_id:
+            return ToolResult(ok=False, error="compare needs two distinct known image_ids")
+        sa, basis_a = _score_signal(ca)
+        sb, basis_b = _score_signal(cb)
+        winner = a_id if sa >= sb else b_id
+        return ToolResult(
+            ok=True,
+            observation={
+                "a": a_id,
+                "b": b_id,
+                "a_signal": round(sa, 2),
+                "b_signal": round(sb, 2),
+                "basis": basis_a if basis_a == basis_b else f"{basis_a}/{basis_b}",
+                "winner": winner,
+                "margin": round(abs(sa - sb), 2),
+            },
+        )
+
+
+_TRAILING_NUM = re.compile(r"(\d+)(?!.*\d)")
+
+
+def _burst_key(image_id: str) -> Optional[int]:
+    """Trailing integer in a filename (e.g. ``DSC02513`` -> 2513); None if absent."""
+    m = _TRAILING_NUM.search(image_id)
+    return int(m.group(1)) if m else None
+
+
+class ClusterTool:
+    """Zero-cost: group burst / near-duplicate frames so the agent can analyze one
+    representative per group instead of every near-identical frame — a real budget win
+    for concert photography, where cameras fire long bursts of the same moment.
+
+    Grouping is by trailing frame number proximity (``window`` consecutive shots).
+    Annotates each candidate's ``features`` with ``cluster_id`` and ``cluster_rep`` so
+    the planner can see the grouping on the next step. Idempotent: sets ``state.clustered``.
+    """
+
+    name = "cluster"
+
+    def __init__(self, *, window: int = 3) -> None:
+        self._window = max(1, int(window))
+
+    def run(self, state: AgentState, call: ToolCall) -> ToolResult:
+        cands = state.ordered_candidates()
+        numbered = sorted(
+            (c for c in cands if _burst_key(c.image_id) is not None),
+            key=lambda c: (_burst_key(c.image_id), c.image_id),
+        )
+        unnumbered = [c for c in cands if _burst_key(c.image_id) is None]
+
+        clusters: list[list[Candidate]] = []
+        prev_num: Optional[int] = None
+        for c in numbered:
+            n = _burst_key(c.image_id)
+            if prev_num is None or (n - prev_num) > self._window:
+                clusters.append([c])
+            else:
+                clusters[-1].append(c)
+            prev_num = n
+        clusters.extend([c] for c in unnumbered)  # singletons keep their own group
+
+        multi = 0
+        largest = 0
+        for cid, members in enumerate(clusters):
+            rep = max(members, key=lambda c: _score_signal(c)[0])
+            largest = max(largest, len(members))
+            if len(members) > 1:
+                multi += 1
+            for c in members:
+                c.features["cluster_id"] = cid
+                c.features["cluster_rep"] = c.image_id == rep.image_id
+
+        state.clustered = True
+        return ToolResult(
+            ok=True,
+            observation={
+                "clusters": len(clusters),
+                "multi_member_clusters": multi,
+                "largest_cluster": largest,
+                "window": self._window,
+            },
+        )
+
+
+class QueryGalleryTool:
+    """Zero-cost: recall a prior committed score for one image from the gallery/memory.
+
+    On a hit the candidate is marked analyzed from the recalled result (tier ``recall``,
+    no inference spent) so the planner sees the score next step and can keep it without
+    a VLM call — reusing prior work instead of paying for it again. Default provider
+    always misses, so the tool is safe to register unconditionally.
+    """
+
+    name = "query_gallery"
+
+    def __init__(self, provider: Optional[GalleryProvider] = None) -> None:
+        self._provider = provider
+
+    def run(self, state: AgentState, call: ToolCall) -> ToolResult:
+        cand = _require_candidate(state, call)
+        if cand is None:
+            return ToolResult(ok=False, error="unknown or missing image_id")
+        cand.features["gallery_queried"] = True
+        prior: Optional[Mapping[str, Any]] = None
+        if self._provider is not None:
+            try:
+                prior = self._provider(cand.image_id)
+            except Exception as exc:  # a recall miss must never crash the loop
+                return ToolResult(ok=False, error=f"gallery_provider failed: {exc}")
+        score = _coerce_float((prior or {}).get("score")) if prior else None
+        if not prior or score is None:
+            return ToolResult(ok=True, observation={"image_id": cand.image_id, "found": False})
+        cand.analysis = {**dict(prior), "recalled": True}
+        cand.score = score
+        cand.confidence = _coerce_float(prior.get("confidence"))
+        cand.tier = str(prior.get("tier") or "recall")
+        return ToolResult(
+            ok=True,
+            observation={
+                "image_id": cand.image_id,
+                "found": True,
+                "score": score,
+                "tier": cand.tier,
+            },
+        )
+
+
 class FinalizeTool:
     """Terminal action: commit the keeper set (explicit list or current keepers)."""
 
@@ -141,12 +296,31 @@ class FinalizeTool:
 
 
 class ToolRegistry:
-    """Maps :class:`ActionType` to a concrete tool and dispatches calls."""
+    """Maps :class:`ActionType` to a concrete tool and dispatches calls.
 
-    def __init__(self, *, inspect: InspectTool, analyze: AnalyzeTool, finalize: FinalizeTool) -> None:
+    ``inspect`` / ``analyze`` / ``finalize`` are required. The zero-cost planning tools
+    (``compare`` / ``cluster`` / ``query_gallery``) are optional and default-constructed
+    when omitted, so existing callers keep working and the LLM planner can always offer
+    the richer tool set. Pass a ``query_gallery`` with a real :data:`GalleryProvider` to
+    wire recall to a gallery / brain lookup.
+    """
+
+    def __init__(
+        self,
+        *,
+        inspect: InspectTool,
+        analyze: AnalyzeTool,
+        finalize: FinalizeTool,
+        compare: Optional[CompareTool] = None,
+        cluster: Optional[ClusterTool] = None,
+        query_gallery: Optional[QueryGalleryTool] = None,
+    ) -> None:
         self._tools: dict[ActionType, Tool] = {
             ActionType.INSPECT: inspect,
             ActionType.ANALYZE: analyze,
+            ActionType.COMPARE: compare or CompareTool(),
+            ActionType.CLUSTER: cluster or ClusterTool(),
+            ActionType.QUERY_GALLERY: query_gallery or QueryGalleryTool(),
             ActionType.FINALIZE: finalize,
         }
 
@@ -169,6 +343,21 @@ class ToolRegistry:
                 "name": "analyze",
                 "description": "Run one VLM analysis on one image. Costs 1 inference. Use tier='full' to escalate.",
                 "args": {"image_id": "string", "tier": "fast|full"},
+            },
+            {
+                "name": "compare",
+                "description": "Weigh two candidates against each other (best available signal). No model cost.",
+                "args": {"a": "image_id", "b": "image_id"},
+            },
+            {
+                "name": "cluster",
+                "description": "Group burst / near-duplicate frames once; analyze one representative per group. No model cost.",
+                "args": {},
+            },
+            {
+                "name": "query_gallery",
+                "description": "Recall a prior committed score for one image instead of re-analyzing it. No model cost.",
+                "args": {"image_id": "string"},
             },
             {
                 "name": "finalize",

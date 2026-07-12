@@ -91,15 +91,43 @@ def run_curation_job(
     }
 
 
+def resolve_default_planner_kind(config_path: str) -> str:
+    """The planner used when a job does not pin one explicitly.
+
+    The curation loop is **LLM-first**: unless the job payload asks for
+    ``agent.planner == "heuristic"``, the model drives the high-value decisions
+    (which photo to deep-analyze next, when to finalize) and the deterministic
+    :class:`HeuristicPlanner` is only the fallback for unusable output. The one
+    exception is ``provider: mock`` — there is no real planner LLM to drive it, so
+    the heuristic planner is the honest default. Any config error degrades to
+    heuristic rather than raising.
+    """
+    try:
+        from utils.config_loader import ConfigLoader
+
+        model_cfg = ConfigLoader.get_model_config(ConfigLoader.load(config_path))
+        provider = str(model_cfg.get("provider") or "ollama").strip().lower()
+    except Exception:
+        logger.debug("planner-default: config load failed; using heuristic", exc_info=True)
+        return "heuristic"
+    return "heuristic" if provider == "mock" else "llm"
+
+
 def _build_planner(payload: Mapping[str, Any] | None, *, config_path: str):
-    """Select the planner from the job payload: ``agent.planner == "llm"`` opts into
-    the LLM tool-calling planner over the configured provider (heuristic fallback);
-    anything else (default) uses the deterministic heuristic planner.
+    """Select the planner for a curation job.
+
+    Resolution order: explicit ``agent.planner`` in the payload → the system default
+    (LLM-first; see :func:`resolve_default_planner_kind`). ``"heuristic"`` returns
+    ``None`` so :class:`CurationAgent` uses its built-in heuristic planner; ``"llm"``
+    builds the LLM tool-calling planner over the configured provider, which keeps the
+    heuristic planner as its own fallback on malformed output.
 
     The LLM backend import is lazy so heuristic jobs and tests never touch it.
     """
     agent_cfg = (payload or {}).get("agent") or {}
-    planner_kind = str(agent_cfg.get("planner") or "heuristic").strip().lower()
+    planner_kind = str(agent_cfg.get("planner") or "").strip().lower()
+    if not planner_kind:
+        planner_kind = resolve_default_planner_kind(config_path)
     if planner_kind != "llm":
         return None
     try:

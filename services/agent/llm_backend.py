@@ -180,10 +180,19 @@ def build_curation_llm_planner_from_config(
     model_name: Optional[str] = None,
     max_state_candidates: int = 40,
 ) -> Planner:
-    """Convenience: load the model section from a config file and build the planner."""
+    """Convenience: load the model section from a config file and build the planner.
+
+    When the caller does not pin ``model_name``, the planner defaults to the dedicated
+    instruct model (``model.agent_chat_model``) rather than the VLM ``model_name``: the
+    planner does text tool-calling, and a vision model (e.g. ``llava``) follows the JSON
+    action protocol poorly, which would silently inflate the heuristic fallback rate.
+    Empty ``agent_chat_model`` reuses the config ``model_name`` inside the backend.
+    """
     from utils.config_loader import ConfigLoader
 
     model_config = ConfigLoader.get_model_config(ConfigLoader.load(config_path))
+    if model_name is None:
+        model_name = str(model_config.get("agent_chat_model") or "").strip() or None
     return build_curation_llm_planner(
         model_config, fallback=fallback, model_name=model_name, max_state_candidates=max_state_candidates
     )

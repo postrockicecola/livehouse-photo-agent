@@ -28,6 +28,78 @@
 
 ## Architecture (recommended main path)
 
+### System map
+
+SQLite is the **single source of truth**; Celery is a dumb transport that carries only a `job_id`; the scheduler throttles by live provider pressure; the curation agent is an LLM-first ReAct loop; and the VLM only ever runs through a bounded inference queue.
+
+```mermaid
+flowchart TB
+  subgraph INGEST["Ingest"]
+    GO["Go SD / brain ingest<br/>main.go · ingest_sd_brain.go"]
+    SEED["tasks.process_brain_ingested<br/>seed ANALYZE_SESSION jobs"]
+  end
+
+  subgraph CP["Control plane"]
+    API["FastAPI · gallery_server<br/>gallery · infra · agent · /metrics"]
+    UI["Next.js<br/>Studio · Gallery · Infra Console"]
+  end
+
+  DB[("SQLite luma_brain — SSOT<br/>jobs · job_events · workers · model_runs")]
+
+  subgraph SCHED["Scheduling (Celery beat)"]
+    PLAN["plan_dispatch<br/>headroom · fair round-robin ·<br/>per-provider pressure throttle (EMA)"]
+  end
+
+  REDIS[["Redis / Celery<br/>carries job_id only"]]
+
+  subgraph EXEC["Worker / executor"]
+    RUN["tasks.run_job(job_id)"]
+    EXE["JobExecutor<br/>claim → run → finalize"]
+    PIPE["PipelineStageRunner<br/>Stage1 OpenCV → Stage2 fast → Stage3 VLM"]
+    AGENT["CurationAgent · ReAct<br/>LLM-first planner → tools → reflect / escalate"]
+  end
+
+  subgraph INFER["Inference gateway"]
+    IQ["PrioritizedInferenceQueue<br/>per-model lanes · batching · backpressure"]
+    ROUTER["Router<br/>primary → fallback"]
+    PROV["Providers<br/>Ollama · vLLM"]
+  end
+
+  subgraph OBS["Observability"]
+    METRICS["infra.metrics<br/>Prometheus + /api/infra/metrics"]
+    GPU["GPU telemetry<br/>Apple powermetrics"]
+  end
+
+  KEDA{{"KEDA<br/>scale worker pools on queue depth"}}
+
+  GO --> API
+  API -->|check_new_images| SEED --> DB
+  UI --> API --> DB
+
+  DB -->|runnable jobs| PLAN
+  PLAN -->|selected job_ids| REDIS --> RUN --> EXE
+  EXE <-->|claim · events · artifacts| DB
+  EXE --> PIPE
+  EXE --> AGENT
+  AGENT -.->|decision trace| DB
+
+  PIPE -->|Stage3| IQ
+  AGENT -->|analyze| IQ
+  IQ --> ROUTER --> PROV
+  IQ -->|model_runs ledger| DB
+
+  IQ --> METRICS
+  GPU --> METRICS
+  METRICS --> API
+  KEDA -. watches .-> REDIS
+  KEDA -. scales .-> EXEC
+
+  classDef ssot fill:#4c1d95,stroke:#a78bfa,color:#fff;
+  class DB ssot;
+```
+
+### Linear main path
+
 Production and SD/brain ingest follow **one** chain (SQLite `jobs` / `job_events` = SSOT; Celery carries only `job_id`):
 
 ```text
@@ -59,8 +131,9 @@ Manual / API analyze: `POST /api/tasks/analyze`, or insert a `jobs` row and `sen
 - **Pipeline stages:** OpenCV gates → fast aesthetic metrics → VLM structured JSON (with an optional single-flight queue / graceful degradation).
 - **Job platform:** `jobs` status machine, append-only `job_events`, `trace_id` correlation, artifacts on success rows, manual retry / cancel via the infra API.
 - **Workers:** SQLite `workers` registration, `WorkerManager` heartbeat (+ `long_task_heartbeat` during long runs); pause / drain / resume; logical pools via `LIVEHOUSE_EXECUTOR_CLASS`.
+- **Agentic curation:** LLM-first ReAct loop (`services/agent/`) with a rich tool surface — `inspect`, `analyze`, plus zero-cost planning tools `compare` (tie-break), `cluster` (group burst frames → analyze one representative per burst), and `query_gallery` (recall a prior score instead of re-analyzing) — heuristic fallback on unusable output.
 - **Inference layer (optional):** provider registry, primary/fallback routing, attempts ledger, latency / fallback counters in `infra.metrics`.
-- **GPU telemetry & demos:** real Apple-Silicon GPU readings and a serial-vs-concurrent throughput demo (see *Recent changes*).
+- **GPU telemetry & demos:** real Apple-Silicon GPU readings, a serial-vs-concurrent throughput demo, and an end-to-end **load → backpressure → throttle → KEDA scale** control-loop demo (`scripts/infra_scaling_demo.py`, driving the real dispatch-throttle engine + KEDA formula).
 - **Gallery:** `analysis_results.json`, FastAPI `/image`, Next.js gallery and **Infra** pages.
 
 ---
@@ -139,6 +212,18 @@ python scripts/eval_stage3.py run --labels data/eval/labels.jsonl \
 ```
 
 Prompt iterations are versioned in `services/processor/stages/stage3_prompt_registry.py` and compared on the same fixed eval set.
+
+### Agent evaluation (planner)
+
+The curation loop is **LLM-first** (the model drives analyze/finalize; the deterministic `HeuristicPlanner` is the fallback). Two harnesses grade it:
+
+- **Selection quality vs. human labels** — `scripts/eval/eval_agent_selection.py`: under a fixed VLM budget, does a planner (`heuristic` / `random` / `oracle` / `llm`) analyze and keep the photos a human would? Headline: `analyzed_keeper_recall` + precision/recall@k.
+- **Trajectory / behavior (label-free)** — `scripts/eval/eval_agent_trajectory.py`: how a planner *spends* its budget — budget utilization, `llm_decision_rate` (fraction of decisions the model drove) and heuristic `fallback_rate`, reflection escalations, steps, and wall-clock — reported as mean ± std over `--repeats`, with a head-to-head delta vs a baseline. Runs fully offline on synthetic candidates (`--synthetic N`) or a real Stage2 manifest (`--features`):
+
+```bash
+python scripts/eval/eval_agent_trajectory.py --synthetic 120 --budget 20 --repeats 3
+# add --llm to also grade the real LLM planner (needs the configured provider)
+```
 
 ---
 

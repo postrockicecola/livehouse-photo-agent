@@ -20,9 +20,12 @@ from typing import Any, Optional
 class ActionType(str, Enum):
     """The tools the planner can invoke each step."""
 
-    INSPECT = "inspect"      # cheap, no model: pull Stage1/2 features for one candidate
-    ANALYZE = "analyze"      # one VLM call (fast or full tier) on one candidate
-    FINALIZE = "finalize"    # terminal: commit the keeper set + rationale
+    INSPECT = "inspect"            # cheap, no model: pull Stage1/2 features for one candidate
+    ANALYZE = "analyze"            # one VLM call (fast or full tier) on one candidate
+    COMPARE = "compare"           # zero-cost: relative judgement between two candidates
+    CLUSTER = "cluster"           # zero-cost: group burst / near-duplicate frames (once)
+    QUERY_GALLERY = "query_gallery"  # zero-cost: recall a prior committed score for one image
+    FINALIZE = "finalize"         # terminal: commit the keeper set + rationale
 
 
 @dataclass
@@ -122,6 +125,7 @@ class AgentState:
     pending_escalations: list[str] = field(default_factory=list)
     finalized: bool = False
     selected: list[str] = field(default_factory=list)
+    clustered: bool = False  # set once the CLUSTER tool has grouped the candidates
 
     @classmethod
     def from_candidates(cls, candidates: list[Candidate], config: AgentConfig) -> "AgentState":

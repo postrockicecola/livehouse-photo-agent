@@ -1,0 +1,95 @@
+
+> livehouse-web@0.1.0 dev /Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/web
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.2s
+ ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /gallery ...
+ ✓ Compiled /gallery in 2.5s (561 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /_next/static/webpack/a560e7f8a3a3683b.webpack.hot-update.json 404 in 2611ms
+ GET /gallery 200 in 2580ms
+ GET /gallery 200 in 14ms
+(node:22987) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ Compiled /image in 254ms (329 modules)
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04010.jpg&max_side=900&rotate=-90 200 in 479ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04007.jpg&max_side=900&rotate=-90 200 in 215ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04002.jpg&max_side=900&rotate=-90 200 in 314ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03988.jpg&max_side=900&rotate=-90 200 in 485ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03989.jpg&max_side=900&rotate=-90 200 in 486ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04001.jpg&max_side=900&rotate=-90 200 in 311ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03982.jpg&max_side=900&rotate=-90 200 in 178ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03990.jpg&max_side=900&rotate=-90 200 in 184ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03985.jpg&max_side=900&rotate=-90 200 in 185ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03979.jpg&max_side=900&rotate=-90 200 in 187ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03999.jpg&max_side=900&rotate=-90 200 in 178ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03993.jpg&max_side=900&rotate=-90 200 in 178ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04004.jpg&max_side=900&rotate=-90 200 in 190ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04009.jpg&max_side=900&rotate=-90 200 in 184ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC02877.jpg&max_side=900 200 in 481ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC02876.jpg&max_side=900 200 in 486ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04008.jpg&max_side=900&rotate=-90 200 in 130ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04000.jpg&max_side=900&rotate=-90 200 in 140ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03987.jpg&max_side=900&rotate=-90 200 in 157ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03981.jpg&max_side=900&rotate=-90 200 in 157ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03980.jpg&max_side=900&rotate=-90 200 in 187ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03976.jpg&max_side=900&rotate=-90 200 in 212ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03978.jpg&max_side=900&rotate=-90 200 in 239ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03984.jpg&max_side=900&rotate=-90 200 in 229ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04003.jpg&max_side=900&rotate=-90 200 in 294ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03977.jpg&max_side=900&rotate=-90 200 in 139ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03983.jpg&max_side=900&rotate=-90 200 in 140ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC03994.jpg&max_side=900&rotate=-90 200 in 149ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC04006.jpg&max_side=900&rotate=-90 200 in 91ms
+ GET /image?path=%2FVolumes%2FM4Buffer%2FVisions%2FLivehouse_Archive%2F2026-07-08%2FPreviews%2FAI_Keep_60-90%2FDSC02939.jpg&max_side=900 200 in 221ms
+ ✓ Compiled in 319ms (287 modules)
+ ✓ Compiled in 230ms (558 modules)
+ ✓ Compiled in 166ms (560 modules)
+ ✓ Compiled in 122ms (560 modules)
+ ✓ Compiled in 171ms (560 modules)
+ ✓ Compiled in 179ms (560 modules)
+ ✓ Compiled in 314ms (560 modules)
+ ✓ Compiled in 155ms (560 modules)
+ ✓ Compiled in 132ms (560 modules)
+ ✓ Compiled in 217ms (560 modules)
+ ✓ Compiled in 383ms (560 modules)
+ ✓ Compiled in 213ms (560 modules)
+Failed to proxy http://127.0.0.1:8080/api/tasks/queue-backlog Error: connect ECONNREFUSED 127.0.0.1:8080
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Error: connect ECONNREFUSED 127.0.0.1:8080
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 509ms (780 modules)
+Failed to proxy http://127.0.0.1:8080/api/tasks/queue-backlog Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:617:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:617:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}

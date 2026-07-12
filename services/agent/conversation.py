@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Iterator, Optional
 
 from services.agent.guardrails import Guardrails
 from services.agent.skills.base import SkillRegistry
@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 # A chat backend: a list of {role, content} messages -> assistant text.
 ChatFn = Callable[[list[dict[str, str]]], str]
+# A streaming chat backend: same input, yields the assistant text token-by-token.
+StreamChatFn = Callable[[list[dict[str, str]]], Iterator[str]]
 # Optional summarizer for evicted turns: old messages -> a short summary string.
 Summarizer = Callable[[list["Message"]], str]
 
@@ -136,6 +138,12 @@ def _parse_tool_call(text: str) -> Optional[dict[str, Any]]:
     return None
 
 
+def _chunk_text(text: str, size: int = 4) -> Iterator[str]:
+    """Split already-computed text into small pieces for a typing effect (no re-gen)."""
+    for i in range(0, len(text), max(1, size)):
+        yield text[i : i + size]
+
+
 @dataclass
 class TurnResult:
     reply: str
@@ -230,6 +238,135 @@ class ConversationalAgent:
         # Tools done / budget spent / repeat detected → force a plain-language answer.
         final = self._force_final_answer(user_text, observations)
         return TurnResult(reply=self._finalize(final), tool_calls=tool_calls)
+
+    def stream_chat(
+        self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None
+    ) -> Iterator[dict[str, Any]]:
+        """Process one user turn, yielding events as they happen.
+
+        Event shapes (all dicts with a ``type`` key):
+
+        - ``{"type": "tool_call", "tool", "args", "ok"}`` — a skill just ran
+        - ``{"type": "token", "text"}``                    — a piece of the final answer
+        - ``{"type": "done", "reply", "tool_calls", "memory_turns"}`` — turn finished
+
+        Real token streaming is used for the final answer whenever ``stream_fn`` is
+        given; tool-call *decisions* still use the non-streaming ``chat_fn`` (they are
+        JSON control messages, not user-facing prose). Mirrors :meth:`chat`'s control
+        flow so behaviour (tool rounds, repeat detection, forced final answer) matches.
+        """
+        if self._guardrails is not None:
+            self._guardrails.scan_input(user_text, source="user")
+        self.memory.add_user(user_text)
+        tool_calls: list[dict[str, Any]] = []
+        observations: list[str] = []
+        seen: set[str] = set()
+        direct_reply: Optional[str] = None
+
+        rounds = self._max_tool_rounds if self._skills is not None else 0
+        for _ in range(rounds):
+            raw = self._chat(self.memory.messages())
+            call = _parse_tool_call(raw)
+            if call is None:
+                direct_reply = raw
+                break
+            key = f"{call['tool']}:{json.dumps(call['args'], sort_keys=True, ensure_ascii=False)}"
+            if key in seen:
+                break
+            seen.add(key)
+            result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
+            self._record_tool_result(call["tool"], result)
+            observations.append(
+                f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
+            )
+            tc = {"tool": call["tool"], "args": call["args"], "ok": result.ok}
+            tool_calls.append(tc)
+            yield {"type": "tool_call", **tc}
+
+        # Case 1: the model answered in-loop (with or without prior tools). The text
+        # already exists (from the non-streaming decision call), so replay it as a
+        # typing effect rather than paying for a second generation — matches chat().
+        if direct_reply is not None:
+            reply = direct_reply if _parse_tool_call(direct_reply) is None else _NO_ANSWER_FALLBACK
+            reply = self._finalize(reply)
+            for piece in _chunk_text(reply):
+                yield {"type": "token", "text": piece}
+            yield self._done_event(reply, tool_calls)
+            return
+
+        # Case 2: no skills at all — stream a plain completion over the live memory.
+        if not tool_calls:
+            yield from self._stream_answer(self.memory.messages(), stream_fn, tool_calls)
+            return
+
+        # Case 3: tools ran but no in-loop answer (budget/repeat) — stream the forced,
+        # clean final answer synthesized from the observations.
+        joined = "\n".join(observations) if observations else "(no tool results)"
+        messages = [
+            {"role": "system", "content": _FINAL_ANSWER_SYSTEM},
+            {"role": "user", "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}"},
+        ]
+        yield from self._stream_answer(messages, stream_fn, tool_calls)
+
+    def _iter_final_tokens(
+        self, messages: list[dict[str, str]], stream_fn: Optional[StreamChatFn]
+    ) -> Iterator[str]:
+        """Yield the final-answer tokens, real-streamed if possible, else chunked."""
+        if stream_fn is not None:
+            try:
+                for piece in stream_fn(messages):
+                    if piece:
+                        yield piece
+                return
+            except Exception:  # transport hiccup mid-stream → fall back to one-shot
+                logger.exception("stream_fn failed; falling back to non-streaming call")
+        yield from _chunk_text(self._chat(messages))
+
+    def _stream_answer(
+        self,
+        messages: list[dict[str, str]],
+        stream_fn: Optional[StreamChatFn],
+        tool_calls: list[dict[str, Any]],
+    ) -> Iterator[dict[str, Any]]:
+        """Stream final-answer tokens + a done event, buffering the head so a stray
+        tool-call JSON is never shown (it is replaced with the fallback prose)."""
+        head = ""
+        committed = False
+        toolish = False
+        acc = ""
+        for piece in self._iter_final_tokens(messages, stream_fn):
+            acc += piece
+            if committed:
+                yield {"type": "token", "text": piece}
+                continue
+            head += piece
+            stripped = head.lstrip()
+            if not stripped:
+                continue
+            if stripped[0] == "{" or stripped.startswith("```"):
+                toolish = True  # looks like a tool call; keep buffering silently
+                continue
+            committed = True
+            yield {"type": "token", "text": head}
+
+        if committed:
+            reply = self._finalize(acc)
+        else:
+            if toolish or _parse_tool_call(acc) is not None:
+                reply = _NO_ANSWER_FALLBACK
+            else:
+                reply = acc.strip() or _NO_ANSWER_FALLBACK
+            reply = self._finalize(reply)
+            yield {"type": "token", "text": reply}
+        yield self._done_event(reply, tool_calls)
+
+    def _done_event(self, reply: str, tool_calls: list[dict[str, Any]]) -> dict[str, Any]:
+        return {
+            "type": "done",
+            "reply": reply,
+            "tool_calls": tool_calls,
+            "memory_turns": self.memory.turn_count,
+        }
 
     def _force_final_answer(self, user_text: str, observations: list[str]) -> str:
         """Synthesize the final prose answer from a CLEAN, lean prompt.

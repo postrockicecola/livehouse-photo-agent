@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChatDock } from "@/components/agent/ChatDock";
 import { GalleryEmptyState } from "@/components/GalleryEmptyState";
 import { StudioAppNav } from "@/components/studio/StudioAppNav";
 import { GalleryMasonry } from "@/components/GalleryMasonry";
@@ -1076,6 +1077,7 @@ export default function HomePage() {
         />
       ) : null}
       </main>
+      <ChatDock apiBase={API_BASE} previewsDir={galleryBasePath} context="gallery" />
     </div>
   );
 }

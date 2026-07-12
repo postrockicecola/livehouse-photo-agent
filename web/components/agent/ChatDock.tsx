@@ -2,11 +2,23 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  newSessionId,
+  fetchAgentHistory,
+  persistentSessionId,
+  rotateSessionId,
   sendAgentChat,
+  streamAgentChat,
   type AgentGuardrailEvent,
+  type AgentMode,
   type AgentToolCall,
 } from "@/components/agent/agentChat";
+import {
+  fetchMe,
+  getStoredUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+  type AuthUser,
+} from "@/components/agent/agentAuth";
 
 type ChatTurn = {
   role: "user" | "assistant";
@@ -14,13 +26,57 @@ type ChatTurn = {
   toolCalls?: AgentToolCall[];
   guardrails?: AgentGuardrailEvent[];
   error?: boolean;
+  streaming?: boolean;
 };
 
-const SUGGESTIONS = [
-  "这个 session 有多少张照片？分布如何？",
-  "给我 90 分以上的精选片",
-  "为什么某张被判为 trash？",
-];
+const SUGGESTIONS: Record<AgentMode, string[]> = {
+  gallery: [
+    "这个 session 有多少张照片？分布如何？",
+    "给我 90 分以上的精选片",
+    "为什么某张被判为 trash？",
+  ],
+  general: [
+    "搜索 KEDA 的最新版本并总结它的用途",
+    "用 Python 算出前 20 个斐波那契数并求和",
+    "调研 SSE 与 WebSocket 的区别，写成一份 markdown 报告",
+  ],
+};
+
+const MODE_LABEL: Record<AgentMode, string> = {
+  gallery: "策展助手",
+  general: "通用助手",
+};
+
+const MODE_HINT: Record<AgentMode, string> = {
+  gallery:
+    "我可以基于当前 session 的分析结果回答关于评分、标签、保留/丢弃的问题（只读，不会改动文件）。",
+  general:
+    "我可以联网检索、读取网页、运行沙箱 Python、并把结果保存为可下载的产物。",
+};
+
+/** Render assistant text with clickable http(s) links (web results / artifacts). */
+function LinkifiedText({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s，。、）)]+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^https?:\/\//.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-sky-300/90 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
 
 function ToolChip({ call }: { call: AgentToolCall }) {
   const argStr = useMemo(() => {
@@ -57,6 +113,93 @@ function GuardrailChip({ ev }: { ev: AgentGuardrailEvent }) {
   );
 }
 
+function AuthPanel({
+  onSubmit,
+  onClose,
+}: {
+  onSubmit: (kind: "login" | "register", username: string, password: string) => Promise<void>;
+  onClose: () => void;
+}) {
+  const [kind, setKind] = useState<"login" | "register">("login");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = useCallback(async () => {
+    if (busy) return;
+    setErr(null);
+    setBusy(true);
+    try {
+      await onSubmit(kind, username.trim(), password);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "操作失败");
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, kind, username, password, onSubmit]);
+
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col bg-[#0d0d0d]/98 p-4 backdrop-blur-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[13px] font-medium text-white/80">
+          {kind === "login" ? "登录" : "注册"}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-[3px] px-1.5 py-0.5 text-[14px] text-white/40 hover:text-white/70"
+          aria-label="关闭"
+        >
+          ×
+        </button>
+      </div>
+      <p className="mb-3 text-[11px] leading-relaxed text-white/35">
+        登录后对话记忆会按账号持久保存、跨设备与刷新恢复；匿名使用则仅在本浏览器会话内保留。
+      </p>
+      <div className="flex flex-col gap-2">
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="用户名（3-32 位）"
+          autoComplete="username"
+          className="rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
+        />
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") void submit();
+          }}
+          type="password"
+          placeholder="密码（≥6 位）"
+          autoComplete={kind === "login" ? "current-password" : "new-password"}
+          className="rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
+        />
+        {err ? <p className="text-[11px] text-rose-300/85">{err}</p> : null}
+        <button
+          type="button"
+          disabled={busy || !username.trim() || !password}
+          onClick={() => void submit()}
+          className="mt-1 rounded-[5px] border border-white/[0.1] bg-white/[0.08] px-3 py-2 text-[13px] text-white/80 transition-colors hover:bg-white/[0.14] disabled:opacity-35"
+        >
+          {busy ? "提交中…" : kind === "login" ? "登录" : "注册并登录"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setKind((k) => (k === "login" ? "register" : "login"));
+            setErr(null);
+          }}
+          className="text-[11px] text-white/40 hover:text-white/65"
+        >
+          {kind === "login" ? "没有账号？去注册" : "已有账号？去登录"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ChatDock({
   apiBase,
   previewsDir,
@@ -70,11 +213,14 @@ export function ChatDock({
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<AgentMode>("gallery");
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
   const sessionIdRef = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   if (!sessionIdRef.current) {
-    sessionIdRef.current = `${context}-${newSessionId()}`;
+    sessionIdRef.current = persistentSessionId(context, mode);
   }
 
   useEffect(() => {
@@ -82,46 +228,147 @@ export function ChatDock({
     if (node) node.scrollTop = node.scrollHeight;
   }, [turns, open, sending]);
 
+  // Reflect stored session immediately, then validate the token against the server.
+  useEffect(() => {
+    setUser(getStoredUser());
+    void fetchMe(apiBase).then(setUser).catch(() => {});
+  }, [apiBase]);
+
+  // Restore the persisted transcript when opening, switching mode, or auth changes.
+  useEffect(() => {
+    if (!open) return;
+    const sid = persistentSessionId(context, mode);
+    sessionIdRef.current = sid;
+    let cancelled = false;
+    void fetchAgentHistory(apiBase, sid, mode).then((hist) => {
+      if (cancelled) return;
+      setTurns(hist.map((h) => ({ role: h.role, text: h.text })));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, mode, user, apiBase, context]);
+
+  // Mutate the trailing assistant turn (the one currently streaming) in place.
+  const patchLastAssistant = useCallback(
+    (patch: (t: ChatTurn) => ChatTurn) => {
+      setTurns((prev) => {
+        if (prev.length === 0) return prev;
+        const idx = prev.length - 1;
+        if (prev[idx].role !== "assistant") return prev;
+        const next = prev.slice();
+        next[idx] = patch(next[idx]);
+        return next;
+      });
+    },
+    [],
+  );
+
   const send = useCallback(
     async (raw: string) => {
       const message = raw.trim();
       if (!message || sending) return;
       setInput("");
-      setTurns((prev) => [...prev, { role: "user", text: message }]);
+      // Push the user turn + an empty assistant placeholder we stream into.
+      setTurns((prev) => [
+        ...prev,
+        { role: "user", text: message },
+        { role: "assistant", text: "", toolCalls: [], streaming: true },
+      ]);
       setSending(true);
+
+      const body = {
+        session_id: sessionIdRef.current,
+        message,
+        mode,
+        previews_dir: mode === "gallery" ? previewsDir ?? undefined : undefined,
+      };
+
       try {
-        const data = await sendAgentChat(apiBase, {
-          session_id: sessionIdRef.current,
-          message,
-          previews_dir: previewsDir ?? undefined,
+        const { receivedToken } = await streamAgentChat(apiBase, body, {
+          onToken: (text) =>
+            patchLastAssistant((t) => ({ ...t, text: t.text + text })),
+          onToolCall: (call) =>
+            patchLastAssistant((t) => ({ ...t, toolCalls: [...(t.toolCalls ?? []), call] })),
+          onDone: (info) =>
+            patchLastAssistant((t) => ({
+              ...t,
+              text: (t.text || info.reply || "(空回复)").trim(),
+              toolCalls: info.tool_calls?.length ? info.tool_calls : t.toolCalls,
+              guardrails: info.guardrail_events,
+              streaming: false,
+            })),
+          onError: (msg) =>
+            patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false })),
         });
-        if (data.error) {
-          setTurns((prev) => [...prev, { role: "assistant", text: data.error as string, error: true }]);
-        } else {
-          setTurns((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              text: data.reply || "(空回复)",
-              toolCalls: data.tool_calls,
-              guardrails: data.guardrail_events,
-            },
-          ]);
+
+        // SSE opened but yielded no content (e.g. proxy buffering) → non-stream fallback.
+        if (!receivedToken) {
+          const data = await sendAgentChat(apiBase, body);
+          patchLastAssistant((t) => ({
+            ...t,
+            text: data.error || data.reply || "(空回复)",
+            toolCalls: data.tool_calls,
+            guardrails: data.guardrail_events,
+            error: Boolean(data.error),
+            streaming: false,
+          }));
         }
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "请求失败";
-        setTurns((prev) => [...prev, { role: "assistant", text: msg, error: true }]);
+      } catch (streamErr) {
+        // Hard stream failure → fall back to the non-streaming endpoint once.
+        try {
+          const data = await sendAgentChat(apiBase, body);
+          patchLastAssistant((t) => ({
+            ...t,
+            text: data.error || data.reply || "(空回复)",
+            toolCalls: data.tool_calls,
+            guardrails: data.guardrail_events,
+            error: Boolean(data.error),
+            streaming: false,
+          }));
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : streamErr instanceof Error ? streamErr.message : "请求失败";
+          patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false }));
+        }
       } finally {
         setSending(false);
       }
     },
-    [apiBase, previewsDir, sending],
+    [apiBase, previewsDir, sending, mode, patchLastAssistant],
   );
 
   const resetChat = useCallback(() => {
     setTurns([]);
-    sessionIdRef.current = `${context}-${newSessionId()}`;
-  }, [context]);
+    // Rotate to a brand-new persisted conversation for this mode.
+    sessionIdRef.current = rotateSessionId(context, mode);
+  }, [context, mode]);
+
+  const switchMode = useCallback(
+    (next: AgentMode) => {
+      if (next === mode) return;
+      setMode(next);
+      // The hydrate effect (keyed on mode) restores that mode's persisted transcript.
+      sessionIdRef.current = persistentSessionId(context, next);
+    },
+    [mode, context],
+  );
+
+  const doAuth = useCallback(
+    async (kind: "login" | "register", username: string, password: string) => {
+      const u =
+        kind === "login"
+          ? await loginUser(apiBase, username, password)
+          : await registerUser(apiBase, username, password);
+      setUser(u);
+      setAuthOpen(false);
+    },
+    [apiBase],
+  );
+
+  const doLogout = useCallback(async () => {
+    await logoutUser(apiBase);
+    setUser(null);
+  }, [apiBase]);
 
   if (!open) {
     return (
@@ -132,20 +379,53 @@ export function ChatDock({
         className="fixed bottom-4 right-4 z-50 flex h-11 items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.08] px-4 text-[13px] text-white/80 shadow-lg backdrop-blur-md transition-colors hover:bg-white/[0.14]"
       >
         <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
-        策展助手
+        AI 助手
       </button>
     );
   }
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex h-[min(560px,calc(100vh-2rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
+      {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
       <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
-          <span className="text-[13px] font-medium text-white/80">策展助手</span>
-          <span className="text-[11px] text-white/30">Gallery Copilot</span>
+          <div className="flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.03] p-0.5 text-[12px]">
+            {(["gallery", "general"] as AgentMode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => switchMode(m)}
+                className={[
+                  "rounded-[4px] px-2 py-0.5 transition-colors",
+                  mode === m ? "bg-white/[0.12] text-white/85" : "text-white/40 hover:text-white/70",
+                ].join(" ")}
+              >
+                {MODE_LABEL[m]}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-1">
+          {user ? (
+            <button
+              type="button"
+              onClick={() => void doLogout()}
+              title={`已登录：${user.username}（点击退出）`}
+              className="max-w-[92px] truncate rounded-[3px] px-1.5 py-0.5 text-[12px] text-emerald-300/70 hover:text-emerald-200"
+            >
+              {user.username}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAuthOpen(true)}
+              title="登录以持久保存对话"
+              className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
+            >
+              登录
+            </button>
+          )}
           <button
             type="button"
             onClick={resetChat}
@@ -168,11 +448,9 @@ export function ChatDock({
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
         {turns.length === 0 ? (
           <div className="space-y-3 pt-2">
-            <p className="text-[12px] leading-relaxed text-white/35">
-              我可以基于当前 session 的分析结果回答关于评分、标签、保留/丢弃的问题（只读，不会改动文件）。
-            </p>
+            <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
             <div className="flex flex-col gap-1.5">
-              {SUGGESTIONS.map((s) => (
+              {SUGGESTIONS[mode].map((s) => (
                 <button
                   key={s}
                   type="button"
@@ -197,7 +475,19 @@ export function ChatDock({
                       : "border border-white/[0.06] bg-white/[0.03] text-white/75",
                 ].join(" ")}
               >
-                <div>{t.text}</div>
+                {t.streaming && !t.text && !t.toolCalls?.length ? (
+                  <div className="flex items-center gap-1 text-white/40">
+                    <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40" />
+                    思考中…
+                  </div>
+                ) : (
+                  <div>
+                    {t.role === "assistant" ? <LinkifiedText text={t.text} /> : t.text}
+                    {t.streaming ? (
+                      <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-white/50 align-[-0.15em]" aria-hidden />
+                    ) : null}
+                  </div>
+                )}
                 {(t.toolCalls?.length || t.guardrails?.length) ? (
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {t.toolCalls?.map((c, j) => <ToolChip key={`t${j}`} call={c} />)}
@@ -208,13 +498,6 @@ export function ChatDock({
             </div>
           ))
         )}
-        {sending ? (
-          <div className="flex justify-start">
-            <div className="rounded-[6px] border border-white/[0.06] bg-white/[0.03] px-2.5 py-2 text-[13px] text-white/40">
-              思考中…
-            </div>
-          </div>
-        ) : null}
       </div>
 
       <div className="shrink-0 border-t border-white/[0.06] p-2.5">
@@ -229,7 +512,7 @@ export function ChatDock({
               }
             }}
             rows={1}
-            placeholder="问问这个 session 的照片…"
+            placeholder={mode === "gallery" ? "问问这个 session 的照片…" : "给我一个任务：检索、算一算、或生成一份产物…"}
             className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
           />
           <button

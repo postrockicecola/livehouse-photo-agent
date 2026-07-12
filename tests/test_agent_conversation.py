@@ -155,3 +155,82 @@ def test_chat_unknown_tool_is_reported_not_fatal():
     res = agent.chat("use ghost")
     assert res.reply == "sorry, that tool is unavailable"
     assert res.tool_calls[0]["ok"] is False
+
+
+# --------------------------------------------------------------------- streaming
+
+
+def _collect(events):
+    """Split a stream_chat() event iterable into (tokens_joined, tool_calls, done)."""
+    tokens, tools, done = [], [], None
+    for ev in events:
+        if ev["type"] == "token":
+            tokens.append(ev["text"])
+        elif ev["type"] == "tool_call":
+            tools.append(ev)
+        elif ev["type"] == "done":
+            done = ev
+    return "".join(tokens), tools, done
+
+
+def test_stream_chat_real_streams_tokens_from_stream_fn():
+    agent = ConversationalAgent(lambda msgs: "unused")
+    stream_fn = lambda msgs: iter(["Hel", "lo ", "world"])
+    text, tools, done = _collect(agent.stream_chat("hi", stream_fn=stream_fn))
+    assert text == "Hello world"
+    assert tools == []
+    assert done is not None and done["reply"] == "Hello world"
+    # The streamed reply is committed to memory (user + assistant).
+    assert agent.memory.turn_count == 2
+
+
+def test_stream_chat_chunks_when_no_stream_fn():
+    # No stream_fn → the one-shot chat_fn result is chunked into token events.
+    agent = ConversationalAgent(lambda msgs: "plain answer")
+    text, tools, done = _collect(agent.stream_chat("hi"))
+    assert text == "plain answer"
+    assert done["reply"] == "plain answer"
+
+
+def test_stream_chat_emits_tool_call_then_streams_forced_final():
+    reg = SkillRegistry()
+    reg.register(_echo_skill())
+    # Decision rounds always re-request the same tool → repeat break → forced final,
+    # which is the branch that streams via stream_fn.
+    agent = ConversationalAgent(
+        lambda msgs: '{"tool": "echo", "args": {"v": "pong"}}',
+        skills=reg,
+        max_tool_rounds=3,
+    )
+    stream_fn = lambda msgs: iter(["based ", "on ", "pong"])
+    text, tools, done = _collect(agent.stream_chat("echo pong", stream_fn=stream_fn))
+    assert len(tools) == 1 and tools[0]["tool"] == "echo" and tools[0]["ok"] is True
+    assert text == "based on pong"
+    assert done["tool_calls"][0]["tool"] == "echo"
+
+
+def test_stream_chat_in_loop_answer_is_chunked_not_reissued():
+    reg = SkillRegistry()
+    reg.register(_echo_skill())
+    scripted = iter([
+        '{"tool": "echo", "args": {"v": "pong"}}',
+        "the tool said pong",
+    ])
+    # stream_fn must NOT be consumed: the in-loop answer already exists and is chunked.
+    def _boom(_msgs):
+        raise AssertionError("stream_fn should not run when the model answers in-loop")
+
+    agent = ConversationalAgent(lambda msgs: next(scripted), skills=reg)
+    text, tools, done = _collect(agent.stream_chat("echo pong", stream_fn=_boom))
+    assert text == "the tool said pong"
+    assert len(tools) == 1
+
+
+def test_stream_chat_buffers_stray_tool_json_into_fallback():
+    # If the final generation is a stray tool-call JSON, it must never be shown; the
+    # buffered head is replaced with the fallback prose instead.
+    agent = ConversationalAgent(lambda msgs: "unused")
+    stream_fn = lambda msgs: iter(['{"tool": ', '"echo", "args": {}}'])
+    text, tools, done = _collect(agent.stream_chat("hi", stream_fn=stream_fn))
+    assert "{" not in text  # no raw JSON leaked to the user
+    assert done["reply"] == text

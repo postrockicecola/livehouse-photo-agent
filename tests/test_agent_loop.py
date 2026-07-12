@@ -15,7 +15,13 @@ import json
 
 from services.agent.loop import CurationAgent
 from services.agent.planner import HeuristicPlanner, LLMPlanner
-from services.agent.tools import AnalyzeTool, FinalizeTool, InspectTool, ToolRegistry
+from services.agent.tools import (
+    AnalyzeTool,
+    FinalizeTool,
+    InspectTool,
+    QueryGalleryTool,
+    ToolRegistry,
+)
 from services.agent.types import ActionType, AgentConfig, Candidate
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
@@ -315,6 +321,60 @@ def test_max_steps_guard_forces_finalize():
     assert res.steps[-1].call.action == ActionType.FINALIZE
     assert res.steps[-1].call.source == "loop_guard"
     assert res.metrics["steps"] <= 6  # 5 stuck steps + 1 forced finalize
+
+
+def test_llm_planner_uses_cluster_recall_compare_tools():
+    # A capable model uses the zero-cost tools: cluster the bursts, recall one score
+    # from the gallery (no inference), compare two candidates, analyze the rest, finalize.
+    cands = _make_candidates(
+        [("a_0001.jpg", 8.0), ("a_0002.jpg", 7.0), ("b_0500.jpg", 6.0), ("c_0900.jpg", 5.0)]
+    )
+    analyze = _fake_analyze({"a_0001.jpg": 82.0, "b_0500.jpg": 78.0})
+
+    def gallery(image_id: str):
+        return {"score": 85.0, "confidence": 0.9} if image_id == "c_0900.jpg" else None
+
+    tools = ToolRegistry(
+        inspect=InspectTool(),
+        analyze=AnalyzeTool(analyze, default_tier="fast"),
+        finalize=FinalizeTool(),
+        query_gallery=QueryGalleryTool(gallery),
+    )
+
+    # auto_inspect handles the 4 inspects; the LLM supplies the decisions below.
+    script = iter(
+        [
+            json.dumps({"action": "cluster", "reason": "group bursts"}),
+            json.dumps({"action": "query_gallery", "idx": 3, "reason": "recall c_0900"}),
+            json.dumps({"action": "analyze", "idx": 0, "tier": "fast", "reason": "burst rep"}),
+            json.dumps({"action": "compare", "a": 0, "b": 2, "reason": "weigh close pair"}),
+            json.dumps({"action": "analyze", "idx": 2, "tier": "fast", "reason": "the other keeper"}),
+            json.dumps({"action": "finalize", "selected": [0, 2, 3], "reason": "commit"}),
+        ]
+    )
+
+    agent = CurationAgent(
+        tools=tools,
+        config=AgentConfig(allow_escalation=False, target_keepers=5, keep_score_threshold=70.0),
+        planner=LLMPlanner(lambda _p: next(script)),
+    )
+    res = agent.run(cands)
+
+    counts = res.metrics["action_counts"]
+    assert counts["cluster"] == 1
+    assert counts["query_gallery"] == 1
+    assert counts["compare"] == 1
+    assert counts["analyze"] == 2
+    assert counts["finalize"] == 1
+
+    # The recalled photo is a keeper with zero inference spent on it.
+    recalled = next(c for c in res.candidates if c.image_id == "c_0900.jpg")
+    assert recalled.tier == "recall"
+    assert recalled.attempts == 0
+    assert res.metrics["inferences_used"] == 2  # only the two analyze calls cost budget
+    assert res.selected == ["a_0001.jpg", "b_0500.jpg", "c_0900.jpg"]
+    # Every non-inspect decision was the model's.
+    assert res.metrics["planner_source_counts"].get("llm") == 6
 
 
 def test_analyze_tool_handles_backend_error():

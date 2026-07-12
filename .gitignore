@@ -34,6 +34,9 @@ configs/studio_ingest.json
 # Stray pipeline eval outputs
 evaluation_*.json
 
+# General-agent artifact workspace (per-session deliverables; local-only)
+data/agent_workspace/
+
 # OS / IDE
 .DS_Store
 .idea/

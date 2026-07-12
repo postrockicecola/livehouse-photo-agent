@@ -2,7 +2,11 @@
 
 import {
   agentThumbUrl,
+  decisionRateTone,
   formatLatency,
+  llmDecisionRatePct,
+  llmFallbackCalls,
+  plannerMode,
   scoreTone,
   shortName,
   tierBadgeClass,
@@ -74,6 +78,10 @@ export function AgentRunCard({ agent, apiBase }: Props) {
   const escRate = analyzed > 0 ? Math.round((escalated / analyzed) * 100) : 0;
   const running = (agent.status ?? "") !== "SUCCEEDED" && !String(agent.status ?? "").startsWith("FAILED");
 
+  const mode = plannerMode(agent.metrics);
+  const llmRate = llmDecisionRatePct(agent.metrics);
+  const fallbacks = llmFallbackCalls(agent.metrics);
+
   return (
     <section className="glass mb-4 rounded-2xl border border-violet-500/30 bg-violet-950/5 p-4 sm:p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -82,19 +90,53 @@ export function AgentRunCard({ agent, apiBase }: Props) {
             <span aria-hidden>🤖</span> Agentic Curation
           </span>
           <h2 className="text-base font-semibold text-zinc-100">observe → plan → act → reflect</h2>
+          <span
+            className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${
+              mode === "llm"
+                ? "border-emerald-500/50 bg-emerald-950/40 text-emerald-200"
+                : "border-stroke bg-panel2 text-zinc-400"
+            }`}
+            title={
+              mode === "llm"
+                ? "LLM-first: the model drives analyze/finalize decisions (heuristic fallback on bad output)"
+                : "Deterministic heuristic planner (no LLM in the loop)"
+            }
+          >
+            {mode === "llm" ? "LLM-driven" : "heuristic"}
+          </span>
         </div>
         <div className="text-xs text-zinc-500">
           {agent.job_type} · budget {agent.max_inferences ?? "—"} inferences · target {agent.target_keepers ?? "—"} keepers
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-6">
+        <Metric
+          label="llm decisions"
+          value={llmRate == null ? "—" : `${llmRate}%`}
+          tone={decisionRateTone(llmRate)}
+        />
         <Metric label="candidates" value={agent.candidate_count ?? "—"} />
         <Metric label="analyzed" value={analyzed} tone="text-sky-200" />
         <Metric label="escalations" value={`${escalated}${analyzed ? ` · ${escRate}%` : ""}`} tone="text-violet-200" />
         <Metric label="keepers" value={agent.selected_count ?? keepers.length} tone="text-emerald-300" />
         <Metric label="wall time" value={formatLatency(agent.total_latency_ms)} />
       </div>
+      {mode === "llm" && (llmRate != null || fallbacks != null) ? (
+        <div className="mb-4 -mt-2 text-[11px] text-zinc-500">
+          {llmRate != null ? (
+            <>
+              model drove <span className={decisionRateTone(llmRate)}>{llmRate}%</span> of its attempted decisions
+            </>
+          ) : null}
+          {fallbacks != null ? (
+            <>
+              {llmRate != null ? " · " : ""}
+              {fallbacks} heuristic fallback{fallbacks === 1 ? "" : "s"}
+            </>
+          ) : null}
+        </div>
+      ) : null}
 
       {keepers.length > 0 ? (
         <div className="mb-4">

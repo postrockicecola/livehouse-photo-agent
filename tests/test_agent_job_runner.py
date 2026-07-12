@@ -66,6 +66,9 @@ def test_run_curation_job_writes_events_and_artifact(tmp_path):
         job_id=job_id,
         source_dir=str(tmp_path),
         trace_id="t-curate-1",
+        # Pin the deterministic planner so this wiring test stays offline (the loop is
+        # LLM-first by default; see test_build_planner_default_is_llm_first).
+        payload={"agent": {"planner": "heuristic"}},
         analyze_fn=_fake_analyze({"a.jpg": 92.0, "b.jpg": 81.0, "c.jpg": 40.0}),
     )
 
@@ -108,8 +111,54 @@ def test_run_curation_job_no_images_raises(tmp_path):
             job_id=job_id,
             source_dir=str(tmp_path),
             trace_id="t-curate-1",
+            payload={"agent": {"planner": "heuristic"}},
             analyze_fn=_fake_analyze({}),
         )
         assert False, "expected FileNotFoundError for empty source dir"
     except FileNotFoundError:
         pass
+
+
+def test_build_planner_default_is_llm_first(tmp_path, monkeypatch):
+    """No explicit planner → LLM-first (real provider) or heuristic (mock provider)."""
+    from services.agent import job_runner
+    from services.agent.planner import LLMPlanner
+
+    # Real provider (e.g. ollama): default resolves to the LLM tool-calling planner,
+    # which keeps a heuristic fallback of its own.
+    monkeypatch.setattr(job_runner, "resolve_default_planner_kind", lambda _cfg: "llm")
+    planner = job_runner._build_planner(None, config_path="configs/livehouse.yaml")
+    assert isinstance(planner, LLMPlanner)
+
+    # Explicit opt-out is always honored regardless of the resolved default.
+    assert job_runner._build_planner({"agent": {"planner": "heuristic"}}, config_path="x") is None
+
+    # mock provider → heuristic default (None → CurationAgent uses HeuristicPlanner).
+    monkeypatch.setattr(job_runner, "resolve_default_planner_kind", lambda _cfg: "heuristic")
+    assert job_runner._build_planner(None, config_path="x") is None
+
+
+def test_resolve_default_planner_kind_by_provider(tmp_path, monkeypatch):
+    """Provider drives the default: mock → heuristic, anything else → llm."""
+    import yaml
+
+    from services.agent import job_runner
+    from services.agent.job_runner import resolve_default_planner_kind
+
+    def _cfg(provider: str) -> str:
+        p = tmp_path / f"cfg_{provider}.yaml"
+        p.write_text(yaml.safe_dump({"model": {"provider": provider}}), encoding="utf-8")
+        return str(p)
+
+    assert resolve_default_planner_kind(_cfg("ollama")) == "llm"
+    assert resolve_default_planner_kind(_cfg("vllm")) == "llm"
+    assert resolve_default_planner_kind(_cfg("mock")) == "heuristic"
+
+    # A genuine config-load failure degrades to heuristic rather than raising.
+    from utils.config_loader import ConfigLoader
+
+    def _boom(*_a, **_k):
+        raise RuntimeError("config unreadable")
+
+    monkeypatch.setattr(ConfigLoader, "load", classmethod(lambda cls, *a, **k: _boom()))
+    assert resolve_default_planner_kind("whatever.yaml") == "heuristic"

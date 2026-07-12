@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { agentThumbUrl, formatLatency, scoreTone, shortName, type AgentRunSummary } from "@/lib/agentRun";
+import {
+  agentThumbUrl,
+  formatLatency,
+  llmDecisionRatePct,
+  plannerMode,
+  scoreTone,
+  shortName,
+  type AgentRunSummary,
+} from "@/lib/agentRun";
 
 type Props = {
   apiBase: string;
@@ -22,6 +30,8 @@ function RunRow({ run, apiBase }: { run: AgentRunSummary; apiBase: string }) {
   const analyzed = run.analyzed ?? 0;
   const escalated = run.escalated ?? 0;
   const running = (run.status ?? "") !== "SUCCEEDED" && !String(run.status ?? "").startsWith("FAILED");
+  const mode = plannerMode(run.metrics);
+  const llmRate = llmDecisionRatePct(run.metrics);
 
   return (
     <div className="rounded-xl border border-stroke/70 bg-panel2/40 p-3">
@@ -39,6 +49,16 @@ function RunRow({ run, apiBase }: { run: AgentRunSummary; apiBase: string }) {
           </span>
         </div>
         <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-400">
+          <span
+            className={`rounded border px-1 py-0.5 text-[10px] ${
+              mode === "llm"
+                ? "border-emerald-500/40 bg-emerald-950/30 text-emerald-300/90"
+                : "border-stroke bg-panel2 text-zinc-500"
+            }`}
+            title={mode === "llm" ? "LLM-driven run" : "heuristic run"}
+          >
+            {mode === "llm" ? (llmRate != null ? `llm ${llmRate}%` : "llm") : "heuristic"}
+          </span>
           <span className="text-sky-300/90">{analyzed} analyzed</span>
           <span className="text-violet-300/90">{escalated} esc</span>
           <span className="text-emerald-300/90">{run.selected_count ?? keepers.length} keep</span>
@@ -85,7 +105,7 @@ function CurateForm({ apiBase, onSubmitted }: { apiBase: string; onSubmitted: ()
   const [sourceDir, setSourceDir] = useState("");
   const [keepers, setKeepers] = useState(10);
   const [maxInferences, setMaxInferences] = useState(20);
-  const [planner, setPlanner] = useState<"heuristic" | "llm">("heuristic");
+  const [planner, setPlanner] = useState<"heuristic" | "llm">("llm");
   const [plannerModel, setPlannerModel] = useState("");
   const [state, setState] = useState<SubmitState>({ busy: false, msg: null, ok: false });
 
@@ -155,8 +175,8 @@ function CurateForm({ apiBase, onSubmitted }: { apiBase: string; onSubmitted: ()
             value={planner}
             onChange={(e) => setPlanner(e.target.value as "heuristic" | "llm")}
           >
+            <option value="llm">llm (default)</option>
             <option value="heuristic">heuristic</option>
-            <option value="llm">llm</option>
           </select>
         </label>
         {planner === "llm" ? (
@@ -225,7 +245,7 @@ export function AgentCurationPanel({ apiBase, limit = 6 }: Props) {
             <span aria-hidden>🤖</span> Agentic Curation
           </h2>
           <p className="mt-1 text-xs text-zinc-500">
-            ReAct loop on the inference gateway · observe → plan → analyze → reflect/escalate → finalize
+            LLM-first ReAct loop on the inference gateway · observe → plan → analyze → reflect/escalate → finalize
           </p>
         </div>
         {error ? <span className="text-xs text-red-300">{error}</span> : null}

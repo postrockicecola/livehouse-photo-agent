@@ -166,20 +166,27 @@ class LLMPlanner:
         # 20-char image id, which silently breaks tool-calling. ``_coerce_call`` maps
         # the idx back to the real image_id.
         for i, c in enumerate(ordered[: self._max_state_candidates]):
-            rows.append(
-                {
-                    "idx": i,
-                    "inspected": c.inspected,
-                    "fast_score": round(c.fast_score(), 1),
-                    "analyzed": c.analyzed,
-                    "score": c.score,
-                    "confidence": c.confidence,
-                    "tier": c.tier,
-                }
-            )
+            row = {
+                "idx": i,
+                "inspected": c.inspected,
+                "fast_score": round(c.fast_score(), 1),
+                "analyzed": c.analyzed,
+                "score": c.score,
+                "confidence": c.confidence,
+                "tier": c.tier,
+            }
+            # Only surface cluster grouping once the CLUSTER tool has run (keeps the
+            # pre-cluster prompt clean; lets the model analyze one rep per burst after).
+            if state.clustered and "cluster_id" in c.features:
+                row["cluster"] = c.features.get("cluster_id")
+                row["rep"] = bool(c.features.get("cluster_rep"))
+            rows.append(row)
         tools = [
             {"action": "inspect", "args": {"idx": "int"}},
             {"action": "analyze", "args": {"idx": "int", "tier": "fast|full"}},
+            {"action": "compare", "args": {"a": "int idx", "b": "int idx"}},
+            {"action": "cluster", "args": {}},
+            {"action": "query_gallery", "args": {"idx": "int"}},
             {"action": "finalize", "args": {"selected": "optional [int idx]"}},
         ]
         budget = {
@@ -194,14 +201,20 @@ class LLMPlanner:
         return (
             "You are a concert-photo culling agent. Pick photos worth delivering.\n"
             "Refer to a photo only by its integer 'idx' from CANDIDATES below.\n"
-            "Choose exactly ONE next action and reply with a single JSON object:\n"
-            '{"action": "inspect|analyze|finalize", "idx": <int>, "tier": "fast|full", "reason": "..."}\n'
+            "Choose exactly ONE next action and reply with a single JSON object, e.g.:\n"
+            '{"action": "analyze", "idx": <int>, "tier": "fast|full", "reason": "..."}\n'
             "Rules:\n"
             "- NEVER inspect a photo whose inspected=true; pick one with inspected=false.\n"
             "- Once every photo is inspected, ANALYZE the most promising un-analyzed ones\n"
             "  (analyzed=false), preferring higher fast_score.\n"
-            "- Each analyze costs 1 inference; FINALIZE once inferences_used reaches\n"
-            "  max_inferences or you have enough keepers above keep_score_threshold.\n"
+            "- Each analyze costs 1 inference; the zero-cost tools do not.\n"
+            "- Optional CLUSTER (once) groups burst/near-duplicate frames and adds\n"
+            "  'cluster'/'rep' to CANDIDATES; then prefer analyzing one rep=true per cluster.\n"
+            "- Optional QUERY_GALLERY recalls a prior score for one image (it becomes\n"
+            "  analyzed=true with tier='recall', no inference) — reuse it instead of analyzing.\n"
+            "- Optional COMPARE weighs two candidates before spending an analyze.\n"
+            "- FINALIZE once inferences_used reaches max_inferences or you have enough\n"
+            "  keepers above keep_score_threshold.\n"
             "- Do not repeat an action that makes no progress.\n\n"
             f"TOOLS: {json.dumps(tools)}\n"
             f"BUDGET: {json.dumps(budget)}\n"
@@ -222,6 +235,28 @@ class LLMPlanner:
             selected = _resolve_selected(parsed.get("selected"), state, ordered)
             args = {"selected": selected} if selected else {}
             return ToolCall(action=action, args=args, reason=reason, source="llm")
+        if action == ActionType.CLUSTER:
+            # One-shot: re-clustering is a no-op → treat as out-of-contract so the loop advances.
+            if state.clustered:
+                return None
+            return ToolCall(action=action, reason=reason, source="llm")
+        if action == ActionType.COMPARE:
+            a_id = _idx_to_image_id(parsed.get("a"), ordered)
+            b_id = _idx_to_image_id(parsed.get("b"), ordered)
+            if a_id is None or b_id is None or a_id == b_id:
+                return None
+            return ToolCall(
+                action=action, args={"a_id": a_id, "b_id": b_id}, reason=reason, source="llm"
+            )
+        if action == ActionType.QUERY_GALLERY:
+            image_id = _resolve_image_id(parsed, state, ordered)
+            if image_id is None:
+                return None
+            cand = state.candidates.get(image_id)
+            # Re-querying the same image (or one already analyzed) makes no progress.
+            if cand is not None and (cand.features.get("gallery_queried") or cand.analyzed):
+                return None
+            return ToolCall(action=action, image_id=image_id, reason=reason, source="llm")
         image_id = _resolve_image_id(parsed, state, ordered)
         if image_id is None:
             return None
@@ -254,6 +289,14 @@ def _as_index(value: Any) -> Optional[int]:
         return value
     if isinstance(value, str) and value.strip().lstrip("-").isdigit():
         return int(value.strip())
+    return None
+
+
+def _idx_to_image_id(value: Any, ordered: list) -> Optional[str]:
+    """Map a bare integer ``idx`` (used by COMPARE's a/b) to a real image_id."""
+    idx = _as_index(value)
+    if idx is not None and 0 <= idx < len(ordered):
+        return ordered[idx].image_id
     return None
 
 

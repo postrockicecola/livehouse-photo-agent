@@ -89,3 +89,43 @@ export function shortName(imageId?: string | null): string {
 export function isAgentSpanLabel(label?: string | null): boolean {
   return typeof label === "string" && label.startsWith("agent ");
 }
+
+function num(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/**
+ * Who actually drove the loop. The curation agent is LLM-first: `planner_source_counts`
+ * tags every step "llm" (model in control), "llm_fallback" (model output unusable →
+ * heuristic rescued it), "heuristic", "auto_inspect", "reflection", or "loop_guard".
+ * Presence of any llm/llm_fallback step (or a non-null `llm_decision_rate`) means the
+ * run was LLM-driven; otherwise it ran the deterministic heuristic baseline.
+ */
+export function plannerMode(metrics?: Record<string, unknown> | null): "llm" | "heuristic" {
+  if (!metrics) return "heuristic";
+  if (num(metrics.llm_decision_rate) != null) return "llm";
+  const src = metrics.planner_source_counts;
+  if (src && typeof src === "object") {
+    const s = src as Record<string, unknown>;
+    if ((num(s.llm) ?? 0) > 0 || (num(s.llm_fallback) ?? 0) > 0) return "llm";
+  }
+  return "heuristic";
+}
+
+/** `llm_decision_rate` (fraction of LLM-attempted steps the model drove) as a 0–100 int, or null. */
+export function llmDecisionRatePct(metrics?: Record<string, unknown> | null): number | null {
+  const r = num(metrics?.llm_decision_rate ?? null);
+  return r == null ? null : Math.round(r * 100);
+}
+
+export function llmFallbackCalls(metrics?: Record<string, unknown> | null): number | null {
+  return num(metrics?.llm_fallback_calls ?? null);
+}
+
+/** Tailwind tone for an LLM decision rate: green when the model is reliably in control. */
+export function decisionRateTone(pct?: number | null): string {
+  if (pct == null) return "text-zinc-400";
+  if (pct >= 80) return "text-emerald-300";
+  if (pct >= 50) return "text-sky-300";
+  return "text-amber-300";
+}

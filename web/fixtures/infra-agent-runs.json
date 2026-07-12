@@ -23,7 +23,8 @@
         "max_inferences": 6,
         "budget_exhausted": true,
         "escalations": 2,
-        "llm_fallback_calls": 0,
+        "llm_fallback_calls": 1,
+        "llm_decision_rate": 0.8,
         "candidates_total": 250,
         "candidates_analyzed": 4,
         "selected_count": 4,
@@ -31,6 +32,12 @@
           "inspect": 250,
           "analyze": 6,
           "finalize": 1
+        },
+        "planner_source_counts": {
+          "auto_inspect": 250,
+          "llm": 4,
+          "llm_fallback": 1,
+          "reflection": 2
         }
       },
       "keepers": [
