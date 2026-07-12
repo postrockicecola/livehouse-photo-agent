@@ -33,12 +33,28 @@ export type GalleryExportItem = {
   automated_adjust?: Record<string, number> | null;
 };
 
+/** A folded (non-representative) frame in a ``sort=diverse`` group. */
+export type GalleryGroupMember = {
+  file?: string;
+  path?: string;
+  path_quoted?: string;
+  before_path_quoted?: string;
+  overall_score?: number;
+  category?: string;
+  rotate_degrees?: number;
+};
+
 export type GalleryItem = {
   file?: string;
   path?: string;
   path_quoted?: string;
   before_path?: string;
   before_path_quoted?: string;
+  /** ``sort=diverse`` grouping: this tile represents a cluster of look-alike frames. */
+  group_id?: number;
+  group_size?: number;
+  is_representative?: boolean;
+  group_members?: GalleryGroupMember[];
   /** Extra graded looks (Film / BW / …); merged into preview strip when present. */
   style_variants?: GalleryStyleVariant[];
   orientation?: "landscape" | "portrait" | "square" | string;

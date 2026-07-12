@@ -124,6 +124,16 @@ export function GalleryMasonry({
 }: Props) {
   const columnCount = useGalleryMasonryColumnCount();
   const sortedItems = useMemo(() => sortItemsByScoreDesc(items), [items]);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
+
+  const toggleGroup = useCallback((key: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
 
   const [measuredByKey, setMeasuredByKey] = useState<Map<string, IntrinsicSize>>(() => new Map());
 
@@ -167,6 +177,10 @@ export function GalleryMasonry({
     const score = Number(item.overall_score ?? 0);
     const measured = measuredByKey.get(reactKey) ?? null;
     const orient = displayOrientation(item, measured);
+    const members = item.group_members ?? [];
+    const groupSize = Number(item.group_size ?? 0);
+    const hasGroup = groupSize > 1 && members.length > 0;
+    const expanded = hasGroup && expandedGroups.has(reactKey);
 
     return (
       <article
@@ -224,6 +238,64 @@ export function GalleryMasonry({
         >
           {checked ? "已选" : "选择"}
         </button>
+
+        {hasGroup ? (
+          <button
+            type="button"
+            aria-pressed={expanded}
+            aria-label={expanded ? "收起同款" : `展开同款 ${groupSize} 张`}
+            title={expanded ? "收起同款" : `同款 ${groupSize} 张，展开查看`}
+            className={[
+              "absolute left-2 top-2 z-20 rounded-[4px] px-1.5 py-0.5 text-[9px] font-normal tracking-wide backdrop-blur-[2px] motion-safe:transition-[background-color,color] motion-safe:duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+              expanded
+                ? "bg-sky-500/35 text-sky-50/95 shadow-[inset_0_0_0_0.5px_rgba(125,211,252,0.35)]"
+                : "bg-black/45 text-white/75 hover:bg-black/55 hover:text-white/90",
+            ].join(" ")}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleGroup(reactKey);
+            }}
+          >
+            {expanded ? "收起" : `同款 ×${groupSize}`}
+          </button>
+        ) : null}
+
+        {expanded ? (
+          <div className="flex flex-wrap gap-[6px] bg-black/40 p-[6px]">
+            {members.map((m, mi) => {
+              const msrc = buildGalleryPlainImageUrl(apiBase, m as GalleryItem);
+              const mscore = Number(m.overall_score ?? 0);
+              return (
+                <button
+                  key={`${reactKey}\0m${mi}\0${m.file ?? m.path ?? mi}`}
+                  type="button"
+                  aria-label={`打开同款：${m.file ?? "photo"}，评分 ${mscore.toFixed(1)}`}
+                  title={`${m.file ?? ""} · ${mscore.toFixed(1)}`}
+                  className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-[2px] border-0 bg-white/[0.03] p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onOpenLab(m as GalleryItem);
+                  }}
+                >
+                  {msrc ? (
+                    <img
+                      src={msrc}
+                      alt=""
+                      role="presentation"
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-[8px] text-white/25">—</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </article>
     );
   };

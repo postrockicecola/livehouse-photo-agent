@@ -48,11 +48,22 @@ import {
   fetchGalleryResultsPage,
   GALLERY_PAGE_LIMIT,
   type GalleryLoadSource,
+  type GallerySort,
 } from "@/lib/galleryLoad";
 
 const API_BASE = getApiBase();
 const GALLERY_BURST_DEDUPE_PREF_KEY = "livehouse.galleryBurstDedupe";
 const GALLERY_SORT_TASTE_PREF_KEY = "livehouse.gallerySortPersonalized";
+const GALLERY_SORT_DIVERSE_PREF_KEY = "livehouse.gallerySortDiverse";
+
+function readGalleryDiversePref(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(GALLERY_SORT_DIVERSE_PREF_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 function readGallerySortPersonalizedPref(): boolean {
   if (typeof window === "undefined") return false;
@@ -123,13 +134,44 @@ export default function HomePage() {
   const [vibeBusy, setVibeBusy] = useState(false);
   const [galleryBurstDedupe, setGalleryBurstDedupe] = useState(readGalleryBurstDedupePref);
   const [gallerySortPersonalized, setGallerySortPersonalized] = useState(readGallerySortPersonalizedPref);
+  const [galleryDiverse, setGalleryDiverse] = useState(readGalleryDiversePref);
   const [tasteProfile, setTasteProfile] = useState<TasteProfile | null>(null);
   const [tasteMsg, setTasteMsg] = useState("");
 
-  const gallerySort = gallerySortPersonalized ? "personalized" : "overall";
+  const gallerySort: GallerySort = galleryDiverse
+    ? "diverse"
+    : gallerySortPersonalized
+      ? "personalized"
+      : "overall";
+
+  const setGalleryDiversePref = useCallback((on: boolean) => {
+    setGalleryDiverse(on);
+    if (on) {
+      setGallerySortPersonalized(false);
+      try {
+        localStorage.setItem(GALLERY_SORT_TASTE_PREF_KEY, "0");
+      } catch {
+        /* ignore */
+      }
+    }
+    try {
+      localStorage.setItem(GALLERY_SORT_DIVERSE_PREF_KEY, on ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+    setReloadNonce((n) => n + 1);
+  }, []);
 
   const setGallerySortPersonalizedPref = useCallback((on: boolean) => {
     setGallerySortPersonalized(on);
+    if (on) {
+      setGalleryDiverse(false);
+      try {
+        localStorage.setItem(GALLERY_SORT_DIVERSE_PREF_KEY, "0");
+      } catch {
+        /* ignore */
+      }
+    }
     try {
       localStorage.setItem(GALLERY_SORT_TASTE_PREF_KEY, on ? "1" : "0");
     } catch {
@@ -211,7 +253,7 @@ export default function HomePage() {
       try {
         const boot = await bootstrapGallery(ctrl.signal, {
           dedupe: galleryBurstDedupe,
-          sort: gallerySortPersonalized ? "personalized" : "overall",
+          sort: gallerySort,
         });
         clearTimeout(tid);
         if (dead) return;
@@ -252,7 +294,7 @@ export default function HomePage() {
       clearTimeout(tid);
       ctrl.abort();
     };
-  }, [reloadNonce, enqueueDecode, galleryBurstDedupe, gallerySortPersonalized]);
+  }, [reloadNonce, enqueueDecode, galleryBurstDedupe, gallerySort]);
 
   useEffect(() => {
     if (!paginated || !hasMore) return;
@@ -302,7 +344,7 @@ export default function HomePage() {
     );
     io.observe(node);
     return () => io.disconnect();
-  }, [API_BASE, hasMore, loadingItems, loadingMore, nextOffset, paginated, enqueueDecode, galleryBurstDedupe]);
+  }, [API_BASE, hasMore, loadingItems, loadingMore, nextOffset, paginated, enqueueDecode, galleryBurstDedupe, gallerySort]);
 
   useEffect(() => {
     let cancelled = false;
@@ -521,7 +563,7 @@ export default function HomePage() {
   const titleCount = datasetTotal != null && datasetTotal > 0 ? datasetTotal : items.length;
   const photoCountLabel = loadingItems && items.length === 0 ? "…" : String(titleCount);
   const photoCountSuffix =
-    galleryBurstDedupe &&
+    (galleryBurstDedupe || gallerySort === "diverse") &&
     datasetTotalRaw != null &&
     datasetTotalRaw > titleCount &&
     titleCount > 0
@@ -799,11 +841,14 @@ export default function HomePage() {
               >
                 <button
                   type="button"
-                  aria-pressed={!gallerySortPersonalized}
-                  onClick={() => setGallerySortPersonalizedPref(false)}
+                  aria-pressed={gallerySort === "overall"}
+                  onClick={() => {
+                    setGalleryDiversePref(false);
+                    setGallerySortPersonalizedPref(false);
+                  }}
                   className={[
                     "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
-                    !gallerySortPersonalized
+                    gallerySort === "overall"
                       ? "bg-white/[0.12] text-white/85"
                       : "text-white/45 hover:text-white/65",
                   ].join(" ")}
@@ -812,13 +857,27 @@ export default function HomePage() {
                 </button>
                 <button
                   type="button"
-                  aria-pressed={gallerySortPersonalized}
+                  aria-pressed={gallerySort === "diverse"}
+                  onClick={() => setGalleryDiversePref(true)}
+                  title="按画面相似度聚类，每组只展示一张代表帧，可展开同款"
+                  className={[
+                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                    gallerySort === "diverse"
+                      ? "bg-white/[0.12] text-white/85"
+                      : "text-white/45 hover:text-white/65",
+                  ].join(" ")}
+                >
+                  多样性
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={gallerySort === "personalized"}
                   onClick={() => setGallerySortPersonalizedPref(true)}
                   disabled={!tasteProfile}
                   title={!tasteProfile ? "需先勾选≥5张并保存以学习口味" : undefined}
                   className={[
                     "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors disabled:opacity-35",
-                    gallerySortPersonalized
+                    gallerySort === "personalized"
                       ? "bg-white/[0.12] text-white/85"
                       : "text-white/45 hover:text-white/65",
                   ].join(" ")}

@@ -7,6 +7,8 @@ import type { GalleryItem } from "@/components/types";
 
 export type GalleryLoadSource = "results_api" | "analysis_json" | "none";
 
+export type GallerySort = "overall" | "personalized" | "diverse";
+
 /** First paint: small lite slice (server skips per-row PIL/RAW). */
 export const GALLERY_BOOTSTRAP_LIMIT = 36;
 /** Infinite scroll / idle prefetch page size. */
@@ -109,7 +111,7 @@ function galleryResultsUrl(
   limit: number,
   lite = true,
   dedupe = true,
-  sort: "overall" | "personalized" = "overall",
+  sort: GallerySort = "overall",
 ): string {
   const liteQ = lite ? "true" : "false";
   const dedupeQ = dedupe ? "true" : "false";
@@ -177,10 +179,11 @@ async function bootstrapFromAnalysisJson(
  */
 export async function bootstrapGallery(
   signal?: AbortSignal,
-  options?: { dedupe?: boolean; sort?: "overall" | "personalized" },
+  options?: { dedupe?: boolean; sort?: GallerySort },
 ): Promise<GalleryBootstrap> {
   const dedupe = options?.dedupe !== false;
-  const sort = options?.sort === "personalized" ? "personalized" : "overall";
+  const sort: GallerySort =
+    options?.sort === "personalized" || options?.sort === "diverse" ? options.sort : "overall";
   const apiBase = getApiBase();
   let activeBaseDir: string | null = null;
   let apiError: string | null = null;
@@ -226,7 +229,7 @@ export async function fetchGalleryResultsPage(
   limit: number,
   signal?: AbortSignal,
   dedupe = true,
-  sort: "overall" | "personalized" = "overall",
+  sort: GallerySort = "overall",
 ): Promise<{ items: GalleryItem[]; next_offset: number | null; has_more: boolean; count?: number }> {
   return fetchJson(galleryResultsUrl(apiBase, offset, limit, true, dedupe, sort), signal);
 }
