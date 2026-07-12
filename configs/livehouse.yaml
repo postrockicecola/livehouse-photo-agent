@@ -210,6 +210,20 @@ processing:
     max_hamming: 10
     keep_per_cluster: 5              # At most this many frames per near-dup cluster in the grid
 
+  # ``GET /api/gallery/results?sort=diverse``: semantic-coverage view (disk unchanged).
+  # Groups same-scene bursts by CLIP similarity (pHash fallback if open-clip-torch missing),
+  # keeps one representative per group, folds the rest as expandable group_members.
+  diversity_selection:
+    enabled: true
+    similarity_threshold: 0.90        # CLIP cosine; higher = only very-alike frames fold together
+    fallback_phash_hamming: 10        # used only when CLIP embeddings are unavailable
+    max_members_returned: 40          # cap folded frames returned per group (payload guard)
+    representative_dims:              # in-cluster rep pick uses dims that vary within a burst
+      moment_peak: 0.35
+      focus_sharpness: 0.25
+      atmosphere_impact: 0.20
+      deliverable_subject: 0.20
+
   # Learn dim weights from homepage selections → ``Previews/runtime/taste_profile.json``
   taste_profile:
     min_liked: 5                     # Min selected images before rebuild / personalized sort

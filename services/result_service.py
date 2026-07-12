@@ -359,7 +359,6 @@ def load_gallery_page(
         rows_ro = _discover_gallery_rows_from_disk(base_dir)
     total_raw = len(rows_ro)
 
-    from services.gallery_dedupe import apply_gallery_view_dedupe, gallery_view_dedupe_settings
     from utils.config_loader import ConfigLoader
 
     from services.taste_profile import personalized_sort_metric, read_taste_profile
@@ -374,17 +373,38 @@ def load_gallery_page(
         except Exception:
             return 0.0
 
-    dedupe_settings = gallery_view_dedupe_settings(ConfigLoader.load())
-    if dedupe and dedupe_settings.get("enabled", True):
-        indices, total, _raw = apply_gallery_view_dedupe(
-            rows_ro,
-            sort,
-            settings=dedupe_settings,
-            sort_key_fn=_row_sort_key,
-        )
+    members_by_rep: dict[int, list[int]] = {}
+    group_id_by_rep: dict[int, int] = {}
+    max_members = 0
+    if sort == "diverse":
+        from services.diversity_selector import apply_diversity_selection, diversity_settings
+
+        div_settings = diversity_settings(ConfigLoader.load())
+        max_members = int(div_settings.get("max_members_returned", 40))
+        if div_settings.get("enabled", True):
+            indices, members_by_rep, group_id_by_rep = apply_diversity_selection(
+                rows_ro,
+                div_settings,
+                order_key_fn=lambda row: _sort_metric(row, "overall"),
+            )
+            total = len(indices)
+        else:
+            indices = sorted(range(total_raw), key=lambda i: _sort_metric(rows_ro[i], "overall"), reverse=True)
+            total = total_raw
     else:
-        indices = sorted(range(total_raw), key=lambda i: _row_sort_key(rows_ro[i]), reverse=True)
-        total = total_raw
+        from services.gallery_dedupe import apply_gallery_view_dedupe, gallery_view_dedupe_settings
+
+        dedupe_settings = gallery_view_dedupe_settings(ConfigLoader.load())
+        if dedupe and dedupe_settings.get("enabled", True):
+            indices, total, _raw = apply_gallery_view_dedupe(
+                rows_ro,
+                sort,
+                settings=dedupe_settings,
+                sort_key_fn=_row_sort_key,
+            )
+        else:
+            indices = sorted(range(total_raw), key=lambda i: _row_sort_key(rows_ro[i]), reverse=True)
+            total = total_raw
 
     start = min(offset, total)
     end = min(start + limit, total)
@@ -402,8 +422,31 @@ def load_gallery_page(
             if not lite and resolver is not None:
                 inject_layout(entry)
                 inject_orientation(entry, resolver)
+            if sort == "diverse":
+                member_idxs = members_by_rep.get(idx, [])
+                entry["group_id"] = group_id_by_rep.get(idx, 0)
+                entry["is_representative"] = True
+                entry["group_size"] = len(member_idxs) + 1
+                entry["group_members"] = [
+                    _compact_member(rows_ro[m], base_dir) for m in member_idxs[:max_members]
+                ]
             cleaned.append(entry)
         except Exception:
             logger.warning("load_gallery_page: skip idx=%s row=%s", idx, rows_ro[idx].get("file"), exc_info=True)
 
     return cleaned, total, start, end, has_more, total_raw
+
+
+def _compact_member(row: dict, base_dir: str) -> dict:
+    """Minimal payload for a folded (non-representative) frame in a diverse group."""
+    entry = dict(row)
+    normalize_scores(entry)
+    resolve_paths(entry, base_dir)
+    return {
+        "file": entry.get("file"),
+        "path": entry.get("path"),
+        "path_quoted": entry.get("path_quoted", ""),
+        "before_path_quoted": entry.get("before_path_quoted", ""),
+        "overall_score": entry.get("overall_score", 0.0),
+        "category": entry.get("category"),
+    }

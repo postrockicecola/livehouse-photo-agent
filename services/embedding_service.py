@@ -65,8 +65,10 @@ class EmbeddingService:
                 import torch
 
                 device = "cuda" if torch.cuda.is_available() else "cpu"
+                # openai weights were trained with QuickGELU; force it to match, else newer
+                # open-clip warns and silently uses plain GELU (degraded embeddings).
                 model, _, preprocess = open_clip.create_model_and_transforms(
-                    _CLIP_MODEL_NAME, pretrained=_CLIP_PRETRAINED
+                    _CLIP_MODEL_NAME, pretrained=_CLIP_PRETRAINED, force_quick_gelu=True
                 )
                 model = model.eval().to(device)
                 cls._model = model

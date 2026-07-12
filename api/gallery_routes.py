@@ -1276,11 +1276,13 @@ def get_gallery_results(
     from services.taste_profile import read_taste_profile
 
     taste_active = sort == "personalized" and read_taste_profile(active) is not None
+    grouped = sort == "diverse"
     return {
         "count": total,
         "total_raw": total_raw,
-        "dedupe_hidden": max(0, total_raw - total) if dedupe else 0,
+        "dedupe_hidden": max(0, total_raw - total) if (dedupe or grouped) else 0,
         "dedupe_enabled": dedupe,
+        "grouped": grouped,
         "sort": sort,
         "taste_personalized": taste_active,
         "offset": start,
