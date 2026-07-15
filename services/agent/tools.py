@@ -277,9 +277,19 @@ class QueryGalleryTool:
 
 
 class FinalizeTool:
-    """Terminal action: commit the keeper set (explicit list or current keepers)."""
+    """Terminal action: commit the keeper set (explicit list or current keepers).
+
+    When ``processing.diversity_selection.agent_finalize`` is enabled (default), the
+    committed set is diversity-capped to at most ``max_per_cluster`` frames per
+    visual/burst group, then refilled from other analyzed candidates up to
+    ``target_keepers`` so the delivery set covers more of the night.
+    """
 
     name = "finalize"
+
+    def __init__(self, *, diversify: bool | None = None) -> None:
+        # None → read config at run time; False disables even if config says on.
+        self._diversify = diversify
 
     def run(self, state: AgentState, call: ToolCall) -> ToolResult:
         explicit = call.args.get("selected")
@@ -287,12 +297,108 @@ class FinalizeTool:
             selected = [str(i) for i in explicit if str(i) in state.candidates]
         else:
             selected = [c.image_id for c in state.current_keepers()]
+
+        diversity_meta: dict[str, Any] | None = None
+        if self._should_diversify():
+            selected, diversity_meta = _diversify_finalize_selection(state, selected)
+
         state.selected = selected
         state.finalized = True
-        return ToolResult(
-            ok=True,
-            observation={"selected": selected, "count": len(selected)},
-        )
+        obs: dict[str, Any] = {"selected": selected, "count": len(selected)}
+        if diversity_meta is not None:
+            obs["diversity"] = diversity_meta
+        return ToolResult(ok=True, observation=obs)
+
+    def _should_diversify(self) -> bool:
+        if self._diversify is False:
+            return False
+        if self._diversify is True:
+            return True
+        try:
+            from utils.config_loader import ConfigLoader
+            from services.diversity_selector import diversity_settings
+
+            return bool(diversity_settings(ConfigLoader.load()).get("finalize_enabled", True))
+        except Exception:
+            return True
+
+
+def _candidate_diversity_item(c: Candidate) -> dict[str, Any]:
+    dims = None
+    if isinstance(c.analysis, dict):
+        raw_dims = c.analysis.get("dimensions")
+        if isinstance(raw_dims, dict):
+            dims = raw_dims
+    return {
+        "id": c.image_id,
+        "path": c.image_path,
+        "score": float(c.score or 0.0),
+        "dimensions": dims or {},
+        "cluster_id": c.features.get("cluster_id"),
+    }
+
+
+def diversify_keeper_selection(
+    candidates: Mapping[str, Candidate] | list[Candidate],
+    proposed_ids: list[str],
+    *,
+    target: int,
+    fill_ids: list[str] | None = None,
+    settings: Mapping[str, Any] | None = None,
+) -> tuple[list[str], dict[str, Any]]:
+    """Public helper: diversity-cap a proposed keeper list (also used by orchestrator merge)."""
+    from services.diversity_selector import diversify_keeper_ids, diversity_settings
+
+    if settings is None:
+        try:
+            from utils.config_loader import ConfigLoader
+
+            settings = diversity_settings(ConfigLoader.load())
+        except Exception:
+            settings = diversity_settings(None)
+
+    if isinstance(candidates, Mapping):
+        cand_list = list(candidates.values())
+        by_id = candidates
+    else:
+        cand_list = list(candidates)
+        by_id = {c.image_id: c for c in cand_list}
+
+    if not bool(settings.get("finalize_enabled", True)):
+        capped = [i for i in proposed_ids if i in by_id][:target]
+        return capped, {"signal": "disabled", "before": len(proposed_ids), "after": len(capped), "dropped": []}
+
+    items = [_candidate_diversity_item(c) for c in cand_list]
+    if fill_ids is None:
+        fill_ids = [c.image_id for c in cand_list if c.image_id not in set(proposed_ids)]
+    return diversify_keeper_ids(
+        items,
+        proposed_ids,
+        target=target,
+        settings=settings,
+        fill_ids=fill_ids,
+    )
+
+
+def _diversify_finalize_selection(
+    state: AgentState, selected: list[str]
+) -> tuple[list[str], dict[str, Any]]:
+    thr = state.config.keep_score_threshold
+    fill_ids = [
+        c.image_id
+        for c in state.ordered_candidates()
+        if c.analyzed and (c.score or 0.0) >= thr and c.image_id not in selected
+    ]
+    fill_ids.sort(
+        key=lambda i: float(state.candidates[i].score or 0.0),
+        reverse=True,
+    )
+    return diversify_keeper_selection(
+        state.candidates,
+        selected,
+        target=state.config.target_keepers,
+        fill_ids=fill_ids,
+    )
 
 
 class ToolRegistry:

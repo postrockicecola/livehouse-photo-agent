@@ -223,6 +223,11 @@ processing:
       focus_sharpness: 0.25
       atmosphere_impact: 0.20
       deliverable_subject: 0.20
+    # Agent finalize / orchestrator merge: at most N keepers per cluster, then refill.
+    agent_finalize:
+      enabled: true
+      max_per_cluster: 1              # 1 = one frame per burst/scene in the delivery set
+      burst_window: 3                 # filename trailing-number proximity when CLIP/pHash unavailable
 
   # Learn dim weights from homepage selections → ``Previews/runtime/taste_profile.json``
   taste_profile:

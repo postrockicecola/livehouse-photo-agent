@@ -38,6 +38,7 @@ from typing import Any, Callable, Optional, Protocol
 
 from services.agent.loop import CurationAgent
 from services.agent.messaging import ROLE_SPECIALIST, MessageBus, build_handoff_messages
+from services.agent.tools import diversify_keeper_selection
 from services.agent.types import (
     AgentConfig,
     AgentResult,
@@ -47,6 +48,21 @@ from services.agent.types import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _diversify_merged_keepers(
+    picked: list[str],
+    cand_by_id: dict[str, Candidate],
+    *,
+    target: int,
+) -> list[str]:
+    """Score-ordered merge, then diversity-cap (same policy as FinalizeTool)."""
+    try:
+        kept, _meta = diversify_keeper_selection(cand_by_id, picked, target=target)
+        return kept
+    except Exception:
+        logger.exception("orchestrator diversity merge failed; falling back to score cap")
+        return picked[:target]
 
 
 @dataclass
@@ -303,7 +319,11 @@ class Coordinator:
                 score_by_id[cid] = (cand.score if cand and cand.score is not None else float("-inf"))
                 picked.append(cid)
         picked.sort(key=lambda cid: score_by_id[cid], reverse=True)
-        return picked[: self._config.target_keepers]
+        return _diversify_merged_keepers(
+            picked,
+            {c.image_id: c for r in runs for c in r.result.candidates},
+            target=self._config.target_keepers,
+        )
 
     def _aggregate(self, runs: list[SubAgentRun]) -> dict[str, Any]:
         """Roll sub-agent metrics into one multi-agent surface (sums + recomputed rates)."""
@@ -517,7 +537,7 @@ class HandoffCoordinator:
             return c.score if c is not None and c.score is not None else float("-inf")
 
         picked.sort(key=_score, reverse=True)
-        return picked[: self._config.target_keepers]
+        return _diversify_merged_keepers(picked, cand_by_id, target=self._config.target_keepers)
 
     def _build_metrics(
         self,

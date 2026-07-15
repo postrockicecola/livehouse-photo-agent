@@ -62,12 +62,25 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
     except (TypeError, ValueError):
         thr = 0.90
 
+    agent_fin = raw.get("agent_finalize")
+    if not isinstance(agent_fin, dict):
+        agent_fin = {}
+    max_per = agent_fin.get("max_per_cluster", 1)
+    try:
+        max_per = int(max_per)
+    except (TypeError, ValueError):
+        max_per = 1
+
     return {
         "enabled": bool(raw.get("enabled", True)),
         "similarity_threshold": max(0.0, min(1.0, thr)),
         "representative_dims": dims,
         "fallback_phash_hamming": int(raw.get("fallback_phash_hamming", 10) or 10),
         "max_members_returned": int(raw.get("max_members_returned", 40) or 40),
+        # Agent finalize / merge: at most N keepers per visual (or burst) cluster.
+        "finalize_enabled": bool(agent_fin.get("enabled", True)),
+        "max_per_cluster": max(1, max_per),
+        "burst_window": max(1, int(agent_fin.get("burst_window", 3) or 3)),
     }
 
 
@@ -212,3 +225,163 @@ def apply_diversity_selection(
     rep_indices.sort(key=lambda i: order_key_fn(rows[i]), reverse=True)
     group_id_by_rep = {rep: gid for gid, rep in enumerate(rep_indices, start=1)}
     return rep_indices, members_by_rep, group_id_by_rep
+
+
+def _trailing_burst_num(image_id: str) -> int | None:
+    import re
+
+    m = re.search(r"(\d+)(?!.*\d)", image_id)
+    return int(m.group(1)) if m else None
+
+
+def _cluster_map_visual(
+    id_list: list[str],
+    items_by_id: Mapping[str, Mapping[str, Any]],
+    settings: Mapping[str, Any],
+) -> dict[str, int] | None:
+    """Cluster by CLIP/pHash when enough on-disk paths exist; else None."""
+    rows: list[dict[str, Any]] = []
+    for iid in id_list:
+        it = items_by_id[iid]
+        path = it.get("path")
+        rows.append(
+            {
+                "path": path if isinstance(path, str) else None,
+                "overall_score": float(it.get("score") or 0.0),
+                "dimensions": it.get("dimensions") if isinstance(it.get("dimensions"), dict) else {},
+            }
+        )
+    if not any(isinstance(r.get("path"), str) and os.path.isfile(r["path"]) for r in rows):
+        return None
+    if not bool(settings.get("enabled", True)):
+        return None
+
+    rep_indices, members_by_rep, _ = apply_diversity_selection(
+        rows,
+        settings,
+        order_key_fn=lambda r: float(r.get("overall_score") or 0.0),
+    )
+    # If every frame is its own cluster, visual signal may be unavailable — still valid.
+    cluster_of: dict[str, int] = {}
+    for gid, rep in enumerate(rep_indices):
+        cluster_of[id_list[rep]] = gid
+        for m in members_by_rep.get(rep, []):
+            cluster_of[id_list[m]] = gid
+    return cluster_of
+
+
+def _cluster_map_features(id_list: list[str], items_by_id: Mapping[str, Mapping[str, Any]]) -> dict[str, int] | None:
+    if not any(items_by_id[i].get("cluster_id") is not None for i in id_list):
+        return None
+    remapped: dict[Any, int] = {}
+    out: dict[str, int] = {}
+    next_gid = 0
+    for iid in id_list:
+        raw = items_by_id[iid].get("cluster_id")
+        if raw is None:
+            out[iid] = next_gid
+            next_gid += 1
+            continue
+        if raw not in remapped:
+            remapped[raw] = next_gid
+            next_gid += 1
+        out[iid] = remapped[raw]
+    return out
+
+
+def _cluster_map_burst(id_list: list[str], burst_window: int) -> dict[str, int]:
+    numbered = sorted(
+        ((i, n) for i in id_list if (n := _trailing_burst_num(i)) is not None),
+        key=lambda t: (t[1], t[0]),
+    )
+    out: dict[str, int] = {}
+    gid = -1
+    prev_num: int | None = None
+    for iid, n in numbered:
+        if prev_num is None or (n - prev_num) > burst_window:
+            gid += 1
+        out[iid] = gid
+        prev_num = n
+    for iid in id_list:
+        if iid not in out:
+            gid += 1
+            out[iid] = gid
+    return out
+
+
+def diversify_keeper_ids(
+    items: list[Mapping[str, Any]],
+    proposed_ids: list[str],
+    *,
+    target: int,
+    settings: Mapping[str, Any] | None = None,
+    fill_ids: list[str] | None = None,
+) -> tuple[list[str], dict[str, Any]]:
+    """Cap keepers to ``max_per_cluster`` per visual/burst group, then refill to ``target``.
+
+    Each item needs ``id``; optional ``path``, ``score``, ``dimensions``, ``cluster_id``.
+    Preference order: ``proposed_ids`` (as given), then ``fill_ids`` by score desc.
+    Signal priority: CLIP/pHash (when paths exist) → ``cluster_id`` → filename burst window.
+    """
+    settings = dict(settings or diversity_settings(None))
+    max_per = int(settings.get("max_per_cluster", 1) or 1)
+    burst_window = int(settings.get("burst_window", 3) or 3)
+    target = max(0, int(target))
+
+    items_by_id: dict[str, Mapping[str, Any]] = {}
+    for it in items:
+        iid = str(it.get("id") or "")
+        if iid:
+            items_by_id[iid] = it
+
+    def _known(ids: list[str] | None) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for raw in ids or []:
+            iid = str(raw)
+            if iid in items_by_id and iid not in seen:
+                seen.add(iid)
+                out.append(iid)
+        return out
+
+    proposed = _known(proposed_ids)
+    fill = [i for i in _known(fill_ids) if i not in set(proposed)]
+    fill.sort(key=lambda i: float(items_by_id[i].get("score") or 0.0), reverse=True)
+    pool = proposed + fill
+
+    if target == 0 or not pool:
+        return [], {"dropped": [], "signal": "none", "before": len(proposed), "after": 0}
+
+    cluster_of = _cluster_map_visual(pool, items_by_id, settings)
+    signal = "clip_or_phash"
+    if cluster_of is None:
+        cluster_of = _cluster_map_features(pool, items_by_id)
+        signal = "features_cluster_id"
+    if cluster_of is None:
+        cluster_of = _cluster_map_burst(pool, burst_window)
+        signal = "burst_window"
+
+    kept: list[str] = []
+    dropped: list[str] = []
+    counts: dict[int, int] = {}
+    for iid in pool:
+        if len(kept) >= target:
+            if iid in proposed:
+                dropped.append(iid)
+            continue
+        cid = cluster_of.get(iid, hash(iid) & 0x7FFFFFFF)
+        if counts.get(cid, 0) >= max_per:
+            if iid in proposed:
+                dropped.append(iid)
+            continue
+        kept.append(iid)
+        counts[cid] = counts.get(cid, 0) + 1
+
+    return kept, {
+        "signal": signal,
+        "before": len(proposed),
+        "after": len(kept),
+        "dropped": dropped,
+        "max_per_cluster": max_per,
+        "clusters_used": len(counts),
+    }
