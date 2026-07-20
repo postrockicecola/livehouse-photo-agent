@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatDock } from "@/components/agent/ChatDock";
 import { GalleryEmptyState } from "@/components/GalleryEmptyState";
@@ -103,8 +102,8 @@ function buildImageUrl(item: GalleryItem) {
 }
 
 export default function HomePage() {
-  const searchParams = useSearchParams();
-  const landingPrompt = searchParams.get("q");
+  // Read landing `?q=` on the client only — avoids Next.js Suspense bailout on SSG.
+  const [landingPrompt, setLandingPrompt] = useState<string | null>(null);
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -238,6 +237,14 @@ export default function HomePage() {
       }
     };
     runNext();
+  }, []);
+
+  useEffect(() => {
+    try {
+      setLandingPrompt(new URLSearchParams(window.location.search).get("q"));
+    } catch {
+      setLandingPrompt(null);
+    }
   }, []);
 
   useEffect(() => {
