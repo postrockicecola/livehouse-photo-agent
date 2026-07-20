@@ -79,7 +79,7 @@ export function LandingAiLayerSection() {
         </header>
 
         <div className="mt-14 lg:mt-16">
-          <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28">Multimodal output</p>
+          <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28">输出字段</p>
           <ol className="landing-ai-flow" aria-label="Multimodal pipeline">
             {flow.map((step, index) => (
               <FlowStep
@@ -96,7 +96,7 @@ export function LandingAiLayerSection() {
 
         <div className="mt-12 grid gap-8 lg:mt-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-12 lg:items-start">
           <div>
-            <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28">Pipeline stages</p>
+            <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28">处理阶段</p>
             <div className="landing-ai-stages">
               {stages.map((stage, index) => (
                 <article
@@ -115,7 +115,7 @@ export function LandingAiLayerSection() {
           </div>
 
           <aside className="landing-ai-preview">
-            <p className="mb-4 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28">What you see in Gallery</p>
+            <p className="mb-4 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28">Gallery 里能看到</p>
             <div className="landing-ai-preview-score tabular-nums">{preview.score}</div>
             <p className="mt-1 font-mono text-[9px] tabular-nums text-white/32">{preview.dimensions}</p>
             <p className="landing-ai-preview-caption">{preview.caption}</p>
@@ -125,7 +125,7 @@ export function LandingAiLayerSection() {
               ))}
             </ul>
             <p className="mt-5 font-mono text-[9px] leading-relaxed text-white/24">
-              Image → VLM → structured fields your curator can trust.
+              图片 → 分阶段分析 → 结构化字段，后面能查。
             </p>
           </aside>
         </div>

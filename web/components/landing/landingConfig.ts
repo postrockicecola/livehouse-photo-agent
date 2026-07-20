@@ -1,9 +1,9 @@
 /** Gallery product showcase on the marketing page. */
 export const LANDING_GALLERY_SECTION = {
   id: "gallery",
-  eyebrow: "03 · Gallery",
-  title: "这就是最终产品。",
-  subtitle: "不是后台，不是配置页——而是交片前真正用来选片的界面。",
+  eyebrow: "Gallery",
+  title: "读 AI 结果，人做最终确认。",
+  subtitle: "分数和标签来自上游 VLM；这里做人工确认，也可以开 ChatDock 问场次。",
 } as const;
 
 export type LandingGalleryFeature = {
@@ -13,11 +13,11 @@ export type LandingGalleryFeature = {
 };
 
 export const LANDING_GALLERY_FEATURES: LandingGalleryFeature[] = [
-  { id: "score", label: "AI 评分", description: "整体分 · Energy · Technical · Composition" },
-  { id: "tags", label: "标签", description: "画面语义，一眼读懂" },
+  { id: "score", label: "VLM 评分", description: "整体分 · Energy · Technical · Composition" },
+  { id: "tags", label: "结构化标签", description: "VLM 语义字段，可检索" },
   { id: "style", label: "风格预览", description: "胶片 Lab 实时试色" },
-  { id: "select", label: "选片", description: "点选、标记、口味偏好" },
-  { id: "export", label: "导出", description: "预览胶片与 RAW 批量交付" },
+  { id: "select", label: "人工确认", description: "点选、标记、偏好反馈" },
+  { id: "export", label: "导出交付", description: "预览与 RAW 批量导出" },
 ];
 
 /** Demo metadata overlaid on showcase tiles (marketing mock). */

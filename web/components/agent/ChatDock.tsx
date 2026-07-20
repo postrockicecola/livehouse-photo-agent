@@ -204,10 +204,13 @@ export function ChatDock({
   apiBase,
   previewsDir,
   context = "gallery",
+  initialPrompt,
 }: {
   apiBase: string;
   previewsDir?: string | null;
   context?: string;
+  /** Prefill + open dock once (e.g. landing hero `?q=`). Does not auto-send. */
+  initialPrompt?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
@@ -218,6 +221,7 @@ export function ChatDock({
   const [authOpen, setAuthOpen] = useState(false);
   const sessionIdRef = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const consumedInitialPrompt = useRef(false);
 
   if (!sessionIdRef.current) {
     sessionIdRef.current = persistentSessionId(context, mode);
@@ -233,6 +237,14 @@ export function ChatDock({
     setUser(getStoredUser());
     void fetchMe(apiBase).then(setUser).catch(() => {});
   }, [apiBase]);
+
+  useEffect(() => {
+    const prompt = initialPrompt?.trim();
+    if (!prompt || consumedInitialPrompt.current) return;
+    consumedInitialPrompt.current = true;
+    setInput(prompt);
+    setOpen(true);
+  }, [initialPrompt]);
 
   // Restore the persisted transcript when opening, switching mode, or auth changes.
   useEffect(() => {

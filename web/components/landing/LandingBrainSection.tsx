@@ -161,7 +161,7 @@ export function LandingBrainSection() {
               href={infraHref}
               className="mt-10 inline-flex font-mono text-[10px] uppercase tracking-[0.14em] text-white/30 transition-colors hover:text-white/55"
             >
-              Open brain console →
+              打开 Brain →
             </Link>
           </header>
 
@@ -179,7 +179,7 @@ export function LandingBrainSection() {
             </div>
 
             <div className="landing-brain-trace mt-8">
-              <p className="mb-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white/28">Recent trace</p>
+              <p className="mb-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white/28">最近状态</p>
               <ul className="landing-brain-trace-list">
                 {traceItems.map((item) => (
                   <li key={item.id} className="landing-brain-trace-item">

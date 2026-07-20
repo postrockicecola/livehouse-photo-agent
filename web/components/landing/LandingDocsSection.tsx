@@ -6,10 +6,10 @@ export function LandingDocsSection() {
     <section id="docs" className="landing-section scroll-mt-24 border-t border-white/[0.05] py-20 sm:py-28">
       <div className="mx-auto w-full max-w-[104rem] px-5 sm:px-8 lg:px-12">
         <header className="max-w-2xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">04 · Docs</p>
-          <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">文档与上手</h2>
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">Docs</p>
+          <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">链路与 Agent 说明</h2>
           <p className="mt-4 text-sm leading-relaxed text-white/38 sm:text-base">
-            配置、pipeline 与运维细节集中在这里；想直接看效果，进入 Studio 实操即可。
+            链路和 Infra 要点集中在这里。想直接看，进 Studio 或 Infra。
           </p>
         </header>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatDock } from "@/components/agent/ChatDock";
 import { GalleryEmptyState } from "@/components/GalleryEmptyState";
@@ -102,6 +103,8 @@ function buildImageUrl(item: GalleryItem) {
 }
 
 export default function HomePage() {
+  const searchParams = useSearchParams();
+  const landingPrompt = searchParams.get("q");
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -1136,7 +1139,12 @@ export default function HomePage() {
         />
       ) : null}
       </main>
-      <ChatDock apiBase={API_BASE} previewsDir={galleryBasePath} context="gallery" />
+      <ChatDock
+        apiBase={API_BASE}
+        previewsDir={galleryBasePath}
+        context="gallery"
+        initialPrompt={landingPrompt}
+      />
     </div>
   );
 }

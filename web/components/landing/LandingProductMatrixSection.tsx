@@ -70,11 +70,11 @@ function ProductTile({
           <h3 className="landing-matrix-tile-name">{name}</h3>
           <p className="landing-matrix-tile-desc">{description}</p>
         </div>
-        <span className="landing-matrix-tile-cta">Open →</span>
+        <span className="landing-matrix-tile-cta">进入 →</span>
       </Link>
       {showcaseHref ? (
         <Link href={showcaseHref} className="landing-matrix-tile-showcase">
-          On this page
+          本页说明
         </Link>
       ) : null}
     </article>

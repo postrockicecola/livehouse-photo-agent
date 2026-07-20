@@ -198,7 +198,7 @@ export function LandingInfraSection() {
 
         <div className="landing-infra-console mt-12 sm:mt-14">
           <div className="landing-infra-console-head">
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/35">Control plane</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/35">运行态</span>
             <span className="font-mono text-[9px] tabular-nums text-white/28">
               {formatCount(metrics.pipeline_active)} active · {formatCount(metrics.dead_letter)} dead letter
             </span>
@@ -206,7 +206,7 @@ export function LandingInfraSection() {
 
           <div className="landing-infra-console-grid">
             <div className="landing-infra-queue">
-              <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">Queue pressure</p>
+              <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">队列压力</p>
               <div className="landing-infra-queue-track" aria-hidden>
                 <span className="landing-infra-queue-fill" style={{ width: `${queueFill}%` }} />
               </div>
@@ -228,7 +228,7 @@ export function LandingInfraSection() {
             </div>
 
             <div className="landing-infra-flow">
-              <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">Retry & recovery</p>
+              <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">重试与恢复</p>
               <ul className="landing-infra-flow-list">
                 {flowItems.map((item) => (
                   <li key={item.id} className="landing-infra-flow-item">
@@ -244,7 +244,7 @@ export function LandingInfraSection() {
           href={consoleHref}
           className="mt-10 inline-flex font-mono text-[10px] uppercase tracking-[0.14em] text-white/30 transition-colors hover:text-white/55"
         >
-          Open infra console →
+          打开 Infra 控制台 →
         </Link>
       </div>
     </section>
