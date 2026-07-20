@@ -334,6 +334,45 @@ class PipelineStageRunner:
         )
         return self._pt_session
 
+    def reset_for_full_rerun(self) -> Dict[str, Any]:
+        """Wipe session analysis state so the next Stage1→3 run scores every frame again.
+
+        Clears aesthetic audit, staged eligibility manifests, ``analysis_results.json``,
+        and image copies under best/keep/trash (source previews are untouched).
+        """
+        self._ensure_layout()
+        cleared: Dict[str, Any] = {"audit": False, "analysis_results": False, "staged": [], "category_images": {}}
+
+        log_file = self.log_paths["log_file"]
+        if log_file.exists():
+            log_file.write_text("", encoding="utf-8")
+            cleared["audit"] = True
+
+        ar = Path(self.source_dir) / "analysis_results.json"
+        if ar.is_file():
+            ar.unlink()
+            cleared["analysis_results"] = True
+
+        sd = staged_state_dir(self.source_dir)
+        for name in (ELIGIBLE_AFTER_S1, ELIGIBLE_AFTER_S2):
+            p = sd / name
+            if p.is_file():
+                p.unlink()
+                cleared["staged"].append(name)
+
+        img_exts = {".jpg", ".jpeg", ".png"}
+        for cat, folder in self.folders.items():
+            n = 0
+            if folder.is_dir():
+                for p in folder.iterdir():
+                    if p.is_file() and p.suffix.lower() in img_exts:
+                        p.unlink()
+                        n += 1
+            cleared["category_images"][str(cat)] = n
+
+        logger.info("force_full_rerun reset | %s", cleared)
+        return cleared
+
     def _audit_logged_image_names(self) -> set[str]:
         """Image basenames already present in the aesthetic audit log (checkpoint / resume)."""
         self._ensure_layout()

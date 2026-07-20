@@ -14,10 +14,11 @@ Design
 - Similarity signal: CLIP ViT-B-32 cosine (``EmbeddingService``). When ``open-clip-torch``
   is unavailable it **degrades gracefully** to pHash Hamming clustering (same signal the
   Stage2 / gallery-view dedupe already uses), so ``sort=diverse`` always works.
-- Greedy single-link clustering seeded best-quality-first, mirroring ``gallery_dedupe``.
-- In-cluster representative pick uses *differentiating* VLM dimensions, not ``overall`` —
-  within one burst ``composition/light/technical`` are ~constant, so ranking by ``overall``
-  is effectively ranking by noise.
+- Greedy single-link clustering (similar to *any* cluster member, not only the seed)
+  so lighting-drift bursts still collapse into one group.
+- In-cluster representative pick uses *differentiating* VLM dimensions, not ``overall``.
+- Representatives are then MMR-ordered so the front page spreads scenes instead of
+  stacking look-alike high scorers.
 - Nothing is deleted: folded frames are returned as ``group_members`` for expand-in-place.
 """
 from __future__ import annotations
@@ -56,11 +57,11 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
     else:
         dims = {str(k): float(v) for k, v in dims.items()}
 
-    thr = raw.get("similarity_threshold", 0.90)
+    thr = raw.get("similarity_threshold", 0.85)
     try:
         thr = float(thr)
     except (TypeError, ValueError):
-        thr = 0.90
+        thr = 0.85
 
     agent_fin = raw.get("agent_finalize")
     if not isinstance(agent_fin, dict):
@@ -70,6 +71,12 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
         max_per = int(max_per)
     except (TypeError, ValueError):
         max_per = 1
+
+    mmr_raw = raw.get("mmr_lambda", 0.65)
+    try:
+        mmr_lambda = float(mmr_raw)
+    except (TypeError, ValueError):
+        mmr_lambda = 0.65
 
     return {
         "enabled": bool(raw.get("enabled", True)),
@@ -81,6 +88,8 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
         "finalize_enabled": bool(agent_fin.get("enabled", True)),
         "max_per_cluster": max(1, max_per),
         "burst_window": max(1, int(agent_fin.get("burst_window", 3) or 3)),
+        # Display order of representatives: blend quality vs distance-to-already-shown.
+        "mmr_lambda": max(0.0, min(1.0, mmr_lambda)),
     }
 
 
@@ -170,16 +179,25 @@ def apply_diversity_selection(
     from services.embedding_service import EmbeddingService
 
     use_clip = bool(settings.get("enabled", True)) and EmbeddingService.is_available()
+    sim_fn: Callable[[int, int], float] | None = None
 
     if use_clip:
-        tau = float(settings.get("similarity_threshold", 0.90))
+        tau = float(settings.get("similarity_threshold", 0.85))
         embeddings: dict[int, np.ndarray | None] = {i: _row_embedding(rows[i]) for i in order}
 
-        def _similar(idx: int, seed: int) -> bool:
-            a, b = embeddings.get(idx), embeddings.get(seed)
+        def _similar(idx: int, other: int) -> bool:
+            a, b = embeddings.get(idx), embeddings.get(other)
             if a is None or b is None:
                 return False
             return float(np.dot(a, b)) >= tau
+
+        def _sim_score(a: int, b: int) -> float:
+            va, vb = embeddings.get(a), embeddings.get(b)
+            if va is None or vb is None:
+                return 0.0
+            return float(np.dot(va, vb))
+
+        sim_fn = _sim_score
     else:
         try:
             from services.gallery_dedupe import resolve_row_phash
@@ -188,24 +206,36 @@ def apply_diversity_selection(
             max_h = int(settings.get("fallback_phash_hamming", 10))
             phashes: dict[int, int] = {i: resolve_row_phash(rows[i]) for i in order}
 
-            def _similar(idx: int, seed: int) -> bool:
-                a, b = phashes.get(idx, 0), phashes.get(seed, 0)
+            def _similar(idx: int, other: int) -> bool:
+                a, b = phashes.get(idx, 0), phashes.get(other, 0)
                 if not a or not b:
                     return False
                 return hamming_64(a, b) <= max_h
+
+            def _sim_score(a: int, b: int) -> float:
+                pa, pb = phashes.get(a, 0), phashes.get(b, 0)
+                if not pa or not pb:
+                    return 0.0
+                # Map Hamming 0..max_h → 1..~0 so MMR can still spread near-dups.
+                return max(0.0, 1.0 - (hamming_64(pa, pb) / float(max(max_h, 1))))
+
+            sim_fn = _sim_score
         except Exception:
             # Neither CLIP nor pHash available: degrade to no folding (plain quality order).
             logger.warning("diversity_selection: no similarity signal available; returning ungrouped order")
 
-            def _similar(idx: int, seed: int) -> bool:
+            def _similar(idx: int, other: int) -> bool:
                 return False
 
-    # Greedy single-link clustering against each cluster's seed.
+            sim_fn = None
+
+    # True single-link: join if similar to *any* member (not only the seed).
+    # Seed-only compare splits livehouse bursts when lighting drifts along the sequence.
     clusters: list[dict[str, Any]] = []  # {seed: int, members: [int]}
     for idx in order:
         placed = False
         for c in clusters:
-            if _similar(idx, c["seed"]):
+            if any(_similar(idx, m) for m in c["members"]):
                 c["members"].append(idx)
                 placed = True
                 break
@@ -222,9 +252,45 @@ def apply_diversity_selection(
         rep_indices.append(rep)
         members_by_rep[rep] = others
 
-    rep_indices.sort(key=lambda i: order_key_fn(rows[i]), reverse=True)
+    # Spread look-alike *representatives* so the front page is coverage, not a wall of same-scene tops.
+    rep_indices = _mmr_order_reps(
+        rep_indices,
+        score_fn=lambda i: float(order_key_fn(rows[i])),
+        sim_fn=sim_fn,
+        mmr_lambda=float(settings.get("mmr_lambda", 0.65)),
+    )
     group_id_by_rep = {rep: gid for gid, rep in enumerate(rep_indices, start=1)}
     return rep_indices, members_by_rep, group_id_by_rep
+
+
+def _mmr_order_reps(
+    rep_indices: list[int],
+    *,
+    score_fn: Callable[[int], float],
+    sim_fn: Callable[[int, int], float] | None,
+    mmr_lambda: float = 0.65,
+) -> list[int]:
+    """Greedy MMR: next rep maximizes λ·quality − (1−λ)·max_similarity_to_picked."""
+    if len(rep_indices) <= 1 or sim_fn is None:
+        return sorted(rep_indices, key=score_fn, reverse=True)
+
+    remaining = set(rep_indices)
+    picked: list[int] = []
+    # First pick: highest score.
+    first = max(remaining, key=score_fn)
+    picked.append(first)
+    remaining.remove(first)
+
+    while remaining:
+        def _mmr(i: int) -> float:
+            quality = score_fn(i) / 100.0
+            max_sim = max((sim_fn(i, j) for j in picked), default=0.0)
+            return mmr_lambda * quality - (1.0 - mmr_lambda) * max_sim
+
+        nxt = max(remaining, key=_mmr)
+        picked.append(nxt)
+        remaining.remove(nxt)
+    return picked
 
 
 def _trailing_burst_num(image_id: str) -> int | None:

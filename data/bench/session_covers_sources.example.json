@@ -1,0 +1,391 @@
+{
+  "schema_version": 1,
+  "sessions": [
+    {
+      "slug": "session-01",
+      "source": "/ABS/PATH/TO/session-01_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-01_portrait.jpg",
+      "date": "2025-08-23",
+      "band": "MADILYN BAILEY",
+      "venue": "福浪"
+    },
+    {
+      "slug": "session-02",
+      "source": "/ABS/PATH/TO/session-02_landscape.jpg",
+      "source_portrait": "",
+      "date": "2025-09-07",
+      "band": "落日飞车"
+    },
+    {
+      "slug": "session-03",
+      "source": "/ABS/PATH/TO/session-03_landscape.jpg",
+      "source_portrait": "",
+      "date": "2025-10-17",
+      "band": "觅屿"
+    },
+    {
+      "slug": "session-04",
+      "source": "/ABS/PATH/TO/session-04_landscape.jpg",
+      "source_portrait": "",
+      "date": "2025-10-24",
+      "band": "重返袖珍时光"
+    },
+    {
+      "slug": "session-06",
+      "source": "/ABS/PATH/TO/session-06_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-06_portrait.jpg",
+      "date": "2025-11-28",
+      "band": "汉堡黄"
+    },
+    {
+      "slug": "session-07",
+      "source": "/ABS/PATH/TO/session-07_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-07_portrait.jpg",
+      "date": "2025-12-05",
+      "band": "理想后花园"
+    },
+    {
+      "slug": "session-08",
+      "source": "/ABS/PATH/TO/session-08_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-08_portrait.jpg",
+      "date": "2025-12-07",
+      "band": "陈婧霏"
+    },
+    {
+      "slug": "session-09",
+      "source": "/ABS/PATH/TO/session-09_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-09_portrait.jpg",
+      "date": "2025-12-10",
+      "band": "恍神儿"
+    },
+    {
+      "slug": "session-10",
+      "source": "/ABS/PATH/TO/session-10_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-10_portrait.jpg",
+      "date": "2025-12-11",
+      "band": "纪念日乐队"
+    },
+    {
+      "slug": "session-11",
+      "source": "/ABS/PATH/TO/session-11_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-11_portrait.jpg",
+      "date": "2025-12-14",
+      "band": "不言而语器乐季"
+    },
+    {
+      "slug": "session-12",
+      "source": "/ABS/PATH/TO/session-12_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-12_portrait.jpg",
+      "date": "2025-12-20",
+      "band": "雾也至"
+    },
+    {
+      "slug": "session-13",
+      "source": "/ABS/PATH/TO/session-13_landscape.jpg",
+      "source_portrait": "",
+      "date": "2025-12-21",
+      "band": "白皮书"
+    },
+    {
+      "slug": "session-14",
+      "source": "/ABS/PATH/TO/session-14_landscape.jpg",
+      "source_portrait": "",
+      "date": "2025-12-27",
+      "band": "刺猬乐队"
+    },
+    {
+      "slug": "session-15",
+      "source": "/ABS/PATH/TO/session-15_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-01-09",
+      "band": "达达乐队"
+    },
+    {
+      "slug": "session-16",
+      "source": "",
+      "source_portrait": "/ABS/PATH/TO/session-16_portrait.jpg",
+      "date": "2026-01-10",
+      "band": "达闻西乐队"
+    },
+    {
+      "slug": "session-17",
+      "source": "",
+      "source_portrait": "/ABS/PATH/TO/session-17_portrait.jpg",
+      "date": "2026-01-16",
+      "band": "康姆士乐队"
+    },
+    {
+      "slug": "session-18",
+      "source": "/ABS/PATH/TO/session-18_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-01-18",
+      "band": "环岛行驶"
+    },
+    {
+      "slug": "session-19",
+      "source": "/ABS/PATH/TO/session-19_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-01-24",
+      "band": "余梓桾X张子薇"
+    },
+    {
+      "slug": "session-20",
+      "source": "/ABS/PATH/TO/session-20_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-20_portrait.jpg",
+      "date": "2026-01-30",
+      "band": "脑浊乐队"
+    },
+    {
+      "slug": "session-21",
+      "source": "/ABS/PATH/TO/session-21_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-01-31",
+      "band": "钢心"
+    },
+    {
+      "slug": "session-22",
+      "source": "/ABS/PATH/TO/session-22_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-02-01",
+      "band": "大都会乐团"
+    },
+    {
+      "slug": "session-23",
+      "source": "/ABS/PATH/TO/session-23_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-23_portrait.jpg",
+      "date": "2026-02-07",
+      "band": "脑浊乐队"
+    },
+    {
+      "slug": "session-24",
+      "source": "/ABS/PATH/TO/session-24_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-24_portrait.jpg",
+      "date": "2026-03-07",
+      "band": "重返袖珍时光x浅水ShallowEnd"
+    },
+    {
+      "slug": "session-25",
+      "source": "/ABS/PATH/TO/session-25_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-25_portrait.jpg",
+      "date": "2026-03-07",
+      "band": "門图MOOTOO"
+    },
+    {
+      "slug": "session-26",
+      "source": "/ABS/PATH/TO/session-26_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-03-13",
+      "band": "RYG室内雷鬼"
+    },
+    {
+      "slug": "session-27",
+      "source": "/ABS/PATH/TO/session-27_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-27_portrait.jpg",
+      "date": "2026-03-21",
+      "band": "荒野声灵硬摇滚集结"
+    },
+    {
+      "slug": "session-28",
+      "source": "/ABS/PATH/TO/session-28_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-03-25",
+      "band": "甜约翰"
+    },
+    {
+      "slug": "session-29",
+      "source": "/ABS/PATH/TO/session-29_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-03-27",
+      "band": "文雀"
+    },
+    {
+      "slug": "session-30",
+      "source": "/ABS/PATH/TO/session-30_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-03-29",
+      "band": "傻子与白痴"
+    },
+    {
+      "slug": "session-31",
+      "source": "/ABS/PATH/TO/session-31_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-31_portrait.jpg",
+      "date": "2026-04-04",
+      "band": "对角巷"
+    },
+    {
+      "slug": "session-32",
+      "source": "/ABS/PATH/TO/session-32_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-04-05",
+      "band": "饮马池"
+    },
+    {
+      "slug": "session-33",
+      "source": "/ABS/PATH/TO/session-33_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-04-06",
+      "band": "花墙"
+    },
+    {
+      "slug": "session-34",
+      "source": "/ABS/PATH/TO/session-34_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-04-10",
+      "band": "帆布小镇"
+    },
+    {
+      "slug": "session-35",
+      "source": "/ABS/PATH/TO/session-35_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-35_portrait.jpg",
+      "date": "2026-04-16",
+      "band": "Kerala Dust"
+    },
+    {
+      "slug": "session-36",
+      "source": "/ABS/PATH/TO/session-36_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-04-24",
+      "band": "Weatherday"
+    },
+    {
+      "slug": "session-37",
+      "source": "/ABS/PATH/TO/session-37_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-04-25",
+      "band": "张蔷"
+    },
+    {
+      "slug": "session-38",
+      "source": "/ABS/PATH/TO/session-38_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-04-26",
+      "band": "SoulFa 靈魂沙發"
+    },
+    {
+      "slug": "session-39",
+      "source": "/ABS/PATH/TO/session-39_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-39_portrait.jpg",
+      "date": "2026-05-02",
+      "band": "蛙池"
+    },
+    {
+      "slug": "session-40",
+      "source": "/ABS/PATH/TO/session-40_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-40_portrait.jpg",
+      "date": "2026-05-09",
+      "band": "NNEEVE"
+    },
+    {
+      "slug": "session-41",
+      "source": "/ABS/PATH/TO/session-41_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-41_portrait.jpg",
+      "date": "2026-05-15",
+      "band": "babychair"
+    },
+    {
+      "slug": "session-42",
+      "source": "/ABS/PATH/TO/session-42_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-05-21",
+      "band": "杭盖乐队"
+    },
+    {
+      "slug": "session-43",
+      "source": "/ABS/PATH/TO/session-43_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-43_portrait.jpg",
+      "date": "2026-05-23",
+      "band": "雾也至"
+    },
+    {
+      "slug": "session-44",
+      "source": "/ABS/PATH/TO/session-44_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-44_portrait.jpg",
+      "date": "2026-05-24",
+      "band": "Chinesefootball"
+    },
+    {
+      "slug": "session-45",
+      "source": "/ABS/PATH/TO/session-45_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-05-28",
+      "band": "软柿子乐队"
+    },
+    {
+      "slug": "session-46",
+      "source": "/ABS/PATH/TO/session-46_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-46_portrait.jpg",
+      "date": "2026-06-05",
+      "band": "浅水ShallowEnd"
+    },
+    {
+      "slug": "session-47",
+      "source": "/ABS/PATH/TO/session-47_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-47_portrait.jpg",
+      "date": "2026-06-06",
+      "band": "CornWave"
+    },
+    {
+      "slug": "session-48",
+      "source": "/ABS/PATH/TO/session-48_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-48_portrait.jpg",
+      "date": "2026-06-12",
+      "band": "Mildlife"
+    },
+    {
+      "slug": "session-49",
+      "source": "/ABS/PATH/TO/session-49_landscape.jpg",
+      "source_portrait": "/ABS/PATH/TO/session-49_portrait.jpg",
+      "date": "2026-06-13",
+      "band": "达达乐队"
+    },
+    {
+      "slug": "session-50",
+      "source": "/ABS/PATH/TO/session-50_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-06-19",
+      "band": "孤独的利里"
+    },
+    {
+      "slug": "session-51",
+      "source": "/ABS/PATH/TO/session-51_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-06-26",
+      "band": "达闻西乐队"
+    },
+    {
+      "slug": "session-52",
+      "source": "/ABS/PATH/TO/session-52_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-06-27",
+      "band": "小狗的骨头"
+    },
+    {
+      "slug": "session-53",
+      "source": "/ABS/PATH/TO/session-53_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-07-03",
+      "band": "沉舟"
+    },
+    {
+      "slug": "session-54",
+      "source": "/ABS/PATH/TO/session-54_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-07-08",
+      "band": "康士坦的变化球"
+    },
+    {
+      "slug": "session-55",
+      "source": "/ABS/PATH/TO/session-55_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-07-10",
+      "band": "棱镜乐队"
+    },
+    {
+      "slug": "session-56",
+      "source": "/ABS/PATH/TO/session-56_landscape.jpg",
+      "source_portrait": "",
+      "date": "2026-07-11",
+      "band": "于贞"
+    }
+  ]
+}

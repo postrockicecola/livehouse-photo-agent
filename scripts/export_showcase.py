@@ -11,10 +11,15 @@ locally, then commit the result — "what's in git is what the Vercel site shows
 
     python scripts/export_showcase.py
 
-Step 1 (this skeleton): dump the landing-page fixtures via scripts/studio_cli.py.
-TODO (step 2): export the per-session image subset (50 sessions x 5-10) into
-    web/public/showcase/ — resize ~1440px, convert WebP, strip EXIF (incl. GPS).
-TODO (step 3): freeze the full /infra console fixtures + per-session galleries.
+Per-session hero covers (one EXIF-stripped JPEG each) are built separately::
+
+    python scripts/build_session_covers.py --src <heroes_dir> --count 9 --patch-fixtures
+
+Those land in ``web/public/showcase/covers/session-NN.jpg`` and are referenced by
+``cover_path_quoted`` in ``studio-sessions.json``. This exporter sets that field
+to the public path (assets must already exist or be rebuilt before deploy).
+
+TODO: optional multi-frame per-session gallery subset under web/public/showcase/.
 """
 from __future__ import annotations
 
@@ -128,7 +133,38 @@ def _build_session_map(*key_sources: list) -> tuple[dict, dict]:
     return label_map, slug_map
 
 
-def _anon_session_obj(obj: dict, label_map: dict, slug_map: dict) -> dict:
+def _display_date_from_key(session_key: str) -> str:
+    sk = str(session_key or "").strip()
+    if len(sk) >= 10 and sk[4:5] == "-" and sk[7:8] == "-":
+        return sk[:10]
+    return ""
+
+
+def _load_cover_catalog() -> dict[str, dict]:
+    """Optional band/date from covers manifest (slug → meta)."""
+    man = REPO_ROOT / "web" / "public" / "showcase" / "covers" / "manifest.json"
+    if not man.is_file():
+        return {}
+    try:
+        data = json.loads(man.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out: dict[str, dict] = {}
+    for c in data.get("covers") or []:
+        if not isinstance(c, dict):
+            continue
+        slug = str(c.get("slug") or "").strip()
+        if slug:
+            out[slug] = c
+    return out
+
+
+def _anon_session_obj(
+    obj: dict,
+    label_map: dict,
+    slug_map: dict,
+    cover_meta: dict[str, dict] | None = None,
+) -> dict:
     """Anonymize one session-shaped dict in place-ish (returns a new dict)."""
     key = obj.get("session_key") or ""
     slug = slug_map.get(key, "session-xx")
@@ -141,8 +177,33 @@ def _anon_session_obj(obj: dict, label_map: dict, slug_map: dict) -> dict:
         out["previews_dir"] = f"/archive/{slug}/Previews"
     if "raw_dir" in out:
         out["raw_dir"] = f"/archive/{slug}/RAW"
-    if "cover_path_quoted" in out:
-        out["cover_path_quoted"] = ""
+    # Prefer covers written by build_session_covers.py (manifest path / path_portrait).
+    # Never keep live absolute archive paths — Vercel has no /Volumes tree.
+    meta = (cover_meta or {}).get(slug) or {}
+    cover = str(meta.get("path") or "").strip()
+    cover_p = str(meta.get("path_portrait") or "").strip()
+    if cover.startswith("/showcase/covers/") and cover.endswith(".jpg"):
+        out["cover_path_quoted"] = cover
+    elif cover_p.startswith("/showcase/covers/") and cover_p.endswith(".jpg"):
+        # Portrait-only sessions: use portrait as the default cover too.
+        out["cover_path_quoted"] = cover_p
+    else:
+        # Fallback when covers have not been built yet.
+        out["cover_path_quoted"] = f"/showcase/covers/{slug}.jpg"
+    if cover_p.startswith("/showcase/covers/") and cover_p.endswith(".jpg"):
+        out["cover_portrait_path_quoted"] = cover_p
+    else:
+        out.pop("cover_portrait_path_quoted", None)
+    # Prefer catalog date/band; else keep YYYY-MM-DD parsed from the real key.
+    date = str(meta.get("date") or "").strip() or _display_date_from_key(key)
+    if date:
+        out["session_date"] = date
+    band = str(meta.get("band") or meta.get("band_name") or "").strip()
+    if band:
+        out["band_name"] = band
+    venue = str(meta.get("venue") or "").strip()
+    if venue:
+        out["venue"] = venue
     return out
 
 
@@ -163,6 +224,7 @@ def export_studio(dry_run: bool) -> int:
     active_key = (sessions.get("active") or {}).get("session_key", "")
     delivery_keys = [d.get("session_key", "") for d in sessions.get("recent_deliveries", [])]
     label_map, slug_map = _build_session_map(session_keys, [active_key], delivery_keys)
+    cover_meta = _load_cover_catalog()
 
     # Pick a representative analyzed session for status + featured-frames.
     rep = None
@@ -179,8 +241,10 @@ def export_studio(dry_run: bool) -> int:
     anon_sessions = {
         "archive_root": "/archive",
         "count": sessions.get("count", 0),
-        "sessions": [_anon_session_obj(s, label_map, slug_map) for s in sessions.get("sessions", [])],
-        "active": _anon_session_obj(sessions["active"], label_map, slug_map)
+        "sessions": [
+            _anon_session_obj(s, label_map, slug_map, cover_meta) for s in sessions.get("sessions", [])
+        ],
+        "active": _anon_session_obj(sessions["active"], label_map, slug_map, cover_meta)
         if sessions.get("active")
         else None,
         "recent_deliveries": [
@@ -188,6 +252,11 @@ def export_studio(dry_run: bool) -> int:
                 **{k: v for k, v in d.items() if k not in ("previews_dir",)},
                 "session_key": label_map.get(d.get("session_key", ""), "Session"),
                 "previews_dir": _remap_previews(d.get("previews_dir", ""), d.get("session_key", ""), slug_map),
+                "session_date": (
+                    str((cover_meta.get(slug_map.get(d.get("session_key", ""), ""), {}) or {}).get("date") or "").strip()
+                    or d.get("session_date")
+                    or _display_date_from_key(str(d.get("session_key") or ""))
+                ),
             }
             for d in sessions.get("recent_deliveries", [])
         ],
@@ -201,7 +270,7 @@ def export_studio(dry_run: bool) -> int:
             status = run_cli("status", [rep_previews])
             for field in ("active", "session"):
                 if isinstance(status.get(field), dict):
-                    status[field] = _anon_session_obj(status[field], label_map, slug_map)
+                    status[field] = _anon_session_obj(status[field], label_map, slug_map, cover_meta)
             if "archive_root" in status:
                 status["archive_root"] = "/archive"
             fixtures.append(("studio-status", status))

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { StudioSessionRow, StudioStatusResponse } from "@/lib/studioApi";
-import { buildStudioCoverUrl, formatElapsed, jobStatusLabel, sessionDateFromKey } from "@/lib/studioUi";
+import { buildStudioCoverUrl, formatElapsed, jobStatusLabel, sessionDisplayDate } from "@/lib/studioUi";
 
 type Props = {
   session: StudioSessionRow;
@@ -75,23 +75,30 @@ export function StudioCurrentSessionHero({
   onAnalyze,
   children,
 }: Props) {
-  const dateLabel = sessionDateFromKey(session.session_key);
+  const dateLabel = sessionDisplayDate(session);
+  const bandName = session.band_name?.trim() || "";
   const photoCount = status?.session?.preview_count ?? session.preview_count;
   const elapsed = status?.job?.elapsed_sec ?? null;
   const jobStatus = jobStatusLabel(status?.job?.status, jobRunning);
   const heroUrl = buildStudioCoverUrl(session.cover_path_quoted, 1280);
+  const heroPortraitUrl = buildStudioCoverUrl(session.cover_portrait_path_quoted, 1280);
 
   return (
     <section aria-labelledby="studio-current-session">
       <div className="relative flex min-h-[calc(100svh-42px)] flex-col overflow-hidden border-b border-white/[0.07]">
         {heroUrl ? (
-          <img
-            src={heroUrl}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-[50%_35%] opacity-65"
-            decoding="async"
-            fetchPriority="high"
-          />
+          <picture>
+            {heroPortraitUrl ? (
+              <source media="(max-width: 767px)" srcSet={heroPortraitUrl} />
+            ) : null}
+            <img
+              src={heroUrl}
+              alt={bandName || dateLabel}
+              className="absolute inset-0 h-full w-full object-cover object-[50%_35%] opacity-65"
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
         ) : (
           <>
             <div
@@ -134,10 +141,15 @@ export function StudioCurrentSessionHero({
                 ) : null}
               </div>
               <h2 className="text-[28px] font-medium leading-none tracking-[-0.5px] text-[#e8e8e8]">
-                {dateLabel}
+                {bandName || dateLabel}
               </h2>
-              {session.session_key !== dateLabel ? (
+              {bandName ? (
+                <p className="mt-1.5 text-[13px] tabular-nums text-white/55">{dateLabel}</p>
+              ) : session.session_key !== dateLabel ? (
                 <p className="mt-1 truncate font-mono text-[11px] text-white/30">{session.session_key}</p>
+              ) : null}
+              {session.venue?.trim() ? (
+                <p className="mt-1 truncate text-[11px] text-white/35">{session.venue.trim()}</p>
               ) : null}
             </div>
 
@@ -172,9 +184,10 @@ export function StudioCurrentSessionHero({
               type="button"
               disabled={busy !== null || analyzeLocked}
               onClick={onAnalyze}
+              title="清空本场分析结果并全量重跑 Stage1–3"
               className="h-[30px] rounded-[5px] border border-white/15 bg-white/[0.06] px-3.5 text-xs tracking-[0.03em] text-[#e8e8e8] transition-colors hover:bg-white/[0.1] disabled:opacity-35"
             >
-              {busy === "analyze" ? "…" : "Analyze"}
+              {busy === "analyze" ? "…" : "全量分析"}
             </button>
             <Link
               href="/gallery"

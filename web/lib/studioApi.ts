@@ -2,6 +2,15 @@ import { getApiBase } from "@/lib/apiBase";
 
 const API_BASE = getApiBase();
 
+/** Photography funnel counts for session-card hover (remaining after each gate). */
+export type StudioSessionFunnel = {
+  imported?: number | null;
+  filtered?: number | null;
+  scored?: number | null;
+  picked?: number | null;
+  exported?: number | null;
+};
+
 export type StudioSessionRow = {
   session_key: string;
   session_dir: string;
@@ -10,6 +19,15 @@ export type StudioSessionRow = {
   has_analysis_results: boolean;
   brain_session_id: number | null;
   cover_path_quoted?: string;
+  /** Optional portrait cover for narrow viewports (showcase). */
+  cover_portrait_path_quoted?: string;
+  /** Showcase / catalog date (YYYY-MM-DD); preferred over parsing session_key. */
+  session_date?: string;
+  /** Act / band name for hover + hero (public on Vercel showcase). */
+  band_name?: string;
+  venue?: string;
+  /** Imported → Filtered → Scored → Picked → Exported (showcase / live). */
+  funnel?: StudioSessionFunnel;
   last_job_status?: string;
   photos_ingested?: number;
   photos_analyzed?: number;
@@ -172,11 +190,17 @@ export async function setActiveSession(previewsDir: string): Promise<void> {
   }
 }
 
-export async function startStudioAnalyze(previewsDir: string): Promise<{ job_id: number; status: string }> {
+export async function startStudioAnalyze(
+  previewsDir: string,
+  opts?: { forceFullRerun?: boolean },
+): Promise<{ job_id: number; status: string; force_full_rerun?: boolean }> {
   const res = await fetch(`${API_BASE}/api/studio/analyze`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ previews_dir: previewsDir }),
+    body: JSON.stringify({
+      previews_dir: previewsDir,
+      force_full_rerun: opts?.forceFullRerun ?? true,
+    }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

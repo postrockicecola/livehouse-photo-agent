@@ -14,10 +14,18 @@ export async function POST(req: NextRequest) {
   }
   let previews_dir = "";
   let config_path = "configs/livehouse.yaml";
+  let force_full_rerun = true;
   try {
-    const body = (await req.json()) as { previews_dir?: string; config_path?: string };
+    const body = (await req.json()) as {
+      previews_dir?: string;
+      config_path?: string;
+      force_full_rerun?: boolean;
+    };
     previews_dir = String(body.previews_dir || "").trim();
     if (body.config_path) config_path = String(body.config_path);
+    if (typeof body.force_full_rerun === "boolean") {
+      force_full_rerun = body.force_full_rerun;
+    }
   } catch {
     return NextResponse.json({ detail: "invalid JSON body" }, { status: 400 });
   }
@@ -26,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = galleryApiOrigin();
-  const payload = JSON.stringify({ previews_dir, config_path });
+  const payload = JSON.stringify({ previews_dir, config_path, force_full_rerun });
 
   for (const path of ["/api/studio/analyze", "/api/tasks/analyze"]) {
     try {

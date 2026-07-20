@@ -91,6 +91,55 @@ export function sessionDateFromKey(sessionKey: string): string {
   return sessionKey;
 }
 
+/** Prefer explicit ``session_date`` (showcase catalog); else parse folder key. */
+export function sessionDisplayDate(row: {
+  session_key: string;
+  session_date?: string | null;
+}): string {
+  const explicit = row.session_date?.trim();
+  if (explicit && explicit.length >= 10 && explicit[4] === "-" && explicit[7] === "-") {
+    return explicit.slice(0, 10);
+  }
+  return sessionDateFromKey(row.session_key);
+}
+
+/** Hover line: ``Imported 2,357 · Filtered 1,820 · Scored 940 · Picked 120``. */
+export function formatSessionFunnelLine(row: {
+  funnel?: {
+    imported?: number | null;
+    filtered?: number | null;
+    scored?: number | null;
+    picked?: number | null;
+    exported?: number | null;
+  } | null;
+  photos_ingested?: number | null;
+  preview_count?: number | null;
+}): string | null {
+  const f = row.funnel;
+  const imported =
+    f?.imported ??
+    (row.photos_ingested && row.photos_ingested > 0 ? row.photos_ingested : null) ??
+    (row.preview_count && row.preview_count > 0 ? row.preview_count : null);
+  if (imported == null || imported < 0) return null;
+
+  const parts: string[] = [`Imported ${imported.toLocaleString("en-US")}`];
+  const stages: Array<[string, number | null | undefined]> = [
+    ["Filtered", f?.filtered],
+    ["Scored", f?.scored],
+    ["Picked", f?.picked],
+    ["Exported", f?.exported],
+  ];
+  // Only append stages that actually diverge (audit present); otherwise one Imported is enough.
+  const diverged = stages.some(([, n]) => n != null && n !== imported);
+  if (diverged) {
+    for (const [label, n] of stages) {
+      if (n == null || n < 0) continue;
+      parts.push(`${label} ${n.toLocaleString("en-US")}`);
+    }
+  }
+  return parts.join(" · ");
+}
+
 export function formatElapsed(sec: number | null | undefined): string {
   if (sec == null || sec < 0) return "—";
   const m = Math.floor(sec / 60);
@@ -160,9 +209,21 @@ export function formatRuntimeHours(
   return `${h.toFixed(1).replace(/\.0$/, "")}h`;
 }
 
+/** True when the cover is a bundled static asset under ``public/`` (Vercel showcase). */
+export function isStaticStudioCoverPath(path: string): boolean {
+  return path.startsWith("/showcase/") || path.startsWith("/demo/");
+}
+
+/**
+ * Cover URL for studio list / hero.
+ * - Showcase covers: ``/showcase/covers/session-NN.jpg`` (static, EXIF-stripped).
+ * - Local archive: proxied via ``/image?path=…`` (FastAPI / Next route).
+ */
 export function buildStudioCoverUrl(coverPathQuoted: string | undefined, maxSide = 160): string | null {
   const pq = coverPathQuoted?.trim();
   if (!pq) return null;
+  // Bundled public assets — skip the image proxy so Vercel does not hash them to /demo/.
+  if (isStaticStudioCoverPath(pq)) return pq;
   const base = getApiBase();
   return `${base}/image?path=${pq}&max_side=${maxSide}`;
 }

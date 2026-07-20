@@ -812,7 +812,7 @@ export default function HomePage() {
                       : "text-white/45 hover:text-white/65",
                   ].join(" ")}
                 >
-                  精简（每簇≤5）
+                  精简（每簇 1 张）
                 </button>
                 <button
                   type="button"
@@ -829,7 +829,7 @@ export default function HomePage() {
                 </button>
               </div>
               <span className="text-[10px] text-white/22">
-                按画面相似度折叠连拍，每簇最多 5 张（分数高的优先）
+                按画面相似度折叠连拍；相似场景只留分数最高的一张
               </span>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2">

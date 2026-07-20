@@ -207,17 +207,18 @@ processing:
   # Homepage / ``GET /api/gallery/results``: fold burst frames for browsing (disk unchanged).
   gallery_view_dedupe:
     enabled: true
-    max_hamming: 10
-    keep_per_cluster: 5              # At most this many frames per near-dup cluster in the grid
+    max_hamming: 12                   # slightly looser so livehouse lighting drift still folds
+    keep_per_cluster: 1              # 精简: one frame per near-dup cluster in the grid
 
   # ``GET /api/gallery/results?sort=diverse``: semantic-coverage view (disk unchanged).
   # Groups same-scene bursts by CLIP similarity (pHash fallback if open-clip-torch missing),
   # keeps one representative per group, folds the rest as expandable group_members.
   diversity_selection:
     enabled: true
-    similarity_threshold: 0.90        # CLIP cosine; higher = only very-alike frames fold together
-    fallback_phash_hamming: 10        # used only when CLIP embeddings are unavailable
+    similarity_threshold: 0.85        # CLIP cosine; lower = merge more look-alikes (was 0.90)
+    fallback_phash_hamming: 12        # used only when CLIP embeddings are unavailable
     max_members_returned: 40          # cap folded frames returned per group (payload guard)
+    mmr_lambda: 0.65                  # display order: quality vs spread (1=pure score, 0=max spread)
     representative_dims:              # in-cluster rep pick uses dims that vary within a burst
       moment_peak: 0.35
       focus_sharpness: 0.25

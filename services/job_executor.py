@@ -194,6 +194,9 @@ class JobExecutor:
             conn, job_id=job_id, job_type=job_type, session_id=session_id, payload=payload
         )
         enable_checkpoint = bool(payload.get("enable_checkpoint", True))
+        force_full_rerun = bool(payload.get("force_full_rerun", False))
+        if force_full_rerun:
+            enable_checkpoint = False
 
         try:
             lifecycle.start_pipeline_preprocessing(
@@ -233,6 +236,8 @@ class JobExecutor:
                 session_id=pipeline_session_id,
             )
             with long_task_heartbeat(wm, status="ONLINE"):
+                if force_full_rerun:
+                    runner.reset_for_full_rerun()
                 runner.run_prepare_input()
                 runner.run_stage1_filter(
                     max_workers=max_workers, enable_checkpoint=enable_checkpoint

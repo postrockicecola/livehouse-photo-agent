@@ -895,13 +895,17 @@ def analyze_path_job_payload(
     config_path: str = "configs/livehouse.yaml",
     max_workers: int | None = None,
     enable_checkpoint: bool = True,
+    force_full_rerun: bool = False,
 ) -> dict[str, Any]:
     """Canonical ANALYZE_PATH dict stored in ``jobs.payload_json`` (read by ``tasks.run_job``)."""
+    if force_full_rerun:
+        enable_checkpoint = False
     return {
         "source_dir": source_dir,
         "config_path": config_path,
         "max_workers": max_workers,
         "enable_checkpoint": enable_checkpoint,
+        "force_full_rerun": bool(force_full_rerun),
     }
 
 
@@ -952,6 +956,7 @@ def create_analyze_path_job(
     config_path: str = "configs/livehouse.yaml",
     max_workers: int | None = None,
     enable_checkpoint: bool = True,
+    force_full_rerun: bool = False,
     trace_id: str | None = None,
     namespace: str | None = None,
     project_key: str | None = None,
@@ -962,6 +967,7 @@ def create_analyze_path_job(
         config_path=config_path,
         max_workers=max_workers,
         enable_checkpoint=enable_checkpoint,
+        force_full_rerun=force_full_rerun,
     )
     return create_job(
         conn,

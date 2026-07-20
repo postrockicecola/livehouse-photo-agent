@@ -13,13 +13,22 @@ export function sessionDateUnix(sessionKey: string): number {
   return Date.UTC(y, m - 1, d) / 1000;
 }
 
+function sessionSortUnix(row: StudioSessionRow): number {
+  const explicit = row.session_date?.trim();
+  if (explicit) {
+    const t = sessionDateUnix(explicit);
+    if (t > 0) return t;
+  }
+  return sessionDateUnix(row.session_key);
+}
+
 export function compareStudioSessions(
   a: StudioSessionRow,
   b: StudioSessionRow,
   order: StudioSessionSortOrder,
 ): number {
-  const ta = sessionDateUnix(a.session_key);
-  const tb = sessionDateUnix(b.session_key);
+  const ta = sessionSortUnix(a);
+  const tb = sessionSortUnix(b);
   if (ta !== tb) {
     return order === "desc" ? tb - ta : ta - tb;
   }

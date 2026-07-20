@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef } from "react";
 
 import type { StudioSessionRow } from "@/lib/studioApi";
 import { shortenPath } from "@/lib/studioApi";
-import { buildStudioCoverUrl, sessionDateFromKey } from "@/lib/studioUi";
+import {
+  buildStudioCoverUrl,
+  formatSessionFunnelLine,
+  sessionDisplayDate,
+} from "@/lib/studioUi";
 import type { StudioSessionSortOrder } from "@/lib/studioSessionSort";
 
 const FAILED_JOB_STATUSES = new Set([
@@ -79,8 +83,9 @@ export function StudioSessionList({
     return () => ro.disconnect();
   }, [recomputeAll, setList]);
 
+  // Cancel main `px-6` equally on both sides, then apply matching gutters.
   return (
-    <footer id="sessions" className="mx-auto w-full max-w-6xl scroll-mt-16">
+    <footer id="sessions" className="-mx-6 scroll-mt-16 px-4 sm:px-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Sessions — recent</p>
         <button
@@ -104,7 +109,10 @@ export function StudioSessionList({
           const sel = selectedPreviewsDir === row.previews_dir;
           const act = activePreviewsDir === row.previews_dir;
           const coverUrl = buildStudioCoverUrl(row.cover_path_quoted, 600);
-          const date = sessionDateFromKey(row.session_key);
+          const coverPortraitUrl = buildStudioCoverUrl(row.cover_portrait_path_quoted, 600);
+          const date = sessionDisplayDate(row);
+          const band = row.band_name?.trim() || "";
+          const funnelLine = formatSessionFunnelLine(row);
           const displayStatus = sessionDisplayStatus(row, act);
 
           return (
@@ -122,45 +130,64 @@ export function StudioSessionList({
               <button
                 type="button"
                 onClick={() => onSelect(row)}
-                className={`group relative block h-full w-full cursor-pointer overflow-hidden rounded-md text-left transition-opacity ${
-                  sel ? "ring-1 ring-white/25 ring-offset-1 ring-offset-[#0e0e0e]" : "hover:opacity-90"
+                title={[date, band].filter(Boolean).join(" · ")}
+                className={`group relative block h-full w-full cursor-pointer overflow-hidden rounded-md text-left ${
+                  sel ? "ring-1 ring-white/25 ring-offset-1 ring-offset-[#0e0e0e]" : ""
                 }`}
               >
                 <div className="relative h-full w-full overflow-hidden bg-[#161616]">
                   {coverUrl ? (
-                    <img
-                      src={coverUrl}
-                      alt=""
-                      className="block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-                      loading="lazy"
-                      decoding="async"
-                      onLoad={(e) => {
-                        const img = e.currentTarget;
-                        if (img.naturalWidth > 0) {
-                          const ratio = img.naturalHeight / img.naturalWidth;
-                          ratios.current.set(key, ratio);
-                          const li = itemRefs.current.get(key);
-                          if (li) applySpan(li, ratio);
-                        }
-                      }}
-                    />
+                    <picture>
+                      {coverPortraitUrl ? (
+                        <source media="(max-width: 639px)" srcSet={coverPortraitUrl} />
+                      ) : null}
+                      <img
+                        src={coverUrl}
+                        alt={band || date}
+                        className="block h-full w-full object-cover transition-[transform,filter] duration-300 group-hover:scale-[1.04] group-hover:blur-[6px] group-hover:brightness-[0.45]"
+                        loading="lazy"
+                        decoding="async"
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          if (img.naturalWidth > 0) {
+                            const ratio = img.naturalHeight / img.naturalWidth;
+                            ratios.current.set(key, ratio);
+                            const li = itemRefs.current.get(key);
+                            if (li) applySpan(li, ratio);
+                          }
+                        }}
+                      />
+                    </picture>
                   ) : (
-                    <div className="h-full w-full bg-[linear-gradient(135deg,#1a1000,#4a2a00)]" />
+                    <div className="h-full w-full bg-[linear-gradient(135deg,#1a1000,#4a2a00)] transition-[filter,brightness] duration-300 group-hover:blur-[6px] group-hover:brightness-[0.45]" />
                   )}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-[linear-gradient(transparent,rgba(0,0,0,0.72))] px-2 pb-1.5 pt-6 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    {displayStatus === "active" ? (
-                      <p className="text-[9px] text-[rgba(64,200,200,0.85)]">● Live</p>
-                    ) : displayStatus === "failed" ? (
-                      <p className="text-[10px] text-rose-300/80">Failed</p>
-                    ) : (
-                      <p className="text-[10px] text-white/75">
-                        {row.preview_count.toLocaleString("en-US")} photos
+
+                  {/* Hover readout: date → band → funnel */}
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-3.5 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <p className="text-[13px] tabular-nums tracking-[0.04em] text-white/75 sm:text-[14px]">
+                      {date}
+                    </p>
+                    {band ? (
+                      <p className="mt-2 max-w-full truncate text-[17px] font-medium leading-tight text-white sm:text-[19px]">
+                        {band}
                       </p>
+                    ) : (
+                      <p className="mt-2 text-[15px] text-white/50 sm:text-[16px]">{row.session_key}</p>
                     )}
-                    <p className="text-[9px] text-white/45">{date}</p>
+                    {funnelLine ? (
+                      <p className="mt-2.5 max-w-full text-[12px] leading-snug text-white/60 [overflow-wrap:anywhere] sm:text-[13px]">
+                        {funnelLine}
+                      </p>
+                    ) : null}
+                    {displayStatus === "active" ? (
+                      <p className="mt-2 text-[9px] text-[rgba(64,200,200,0.9)]">● Live</p>
+                    ) : displayStatus === "failed" ? (
+                      <p className="mt-2 text-[10px] text-rose-300/85">Failed</p>
+                    ) : null}
                   </div>
+
                   {displayStatus === "active" ? (
-                    <span className="absolute left-2 top-2 rounded-full bg-black/45 px-1.5 py-0.5 text-[9px] text-[rgba(64,200,200,0.9)]">
+                    <span className="absolute left-2 top-2 rounded-full bg-black/45 px-1.5 py-0.5 text-[9px] text-[rgba(64,200,200,0.9)] transition-opacity duration-300 group-hover:opacity-0">
                       ● Live
                     </span>
                   ) : null}

@@ -1,0 +1,559 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-20T02:13:06.150787+00:00",
+  "tool": "build_session_covers",
+  "privacy": "EXIF/ICC stripped; opaque session-NN filenames; no absolute paths",
+  "count": 55,
+  "covers": [
+    {
+      "slug": "session-01",
+      "path": "/showcase/covers/session-01.jpg",
+      "path_portrait": "/showcase/covers/session-01-portrait.jpg",
+      "source_basename": "DSC02234.jpg",
+      "source_portrait_basename": "DSC02255.jpg",
+      "date": "2025-08-23",
+      "band": "MADILYN BAILEY",
+      "venue": "福浪"
+    },
+    {
+      "slug": "session-02",
+      "path": "/showcase/covers/session-02.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC02579.jpg",
+      "source_portrait_basename": "",
+      "date": "2025-09-07",
+      "band": "落日飞车",
+      "venue": ""
+    },
+    {
+      "slug": "session-03",
+      "path": "/showcase/covers/session-03.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC03534.jpg",
+      "source_portrait_basename": "",
+      "date": "2025-10-17",
+      "band": "觅屿",
+      "venue": ""
+    },
+    {
+      "slug": "session-04",
+      "path": "/showcase/covers/session-04.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC03651.jpg",
+      "source_portrait_basename": "",
+      "date": "2025-10-24",
+      "band": "重返袖珍时光",
+      "venue": ""
+    },
+    {
+      "slug": "session-06",
+      "path": "/showcase/covers/session-06.jpg",
+      "path_portrait": "/showcase/covers/session-06-portrait.jpg",
+      "source_basename": "DSC03984.jpg",
+      "source_portrait_basename": "DSC03864.jpg",
+      "date": "2025-11-28",
+      "band": "汉堡黄",
+      "venue": ""
+    },
+    {
+      "slug": "session-07",
+      "path": "/showcase/covers/session-07.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC04284.jpg",
+      "source_portrait_basename": "",
+      "date": "2025-12-05",
+      "band": "理想后花园",
+      "venue": ""
+    },
+    {
+      "slug": "session-08",
+      "path": "/showcase/covers/session-08.jpg",
+      "path_portrait": "/showcase/covers/session-08-portrait.jpg",
+      "source_basename": "DSC04649.jpg",
+      "source_portrait_basename": "DSC04707.jpg",
+      "date": "2025-12-07",
+      "band": "陈婧霏",
+      "venue": ""
+    },
+    {
+      "slug": "session-09",
+      "path": "/showcase/covers/session-09.jpg",
+      "path_portrait": "/showcase/covers/session-09-portrait.jpg",
+      "source_basename": "DSC04284.jpg",
+      "source_portrait_basename": "DSC05862.jpg",
+      "date": "2025-12-10",
+      "band": "恍神儿",
+      "venue": ""
+    },
+    {
+      "slug": "session-10",
+      "path": "",
+      "path_portrait": "/showcase/covers/session-10-portrait.jpg",
+      "source_basename": "",
+      "source_portrait_basename": "DSC05963.jpg",
+      "date": "2025-12-11",
+      "band": "纪念日乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-11",
+      "path": "/showcase/covers/session-11.jpg",
+      "path_portrait": "/showcase/covers/session-11-portrait.jpg",
+      "source_basename": "DSC06838.jpg",
+      "source_portrait_basename": "DSC06623.jpg",
+      "date": "2025-12-14",
+      "band": "不言而语器乐季",
+      "venue": ""
+    },
+    {
+      "slug": "session-12",
+      "path": "/showcase/covers/session-12.jpg",
+      "path_portrait": "/showcase/covers/session-12-portrait.jpg",
+      "source_basename": "DSC08265.jpg",
+      "source_portrait_basename": "DSC07961.jpg",
+      "date": "2025-12-20",
+      "band": "雾也至",
+      "venue": ""
+    },
+    {
+      "slug": "session-13",
+      "path": "/showcase/covers/session-13.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC08480.jpg",
+      "source_portrait_basename": "",
+      "date": "2025-12-21",
+      "band": "白皮书",
+      "venue": ""
+    },
+    {
+      "slug": "session-14",
+      "path": "/showcase/covers/session-14.jpg",
+      "path_portrait": "",
+      "source_basename": "1-1-6.jpg",
+      "source_portrait_basename": "",
+      "date": "2025-12-27",
+      "band": "刺猬乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-15",
+      "path": "/showcase/covers/session-15.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC09691.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-01-09",
+      "band": "达达乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-16",
+      "path": "",
+      "path_portrait": "/showcase/covers/session-16-portrait.jpg",
+      "source_basename": "",
+      "source_portrait_basename": "DSC00046.jpg",
+      "date": "2026-01-10",
+      "band": "达闻西乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-17",
+      "path": "",
+      "path_portrait": "/showcase/covers/session-17-portrait.jpg",
+      "source_basename": "",
+      "source_portrait_basename": "1-1-5.jpg",
+      "date": "2026-01-16",
+      "band": "康姆士乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-18",
+      "path": "/showcase/covers/session-18.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC01789.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-01-18",
+      "band": "环岛行驶",
+      "venue": ""
+    },
+    {
+      "slug": "session-19",
+      "path": "/showcase/covers/session-19.jpg",
+      "path_portrait": "",
+      "source_basename": "1-1-4.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-01-24",
+      "band": "余梓桾X张子薇",
+      "venue": ""
+    },
+    {
+      "slug": "session-20",
+      "path": "/showcase/covers/session-20.jpg",
+      "path_portrait": "/showcase/covers/session-20-portrait.jpg",
+      "source_basename": "DSC02667.jpg",
+      "source_portrait_basename": "DSC02678.jpg",
+      "date": "2026-01-30",
+      "band": "脑浊乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-21",
+      "path": "",
+      "path_portrait": "",
+      "source_basename": "",
+      "source_portrait_basename": "",
+      "date": "2026-01-31",
+      "band": "钢心",
+      "venue": ""
+    },
+    {
+      "slug": "session-22",
+      "path": "/showcase/covers/session-22.jpg",
+      "path_portrait": "",
+      "source_basename": "1-1-2.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-02-01",
+      "band": "大都会乐团",
+      "venue": ""
+    },
+    {
+      "slug": "session-23",
+      "path": "",
+      "path_portrait": "",
+      "source_basename": "",
+      "source_portrait_basename": "",
+      "date": "2026-02-07",
+      "band": "脑浊乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-24",
+      "path": "/showcase/covers/session-24.jpg",
+      "path_portrait": "/showcase/covers/session-24-portrait.jpg",
+      "source_basename": "DSC04515.jpg",
+      "source_portrait_basename": "DSC04880.jpg",
+      "date": "2026-03-07",
+      "band": "重返袖珍时光x浅水ShallowEnd",
+      "venue": ""
+    },
+    {
+      "slug": "session-25",
+      "path": "/showcase/covers/session-25.jpg",
+      "path_portrait": "/showcase/covers/session-25-portrait.jpg",
+      "source_basename": "DSC05598.jpg",
+      "source_portrait_basename": "DSC05482.jpg",
+      "date": "2026-03-07",
+      "band": "門图MOOTOO",
+      "venue": ""
+    },
+    {
+      "slug": "session-26",
+      "path": "/showcase/covers/session-26.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC06051.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-03-13",
+      "band": "RYG室内雷鬼",
+      "venue": ""
+    },
+    {
+      "slug": "session-27",
+      "path": "/showcase/covers/session-27.jpg",
+      "path_portrait": "/showcase/covers/session-27-portrait.jpg",
+      "source_basename": "DSC07454.jpg",
+      "source_portrait_basename": "DSC07209.jpg",
+      "date": "2026-03-21",
+      "band": "荒野声灵硬摇滚集结",
+      "venue": ""
+    },
+    {
+      "slug": "session-28",
+      "path": "/showcase/covers/session-28.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC08459.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-03-25",
+      "band": "甜约翰",
+      "venue": ""
+    },
+    {
+      "slug": "session-29",
+      "path": "/showcase/covers/session-29.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC08761.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-03-27",
+      "band": "文雀",
+      "venue": ""
+    },
+    {
+      "slug": "session-30",
+      "path": "/showcase/covers/session-30.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC09185.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-03-29",
+      "band": "傻子与白痴",
+      "venue": ""
+    },
+    {
+      "slug": "session-31",
+      "path": "/showcase/covers/session-31.jpg",
+      "path_portrait": "/showcase/covers/session-31-portrait.jpg",
+      "source_basename": "DSC00061.jpg",
+      "source_portrait_basename": "DSC00132.jpg",
+      "date": "2026-04-04",
+      "band": "对角巷",
+      "venue": ""
+    },
+    {
+      "slug": "session-32",
+      "path": "/showcase/covers/session-32.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC00853.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-04-05",
+      "band": "饮马池",
+      "venue": ""
+    },
+    {
+      "slug": "session-33",
+      "path": "/showcase/covers/session-33.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC01150.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-04-06",
+      "band": "花墙",
+      "venue": ""
+    },
+    {
+      "slug": "session-34",
+      "path": "/showcase/covers/session-34.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC02219.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-04-10",
+      "band": "帆布小镇",
+      "venue": ""
+    },
+    {
+      "slug": "session-35",
+      "path": "/showcase/covers/session-35.jpg",
+      "path_portrait": "/showcase/covers/session-35-portrait.jpg",
+      "source_basename": "DSC03771.jpg",
+      "source_portrait_basename": "DSC03187.jpg",
+      "date": "2026-04-16",
+      "band": "Kerala Dust",
+      "venue": ""
+    },
+    {
+      "slug": "session-36",
+      "path": "/showcase/covers/session-36.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC04162.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-04-24",
+      "band": "Weatherday",
+      "venue": ""
+    },
+    {
+      "slug": "session-37",
+      "path": "/showcase/covers/session-37.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC04485.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-04-25",
+      "band": "张蔷",
+      "venue": ""
+    },
+    {
+      "slug": "session-38",
+      "path": "/showcase/covers/session-38.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC04883.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-04-26",
+      "band": "SoulFa 靈魂沙發",
+      "venue": ""
+    },
+    {
+      "slug": "session-39",
+      "path": "/showcase/covers/session-39.jpg",
+      "path_portrait": "/showcase/covers/session-39-portrait.jpg",
+      "source_basename": "DSC05120.JPG",
+      "source_portrait_basename": "DSC05120.JPG",
+      "date": "2026-05-02",
+      "band": "蛙池",
+      "venue": ""
+    },
+    {
+      "slug": "session-40",
+      "path": "/showcase/covers/session-40.jpg",
+      "path_portrait": "/showcase/covers/session-40-portrait.jpg",
+      "source_basename": "DSC06627.jpg",
+      "source_portrait_basename": "DSC05985.jpg",
+      "date": "2026-05-09",
+      "band": "NNEEVE",
+      "venue": ""
+    },
+    {
+      "slug": "session-41",
+      "path": "/showcase/covers/session-41.jpg",
+      "path_portrait": "/showcase/covers/session-41-portrait.jpg",
+      "source_basename": "DSC07664.jpg",
+      "source_portrait_basename": "DSC07367.jpg",
+      "date": "2026-05-15",
+      "band": "babychair",
+      "venue": ""
+    },
+    {
+      "slug": "session-42",
+      "path": "/showcase/covers/session-42.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC07913.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-05-21",
+      "band": "杭盖乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-43",
+      "path": "/showcase/covers/session-43.jpg",
+      "path_portrait": "/showcase/covers/session-43-portrait.jpg",
+      "source_basename": "DSC09562.jpg",
+      "source_portrait_basename": "DSC08974.jpg",
+      "date": "2026-05-23",
+      "band": "雾也至",
+      "venue": ""
+    },
+    {
+      "slug": "session-44",
+      "path": "/showcase/covers/session-44.jpg",
+      "path_portrait": "/showcase/covers/session-44-portrait.jpg",
+      "source_basename": "DSC00911.jpg",
+      "source_portrait_basename": "DSC00539.jpg",
+      "date": "2026-05-24",
+      "band": "Chinesefootball",
+      "venue": ""
+    },
+    {
+      "slug": "session-45",
+      "path": "/showcase/covers/session-45.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC02365.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-05-28",
+      "band": "软柿子乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-46",
+      "path": "/showcase/covers/session-46.jpg",
+      "path_portrait": "/showcase/covers/session-46-portrait.jpg",
+      "source_basename": "DSC03754.jpg",
+      "source_portrait_basename": "DSC03630.jpg",
+      "date": "2026-06-05",
+      "band": "浅水ShallowEnd",
+      "venue": ""
+    },
+    {
+      "slug": "session-47",
+      "path": "/showcase/covers/session-47.jpg",
+      "path_portrait": "/showcase/covers/session-47-portrait.jpg",
+      "source_basename": "DSC05546.jpg",
+      "source_portrait_basename": "DSC04700.jpg",
+      "date": "2026-06-06",
+      "band": "CornWave",
+      "venue": ""
+    },
+    {
+      "slug": "session-48",
+      "path": "/showcase/covers/session-48.jpg",
+      "path_portrait": "/showcase/covers/session-48-portrait.jpg",
+      "source_basename": "DSC06728.jpg",
+      "source_portrait_basename": "DSC05888.jpg",
+      "date": "2026-06-12",
+      "band": "Mildlife",
+      "venue": ""
+    },
+    {
+      "slug": "session-49",
+      "path": "/showcase/covers/session-49.jpg",
+      "path_portrait": "/showcase/covers/session-49-portrait.jpg",
+      "source_basename": "DSC09386.jpg",
+      "source_portrait_basename": "DSC07633.jpg",
+      "date": "2026-06-13",
+      "band": "达达乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-50",
+      "path": "/showcase/covers/session-50.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC02895.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-06-19",
+      "band": "孤独的利里",
+      "venue": ""
+    },
+    {
+      "slug": "session-51",
+      "path": "/showcase/covers/session-51.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC03639.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-06-26",
+      "band": "达闻西乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-52",
+      "path": "/showcase/covers/session-52.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC08839.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-06-27",
+      "band": "小狗的骨头",
+      "venue": ""
+    },
+    {
+      "slug": "session-53",
+      "path": "/showcase/covers/session-53.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC01082.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-07-03",
+      "band": "沉舟",
+      "venue": ""
+    },
+    {
+      "slug": "session-54",
+      "path": "/showcase/covers/session-54.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC03267.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-07-08",
+      "band": "康士坦的变化球",
+      "venue": ""
+    },
+    {
+      "slug": "session-55",
+      "path": "/showcase/covers/session-55.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC05257.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-07-10",
+      "band": "棱镜乐队",
+      "venue": ""
+    },
+    {
+      "slug": "session-56",
+      "path": "/showcase/covers/session-56.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC07563.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-07-11",
+      "band": "于贞",
+      "venue": ""
+    }
+  ]
+}

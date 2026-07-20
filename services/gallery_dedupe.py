@@ -29,7 +29,7 @@ def gallery_view_dedupe_settings(config: Mapping[str, Any] | None) -> dict[str, 
     if enabled is None:
         enabled = stage.get("enabled", True)
     max_h = int(raw.get("max_hamming", stage.get("max_hamming", 10)) or 10)
-    kpc = int(raw.get("keep_per_cluster", 5) or 5)
+    kpc = int(raw.get("keep_per_cluster", 1) or 1)
     return {
         "enabled": bool(enabled),
         "max_hamming": max(0, min(32, max_h)),

@@ -89,6 +89,9 @@ class ActiveSessionBody(BaseModel):
 class AnalyzeBody(BaseModel):
     previews_dir: str = Field(..., min_length=1)
     config_path: str = Field(default="configs/livehouse.yaml")
+    # Studio Analyze defaults to a full refresh (clear audit + re-run all frames).
+    force_full_rerun: bool = True
+    enable_checkpoint: bool | None = None
 
 
 class IngestConfigPutBody(BaseModel):
@@ -268,6 +271,16 @@ def studio_start_analyze(body: AnalyzeBody):
 
     trace_id = new_trace_id("studio_analyze")
     config_path = body.config_path or os.getenv("LIVEHOUSE_CONFIG", "configs/livehouse.yaml")
+    force_full = bool(body.force_full_rerun)
+    enable_checkpoint = False if force_full else (
+        True if body.enable_checkpoint is None else bool(body.enable_checkpoint)
+    )
+    job_payload: dict = {
+        "config_path": config_path,
+        "enable_checkpoint": enable_checkpoint,
+        "force_full_rerun": force_full,
+        "source_dir": str(previews),
+    }
 
     conn = brain_connect()
     try:
@@ -291,12 +304,15 @@ def studio_start_analyze(body: AnalyzeBody):
                 job_type="ANALYZE_SESSION",
                 session_id=sid,
                 trace_id=trace_id,
+                payload=job_payload,
             )
         else:
             job_id = create_analyze_path_job(
                 conn,
                 source_dir=str(previews),
                 config_path=config_path,
+                enable_checkpoint=enable_checkpoint,
+                force_full_rerun=force_full,
                 trace_id=trace_id,
             )
     except Exception as e:
@@ -316,4 +332,6 @@ def studio_start_analyze(body: AnalyzeBody):
         "run_task_id": task.id,
         "task_name": "tasks.run_job",
         "previews_dir": str(previews),
+        "force_full_rerun": force_full,
+        "enable_checkpoint": enable_checkpoint,
     }

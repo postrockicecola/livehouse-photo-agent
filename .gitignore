@@ -70,6 +70,11 @@ data/agent_demo/*.jpg
 demo_gallery/**/*.jpg
 docs/images/*.jpg
 web/public/showcase/**/*.jpg
+# Per-session heroes for Vercel /studio (EXIF-stripped; built by build_session_covers.py)
+!web/public/showcase/covers/
+!web/public/showcase/covers/**
+# Local cover catalog with absolute paths — commit only the .example.json
+data/bench/session_covers_sources.json
 
 # Markdown docs (currently messy; excluded from VCS. Use `git add -f <file>.md` to track specific ones)
 *.md
