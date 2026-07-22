@@ -1,17 +1,11 @@
-"""The curation agent loop: observe → plan → act → reflect, under a budget.
+"""Curation agent entrypoint: LangGraph-first ReAct runtime.
 
-This ties the pieces together into a real ReAct-style controller:
+Production path (default): ``plan → act → reflect`` StateGraph in
+:mod:`services.agent.graph`.
 
-    while not done:
-        call   = planner.next_action(state)     # decide (LLM or heuristic)
-        result = tools.dispatch(state, call)    # act (inspect / analyze / finalize)
-        reflect(...)                            # self-correct: queue escalations
-        record AgentStep                        # structured trace for observability
-
-Termination is guaranteed by three guards — explicit FINALIZE, the step ceiling,
-and the inference budget — so the loop can never run away. Every step is recorded,
-and the run returns a metrics dict (steps, inferences, escalations, fallbacks,
-selection size) that doubles as the observability surface for A's cost narrative.
+Fallback: imperative ``while`` loop when ``LIVEHOUSE_AGENT_RUNTIME=imperative`` or
+``langgraph`` is not installed. Behaviour (tools, budgets, step_hook metrics) stays
+aligned so job_runner / orchestrator callers do not care which backend ran.
 """
 from __future__ import annotations
 
@@ -34,13 +28,11 @@ from services.agent.types import (
 logger = logging.getLogger(__name__)
 
 MetricsHook = Callable[[dict[str, Any]], None]
-# Called after every recorded step; the job runner uses it to stream agent
-# decisions into ``job_events`` so the Infra Console timeline shows the loop live.
 StepHook = Callable[[AgentStep, AgentState], None]
 
 
 class CurationAgent:
-    """Runs the agentic curation loop over a set of candidate photos."""
+    """Runs agentic curation over candidate photos (LangGraph by default)."""
 
     def __init__(
         self,
@@ -68,6 +60,29 @@ class CurationAgent:
             logger.exception("agent step_hook failed (step #%s)", step.index)
 
     def run(self, candidates: list[Candidate]) -> AgentResult:
+        from services.agent.graph import langgraph_available, run_curation_graph, runtime_preference
+
+        prefer = runtime_preference()
+        if prefer == "langgraph" and langgraph_available():
+            try:
+                return run_curation_graph(
+                    candidates,
+                    tools=self._tools,
+                    config=self._config,
+                    planner=self._planner,
+                    reflect_fn=self._reflect,
+                    step_hook=self._step_hook,
+                    metrics_hook=self._metrics_hook,
+                )
+            except Exception:
+                logger.exception("LangGraph curation runtime failed; falling back to imperative loop")
+
+        result = self._run_imperative(candidates)
+        result.metrics = {**(result.metrics or {}), "backend": "imperative"}
+        return result
+
+    def _run_imperative(self, candidates: list[Candidate]) -> AgentResult:
+        """Legacy while-loop runtime (fallback / explicit ``imperative`` preference)."""
         state = AgentState.from_candidates(candidates, self._config)
         steps: list[AgentStep] = []
         fallback_calls = 0
@@ -127,29 +142,6 @@ class CurationAgent:
         return AgentStep(index=state.step_index, call=call, result=result)
 
     def _build_metrics(self, state: AgentState, steps: list[AgentStep], fallback_calls: int) -> dict[str, Any]:
-        action_counts: dict[str, int] = {}
-        # Who actually decided each step: "llm" (model in control), "llm_fallback"
-        # (model output was unusable → heuristic rescued it), "heuristic", "reflection",
-        # or "loop_guard". This is the structured-output-reliability number for the
-        # LLM-agent narrative: how often the model drove vs how often we fell back.
-        source_counts: dict[str, int] = {}
-        for s in steps:
-            action_counts[s.call.action.value] = action_counts.get(s.call.action.value, 0) + 1
-            source_counts[s.call.source] = source_counts.get(s.call.source, 0) + 1
-        llm_steps = source_counts.get("llm", 0)
-        llm_total = llm_steps + fallback_calls
-        return {
-            "steps": len(steps),
-            "inferences_used": state.inferences_used,
-            "max_inferences": self._config.max_inferences,
-            "budget_exhausted": state.budget_exhausted(),
-            "escalations": state.escalations,
-            "llm_fallback_calls": fallback_calls,
-            # Fraction of LLM-attempted steps the model drove without falling back.
-            "llm_decision_rate": (llm_steps / llm_total) if llm_total else None,
-            "candidates_total": len(state.candidates),
-            "candidates_analyzed": state.analyzed_count(),
-            "selected_count": len(state.selected),
-            "action_counts": action_counts,
-            "planner_source_counts": source_counts,
-        }
+        from services.agent.graph import build_metrics
+
+        return build_metrics(state, steps, fallback_calls, backend="imperative")

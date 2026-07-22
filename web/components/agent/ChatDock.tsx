@@ -29,11 +29,26 @@ type ChatTurn = {
   streaming?: boolean;
 };
 
+/** Notify Gallery page to reload curation / vibe after write skills. */
+function emitGalleryUiActions(calls: AgentToolCall[]) {
+  if (typeof window === "undefined") return;
+  for (const call of calls) {
+    if (!call?.ok) continue;
+    const action = String(call.metadata?.ui_action || "");
+    if (!action) continue;
+    window.dispatchEvent(
+      new CustomEvent("luma:gallery-agent-action", {
+        detail: { action, tool: call.tool, metadata: call.metadata ?? {} },
+      }),
+    );
+  }
+}
+
 const SUGGESTIONS: Record<AgentMode, string[]> = {
   gallery: [
-    "这个 session 有多少张照片？分布如何？",
-    "给我 90 分以上的精选片",
-    "为什么某张被判为 trash？",
+    "帮我从这场里选出 40 张能交片的",
+    "找出吉他手弹琴的特写",
+    "修成复古胶片风预览看看",
   ],
   general: [
     "搜索 KEDA 的最新版本并总结它的用途",
@@ -209,7 +224,7 @@ export function ChatDock({
   apiBase: string;
   previewsDir?: string | null;
   context?: string;
-  /** Prefill + open dock once (e.g. landing hero `?q=`). Does not auto-send. */
+  /** Prefill + open dock once (e.g. landing hero `?q=`), then auto-send. */
   initialPrompt?: string | null;
 }) {
   const [open, setOpen] = useState(false);
@@ -222,6 +237,8 @@ export function ChatDock({
   const sessionIdRef = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const consumedInitialPrompt = useRef(false);
+  const pendingAutoSend = useRef<string | null>(null);
+  const sendRef = useRef<(raw: string) => Promise<void>>(async () => {});
 
   if (!sessionIdRef.current) {
     sessionIdRef.current = persistentSessionId(context, mode);
@@ -242,6 +259,7 @@ export function ChatDock({
     const prompt = initialPrompt?.trim();
     if (!prompt || consumedInitialPrompt.current) return;
     consumedInitialPrompt.current = true;
+    pendingAutoSend.current = prompt;
     setInput(prompt);
     setOpen(true);
   }, [initialPrompt]);
@@ -255,6 +273,14 @@ export function ChatDock({
     void fetchAgentHistory(apiBase, sid, mode).then((hist) => {
       if (cancelled) return;
       setTurns(hist.map((h) => ({ role: h.role, text: h.text })));
+      const pending = pendingAutoSend.current;
+      if (pending) {
+        pendingAutoSend.current = null;
+        // After history hydrate, send the landing hero prompt as a real turn.
+        window.setTimeout(() => {
+          void sendRef.current(pending);
+        }, 50);
+      }
     });
     return () => {
       cancelled = true;
@@ -302,14 +328,17 @@ export function ChatDock({
             patchLastAssistant((t) => ({ ...t, text: t.text + text })),
           onToolCall: (call) =>
             patchLastAssistant((t) => ({ ...t, toolCalls: [...(t.toolCalls ?? []), call] })),
-          onDone: (info) =>
+          onDone: (info) => {
+            const calls = info.tool_calls?.length ? info.tool_calls : undefined;
             patchLastAssistant((t) => ({
               ...t,
               text: (t.text || info.reply || "(空回复)").trim(),
-              toolCalls: info.tool_calls?.length ? info.tool_calls : t.toolCalls,
+              toolCalls: calls ?? t.toolCalls,
               guardrails: info.guardrail_events,
               streaming: false,
-            })),
+            }));
+            emitGalleryUiActions(calls ?? []);
+          },
           onError: (msg) =>
             patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false })),
         });
@@ -325,6 +354,7 @@ export function ChatDock({
             error: Boolean(data.error),
             streaming: false,
           }));
+          emitGalleryUiActions(data.tool_calls ?? []);
         }
       } catch (streamErr) {
         // Hard stream failure → fall back to the non-streaming endpoint once.
@@ -338,6 +368,7 @@ export function ChatDock({
             error: Boolean(data.error),
             streaming: false,
           }));
+          emitGalleryUiActions(data.tool_calls ?? []);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : streamErr instanceof Error ? streamErr.message : "请求失败";
           patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false }));
@@ -348,6 +379,8 @@ export function ChatDock({
     },
     [apiBase, previewsDir, sending, mode, patchLastAssistant],
   );
+
+  sendRef.current = send;
 
   const resetChat = useCallback(() => {
     setTurns([]);

@@ -110,7 +110,10 @@ def test_chat_runs_tool_then_answers():
     agent = ConversationalAgent(lambda msgs: next(scripted), skills=reg)
     res = agent.chat("please echo pong")
     assert res.reply == "the tool said pong"
-    assert res.tool_calls == [{"tool": "echo", "args": {"v": "pong"}, "ok": True}]
+    assert res.tool_calls == [
+        {"tool": "echo", "args": {"v": "pong"}, "ok": True, "metadata": {}}
+    ]
+    assert res.working_memory.get("last_tool") == "echo"
     # A tool-role message carrying the observation is in memory.
     roles = [m["role"] for m in agent.memory.messages()]
     assert "tool" in roles

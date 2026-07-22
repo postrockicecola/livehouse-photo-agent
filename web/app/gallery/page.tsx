@@ -478,6 +478,22 @@ export default function HomePage() {
     };
   }, [API_BASE, reloadNonce]);
 
+  // ChatDock write skills (select / vibe / export) → refresh Gallery state.
+  useEffect(() => {
+    const onAgentAction = (ev: Event) => {
+      const detail = (ev as CustomEvent<{ action?: string }>).detail;
+      const action = String(detail?.action || "");
+      if (action === "reload_curation" || action === "reload_vibe" || action === "export_done") {
+        setReloadNonce((n) => n + 1);
+        if (action === "reload_curation") setActionMsg("助手已更新选片，正在刷新…");
+        if (action === "reload_vibe") setActionMsg("助手已应用胶片风格，正在刷新…");
+        if (action === "export_done") setActionMsg("助手已触发导出（预览 + RAW）");
+      }
+    };
+    window.addEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
+    return () => window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
+  }, []);
+
   const onApplySessionVibe = async () => {
     const text = vibePrompt.trim();
     if (!text) {

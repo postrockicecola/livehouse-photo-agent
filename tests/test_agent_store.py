@@ -119,3 +119,34 @@ def test_load_messages_caps_and_orders(conn):
     assert len(msgs) == 10
     # Oldest-first slice of the most-recent 10 → m50..m59.
     assert msgs[0]["content"] == "m50" and msgs[-1]["content"] == "m59"
+
+
+def test_preferences_survive_conversation_reset(conn):
+    owner = "user:9"
+    store.set_preference(conn, owner, "avoid_silhouettes", "true")
+    store.set_preference(conn, owner, "language", "zh")
+    assert store.get_preferences(conn, owner) == {
+        "avoid_silhouettes": "true",
+        "language": "zh",
+    }
+    cid = store.get_or_create_conversation(conn, owner, "s", "gallery")
+    store.append_messages(conn, cid, [{"role": "user", "content": "hi"}])
+    store.reset_conversation(conn, owner, "s", "gallery")
+    assert store.message_count(conn, cid) == 0
+    assert store.get_preferences(conn, owner)["avoid_silhouettes"] == "true"
+    assert "avoid_silhouettes" in store.preferences_prompt_block(store.get_preferences(conn, owner))
+
+
+def test_agent_events_roundtrip(conn):
+    cid = store.get_or_create_conversation(conn, "user:1", "s", "gallery")
+    store.append_agent_events(
+        conn,
+        cid,
+        [
+            {"type": "tool_call", "tool": "gallery_search", "ok": True},
+            {"type": "done", "reply": "ok"},
+        ],
+    )
+    events = store.load_agent_events(conn, cid)
+    assert [e["type"] for e in events] == ["tool_call", "done"]
+    assert events[0]["tool"] == "gallery_search"

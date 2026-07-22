@@ -9,6 +9,7 @@ export type AgentToolCall = {
   tool: string;
   args: Record<string, unknown>;
   ok: boolean;
+  metadata?: Record<string, unknown>;
 };
 
 export type AgentGuardrailEvent = {
@@ -122,6 +123,7 @@ export async function streamAgentChat(
           tool: String(ev.tool ?? ""),
           args: (ev.args as Record<string, unknown>) ?? {},
           ok: Boolean(ev.ok),
+          metadata: (ev.metadata as Record<string, unknown>) || undefined,
         });
         break;
       case "guardrail":

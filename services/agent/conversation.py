@@ -21,6 +21,11 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, Optional
 
+from services.agent.context_governance import (
+    DEFAULT_TOOL_RESULT_CHARS,
+    compress_working_memory,
+    truncate_tool_observation,
+)
 from services.agent.guardrails import Guardrails
 from services.agent.skills.base import SkillRegistry
 
@@ -32,6 +37,8 @@ ChatFn = Callable[[list[dict[str, str]]], str]
 StreamChatFn = Callable[[list[dict[str, str]]], Iterator[str]]
 # Optional summarizer for evicted turns: old messages -> a short summary string.
 Summarizer = Callable[[list["Message"]], str]
+# Optional observability hook: one structured event per tool / turn boundary.
+TurnHook = Callable[[dict[str, Any]], None]
 
 
 def approx_tokens(text: str) -> int:
@@ -79,8 +86,8 @@ class ConversationMemory:
         self._turns.append(Message("assistant", text))
         self._enforce_budget()
 
-    def add_tool_result(self, name: str, content: str) -> None:
-        self._turns.append(Message("tool", content, name=name))
+    def add_tool_result(self, name: str, content: str, *, max_chars: int = DEFAULT_TOOL_RESULT_CHARS) -> None:
+        self._turns.append(Message("tool", truncate_tool_observation(content, max_chars=max_chars), name=name))
         self._enforce_budget()
 
     def _base_messages(self) -> list[Message]:
@@ -148,6 +155,8 @@ def _chunk_text(text: str, size: int = 4) -> Iterator[str]:
 class TurnResult:
     reply: str
     tool_calls: list[dict[str, Any]] = field(default_factory=list)
+    working_memory: dict[str, Any] = field(default_factory=dict)
+    events: list[dict[str, Any]] = field(default_factory=list)
 
 
 # Clean, minimal context used to force a final answer. Weaker chat models (e.g. llava)
@@ -179,6 +188,9 @@ class ConversationalAgent:
         guardrails: Optional[Guardrails] = None,
         max_tool_rounds: int = 3,
         wrap_tool_output: bool = True,
+        max_tool_result_chars: int = DEFAULT_TOOL_RESULT_CHARS,
+        turn_hook: Optional[TurnHook] = None,
+        working_memory: Optional[dict[str, Any]] = None,
     ) -> None:
         self._chat = chat_fn
         self.memory = memory or ConversationMemory()
@@ -189,6 +201,33 @@ class ConversationalAgent:
         # external/untrusted — the fence adds noise and confuses weaker models. Set
         # False for trusted skills; injection scanning still runs for observability.
         self._wrap_tool_output = wrap_tool_output
+        self._max_tool_result_chars = max(512, int(max_tool_result_chars))
+        self._turn_hook = turn_hook
+        # Working memory: last tool artifacts for the current dialogue (not durable prefs).
+        self.working_memory: dict[str, Any] = dict(working_memory or {})
+        self._events: list[dict[str, Any]] = []
+
+    def _emit(self, event: dict[str, Any]) -> None:
+        self._events.append(event)
+        if self._turn_hook is None:
+            return
+        try:
+            self._turn_hook(event)
+        except Exception:
+            logger.exception("conversation turn_hook failed")
+
+    def _update_working_memory(self, name: str, args: dict[str, Any], result) -> None:
+        meta = getattr(result, "metadata", None) or {}
+        self.working_memory["last_tool"] = name
+        if args.get("query") is not None:
+            self.working_memory["last_query"] = args.get("query")
+        if meta.get("files"):
+            self.working_memory["last_files"] = list(meta.get("files") or [])
+        if meta.get("citations"):
+            self.working_memory["last_citations"] = list(meta.get("citations") or [])
+        if meta.get("rag"):
+            self.working_memory["last_rag_mode"] = (meta.get("rag") or {}).get("mode")
+        self.working_memory = compress_working_memory(self.working_memory)
 
     def _record_tool_result(self, name: str, result) -> None:
         """Add a tool observation to memory, fencing it as untrusted only when asked."""
@@ -199,7 +238,7 @@ class ConversationalAgent:
             else:
                 # Still scan for injection (observability) without the heavy fence.
                 self._guardrails.scan_input(obs, source=f"tool:{name}")
-        self.memory.add_tool_result(name, obs)
+        self.memory.add_tool_result(name, obs, max_chars=self._max_tool_result_chars)
 
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
@@ -215,7 +254,14 @@ class ConversationalAgent:
             raw = self._chat(self.memory.messages())
             call = _parse_tool_call(raw)
             if call is None:
-                return TurnResult(reply=self._finalize(raw), tool_calls=tool_calls)
+                reply = self._finalize(raw)
+                self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+                return TurnResult(
+                    reply=reply,
+                    tool_calls=tool_calls,
+                    working_memory=dict(self.working_memory),
+                    events=list(self._events),
+                )
             # Weak models often re-request a call they've already run instead of answering.
             # Detect the repeat and break to a forced final answer rather than looping.
             key = f"{call['tool']}:{json.dumps(call['args'], sort_keys=True, ensure_ascii=False)}"
@@ -224,20 +270,42 @@ class ConversationalAgent:
             seen.add(key)
             # Execute the requested skill and feed the observation back for the next round.
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
+            self._update_working_memory(call["tool"], call["args"], result)
             self._record_tool_result(call["tool"], result)
             observations.append(f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}")
-            tool_calls.append({"tool": call["tool"], "args": call["args"], "ok": result.ok})
+            tc = {
+                "tool": call["tool"],
+                "args": call["args"],
+                "ok": result.ok,
+                "metadata": getattr(result, "metadata", None) or {},
+            }
+            tool_calls.append(tc)
+            self._emit({"type": "tool_call", **tc})
 
         if not tool_calls:
             # No skills available → plain completion (no tool-result nudge).
             final = self._chat(self.memory.messages())
             if _parse_tool_call(final) is not None:
                 final = _NO_ANSWER_FALLBACK
-            return TurnResult(reply=self._finalize(final), tool_calls=tool_calls)
+            reply = self._finalize(final)
+            self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+            return TurnResult(
+                reply=reply,
+                tool_calls=tool_calls,
+                working_memory=dict(self.working_memory),
+                events=list(self._events),
+            )
 
         # Tools done / budget spent / repeat detected → force a plain-language answer.
         final = self._force_final_answer(user_text, observations)
-        return TurnResult(reply=self._finalize(final), tool_calls=tool_calls)
+        reply = self._finalize(final)
+        self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+        return TurnResult(
+            reply=reply,
+            tool_calls=tool_calls,
+            working_memory=dict(self.working_memory),
+            events=list(self._events),
+        )
 
     def stream_chat(
         self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None
@@ -275,12 +343,19 @@ class ConversationalAgent:
                 break
             seen.add(key)
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
+            self._update_working_memory(call["tool"], call["args"], result)
             self._record_tool_result(call["tool"], result)
             observations.append(
                 f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
             )
-            tc = {"tool": call["tool"], "args": call["args"], "ok": result.ok}
+            tc = {
+                "tool": call["tool"],
+                "args": call["args"],
+                "ok": result.ok,
+                "metadata": getattr(result, "metadata", None) or {},
+            }
             tool_calls.append(tc)
+            self._emit({"type": "tool_call", **tc})
             yield {"type": "tool_call", **tc}
 
         # Case 1: the model answered in-loop (with or without prior tools). The text
@@ -361,12 +436,15 @@ class ConversationalAgent:
         yield self._done_event(reply, tool_calls)
 
     def _done_event(self, reply: str, tool_calls: list[dict[str, Any]]) -> dict[str, Any]:
-        return {
+        ev = {
             "type": "done",
             "reply": reply,
             "tool_calls": tool_calls,
             "memory_turns": self.memory.turn_count,
+            "working_memory": dict(self.working_memory),
         }
+        self._emit(ev)
+        return ev
 
     def _force_final_answer(self, user_text: str, observations: list[str]) -> str:
         """Synthesize the final prose answer from a CLEAN, lean prompt.

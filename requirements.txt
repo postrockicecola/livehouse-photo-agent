@@ -25,3 +25,6 @@ open-clip-torch>=2.20
 # Used by VLLMProvider.generate_structured() and the instructor usage example in schemas.py.
 openai>=1.0
 instructor>=1.2
+
+# Agent runtime: curation ReAct graph (plan → act → reflect). Imperative loop is fallback.
+langgraph>=0.2

@@ -7,10 +7,12 @@ when to commit a final selection. Tools wrap existing capabilities and ride the
 real ``inference`` layer, so the agent reuses production serving infra rather than
 a parallel model path.
 
-Entry point: :class:`~services.agent.loop.CurationAgent`.
+Entry point: :class:`~services.agent.loop.CurationAgent` (LangGraph ``plan→act→reflect``
+by default; see :mod:`services.agent.graph`).
 """
 from __future__ import annotations
 
+from services.agent.graph import LANGGRAPH_MAPPING, compile_curation_graph, run_curation_graph
 from services.agent.llm_backend import (
     build_curation_llm_planner,
     build_curation_llm_planner_from_config,
@@ -48,9 +50,11 @@ __all__ = [
     "CurationAgent",
     "FinalizeTool",
     "HeuristicPlanner",
+    "LANGGRAPH_MAPPING",
     "build_curation_llm_planner",
     "build_curation_llm_planner_from_config",
     "build_planner_complete_fn",
+    "compile_curation_graph",
     "InspectTool",
     "LLMPlanner",
     "Planner",
@@ -60,5 +64,6 @@ __all__ = [
     "ToolResult",
     "build_stage3_analyze_fn",
     "reflect",
+    "run_curation_graph",
     "validate_analysis",
 ]

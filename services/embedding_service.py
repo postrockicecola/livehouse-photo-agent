@@ -132,6 +132,85 @@ class EmbeddingService:
         """Embed a list of images.  Returns one entry per input (None on failure)."""
         return [cls.embed_image(p) for p in image_paths]
 
+    @classmethod
+    def embed_text(cls, text: str) -> np.ndarray | None:
+        """Encode *text* to a 512-D L2-normalised float32 CLIP embedding (same space as images)."""
+        if not cls._load():
+            return None
+        q = (text or "").strip()
+        if not q:
+            return None
+        try:
+            import open_clip  # type: ignore[import]
+            import torch
+
+            tokens = open_clip.tokenize(q).to(cls._device)
+            with torch.no_grad():
+                features = cls._model.encode_text(tokens)
+                features = features / features.norm(dim=-1, keepdim=True)
+            return features.squeeze(0).cpu().numpy().astype(np.float32)
+        except Exception as exc:
+            logger.warning("embed_text failed: %s", exc)
+            return None
+
+    @classmethod
+    def find_similar_to_text(
+        cls,
+        query: str,
+        image_paths: list[str | Path],
+        *,
+        top_k: int = 10,
+        cache_dir: str | Path | None = None,
+    ) -> list[dict[str, Any]]:
+        """Rank local image paths by CLIP similarity to a text *query*.
+
+        Optional *cache_dir* stores per-file ``.npy`` embeddings (keyed by basename + mtime)
+        so gallery RAG does not re-encode every turn.
+        """
+        query_emb = cls.embed_text(query)
+        if query_emb is None:
+            return []
+
+        cache_root = Path(cache_dir) if cache_dir else None
+        if cache_root is not None:
+            cache_root.mkdir(parents=True, exist_ok=True)
+
+        rows: list[dict[str, Any]] = []
+        vectors: list[np.ndarray] = []
+        for raw in image_paths:
+            path = Path(raw)
+            if not path.is_file():
+                continue
+            emb = None
+            if cache_root is not None:
+                emb = _load_file_cache(cache_root, path)
+            if emb is None:
+                emb = cls.embed_image(path)
+                if emb is not None and cache_root is not None:
+                    _save_file_cache(cache_root, path, emb)
+            if emb is None:
+                continue
+            rows.append({"file_path": str(path), "file_name": path.name})
+            vectors.append(emb)
+
+        if not vectors:
+            return []
+
+        corpus = np.stack(vectors)
+        scores = cls.cosine_similarity(query_emb, corpus)
+        order = np.argsort(scores)[::-1]
+        out: list[dict[str, Any]] = []
+        for idx in order[: max(1, int(top_k))]:
+            row = rows[int(idx)]
+            out.append(
+                {
+                    "file_path": row["file_path"],
+                    "file_name": row["file_name"],
+                    "similarity": float(scores[idx]),
+                }
+            )
+        return out
+
     # ------------------------------------------------------------------
     # Similarity maths
     # ------------------------------------------------------------------
@@ -283,6 +362,41 @@ class EmbeddingService:
             "total": len(rows),
             "elapsed_ms": elapsed_ms,
         }
+
+
+# ------------------------------------------------------------------
+# File-cache helpers (gallery RAG without luma_brain)
+# ------------------------------------------------------------------
+
+
+def _cache_key(path: Path) -> str:
+    try:
+        mtime_ns = path.stat().st_mtime_ns
+    except OSError:
+        mtime_ns = 0
+    safe = "".join(c if c.isalnum() or c in "._-" else "_" for c in path.name)
+    return f"{safe}.{mtime_ns}.{_CLIP_MODEL_NAME}.npy"
+
+
+def _load_file_cache(cache_root: Path, path: Path) -> np.ndarray | None:
+    fp = cache_root / _cache_key(path)
+    if not fp.is_file():
+        return None
+    try:
+        arr = np.load(str(fp))
+        if isinstance(arr, np.ndarray) and arr.shape == (_EMBED_DIM,):
+            return arr.astype(np.float32)
+    except Exception:
+        return None
+    return None
+
+
+def _save_file_cache(cache_root: Path, path: Path, vector: np.ndarray) -> None:
+    fp = cache_root / _cache_key(path)
+    try:
+        np.save(str(fp), vector.astype(np.float32))
+    except Exception as exc:
+        logger.debug("clip cache write failed %s: %s", fp, exc)
 
 
 # ------------------------------------------------------------------

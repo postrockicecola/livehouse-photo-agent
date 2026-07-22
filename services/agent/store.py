@@ -67,6 +67,22 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at      REAL NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_messages_conv ON messages(conversation_id, id);
+CREATE TABLE IF NOT EXISTS preferences (
+    owner      TEXT NOT NULL,
+    key        TEXT NOT NULL,
+    value      TEXT NOT NULL,
+    updated_at REAL NOT NULL,
+    PRIMARY KEY (owner, key)
+);
+CREATE INDEX IF NOT EXISTS idx_preferences_owner ON preferences(owner);
+CREATE TABLE IF NOT EXISTS agent_events (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    event_type      TEXT NOT NULL,
+    payload         TEXT NOT NULL,
+    created_at      REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_agent_events_conv ON agent_events(conversation_id, id);
 """
 
 _SCHEMA_LOCK = threading.Lock()
@@ -79,9 +95,9 @@ def agent_db_path() -> Path:
 
 
 def _ensure_schema(conn: sqlite3.Connection, abs_path: str) -> None:
+    # Always apply idempotent DDL so additive migrations (preferences, agent_events)
+    # land even if this process previously initialized an older schema revision.
     with _SCHEMA_LOCK:
-        if abs_path in _SCHEMA_INITIALIZED:
-            return
         conn.executescript(_SCHEMA)
         conn.commit()
         _SCHEMA_INITIALIZED.add(abs_path)
@@ -261,3 +277,110 @@ def message_count(conn: sqlite3.Connection, conversation_id: int) -> int:
         "SELECT COUNT(*) AS n FROM messages WHERE conversation_id=?", (conversation_id,)
     ).fetchone()
     return int(row["n"]) if row else 0
+
+
+# ----------------------------------------------------------------- preferences (long-term)
+
+
+def set_preference(conn: sqlite3.Connection, owner: str, key: str, value: str) -> None:
+    """Upsert a long-term preference for *owner* (survives conversation resets)."""
+    k = (key or "").strip()[:120]
+    if not k:
+        raise ValueError("preference key must be non-empty")
+    conn.execute(
+        """
+        INSERT INTO preferences(owner, key, value, updated_at) VALUES(?,?,?,?)
+        ON CONFLICT(owner, key) DO UPDATE SET
+          value = excluded.value,
+          updated_at = excluded.updated_at
+        """,
+        (owner, k, str(value)[:2000], time.time()),
+    )
+    conn.commit()
+
+
+def get_preferences(conn: sqlite3.Connection, owner: str) -> dict[str, str]:
+    rows = conn.execute(
+        "SELECT key, value FROM preferences WHERE owner=? ORDER BY key",
+        (owner,),
+    ).fetchall()
+    return {str(r["key"]): str(r["value"]) for r in rows}
+
+
+def delete_preference(conn: sqlite3.Connection, owner: str, key: str) -> bool:
+    cur = conn.execute(
+        "DELETE FROM preferences WHERE owner=? AND key=?",
+        (owner, (key or "").strip()),
+    )
+    conn.commit()
+    return bool(cur.rowcount)
+
+
+def preferences_prompt_block(prefs: dict[str, str]) -> str:
+    """Format durable preferences for injection into the system prompt."""
+    if not prefs:
+        return ""
+    lines = ["LONG-TERM USER PREFERENCES (honor unless the user overrides this turn):"]
+    for k, v in prefs.items():
+        lines.append(f"- {k}: {v}")
+    return "\n".join(lines)
+
+
+# --------------------------------------------------------------- agent event trace
+
+
+def append_agent_events(
+    conn: sqlite3.Connection,
+    conversation_id: int,
+    events: list[dict[str, Any]],
+) -> None:
+    """Persist structured agent step events (tool calls, done) for timeline replay."""
+    if not events:
+        return
+    import json
+
+    now = time.time()
+    conn.executemany(
+        "INSERT INTO agent_events(conversation_id, event_type, payload, created_at) VALUES(?,?,?,?)",
+        [
+            (
+                conversation_id,
+                str(ev.get("type") or "event"),
+                json.dumps(ev, ensure_ascii=False)[:12000],
+                now,
+            )
+            for ev in events
+        ],
+    )
+    conn.commit()
+
+
+def load_agent_events(
+    conn: sqlite3.Connection,
+    conversation_id: int,
+    *,
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    import json
+
+    rows = conn.execute(
+        "SELECT event_type, payload, created_at FROM agent_events "
+        "WHERE conversation_id=? ORDER BY id DESC LIMIT ?",
+        (conversation_id, limit),
+    ).fetchall()
+    out: list[dict[str, Any]] = []
+    for r in reversed(rows):
+        try:
+            payload = json.loads(r["payload"])
+        except json.JSONDecodeError:
+            payload = {"raw": r["payload"]}
+        if not isinstance(payload, dict):
+            payload = {"raw": payload}
+        out.append(
+            {
+                "type": r["event_type"],
+                "created_at": r["created_at"],
+                **payload,
+            }
+        )
+    return out
