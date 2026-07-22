@@ -12,7 +12,12 @@ by default; see :mod:`services.agent.graph`).
 """
 from __future__ import annotations
 
-from services.agent.graph import LANGGRAPH_MAPPING, compile_curation_graph, run_curation_graph
+from services.agent.graph import (
+    LANGGRAPH_MAPPING,
+    compile_agent_platform_graph,
+    compile_curation_graph,
+    run_curation_graph,
+)
 from services.agent.llm_backend import (
     build_curation_llm_planner,
     build_curation_llm_planner_from_config,
@@ -54,6 +59,7 @@ __all__ = [
     "build_curation_llm_planner",
     "build_curation_llm_planner_from_config",
     "build_planner_complete_fn",
+    "compile_agent_platform_graph",
     "compile_curation_graph",
     "InspectTool",
     "LLMPlanner",

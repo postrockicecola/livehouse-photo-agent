@@ -56,7 +56,7 @@ flowchart TB
     RUN["tasks.run_job(job_id)"]
     EXE["JobExecutor<br/>claim → run → finalize"]
     PIPE["PipelineStageRunner<br/>Stage1 OpenCV → Stage2 fast → Stage3 VLM"]
-    AGENT["CurationAgent · LangGraph ReAct<br/>plan → act → reflect / escalate"]
+    AGENT["LangGraph agents<br/>curation plan→act→reflect · chat decide→act→answer"]
   end
 
   subgraph INFER["Inference gateway"]

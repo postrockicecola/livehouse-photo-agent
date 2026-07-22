@@ -1,9 +1,10 @@
 """Multi-turn conversational agent with memory, context-window management, and tools.
 
-This is the dialogue counterpart to the single-shot curation loop: it keeps a running
-conversation, trims it to a token budget (oldest turns first, optionally rolled into a
-running summary), and on each user turn lets the model optionally call one Agent Skill
-(see ``services/agent/skills``) before producing its final reply.
+This is the dialogue counterpart to the curation graph: it keeps a running conversation,
+trims it to a token budget (oldest turns first, optionally rolled into a running summary),
+and on each user turn runs the LangGraph ``decide → act → answer`` subgraph
+(:mod:`services.agent.conversation_graph`) so the model can call Agent Skills before the
+final reply.
 
 Design choices that keep it testable and provider-agnostic:
 
@@ -177,7 +178,12 @@ _NO_ANSWER_FALLBACK = (
 
 
 class ConversationalAgent:
-    """A stateful, multi-turn chat agent that can call skills mid-turn."""
+    """A stateful, multi-turn chat agent that can call skills mid-turn.
+
+    Default runtime is the LangGraph ``decide → act → answer`` subgraph
+    (:mod:`services.agent.conversation_graph`); set ``LIVEHOUSE_AGENT_RUNTIME=imperative``
+    to force the legacy while-loop.
+    """
 
     def __init__(
         self,
@@ -206,6 +212,7 @@ class ConversationalAgent:
         # Working memory: last tool artifacts for the current dialogue (not durable prefs).
         self.working_memory: dict[str, Any] = dict(working_memory or {})
         self._events: list[dict[str, Any]] = []
+        self.last_backend: str = "imperative"
 
     def _emit(self, event: dict[str, Any]) -> None:
         self._events.append(event)
@@ -240,11 +247,68 @@ class ConversationalAgent:
                 self._guardrails.scan_input(obs, source=f"tool:{name}")
         self.memory.add_tool_result(name, obs, max_chars=self._max_tool_result_chars)
 
+    def _graph_kwargs(self) -> dict[str, Any]:
+        return {
+            "chat_fn": self._chat,
+            "memory": self.memory,
+            "skills": self._skills,
+            "guardrails": self._guardrails,
+            "wrap_tool_output": self._wrap_tool_output,
+            "max_tool_result_chars": self._max_tool_result_chars,
+            "update_working_memory": self._update_working_memory,
+            "record_tool_result": self._record_tool_result,
+            "finalize": self._finalize,
+            "force_final_answer": self._force_final_answer,
+            "parse_tool_call": _parse_tool_call,
+            "emit": self._emit,
+            "no_answer_fallback": _NO_ANSWER_FALLBACK,
+            "final_answer_system": _FINAL_ANSWER_SYSTEM,
+            "final_answer_nudge": _FINAL_ANSWER_NUDGE,
+        }
+
+    def _langgraph_enabled(self) -> bool:
+        from services.agent.conversation_graph import chat_runtime_preference, langgraph_available
+
+        return chat_runtime_preference() == "langgraph" and langgraph_available()
+
+    def _try_langgraph_turn(self, user_text: str, *, defer_answer: bool = False) -> Optional[dict[str, Any]]:
+        from services.agent.conversation_graph import run_chat_turn
+
+        if not self._langgraph_enabled():
+            return None
+        try:
+            return dict(
+                run_chat_turn(
+                    user_text=user_text,
+                    max_tool_rounds=self._max_tool_rounds,
+                    defer_answer=defer_answer,
+                    **self._graph_kwargs(),
+                )
+            )
+        except Exception:
+            logger.exception("LangGraph chat turn failed; falling back to imperative loop")
+            return None
+
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
+
+        state = self._try_langgraph_turn(user_text, defer_answer=False)
+        if state is not None:
+            self.last_backend = str(state.get("backend") or "langgraph")
+            return TurnResult(
+                reply=str(state.get("reply") or ""),
+                tool_calls=list(state.get("tool_calls") or []),
+                working_memory=dict(self.working_memory),
+                events=list(self._events),
+            )
+
+        self.last_backend = "imperative"
+        return self._chat_imperative(user_text)
+
+    def _chat_imperative(self, user_text: str) -> TurnResult:
         tool_calls: list[dict[str, Any]] = []
         observations: list[str] = []
         seen: set[str] = set()
@@ -262,13 +326,10 @@ class ConversationalAgent:
                     working_memory=dict(self.working_memory),
                     events=list(self._events),
                 )
-            # Weak models often re-request a call they've already run instead of answering.
-            # Detect the repeat and break to a forced final answer rather than looping.
             key = f"{call['tool']}:{json.dumps(call['args'], sort_keys=True, ensure_ascii=False)}"
             if key in seen:
                 break
             seen.add(key)
-            # Execute the requested skill and feed the observation back for the next round.
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
             self._update_working_memory(call["tool"], call["args"], result)
             self._record_tool_result(call["tool"], result)
@@ -283,7 +344,6 @@ class ConversationalAgent:
             self._emit({"type": "tool_call", **tc})
 
         if not tool_calls:
-            # No skills available → plain completion (no tool-result nudge).
             final = self._chat(self.memory.messages())
             if _parse_tool_call(final) is not None:
                 final = _NO_ANSWER_FALLBACK
@@ -296,7 +356,6 @@ class ConversationalAgent:
                 events=list(self._events),
             )
 
-        # Tools done / budget spent / repeat detected → force a plain-language answer.
         final = self._force_final_answer(user_text, observations)
         reply = self._finalize(final)
         self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
@@ -318,14 +377,70 @@ class ConversationalAgent:
         - ``{"type": "token", "text"}``                    — a piece of the final answer
         - ``{"type": "done", "reply", "tool_calls", "memory_turns"}`` — turn finished
 
-        Real token streaming is used for the final answer whenever ``stream_fn`` is
-        given; tool-call *decisions* still use the non-streaming ``chat_fn`` (they are
-        JSON control messages, not user-facing prose). Mirrors :meth:`chat`'s control
-        flow so behaviour (tool rounds, repeat detection, forced final answer) matches.
+        Tool rounds use the LangGraph chat subgraph when available (``defer_answer``);
+        the final answer is streamed afterward so SSE behaviour stays unchanged.
         """
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
+
+        if self._langgraph_enabled():
+            try:
+                yield from self._stream_chat_langgraph(user_text, stream_fn=stream_fn)
+                return
+            except Exception:
+                logger.exception("LangGraph streaming chat failed; falling back to imperative loop")
+
+        self.last_backend = "imperative"
+        yield from self._stream_chat_imperative(user_text, stream_fn=stream_fn)
+
+    def _stream_chat_langgraph(
+        self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None
+    ) -> Iterator[dict[str, Any]]:
+        from services.agent.conversation_graph import iter_chat_turn_updates
+
+        self.last_backend = "langgraph"
+        tool_calls: list[dict[str, Any]] = []
+        direct: Optional[str] = None
+        answer_messages: Optional[list[dict[str, str]]] = None
+
+        for node_name, partial in iter_chat_turn_updates(
+            user_text=user_text,
+            max_tool_rounds=self._max_tool_rounds,
+            defer_answer=True,
+            **self._graph_kwargs(),
+        ):
+            if node_name == "act":
+                tcs = list(partial.get("tool_calls") or [])
+                if tcs:
+                    # updates mode returns the full list after act; emit only the newest.
+                    newest = tcs[-1]
+                    if not tool_calls or newest != tool_calls[-1]:
+                        tool_calls = tcs
+                        yield {"type": "tool_call", **newest}
+                else:
+                    tool_calls = tcs
+            elif node_name == "answer":
+                if partial.get("direct_reply") is not None:
+                    direct = str(partial.get("direct_reply"))
+                if partial.get("answer_messages") is not None:
+                    answer_messages = list(partial.get("answer_messages") or [])
+                if partial.get("tool_calls") is not None:
+                    tool_calls = list(partial.get("tool_calls") or [])
+
+        if direct is not None:
+            reply = self._finalize(direct)
+            for piece in _chunk_text(reply):
+                yield {"type": "token", "text": piece}
+            yield self._done_event(reply, tool_calls)
+            return
+
+        messages = answer_messages or self.memory.messages()
+        yield from self._stream_answer(messages, stream_fn, tool_calls)
+
+    def _stream_chat_imperative(
+        self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None
+    ) -> Iterator[dict[str, Any]]:
         tool_calls: list[dict[str, Any]] = []
         observations: list[str] = []
         seen: set[str] = set()
@@ -358,9 +473,6 @@ class ConversationalAgent:
             self._emit({"type": "tool_call", **tc})
             yield {"type": "tool_call", **tc}
 
-        # Case 1: the model answered in-loop (with or without prior tools). The text
-        # already exists (from the non-streaming decision call), so replay it as a
-        # typing effect rather than paying for a second generation — matches chat().
         if direct_reply is not None:
             reply = direct_reply if _parse_tool_call(direct_reply) is None else _NO_ANSWER_FALLBACK
             reply = self._finalize(reply)
@@ -369,13 +481,10 @@ class ConversationalAgent:
             yield self._done_event(reply, tool_calls)
             return
 
-        # Case 2: no skills at all — stream a plain completion over the live memory.
         if not tool_calls:
             yield from self._stream_answer(self.memory.messages(), stream_fn, tool_calls)
             return
 
-        # Case 3: tools ran but no in-loop answer (budget/repeat) — stream the forced,
-        # clean final answer synthesized from the observations.
         joined = "\n".join(observations) if observations else "(no tool results)"
         messages = [
             {"role": "system", "content": _FINAL_ANSWER_SYSTEM},

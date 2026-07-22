@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Callable, Literal, Optional, TypedDict
+from typing import Any, Callable, Literal, Optional, TypedDict  # noqa: F401 — Literal used by platform graph
 
 from services.agent.planner import HeuristicPlanner, Planner
 from services.agent.reflection import reflect as default_reflect
@@ -42,7 +42,9 @@ LANGGRAPH_MAPPING = {
     "tools.dispatch": "node: act",
     "reflect / escalate": "node: reflect",
     "FINALIZE / max_steps": "conditional edge → END",
-    "AgentStep + step_hook": "emitted after act (job_events timeline)",
+    "AgentStep + step_hook": "emitted after reflect (job_events timeline)",
+    "Gallery chat turn": "conversation_graph decide→act→answer (subgraph)",
+    "Platform router": "compile_agent_platform_graph → curation | gallery_chat",
     "MultiAgentOrchestrator": "fan-out of compiled subgraphs / Send API",
 }
 
@@ -273,3 +275,78 @@ def run_curation_graph(
 
 def mapping_table() -> dict[str, str]:
     return dict(LANGGRAPH_MAPPING)
+
+
+class AgentPlatformState(TypedDict, total=False):
+    """Parent graph state: route a request to curation or gallery-chat subgraphs."""
+
+    intent: Literal["curate", "chat"]
+    # Curation inputs / outputs (populated when intent=curate).
+    candidates: list[Candidate]
+    curation_result: Optional[AgentResult]
+    # Chat inputs / outputs (populated when intent=chat) — chat subgraph owns details.
+    user_text: str
+    chat_reply: Optional[str]
+    chat_tool_calls: list[dict[str, Any]]
+    backend: str
+
+
+def compile_agent_platform_graph(
+    *,
+    curation_runner: Callable[[list[Candidate]], AgentResult],
+    chat_subgraph: Any,
+):
+    """Compose curation + gallery-chat as sibling subgraphs under one router.
+
+    ``chat_subgraph`` is the compiled graph from
+    :func:`services.agent.conversation_graph.compile_chat_turn_graph`. The platform
+    node ``gallery_chat`` invokes that subgraph and maps ``reply`` / ``tool_calls``
+    back onto :class:`AgentPlatformState` (explicit invoke keeps parent/child schemas
+    decoupled — the interview-visible structure is still a subgraph mount).
+    """
+    from langgraph.graph import END, START, StateGraph
+
+    def route(state: AgentPlatformState) -> Literal["curation", "gallery_chat"]:
+        return "gallery_chat" if state.get("intent") == "chat" else "curation"
+
+    def curation_node(state: AgentPlatformState) -> dict[str, Any]:
+        cands = list(state.get("candidates") or [])
+        result = curation_runner(cands)
+        return {
+            "curation_result": result,
+            "backend": str((result.metrics or {}).get("backend") or "langgraph"),
+        }
+
+    def gallery_chat_node(state: AgentPlatformState) -> dict[str, Any]:
+        seed = {
+            "user_text": str(state.get("user_text") or ""),
+            "tool_calls": [],
+            "observations": [],
+            "seen_keys": [],
+            "rounds_used": 0,
+            "max_rounds": 3,
+            "pending_call": None,
+            "direct_reply": None,
+            "force_answer": False,
+            "defer_answer": False,
+            "reply": None,
+            "answer_messages": None,
+            "done": False,
+            "backend": "langgraph",
+        }
+        out = chat_subgraph.invoke(seed)
+        return {
+            "chat_reply": out.get("reply"),
+            "chat_tool_calls": list(out.get("tool_calls") or []),
+            "backend": str(out.get("backend") or "langgraph"),
+        }
+
+    g = StateGraph(AgentPlatformState)
+    g.add_node("curation", curation_node)
+    g.add_node("gallery_chat", gallery_chat_node)
+    g.add_conditional_edges(
+        START, route, {"curation": "curation", "gallery_chat": "gallery_chat"}
+    )
+    g.add_edge("curation", END)
+    g.add_edge("gallery_chat", END)
+    return g.compile()
