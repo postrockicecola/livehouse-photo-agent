@@ -83,6 +83,49 @@ function StatusBadge({ status }: { status?: string | null }) {
   );
 }
 
+function JobActions({
+  job,
+  busy,
+  onRetry,
+  onCancel,
+}: {
+  job: InfraJobRow;
+  busy: boolean;
+  onRetry: () => void;
+  onCancel: () => void;
+}) {
+  if (job.id == null) return <span className="text-[11px] text-zinc-600">—</span>;
+  const s = job.status ?? "";
+  const terminal = TERMINAL_STATUSES.has(s);
+  const canRetry = terminal || s === "FAILED_RETRYABLE";
+  const canCancel = !terminal && s !== "";
+  if (!canRetry && !canCancel) return <span className="text-[11px] text-zinc-600">—</span>;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {canRetry ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onRetry}
+          className="rounded border border-amber-600/50 bg-amber-950/30 px-2 py-1 text-[11px] text-amber-100 hover:bg-amber-900/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 disabled:opacity-40"
+        >
+          {busy ? "…" : "Retry"}
+        </button>
+      ) : null}
+      {canCancel ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onCancel}
+          className="rounded border border-stroke bg-panel2 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 disabled:opacity-40"
+        >
+          {busy ? "…" : "Cancel"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 export function JobsTable({
   apiBase,
   byStatus,
@@ -272,7 +315,7 @@ export function JobsTable({
           }`}
           title="Show only agentic curation jobs (CURATE_*)"
         >
-          🤖 Agent
+          Agent
         </button>
       </div>
 
@@ -310,183 +353,258 @@ export function JobsTable({
 
       {loading && !filteredJobs.length ? (
         <div className="py-8 text-sm text-zinc-400">Loading jobs…</div>
+      ) : !filteredJobs.length ? (
+        <div className="py-6 text-sm text-zinc-500">No jobs match filters</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-[1100px] w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-stroke text-[10px] uppercase tracking-wide text-zinc-500">
-                <th className="w-8 px-1 py-2" />
-                <th className="px-2 py-2">Job</th>
-                <th className="px-2 py-2">Trace / Session</th>
-                <th className="px-2 py-2">Status</th>
-                <th className="px-2 py-2">Worker</th>
-                <th className="px-2 py-2">Queue wait</th>
-                <th className="px-2 py-2">Run duration</th>
-                <th className="px-2 py-2">Stage breakdown</th>
-                <th className="px-2 py-2">Retry history</th>
-                <th className="px-2 py-2">Updated</th>
-                <th className="px-2 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredJobs.map((job, idx) => {
-                const jid = job.id;
-                const open = jid != null && expandedId === jid;
-                const walkthrough = jid != null && highlightSet.has(jid);
-                const wLabel =
-                  job.worker_id != null ? workerNameById[job.worker_id] ?? `#${job.worker_id}` : "—";
-                return (
-                  <Fragment key={`${jid ?? "job"}-${idx}`}>
-                    <tr
-                      className={`cursor-pointer border-b border-stroke/60 text-zinc-300 transition-colors hover:bg-zinc-900/40 focus-within:bg-zinc-900/50 ${rowVisualClass(job)} ${
-                        walkthrough ? "ring-1 ring-inset ring-sky-500/35" : ""
-                      }`}
-                      onClick={() => {
-                        if (jid == null) return;
-                        setExpandedId(open ? null : jid);
-                      }}
-                    >
-                      <td className="px-1 py-2 text-center text-zinc-600">
-                        <button
-                          type="button"
-                          className="rounded px-1.5 py-0.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
-                          aria-expanded={open}
-                          aria-label={open ? `Collapse job ${jid ?? ""}` : `Expand job ${jid ?? ""}`}
-                          disabled={jid == null}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (jid == null) return;
-                            setExpandedId(open ? null : jid);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              if (jid == null) return;
-                              setExpandedId(open ? null : jid);
-                            }
-                          }}
-                        >
-                          {open ? "▼" : "▶"}
-                        </button>
-                      </td>
-                      <td className="px-2 py-2 font-medium text-zinc-200">
+        <>
+          {/* Mobile: stacked cards — no horizontal table scroll */}
+          <ul className="space-y-3 md:hidden" aria-label="Jobs">
+            {filteredJobs.map((job, idx) => {
+              const jid = job.id;
+              const open = jid != null && expandedId === jid;
+              const walkthrough = jid != null && highlightSet.has(jid);
+              const wLabel =
+                job.worker_id != null ? workerNameById[job.worker_id] ?? `#${job.worker_id}` : "—";
+              const root = stageGroupRootId(job);
+              const stageLabel =
+                root != null && stageLabelByRoot[root] ? stageLabelByRoot[root] : stageBreakdownLabel(job);
+              return (
+                <li
+                  key={`card-${jid ?? "job"}-${idx}`}
+                  className={`rounded-xl border border-stroke/80 bg-panel2/40 p-3 ${rowVisualClass(job)} ${
+                    walkthrough ? "ring-1 ring-sky-500/35" : ""
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
                         {jid != null ? (
-                          <Link
-                            className="text-sky-400 hover:underline"
-                            href={`/infra/jobs/${jid}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {jid}
+                          <Link className="font-medium text-sky-400 hover:underline" href={`/infra/jobs/${jid}`}>
+                            #{jid}
                           </Link>
                         ) : (
-                          "—"
+                          <span className="text-zinc-500">—</span>
                         )}
-                        <div className="flex flex-wrap items-center gap-1 text-[10px] text-zinc-600">
-                          {job.job_type ?? ""}
-                          {isAgentJob(job) ? (
-                            <span className="rounded border border-violet-500/40 bg-violet-950/30 px-1 py-px text-[9px] font-medium text-violet-200">
-                              🤖 agent
-                            </span>
-                          ) : null}
-                          {Number(job.fallback_used) > 0 ? (
-                            <span className="rounded border border-amber-500/40 bg-amber-950/30 px-1 py-px text-[9px] font-medium text-amber-200">
-                              fallback
-                            </span>
-                          ) : null}
-                          {walkthrough ? (
-                            <span className="rounded border border-sky-500/40 bg-sky-950/30 px-1 py-px text-[9px] font-medium text-sky-200">
-                              demo
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="max-w-[11rem] px-2 py-2 font-mono text-[11px]">
-                        {job.trace_id ? (
+                        <StatusBadge status={job.status} />
+                      </div>
+                      <p className="mt-1 truncate font-mono text-[11px] text-zinc-500">
+                        {job.job_type ?? "job"}
+                        {isAgentJob(job) ? " · agent" : ""}
+                        {Number(job.fallback_used) > 0 ? " · fallback" : ""}
+                      </p>
+                    </div>
+                    {jid != null ? (
+                      <button
+                        type="button"
+                        className="shrink-0 rounded border border-stroke px-2 py-1 text-[11px] text-zinc-400 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+                        aria-expanded={open}
+                        onClick={() => setExpandedId(open ? null : jid)}
+                      >
+                        {open ? "收起" : "详情"}
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
+                    <div>
+                      <dt className="text-zinc-600">Worker</dt>
+                      <dd className="text-zinc-300">{wLabel}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-zinc-600">Updated</dt>
+                      <dd className="text-zinc-400">{formatTs(job.updated_at)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-zinc-600">Queue / Run</dt>
+                      <dd className="font-mono tabular-nums text-zinc-300">
+                        {formatMs(job.queue_wait_ms)} / {formatMs(runDurationMs(job))}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-zinc-600">Session</dt>
+                      <dd className="truncate text-zinc-400">{job.session_id ?? "—"}</dd>
+                    </div>
+                    <div className="col-span-2">
+                      <dt className="text-zinc-600">Stage</dt>
+                      <dd className="text-zinc-400">{stageLabel}</dd>
+                    </div>
+                    {job.trace_id ? (
+                      <div className="col-span-2">
+                        <dt className="text-zinc-600">Trace</dt>
+                        <dd>
                           <Link
-                            className="block truncate text-zinc-400 hover:text-sky-400"
+                            className="block truncate font-mono text-zinc-400 hover:text-sky-400"
                             href={`/infra/traces/${encodeURIComponent(job.trace_id)}`}
-                            onClick={(e) => e.stopPropagation()}
                           >
                             {job.trace_id}
                           </Link>
-                        ) : (
-                          <span className="text-zinc-600">—</span>
-                        )}
-                        <div className="text-zinc-600">sess {job.session_id ?? "—"}</div>
-                      </td>
-                      <td className="px-2 py-2">
-                        <StatusBadge status={job.status} />
-                      </td>
-                      <td className="px-2 py-2 text-xs">{wLabel}</td>
-                      <td className="px-2 py-2 font-mono text-xs tabular-nums">{formatMs(job.queue_wait_ms)}</td>
-                      <td className="px-2 py-2 font-mono text-xs tabular-nums">{formatMs(runDurationMs(job))}</td>
-                      <td className="max-w-[14rem] px-2 py-2 text-[11px] leading-snug text-zinc-400">
-                        {(() => {
-                          const root = stageGroupRootId(job);
-                          if (root != null && stageLabelByRoot[root]) return stageLabelByRoot[root];
-                          return stageBreakdownLabel(job);
-                        })()}
-                      </td>
-                      <td className="max-w-[12rem] px-2 py-2 text-[11px] leading-snug text-amber-200/90">
-                        {retryHistoryShortFromJob(job)}
-                      </td>
-                      <td className="px-2 py-2 text-xs text-zinc-500">{formatTs(job.updated_at)}</td>
-                      <td className="whitespace-nowrap px-2 py-2" onClick={(e) => e.stopPropagation()}>
-                        {jid != null ? (
-                          <div className="flex gap-1.5">
-                            {(() => {
-                              const s = job.status ?? "";
-                              const terminal = TERMINAL_STATUSES.has(s);
-                              const canRetry = terminal || s === "FAILED_RETRYABLE";
-                              const canCancel = !terminal && s !== "";
-                              const busy = actionBusyId === jid;
-                              return (
-                                <>
-                                  {canRetry ? (
-                                    <button
-                                      type="button"
-                                      disabled={busy}
-                                      onClick={() => postJobAction(jid, "retry")}
-                                      className="rounded border border-amber-600/50 bg-amber-950/30 px-2 py-1 text-[11px] text-amber-100 hover:bg-amber-900/40 disabled:opacity-40"
-                                    >
-                                      {busy ? "…" : "Retry"}
-                                    </button>
-                                  ) : null}
-                                  {canCancel ? (
-                                    <button
-                                      type="button"
-                                      disabled={busy}
-                                      onClick={() => postJobAction(jid, "cancel")}
-                                      className="rounded border border-stroke bg-panel2 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
-                                    >
-                                      {busy ? "…" : "Cancel"}
-                                    </button>
-                                  ) : null}
-                                  {!canRetry && !canCancel ? <span className="text-[11px] text-zinc-600">—</span> : null}
-                                </>
-                              );
-                            })()}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-stroke/60 pt-3">
+                    <p className="text-[11px] text-amber-200/80">{retryHistoryShortFromJob(job)}</p>
+                    {jid != null ? (
+                      <JobActions
+                        job={job}
+                        busy={actionBusyId === jid}
+                        onRetry={() => postJobAction(jid, "retry")}
+                        onCancel={() => postJobAction(jid, "cancel")}
+                      />
+                    ) : null}
+                  </div>
+
+                  {open && jid != null ? (
+                    <div className="mt-3 border-t border-stroke/60 pt-2">
+                      <JobExplorerRowDetail jobId={jid} apiBase={apiBase} workerNameById={workerNameById} />
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Desktop table */}
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-[1100px] w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-stroke text-[10px] uppercase tracking-wide text-zinc-500">
+                  <th className="w-8 px-1 py-2" />
+                  <th className="px-2 py-2">Job</th>
+                  <th className="px-2 py-2">Trace / Session</th>
+                  <th className="px-2 py-2">Status</th>
+                  <th className="px-2 py-2">Worker</th>
+                  <th className="px-2 py-2">Queue wait</th>
+                  <th className="px-2 py-2">Run duration</th>
+                  <th className="px-2 py-2">Stage breakdown</th>
+                  <th className="px-2 py-2">Retry history</th>
+                  <th className="px-2 py-2">Updated</th>
+                  <th className="px-2 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredJobs.map((job, idx) => {
+                  const jid = job.id;
+                  const open = jid != null && expandedId === jid;
+                  const walkthrough = jid != null && highlightSet.has(jid);
+                  const wLabel =
+                    job.worker_id != null ? workerNameById[job.worker_id] ?? `#${job.worker_id}` : "—";
+                  const root = stageGroupRootId(job);
+                  const stageLabel =
+                    root != null && stageLabelByRoot[root]
+                      ? stageLabelByRoot[root]
+                      : stageBreakdownLabel(job);
+                  return (
+                    <Fragment key={`${jid ?? "job"}-${idx}`}>
+                      <tr
+                        className={`cursor-pointer border-b border-stroke/60 text-zinc-300 transition-colors hover:bg-zinc-900/40 focus-within:bg-zinc-900/50 ${rowVisualClass(job)} ${
+                          walkthrough ? "ring-1 ring-inset ring-sky-500/35" : ""
+                        }`}
+                        onClick={() => {
+                          if (jid == null) return;
+                          setExpandedId(open ? null : jid);
+                        }}
+                      >
+                        <td className="px-1 py-2 text-center text-zinc-600">
+                          <button
+                            type="button"
+                            className="rounded px-1.5 py-0.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+                            aria-expanded={open}
+                            aria-label={open ? `Collapse job ${jid ?? ""}` : `Expand job ${jid ?? ""}`}
+                            disabled={jid == null}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (jid == null) return;
+                              setExpandedId(open ? null : jid);
+                            }}
+                          >
+                            {open ? "▼" : "▶"}
+                          </button>
+                        </td>
+                        <td className="px-2 py-2 font-medium text-zinc-200">
+                          {jid != null ? (
+                            <Link
+                              className="text-sky-400 hover:underline"
+                              href={`/infra/jobs/${jid}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {jid}
+                            </Link>
+                          ) : (
+                            "—"
+                          )}
+                          <div className="flex flex-wrap items-center gap-1 text-[10px] text-zinc-600">
+                            {job.job_type ?? ""}
+                            {isAgentJob(job) ? (
+                              <span className="rounded border border-violet-500/40 bg-violet-950/30 px-1 py-px text-[9px] font-medium text-violet-200">
+                                agent
+                              </span>
+                            ) : null}
+                            {Number(job.fallback_used) > 0 ? (
+                              <span className="rounded border border-amber-500/40 bg-amber-950/30 px-1 py-px text-[9px] font-medium text-amber-200">
+                                fallback
+                              </span>
+                            ) : null}
+                            {walkthrough ? (
+                              <span className="rounded border border-sky-500/40 bg-sky-950/30 px-1 py-px text-[9px] font-medium text-sky-200">
+                                demo
+                              </span>
+                            ) : null}
                           </div>
-                        ) : (
-                          <span className="text-[11px] text-zinc-600">—</span>
-                        )}
-                      </td>
-                    </tr>
-                    {open && jid != null ? (
-                      <tr className="border-b border-stroke/60">
-                        <td colSpan={11} className="p-0">
-                          <JobExplorerRowDetail jobId={jid} apiBase={apiBase} workerNameById={workerNameById} />
+                        </td>
+                        <td className="max-w-[11rem] px-2 py-2 font-mono text-[11px]">
+                          {job.trace_id ? (
+                            <Link
+                              className="block truncate text-zinc-400 hover:text-sky-400"
+                              href={`/infra/traces/${encodeURIComponent(job.trace_id)}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {job.trace_id}
+                            </Link>
+                          ) : (
+                            <span className="text-zinc-600">—</span>
+                          )}
+                          <div className="text-zinc-600">sess {job.session_id ?? "—"}</div>
+                        </td>
+                        <td className="px-2 py-2">
+                          <StatusBadge status={job.status} />
+                        </td>
+                        <td className="px-2 py-2 text-xs">{wLabel}</td>
+                        <td className="px-2 py-2 font-mono text-xs tabular-nums">{formatMs(job.queue_wait_ms)}</td>
+                        <td className="px-2 py-2 font-mono text-xs tabular-nums">{formatMs(runDurationMs(job))}</td>
+                        <td className="max-w-[14rem] px-2 py-2 text-[11px] leading-snug text-zinc-400">{stageLabel}</td>
+                        <td className="max-w-[12rem] px-2 py-2 text-[11px] leading-snug text-amber-200/90">
+                          {retryHistoryShortFromJob(job)}
+                        </td>
+                        <td className="px-2 py-2 text-xs text-zinc-500">{formatTs(job.updated_at)}</td>
+                        <td className="whitespace-nowrap px-2 py-2" onClick={(e) => e.stopPropagation()}>
+                          {jid != null ? (
+                            <JobActions
+                              job={job}
+                              busy={actionBusyId === jid}
+                              onRetry={() => postJobAction(jid, "retry")}
+                              onCancel={() => postJobAction(jid, "cancel")}
+                            />
+                          ) : (
+                            <span className="text-[11px] text-zinc-600">—</span>
+                          )}
                         </td>
                       </tr>
-                    ) : null}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-          {!filteredJobs.length && <div className="py-6 text-sm text-zinc-500">No jobs match filters</div>}
-        </div>
+                      {open && jid != null ? (
+                        <tr className="border-b border-stroke/60">
+                          <td colSpan={11} className="p-0">
+                            <JobExplorerRowDetail jobId={jid} apiBase={apiBase} workerNameById={workerNameById} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   );
