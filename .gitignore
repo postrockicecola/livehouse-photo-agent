@@ -75,6 +75,9 @@ web/public/showcase/**/*.jpg
 !web/public/showcase/covers/**
 # Fixed landing first-screen background (EXIF-stripped); referenced by LANDING_HERO.backgroundSrc
 !web/public/showcase/landing-hero.jpg
+# Scripted Agent demo keepers from 2026-04-16 (EXIF-stripped)
+!web/public/showcase/agent-demo/
+!web/public/showcase/agent-demo/**
 # Local cover catalog with absolute paths — commit only the .example.json
 data/bench/session_covers_sources.json
 

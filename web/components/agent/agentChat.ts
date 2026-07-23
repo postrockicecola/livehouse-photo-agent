@@ -55,7 +55,9 @@ export async function sendAgentChat(
   try {
     data = text ? (JSON.parse(text) as AgentChatResponse) : ({} as AgentChatResponse);
   } catch {
-    throw new Error(`agent 返回非 JSON（HTTP ${res.status}）。请确认 gallery_server 已启动。`);
+    throw new Error(
+      `agent 返回非 JSON（HTTP ${res.status}）。本地请确认 gallery_server 已启动；线上 Showcase 应走 /api/agent 预录路由。`,
+    );
   }
   if (!res.ok && !data?.error) {
     throw new Error(`agent 请求失败（HTTP ${res.status}）`);

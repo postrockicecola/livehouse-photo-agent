@@ -246,6 +246,42 @@ function LinkifiedText({ text }: { text: string }) {
   );
 }
 
+function showcasePathsFromCall(call: AgentToolCall): string[] {
+  const paths = Array.isArray(call.metadata?.paths)
+    ? (call.metadata.paths as unknown[]).map((p) => String(p || "").trim()).filter(Boolean)
+    : [];
+  return paths.filter((p) => p.startsWith("/showcase/") || p.startsWith("/demo/"));
+}
+
+function ShowcaseThumbStrip({ paths, scores }: { paths: string[]; scores?: Record<string, number> }) {
+  if (!paths.length) return null;
+  return (
+    <div className="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+      {paths.map((src) => {
+        const file = src.split("/").pop() || src;
+        const score = scores?.[file];
+        return (
+          <a
+            key={src}
+            href={src}
+            target="_blank"
+            rel="noreferrer"
+            className="group relative block overflow-hidden rounded-[4px] border border-white/[0.08] bg-black/40"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={src} alt="" className="aspect-[4/3] h-full w-full object-cover transition-opacity group-hover:opacity-90" />
+            {score != null ? (
+              <span className="absolute bottom-1 right-1 rounded-[2px] bg-black/65 px-1 py-0.5 font-mono text-[9px] tabular-nums text-white/80">
+                {Number(score).toFixed(1)}
+              </span>
+            ) : null}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 function ToolChip({ call }: { call: AgentToolCall }) {
   const argStr = useMemo(() => {
     try {
@@ -258,12 +294,18 @@ function ToolChip({ call }: { call: AgentToolCall }) {
   const files = Array.isArray(call.metadata?.files)
     ? (call.metadata.files as unknown[]).map((f) => String(f || "").trim()).filter(Boolean)
     : [];
+  const showcasePaths = showcasePathsFromCall(call);
+  const scores =
+    call.metadata?.scores && typeof call.metadata.scores === "object"
+      ? (call.metadata.scores as Record<string, number>)
+      : undefined;
   const uiAction = String(call.metadata?.ui_action || "");
   const canPreviewSearch =
     call.ok &&
     call.tool === "gallery_search" &&
     uiAction === "search" &&
-    files.length > 0;
+    files.length > 0 &&
+    showcasePaths.length === 0;
   const vibeMeta =
     call.metadata?.session_vibe && typeof call.metadata.session_vibe === "object"
       ? (call.metadata.session_vibe as Record<string, unknown>)
@@ -275,58 +317,61 @@ function ToolChip({ call }: { call: AgentToolCall }) {
     (call.tool === "apply_film_vibe" || Boolean(vibeMeta));
 
   return (
-    <span className="inline-flex flex-wrap items-center gap-1">
-      <span
-        title={argStr ? `args: ${argStr}` : undefined}
-        className="inline-flex items-center gap-1 rounded-[3px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[11px] text-white/55"
-      >
+    <span className="flex w-full min-w-[12rem] flex-col gap-1.5">
+      <span className="inline-flex flex-wrap items-center gap-1">
         <span
-          className={`h-1.5 w-1.5 rounded-full ${call.ok ? "bg-emerald-400/90" : "bg-rose-400/90"}`}
-          aria-hidden
-        />
-        <span className="font-mono">{call.tool}</span>
-        {files.length > 0 ? (
-          <span className="tabular-nums text-white/35">{files.length}</span>
+          title={argStr ? `args: ${argStr}` : undefined}
+          className="inline-flex items-center gap-1 rounded-[3px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[11px] text-white/55"
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${call.ok ? "bg-emerald-400/90" : "bg-rose-400/90"}`}
+            aria-hidden
+          />
+          <span className="font-mono">{call.tool}</span>
+          {files.length > 0 ? (
+            <span className="tabular-nums text-white/35">{files.length}</span>
+          ) : null}
+        </span>
+        {canPreviewSearch ? (
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("luma:gallery-agent-action", {
+                  detail: {
+                    action: "search",
+                    tool: call.tool,
+                    metadata: call.metadata ?? {},
+                  },
+                }),
+              )
+            }
+            className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
+          >
+            打开预览
+          </button>
+        ) : null}
+        {canPreviewVibe ? (
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("luma:gallery-agent-action", {
+                  detail: {
+                    action: "reload_vibe",
+                    tool: call.tool,
+                    metadata: call.metadata ?? {},
+                  },
+                }),
+              )
+            }
+            className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
+          >
+            打开风格预览
+          </button>
         ) : null}
       </span>
-      {canPreviewSearch ? (
-        <button
-          type="button"
-          onClick={() =>
-            window.dispatchEvent(
-              new CustomEvent("luma:gallery-agent-action", {
-                detail: {
-                  action: "search",
-                  tool: call.tool,
-                  metadata: call.metadata ?? {},
-                },
-              }),
-            )
-          }
-          className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
-        >
-          打开预览
-        </button>
-      ) : null}
-      {canPreviewVibe ? (
-        <button
-          type="button"
-          onClick={() =>
-            window.dispatchEvent(
-              new CustomEvent("luma:gallery-agent-action", {
-                detail: {
-                  action: "reload_vibe",
-                  tool: call.tool,
-                  metadata: call.metadata ?? {},
-                },
-              }),
-            )
-          }
-          className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
-        >
-          打开风格预览
-        </button>
-      ) : null}
+      {showcasePaths.length ? <ShowcaseThumbStrip paths={showcasePaths} scores={scores} /> : null}
     </span>
   );
 }
