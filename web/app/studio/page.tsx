@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  fetchStudioInfraOverview,
   fetchStudioLifetimeStats,
   fetchStudioSessions,
   fetchStudioStatus,
   setActiveSession,
   startStudioAnalyze,
+  type StudioInfraOverview,
   type StudioLifetimeStats,
   type StudioSessionRow,
   type StudioRecentDelivery,
@@ -21,9 +23,11 @@ import { ErrorState, LoadingState } from "@/components/ui/states";
 import { ShowcaseBanner } from "@/components/ShowcaseBanner";
 import { StudioCurrentSessionHero } from "@/components/studio/StudioCurrentSessionHero";
 import { StudioFeaturedFrames } from "@/components/studio/StudioFeaturedFrames";
+import { StudioInfraOverview as StudioInfraOverviewSection } from "@/components/studio/StudioInfraOverview";
 import { StudioPipelineTimeline } from "@/components/studio/StudioPipelineTimeline";
 import { StudioRecentDeliveries } from "@/components/studio/StudioRecentDeliveries";
 import { StudioSessionList } from "@/components/studio/StudioSessionList";
+import { StudioShowcaseSection } from "@/components/studio/StudioShowcaseSection";
 import { StudioStatsSection } from "@/components/studio/StudioStatsSection";
 import { PIPELINE_DISPLAY_LABELS } from "@/lib/studioUi";
 
@@ -51,8 +55,10 @@ export default function StudioPage() {
   const [selected, setSelected] = useState<StudioSessionRow | null>(null);
   const [status, setStatus] = useState<StudioStatusResponse | null>(null);
   const [lifetimeStats, setLifetimeStats] = useState<StudioLifetimeStats | null>(null);
+  const [infraOverview, setInfraOverview] = useState<StudioInfraOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [infraLoading, setInfraLoading] = useState(true);
   const [busy, setBusy] = useState<"activate" | "analyze" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -109,6 +115,23 @@ export default function StudioPage() {
         if (!cancelled) setLifetimeStats(null);
       } finally {
         if (!cancelled) setStatsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const overview = await fetchStudioInfraOverview();
+        if (!cancelled) setInfraOverview(overview);
+      } catch {
+        if (!cancelled) setInfraOverview(null);
+      } finally {
+        if (!cancelled) setInfraLoading(false);
       }
     })();
     return () => {
@@ -334,7 +357,7 @@ export default function StudioPage() {
                   if (row) selectSession(row);
                 }}
                 collapsible
-                defaultCollapsed
+                defaultCollapsed={false}
               />
             ) : null}
 
@@ -350,8 +373,15 @@ export default function StudioPage() {
             ) : null}
           </>
         ) : (
-          <StudioStatsSection stats={lifetimeStats} loading={statsLoading} variant="kpi" />
+          <>
+            <StudioShowcaseSection stats={lifetimeStats} loading={statsLoading} />
+            <StudioStatsSection stats={lifetimeStats} loading={statsLoading} variant="kpi" />
+          </>
         )}
+
+        <StudioDivider />
+
+        <StudioInfraOverviewSection data={infraOverview} loading={infraLoading} />
 
         <StudioDivider />
 

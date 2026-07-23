@@ -46,16 +46,6 @@ export function StudioShowcaseSection({ stats, loading }: Props) {
       className={`relative overflow-hidden border-y border-white/[0.06] py-12 sm:py-16 md:py-20 lg:py-24 ${STUDIO_SHELL_BLEED_X}`}
       aria-label="Luma at scale"
     >
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(255,255,255,0.07),transparent_55%)]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_100%,rgba(120,50,30,0.12),transparent_50%)]"
-        aria-hidden
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-
       <div className={`relative ${STUDIO_SHELL_INNER}`}>
         <p className="mx-auto max-w-3xl whitespace-pre-line text-center text-[clamp(1.35rem,3.2vw,2.35rem)] font-light leading-[1.25] tracking-[-0.02em] text-white/88 sm:leading-[1.2]">
           {TAGLINE}

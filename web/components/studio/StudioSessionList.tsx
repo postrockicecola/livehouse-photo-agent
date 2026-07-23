@@ -35,6 +35,9 @@ const ROW_UNIT = 8;
 const GAP = 16;
 const FALLBACK_RATIO = 0.667; // height / width for cover-less tiles (~3:2)
 
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0e0e]";
+
 type Props = {
   setList: StudioSessionRow[];
   setListSort: StudioSessionSortOrder;
@@ -91,7 +94,7 @@ export function StudioSessionList({
         <button
           type="button"
           onClick={onToggleSort}
-          className="shrink-0 text-[10px] uppercase tracking-[0.08em] text-white/20 transition-colors hover:text-white/45"
+          className={`shrink-0 text-[10px] uppercase tracking-[0.08em] text-white/20 transition-colors hover:text-white/45 ${focusRing}`}
           title="Sort by session date"
         >
           {setListSort === "desc" ? "New → Old" : "Old → New"}
@@ -114,6 +117,7 @@ export function StudioSessionList({
           const band = row.band_name?.trim() || "";
           const funnelLine = formatSessionFunnelLine(row);
           const displayStatus = sessionDisplayStatus(row, act);
+          const titleLine = band || row.session_key;
 
           return (
             <li
@@ -130,8 +134,9 @@ export function StudioSessionList({
               <button
                 type="button"
                 onClick={() => onSelect(row)}
-                title={[date, band].filter(Boolean).join(" · ")}
-                className={`group relative block h-full w-full cursor-pointer overflow-hidden rounded-md text-left ${
+                title={[date, titleLine, funnelLine].filter(Boolean).join(" · ")}
+                aria-label={[date, titleLine, funnelLine, displayStatus].filter(Boolean).join(", ")}
+                className={`group relative block h-full w-full cursor-pointer overflow-hidden rounded-md text-left ${focusRing} ${
                   sel ? "ring-1 ring-white/25 ring-offset-1 ring-offset-[#0e0e0e]" : ""
                 }`}
               >
@@ -143,8 +148,8 @@ export function StudioSessionList({
                       ) : null}
                       <img
                         src={coverUrl}
-                        alt={band || date}
-                        className="block h-full w-full object-cover transition-[transform,filter] duration-300 group-hover:scale-[1.04] group-hover:blur-[6px] group-hover:brightness-[0.45]"
+                        alt=""
+                        className="block h-full w-full object-cover transition-transform duration-300 [@media(hover:hover)]:group-hover:scale-[1.03]"
                         loading="lazy"
                         decoding="async"
                         onLoad={(e) => {
@@ -159,38 +164,36 @@ export function StudioSessionList({
                       />
                     </picture>
                   ) : (
-                    <div className="h-full w-full bg-[linear-gradient(135deg,#1a1000,#4a2a00)] transition-[filter,brightness] duration-300 group-hover:blur-[6px] group-hover:brightness-[0.45]" />
+                    <div className="h-full w-full bg-[#1a140c]" />
                   )}
 
-                  {/* Hover readout: date → band → funnel */}
-                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-3.5 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    <p className="text-[13px] tabular-nums tracking-[0.04em] text-white/75 sm:text-[14px]">
-                      {date}
-                    </p>
-                    {band ? (
-                      <p className="mt-2 max-w-full truncate text-[17px] font-medium leading-tight text-white sm:text-[19px]">
-                        {band}
-                      </p>
-                    ) : (
-                      <p className="mt-2 text-[15px] text-white/50 sm:text-[16px]">{row.session_key}</p>
-                    )}
-                    {funnelLine ? (
-                      <p className="mt-2.5 max-w-full text-[12px] leading-snug text-white/60 [overflow-wrap:anywhere] sm:text-[13px]">
-                        {funnelLine}
-                      </p>
-                    ) : null}
-                    {displayStatus === "active" ? (
-                      <p className="mt-2 text-[9px] text-[rgba(64,200,200,0.9)]">● Live</p>
-                    ) : displayStatus === "failed" ? (
-                      <p className="mt-2 text-[10px] text-rose-300/85">Failed</p>
-                    ) : null}
+                  {/* Always-on caption — readable on touch without hover */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-2.5 pb-2.5 pt-10">
+                    <div className="flex items-end justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-[11px] font-medium leading-tight text-white/92 sm:text-[12px]">
+                          {titleLine}
+                        </p>
+                        <p className="mt-0.5 truncate text-[10px] tabular-nums text-white/55">{date}</p>
+                        {funnelLine ? (
+                          <p className="mt-0.5 truncate text-[9px] text-white/40 sm:text-[10px]">{funnelLine}</p>
+                        ) : null}
+                      </div>
+                      {displayStatus === "active" ? (
+                        <span className="shrink-0 rounded-full bg-black/40 px-1.5 py-0.5 text-[9px] text-[rgba(64,200,200,0.95)]">
+                          Live
+                        </span>
+                      ) : displayStatus === "failed" ? (
+                        <span className="shrink-0 rounded-full bg-black/40 px-1.5 py-0.5 text-[9px] text-rose-300/90">
+                          Failed
+                        </span>
+                      ) : displayStatus === "completed" ? (
+                        <span className="shrink-0 rounded-full bg-black/40 px-1.5 py-0.5 text-[9px] text-white/45">
+                          Done
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-
-                  {displayStatus === "active" ? (
-                    <span className="absolute left-2 top-2 rounded-full bg-black/45 px-1.5 py-0.5 text-[9px] text-[rgba(64,200,200,0.9)] transition-opacity duration-300 group-hover:opacity-0">
-                      ● Live
-                    </span>
-                  ) : null}
                 </div>
               </button>
             </li>
