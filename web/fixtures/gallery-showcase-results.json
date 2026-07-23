@@ -19,7 +19,8 @@
       "category": "best",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "stage"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -28,9 +29,9 @@
       "file": "frame-02.jpg",
       "path": "/showcase/agent-demo/frame-02.jpg",
       "path_quoted": "/showcase/agent-demo/frame-02.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
       "overall_score": 89.5,
       "energy": 87.0,
       "technical": 88.3,
@@ -38,7 +39,8 @@
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "keyboard"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -57,7 +59,8 @@
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "bass"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -66,9 +69,9 @@
       "file": "frame-04.jpg",
       "path": "/showcase/agent-demo/frame-04.jpg",
       "path_quoted": "/showcase/agent-demo/frame-04.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
       "overall_score": 87.3,
       "energy": 84.8,
       "technical": 86.1,
@@ -76,7 +79,8 @@
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -85,9 +89,9 @@
       "file": "frame-05.jpg",
       "path": "/showcase/agent-demo/frame-05.jpg",
       "path_quoted": "/showcase/agent-demo/frame-05.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
       "overall_score": 87.1,
       "energy": 84.6,
       "technical": 85.9,
@@ -95,7 +99,8 @@
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "electronics"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -114,7 +119,8 @@
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -123,17 +129,18 @@
       "file": "frame-07.jpg",
       "path": "/showcase/agent-demo/frame-07.jpg",
       "path_quoted": "/showcase/agent-demo/frame-07.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
-      "overall_score": 86.4,
-      "energy": 83.9,
-      "technical": 85.2,
-      "composition": 83.3,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
+      "overall_score": 86.3,
+      "energy": 83.8,
+      "technical": 85.1,
+      "composition": 83.2,
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "keyboard"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -145,14 +152,15 @@
       "orientation": "landscape",
       "width": 1616,
       "height": 1080,
-      "overall_score": 86.3,
-      "energy": 83.8,
-      "technical": 85.1,
-      "composition": 83.2,
+      "overall_score": 85.6,
+      "energy": 83.1,
+      "technical": 84.4,
+      "composition": 82.5,
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -161,17 +169,18 @@
       "file": "frame-09.jpg",
       "path": "/showcase/agent-demo/frame-09.jpg",
       "path_quoted": "/showcase/agent-demo/frame-09.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
-      "overall_score": 86.2,
-      "energy": 83.7,
-      "technical": 85.0,
-      "composition": 83.1,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
+      "overall_score": 85.3,
+      "energy": 82.8,
+      "technical": 84.1,
+      "composition": 82.2,
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -180,17 +189,18 @@
       "file": "frame-10.jpg",
       "path": "/showcase/agent-demo/frame-10.jpg",
       "path_quoted": "/showcase/agent-demo/frame-10.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
-      "overall_score": 86.2,
-      "energy": 83.7,
-      "technical": 85.0,
-      "composition": 83.1,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
+      "overall_score": 85.0,
+      "energy": 82.5,
+      "technical": 83.8,
+      "composition": 81.9,
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -199,17 +209,18 @@
       "file": "frame-11.jpg",
       "path": "/showcase/agent-demo/frame-11.jpg",
       "path_quoted": "/showcase/agent-demo/frame-11.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
-      "overall_score": 85.9,
-      "energy": 83.4,
-      "technical": 84.7,
-      "composition": 82.8,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
+      "overall_score": 84.9,
+      "energy": 82.4,
+      "technical": 83.7,
+      "composition": 81.8,
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"
@@ -218,17 +229,18 @@
       "file": "frame-12.jpg",
       "path": "/showcase/agent-demo/frame-12.jpg",
       "path_quoted": "/showcase/agent-demo/frame-12.jpg",
-      "orientation": "portrait",
-      "width": 1080,
-      "height": 1616,
-      "overall_score": 85.6,
-      "energy": 83.1,
-      "technical": 84.4,
-      "composition": 82.5,
+      "orientation": "landscape",
+      "width": 1616,
+      "height": 1080,
+      "overall_score": 84.5,
+      "energy": 82.0,
+      "technical": 83.3,
+      "composition": 81.4,
       "category": "keep",
       "tags": [
         "livehouse",
-        "showcase"
+        "showcase",
+        "guitarist"
       ],
       "reason": "Showcase keeper · Kerala Dust · 2026-04-16",
       "algorithm_version": "showcase_fixture"

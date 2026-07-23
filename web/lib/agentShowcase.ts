@@ -2,9 +2,10 @@
  * Scripted Agent turns for SHOWCASE_MODE (no FastAPI / VLM).
  * Photos are EXIF-stripped keepers from the 2026-04-16 session.
  *
- * Keep intents aligned with the three-step Studio ladder only:
- * select top-10 → Cinestill style → find guitarist.
- * Extra free-typed styles still work; unsupported subject searches fall back honestly.
+ * Three-step Studio ladder only:
+ * 1) select top-10 by score
+ * 2) film / dreamcore style grades
+ * 3) find guitarist — returns subject=guitarist frames only
  */
 import agentDemoManifest from "@/fixtures/agent-showcase-manifest.json";
 import type { AgentChatResponse, AgentToolCall } from "@/components/agent/agentChat";
@@ -17,6 +18,7 @@ export type AgentDemoFrame = {
   overall_score: number;
   category: string;
   orient: string;
+  subject?: string;
 };
 
 export type ShowcaseFilmVibe = {
@@ -49,6 +51,15 @@ function pickFrames(ids: number[]): AgentDemoFrame[] {
   return ids.map(frameByIndex).filter((f): f is AgentDemoFrame => Boolean(f));
 }
 
+/** Hand-verified guitarist keepers only (see manifest `subject`). */
+function guitaristFrameIds(): number[] {
+  const ids: number[] = [];
+  FRAMES.forEach((f, i) => {
+    if (f.subject === "guitarist") ids.push(i + 1);
+  });
+  return ids;
+}
+
 function filmReply(label: string, hint: string): string {
   return (
     `已套用「${label}」修图风格（Showcase CSS 模拟，${SESSION_LABEL}）。\n` +
@@ -57,22 +68,24 @@ function filmReply(label: string, hint: string): string {
   );
 }
 
+const GUITAR_IDS = guitaristFrameIds();
+
 const INTENTS: ScriptedIntent[] = [
   {
     id: "select_delivery",
     keywords: ["得分最高", "最高的 10", "最高的10", "10 张", "10张", "选出", "交片", "初选"],
     reply:
       `这是 ${SESSION_LABEL} 按 overall 从高到低选出的 10 张（Showcase Fixture，池内最高 92.5）。\n` +
-      `点「打开预览」浏览；下一步可以试试修成 Cinestill 800T 风格。`,
+      `点「打开预览」浏览；下一步可以试试修成一种胶片 / 梦核风格。`,
     frameIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   },
   {
     id: "guitar",
     keywords: ["吉他"],
     reply:
-      `「吉他手特写」预录短名单（${SESSION_LABEL}）。\n` +
-      `从高分 keepers 里挑了偏近景/竖构图的 5 张。Showcase 主体检索只演示这一条。`,
-    frameIds: [2, 4, 5, 7, 10],
+      `「吉他手弹琴的特写」——只返回已核对过主体为吉他手的 ${GUITAR_IDS.length} 张（${SESSION_LABEL}）。\n` +
+      `不含键盘手、鼓手、贝斯特写。点「打开预览」查看。`,
+    frameIds: GUITAR_IDS,
   },
   // Specific styles first, then generic「胶片/复古/风格」→ Cinestill (the ladder step).
   {
@@ -153,7 +166,7 @@ const INTENTS: ScriptedIntent[] = [
     reply:
       `导出在只读 Showcase 里不可用（无后端卷）。\n` +
       `完整打包请本地 ./start_all.sh。`,
-    frameIds: [1, 2, 3, 4, 5, 6, 7, 8],
+    frameIds: [],
   },
 ];
 
@@ -161,10 +174,10 @@ const FALLBACK: ScriptedIntent = {
   id: "fallback",
   keywords: [],
   reply:
-    `这是只读 Showcase：Agent 不会真的调 VLM，主体检索也只演示「吉他手」。\n` +
-    `请按三步预设走：选出得分最高的 10 张 → 修成 Cinestill 800T → 找出吉他手。\n` +
+    `这是只读 Showcase：Agent 不会真的调 VLM。\n` +
+    `请按三步预设走：选出得分最高的 10 张 → 试试一种修图风格 → 找出吉他手弹琴的特写。\n` +
     `完整对话与检索请本地 ./start_all.sh。`,
-  frameIds: [1, 2, 3, 4],
+  frameIds: [],
 };
 
 function matchIntent(message: string): ScriptedIntent {

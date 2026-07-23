@@ -214,6 +214,8 @@ const SUGGESTIONS: Record<AgentMode, string[]> = {
   gallery: [
     "帮我选出得分最高的 10 张",
     "试试修成 Cinestill 800T 风格",
+    "试试修成 Kodak Portra 暖调风格",
+    "试试修成梦核式修图风格",
     "找出吉他手弹琴的特写",
   ],
   general: [

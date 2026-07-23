@@ -2,7 +2,7 @@
   "session_date": "2026-04-16",
   "session_key": "Session 35",
   "band_name": "Kerala Dust",
-  "source": "Previews/analysis_results.json top keepers",
+  "source": "Previews/analysis_results.json curated keepers (guitarist-verified)",
   "count": 12,
   "frames": [
     {
@@ -14,7 +14,8 @@
       "category": "best",
       "width": 1616,
       "height": 1080,
-      "orient": "l"
+      "orient": "l",
+      "subject": "stage"
     },
     {
       "id": "frame-02",
@@ -23,9 +24,10 @@
       "path": "/showcase/agent-demo/frame-02.jpg",
       "overall_score": 89.5,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "keyboard"
     },
     {
       "id": "frame-03",
@@ -36,7 +38,8 @@
       "category": "keep",
       "width": 1616,
       "height": 1080,
-      "orient": "l"
+      "orient": "l",
+      "subject": "bass"
     },
     {
       "id": "frame-04",
@@ -45,9 +48,10 @@
       "path": "/showcase/agent-demo/frame-04.jpg",
       "overall_score": 87.3,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "guitarist"
     },
     {
       "id": "frame-05",
@@ -56,9 +60,10 @@
       "path": "/showcase/agent-demo/frame-05.jpg",
       "overall_score": 87.1,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "electronics"
     },
     {
       "id": "frame-06",
@@ -69,73 +74,80 @@
       "category": "keep",
       "width": 1616,
       "height": 1080,
-      "orient": "l"
+      "orient": "l",
+      "subject": "guitarist"
     },
     {
       "id": "frame-07",
       "file": "frame-07.jpg",
-      "src_file": "DSC03006.jpg",
-      "path": "/showcase/agent-demo/frame-07.jpg",
-      "overall_score": 86.4,
-      "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
-    },
-    {
-      "id": "frame-08",
-      "file": "frame-08.jpg",
       "src_file": "DSC02941.jpg",
-      "path": "/showcase/agent-demo/frame-08.jpg",
+      "path": "/showcase/agent-demo/frame-07.jpg",
       "overall_score": 86.3,
       "category": "keep",
       "width": 1616,
       "height": 1080,
-      "orient": "l"
+      "orient": "l",
+      "subject": "keyboard"
+    },
+    {
+      "id": "frame-08",
+      "file": "frame-08.jpg",
+      "src_file": "DSC03610.jpg",
+      "path": "/showcase/agent-demo/frame-08.jpg",
+      "overall_score": 85.6,
+      "category": "keep",
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "guitarist"
     },
     {
       "id": "frame-09",
       "file": "frame-09.jpg",
-      "src_file": "DSC03419.jpg",
+      "src_file": "DSC02841.jpg",
       "path": "/showcase/agent-demo/frame-09.jpg",
-      "overall_score": 86.2,
+      "overall_score": 85.3,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "guitarist"
     },
     {
       "id": "frame-10",
       "file": "frame-10.jpg",
-      "src_file": "DSC03514.jpg",
+      "src_file": "DSC03617.jpg",
       "path": "/showcase/agent-demo/frame-10.jpg",
-      "overall_score": 86.2,
+      "overall_score": 85.0,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "guitarist"
     },
     {
       "id": "frame-11",
       "file": "frame-11.jpg",
-      "src_file": "DSC03187.jpg",
+      "src_file": "DSC03607.jpg",
       "path": "/showcase/agent-demo/frame-11.jpg",
-      "overall_score": 85.9,
+      "overall_score": 84.9,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "guitarist"
     },
     {
       "id": "frame-12",
       "file": "frame-12.jpg",
-      "src_file": "DSC03610.jpg",
+      "src_file": "DSC03622.jpg",
       "path": "/showcase/agent-demo/frame-12.jpg",
-      "overall_score": 85.6,
+      "overall_score": 84.5,
       "category": "keep",
-      "width": 1080,
-      "height": 1616,
-      "orient": "p"
+      "width": 1616,
+      "height": 1080,
+      "orient": "l",
+      "subject": "guitarist"
     }
   ]
 }

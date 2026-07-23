@@ -33,15 +33,21 @@ export const PROJECT_POSITIONING = {
 export const LANDING_STUDIO_CTA = "打开 Agent";
 
 /**
- * Showcase Studio Agent — exactly three ladder steps (one prompt each).
- * 1. select → 2. style → 3. find
+ * Showcase Studio Agent — three ladder steps:
+ * 1. select top-10 → 2. style chips → 3. find guitarist (verified only)
  */
 export const STUDIO_SELECT_PROMPTS = ["帮我选出得分最高的 10 张"] as const;
 
-/** Phase 2: after first select. */
-export const STUDIO_STYLE_PROMPTS = ["试试修成 Cinestill 800T 风格"] as const;
+/** Phase 2: after first select — multiple film / dreamcore grades. */
+export const STUDIO_STYLE_PROMPTS = [
+  "试试修成 Cinestill 800T 风格",
+  "试试修成 Kodak Portra 暖调风格",
+  "试试修成富士 Superia 青绿风格",
+  "试试修成梦核式修图风格",
+  "试试修成 HP5 银盐黑白风格",
+] as const;
 
-/** Phase 3: after a style has been applied. */
+/** Phase 3: after a style has been applied — single verified subject search. */
 export const STUDIO_FIND_PROMPTS = ["找出吉他手弹琴的特写"] as const;
 
 /** Landing hero rotator — broader demo copy (not the Studio three-step ladder). */
