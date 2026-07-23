@@ -767,6 +767,19 @@ export default function HomePage() {
     );
   }, [items, selectedKeys]);
 
+  // Lift the global Chat FAB above the selection rail so they don't collide.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (selectedItems.length > 0) {
+      root.style.setProperty("--luma-chat-bottom", "5.75rem");
+    } else {
+      root.style.removeProperty("--luma-chat-bottom");
+    }
+    return () => {
+      root.style.removeProperty("--luma-chat-bottom");
+    };
+  }, [selectedItems.length]);
+
   const modalSelectionKey = useMemo(() => {
     if (!modal) return "";
     const idx = items.indexOf(modal);

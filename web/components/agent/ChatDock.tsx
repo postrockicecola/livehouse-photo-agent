@@ -494,9 +494,12 @@ export function ChatDock({
   }, [apiBase]);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    <div
+      className="fixed right-4 z-50 flex flex-col items-end gap-2 transition-[bottom] duration-200"
+      style={{ bottom: "var(--luma-chat-bottom, 1rem)" }}
+    >
       {open ? (
-        <div className="flex h-[min(560px,calc(100vh-5.5rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
+        <div className="flex h-[min(560px,calc(100vh-5.5rem-var(--luma-chat-bottom,1rem)))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
           {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
           <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
             <div className="flex items-center gap-2">

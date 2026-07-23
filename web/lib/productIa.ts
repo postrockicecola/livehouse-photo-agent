@@ -166,7 +166,7 @@ export const LANDING_WORKFLOW = {
   eyebrow: "主链路",
   title: "从入库到可追踪的推理作业。",
   subtitle:
-    "场次先建成可恢复的作业，再经低成本门控进入有界 VLM；状态、调用与产物都写进账本，可在 Infra 里回看。",
+    "场次先建成可恢复的作业，再经 OpenCV → 美学分 → 有界 VLM；状态、调用与产物都写进账本，可在 Infra 里回看。",
   phases: [
     { id: "ingest", label: "Ingest", range: [0, 0] },
     { id: "orchestrate", label: "Run", range: [1, 4] },

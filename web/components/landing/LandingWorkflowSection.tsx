@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LANDING_WORKFLOW, PROJECT_POSITIONING } from "@/lib/productIa";
+import { LANDING_AI_LAYER, LANDING_WORKFLOW, PROJECT_POSITIONING } from "@/lib/productIa";
 
 function WorkflowStepItem({
   title,
@@ -63,8 +63,6 @@ export function LandingWorkflowSection() {
       className={`landing-workflow scroll-mt-24 border-t border-white/[0.05] ${visible ? "landing-workflow--visible" : ""}`}
       aria-labelledby="landing-workflow-title"
     >
-      <div className="landing-workflow-glow pointer-events-none absolute inset-0" aria-hidden />
-
       <div className="relative mx-auto w-full max-w-[104rem] px-5 py-24 sm:px-8 sm:py-32 lg:px-12">
         <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-20 lg:items-start">
           <header className="lg:sticky lg:top-28">
@@ -99,6 +97,49 @@ export function LandingWorkflowSection() {
               />
             ))}
           </ol>
+        </div>
+
+        {/* AI stages folded into the same chapter — not a second full landing section */}
+        <div id="ai-layer" className="mt-16 scroll-mt-24 border-t border-white/[0.06] pt-12 sm:mt-20 sm:pt-14">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-xl">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">
+                {LANDING_AI_LAYER.eyebrow}
+              </p>
+              <h3 className="mt-3 text-xl font-light tracking-tight text-white/88 sm:text-2xl">
+                {LANDING_AI_LAYER.title}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/38">{LANDING_AI_LAYER.subtitle}</p>
+            </div>
+            <p className="font-mono text-[10px] tabular-nums text-white/40">
+              示例分 {LANDING_AI_LAYER.preview.score}
+              <span className="ml-2 text-white/28">{LANDING_AI_LAYER.preview.dimensions}</span>
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {LANDING_AI_LAYER.stages.map((stage) => (
+              <article
+                key={stage.stage}
+                className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-4 py-4"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/28">
+                  {stage.stage} · {stage.title}
+                </p>
+                <h4 className="mt-2 text-base font-light text-white/85">{stage.name}</h4>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-white/40">{stage.body}</p>
+              </article>
+            ))}
+          </div>
+
+          <p className="mt-5 max-w-2xl text-[12px] leading-relaxed text-white/32">
+            输出 caption / tags / score，在 Gallery 里人工确认。
+            {LANDING_AI_LAYER.preview.tags.map((tag) => (
+              <span key={tag} className="ml-2 font-mono text-white/40">
+                #{tag}
+              </span>
+            ))}
+          </p>
         </div>
       </div>
     </section>
