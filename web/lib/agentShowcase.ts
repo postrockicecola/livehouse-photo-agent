@@ -56,12 +56,11 @@ function filmReply(label: string, hint: string): string {
 const INTENTS: ScriptedIntent[] = [
   {
     id: "select_delivery",
-    keywords: ["选出", "交片", "初选", "20 张", "20张"],
+    keywords: ["得分最高", "最高的 10", "最高的10", "10 张", "10张", "选出", "交片", "初选"],
     reply:
-      `这是 ${SESSION_LABEL} 的预录选片结果（Showcase Fixture）。\n` +
-      `按 overall 从高到低取了 8 张 keepers（池内最高 92.5）。\n` +
-      `线上只读演示：完整 Agent + 全场分析请本地启动 gallery_server。`,
-    frameIds: [1, 2, 3, 4, 5, 6, 7, 8],
+      `这是 ${SESSION_LABEL} 按 overall 从高到低选出的 10 张（Showcase Fixture，池内最高 92.5）。\n` +
+      `点「打开预览」浏览；下一步可以试试修成一种胶片风格。`,
+    frameIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   },
   {
     id: "reject_quality",

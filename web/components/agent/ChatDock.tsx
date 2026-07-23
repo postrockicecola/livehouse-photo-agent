@@ -212,9 +212,9 @@ function AssistantActionBar({
 
 const SUGGESTIONS: Record<AgentMode, string[]> = {
   gallery: [
-    "帮我从这场里选出 20 张能交片的",
+    "帮我选出得分最高的 10 张",
+    "试试修成 Cinestill 800T 风格",
     "找出吉他手弹琴的特写",
-    "修成梦核式修图预览看看",
   ],
   general: [
     "搜索 KEDA 的最新版本并总结它的用途",
@@ -281,21 +281,21 @@ function promptsForPhase(stages: PromptStages, phase: PromptPhase): readonly str
 }
 
 function phaseStepLabel(phase: PromptPhase): string {
-  if (phase === "find") return "Step 3 · 再按主体找几张";
+  if (phase === "find") return "Step 3 · 找出吉他手";
   if (phase === "style") return "Step 2 · 试试修成一种风格";
-  return "Step 1 · 先选一批照片";
+  return "Step 1 · 选出得分最高的 10 张";
 }
 
 function phaseChipEyebrow(phase: PromptPhase): string {
-  if (phase === "find") return "常见检索";
-  if (phase === "style") return "可选风格";
-  return "常见选片";
+  if (phase === "find") return "下一步";
+  if (phase === "style") return "下一步";
+  return "试试这样问";
 }
 
 function phaseFollowUpEyebrow(phase: PromptPhase): string {
-  if (phase === "find") return "风格好了？再试试找出主体";
+  if (phase === "find") return "风格好了？再找吉他手";
   if (phase === "style") return "选好了？试试修成一种风格";
-  return "还可以这样选";
+  return "试试这样问";
 }
 
 function PromptChipList({
@@ -1084,40 +1084,37 @@ export function ChatDock({
               <div className="space-y-3 pt-2">
                 <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
                 {promptStages ? (
-                  <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
-                    {phaseStepLabel(promptPhase)}
-                  </p>
-                ) : null}
-                {emptyRotatingPrompts && emptyRotatingPrompts.length > 0 ? (
-                  <RotatingPromptStage
-                    key={promptPhase}
-                    prompts={emptyRotatingPrompts}
-                    onPick={(p) => void send(p)}
-                  />
-                ) : null}
-                {promptStages ? (
-                  <PromptChipList
-                    prompts={
-                      promptPhase === "select"
-                        ? promptStages.select.slice(0, 4)
-                        : promptsForPhase(promptStages, promptPhase)
-                    }
-                    onPick={(p) => void send(p)}
-                    eyebrow={phaseChipEyebrow(promptPhase)}
-                  />
+                  <>
+                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
+                      {phaseStepLabel(promptPhase)}
+                    </p>
+                    <PromptChipList
+                      prompts={promptsForPhase(promptStages, promptPhase)}
+                      onPick={(p) => void send(p)}
+                      eyebrow={phaseChipEyebrow(promptPhase)}
+                    />
+                  </>
                 ) : (
-                  <div className="flex flex-col gap-1.5">
-                    {SUGGESTIONS[mode].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => void send(s)}
-                        className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    {emptyRotatingPrompts && emptyRotatingPrompts.length > 0 ? (
+                      <RotatingPromptStage
+                        prompts={emptyRotatingPrompts}
+                        onPick={(p) => void send(p)}
+                      />
+                    ) : null}
+                    <div className="flex flex-col gap-1.5">
+                      {SUGGESTIONS[mode].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => void send(s)}
+                          className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             ) : (

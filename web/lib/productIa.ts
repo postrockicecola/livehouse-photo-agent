@@ -33,43 +33,24 @@ export const PROJECT_POSITIONING = {
 export const LANDING_STUDIO_CTA = "打开 Agent";
 
 /**
- * Studio Agent prompt ladder (ChatDock ``promptStages``):
- * 1. select → 2. style → 3. find (e.g. 吉他手)
+ * Showcase Studio Agent — exactly three ladder steps (one prompt each).
+ * 1. select → 2. style → 3. find
  */
-export const STUDIO_SELECT_PROMPTS = [
-  "帮我从这场里选出 20 张能交片的",
+export const STUDIO_SELECT_PROMPTS = ["帮我选出得分最高的 10 张"] as const;
+
+/** Phase 2: after first select. */
+export const STUDIO_STYLE_PROMPTS = ["试试修成 Cinestill 800T 风格"] as const;
+
+/** Phase 3: after a style has been applied. */
+export const STUDIO_FIND_PROMPTS = ["找出吉他手弹琴的特写"] as const;
+
+/** Landing hero rotator — broader demo copy (not the Studio three-step ladder). */
+export const LANDING_HERO_PROMPTS = [
+  "帮我选出得分最高的 10 张",
+  "试试修成 Cinestill 800T 风格",
+  "找出吉他手弹琴的特写",
   "把糊的、过曝的先剔掉",
   "连拍里每组只留一张最好的",
-  "按分数从高到低给我一份初选",
-  "这场里 energy 最高的十张是哪些",
-  "有没有技术分高但构图一般的，标出来",
-] as const;
-
-/** Phase 2: style grades after first select. */
-export const STUDIO_STYLE_PROMPTS = [
-  "试试修成 Cinestill 800T 风格",
-  "试试修成 Kodak Portra 暖调风格",
-  "试试修成富士 Superia 青绿风格",
-  "试试修成梦核式修图风格",
-  "试试修成 HP5 银盐黑白风格",
-] as const;
-
-/** Phase 3: subject search after a style has been applied. */
-export const STUDIO_FIND_PROMPTS = [
-  "找出吉他手弹琴的特写",
-  "找出全景舞台、观众和灯都在的",
-  "找出鼓手打鼓的那几张",
-  "找出歌手表情最狠的瞬间",
-  "找出前排互动、气氛最猛的",
-  "找出逆光剪影那种",
-  "出一组黑白的，偏纪实",
-] as const;
-
-/** Hero chat-box rotating prompts — full ladder (landing still shows the full set). */
-export const LANDING_HERO_PROMPTS = [
-  ...STUDIO_SELECT_PROMPTS,
-  ...STUDIO_STYLE_PROMPTS,
-  ...STUDIO_FIND_PROMPTS,
   "选中的导出预览，RAW 也一起打包",
 ] as const;
 
