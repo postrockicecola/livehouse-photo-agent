@@ -29,8 +29,8 @@ export const PROJECT_POSITIONING = {
   ],
 } as const;
 
-/** Primary CTA — nav + hero + closing. */
-export const LANDING_STUDIO_CTA = "打开 Studio";
+/** Primary CTA — nav + hero + closing. Points at Studio (agent workbench). */
+export const LANDING_STUDIO_CTA = "打开 Agent";
 
 /** Hero chat-box rotating prompts — concrete things the system can do. */
 export const LANDING_HERO_PROMPTS = [
@@ -68,8 +68,9 @@ export const LANDING_HERO = {
   ctaSecondary: { label: "看主链路", href: "#workflow" },
   promptIdle: "试试：找出吉他手特写…",
   promptSubmitHref: "/gallery",
+  /** Hero CTAs under the prompt — first is the primary product entry. */
   promptCtas: [
-    { label: "打开 Studio", href: STUDIO_HOME },
+    { label: "打开 Agent", href: STUDIO_HOME, primary: true },
     { label: "打开 Infra", href: "/infra" },
   ],
 } as const;

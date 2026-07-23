@@ -90,9 +90,17 @@ export function LandingHeroPrompt() {
         </button>
       </form>
 
-      <div className="landing-hero-prompt-pills">
+      <div className="landing-hero-prompt-ctas">
         {promptCtas.map((cta) => (
-          <Link key={cta.href} href={cta.href} className="landing-hero-prompt-pill">
+          <Link
+            key={cta.href}
+            href={cta.href}
+            className={
+              "primary" in cta && cta.primary
+                ? "landing-hero-prompt-cta-primary"
+                : "landing-hero-prompt-pill"
+            }
+          >
             {cta.label}
           </Link>
         ))}
