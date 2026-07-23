@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChatDock } from "@/components/agent/ChatDock";
 import { getApiBase } from "@/lib/apiBase";
-import { LANDING_HERO_PROMPTS } from "@/lib/productIa";
+import { STUDIO_SELECT_PROMPTS, STUDIO_STYLE_PROMPTS } from "@/lib/productIa";
 
 const API_BASE = getApiBase();
 
@@ -43,6 +43,8 @@ export function GlobalChatDock() {
         ev as CustomEvent<{ action?: string; metadata?: Record<string, unknown> }>
       ).detail;
       if (String(detail?.action || "") !== "reload_vibe") return;
+      // Showcase Studio opens CSS grade locally — don't bounce to /gallery.
+      if (detail?.metadata?.showcase) return;
       const sv = detail?.metadata?.session_vibe;
       if (!sv || typeof sv !== "object") return;
       if ((pathname || "").startsWith("/gallery")) return;
@@ -67,7 +69,11 @@ export function GlobalChatDock() {
       context={onStudio ? "studio" : "gallery"}
       initialPrompt={initialPrompt}
       defaultOpen={onStudio || Boolean(initialPrompt?.trim())}
-      rotatingPrompts={onStudio ? LANDING_HERO_PROMPTS : undefined}
+      promptStages={
+        onStudio
+          ? { select: STUDIO_SELECT_PROMPTS, style: STUDIO_STYLE_PROMPTS }
+          : undefined
+      }
     />
   );
 }

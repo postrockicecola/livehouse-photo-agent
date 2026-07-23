@@ -32,8 +32,11 @@ export const PROJECT_POSITIONING = {
 /** Primary CTA — nav + hero + closing. Points at Studio (agent workbench). */
 export const LANDING_STUDIO_CTA = "打开 Agent";
 
-/** Hero chat-box rotating prompts — concrete things the system can do. */
-export const LANDING_HERO_PROMPTS = [
+/**
+ * Studio Agent — phase 1: curation / select.
+ * After the first successful select, ChatDock switches to {@link STUDIO_STYLE_PROMPTS}.
+ */
+export const STUDIO_SELECT_PROMPTS = [
   "帮我从这场里选出 20 张能交片的",
   "把糊的、过曝的先剔掉",
   "连拍里每组只留一张最好的",
@@ -44,16 +47,25 @@ export const LANDING_HERO_PROMPTS = [
   "找出歌手表情最狠的瞬间",
   "找出前排互动、气氛最猛的",
   "找出逆光剪影那种",
-  "修成复古胶片风预览看看",
-  "试试 Cinestill 800T 的胶片感觉",
-  "套一层 Kodak Portra 暖调看看",
-  "换成富士 Superia 青绿胶片感",
-  "修成梦核式修图预览看看",
-  "用 HP5 银盐黑白胶片风预览",
   "出一组黑白的，偏纪实",
-  "选中的导出预览，RAW 也一起打包",
   "这场里 energy 最高的十张是哪些",
   "有没有技术分高但构图一般的，标出来",
+] as const;
+
+/** Studio Agent — phase 2: style grades after first select. */
+export const STUDIO_STYLE_PROMPTS = [
+  "试试修成 Cinestill 800T 风格",
+  "试试修成 Kodak Portra 暖调风格",
+  "试试修成富士 Superia 青绿风格",
+  "试试修成梦核式修图风格",
+  "试试修成 HP5 银盐黑白风格",
+] as const;
+
+/** Hero chat-box rotating prompts — select first, then styles (landing still shows the full set). */
+export const LANDING_HERO_PROMPTS = [
+  ...STUDIO_SELECT_PROMPTS,
+  ...STUDIO_STYLE_PROMPTS,
+  "选中的导出预览，RAW 也一起打包",
 ] as const;
 
 export const LANDING_HERO = {

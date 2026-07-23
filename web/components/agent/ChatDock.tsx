@@ -223,6 +223,69 @@ const SUGGESTIONS: Record<AgentMode, string[]> = {
   ],
 };
 
+type PromptPhase = "select" | "style";
+
+const STUDIO_PROMPT_PHASE_KEY = "luma.studio_agent_prompt_phase";
+
+function readStoredPromptPhase(): PromptPhase {
+  try {
+    return sessionStorage.getItem(STUDIO_PROMPT_PHASE_KEY) === "style" ? "style" : "select";
+  } catch {
+    return "select";
+  }
+}
+
+function writeStoredPromptPhase(phase: PromptPhase) {
+  try {
+    sessionStorage.setItem(STUDIO_PROMPT_PHASE_KEY, phase);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** First successful curation search advances Studio from select → style prompts. */
+function callsCompleteSelectPhase(calls: AgentToolCall[] | undefined): boolean {
+  return Boolean(
+    calls?.some(
+      (c) =>
+        c.ok &&
+        c.tool === "gallery_search" &&
+        String(c.metadata?.ui_action || "") === "search",
+    ),
+  );
+}
+
+function PromptChipList({
+  prompts,
+  onPick,
+  eyebrow,
+}: {
+  prompts: readonly string[];
+  onPick: (prompt: string) => void;
+  eyebrow?: string;
+}) {
+  if (!prompts.length) return null;
+  return (
+    <div className="space-y-1.5">
+      {eyebrow ? (
+        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">{eyebrow}</p>
+      ) : null}
+      <div className="flex flex-col gap-1.5">
+        {prompts.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => onPick(s)}
+            className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:border-amber-400/25 hover:bg-amber-400/[0.06] hover:text-white/80"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const ROTATE_MS = 3200;
 
 /** Empty-state rotating prompt (landing / Studio showcase copy). */
@@ -594,6 +657,7 @@ export function ChatDock({
   initialPrompt,
   defaultOpen = false,
   rotatingPrompts,
+  promptStages,
 }: {
   apiBase: string;
   previewsDir?: string | null;
@@ -604,6 +668,11 @@ export function ChatDock({
   defaultOpen?: boolean;
   /** When set, empty state scrolls these prompts (click to send). */
   rotatingPrompts?: readonly string[];
+  /**
+   * Studio two-step prompts: select first, then style chips after the first
+   * successful curation search (persisted in sessionStorage).
+   */
+  promptStages?: { select: readonly string[]; style: readonly string[] };
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
@@ -612,6 +681,9 @@ export function ChatDock({
   const [mode, setMode] = useState<AgentMode>("gallery");
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [promptPhase, setPromptPhase] = useState<PromptPhase>(() =>
+    promptStages ? readStoredPromptPhase() : "select",
+  );
   const [showcasePreview, setShowcasePreview] = useState<{
     items: ShowcasePreviewItem[];
     variant: "agent" | "vibe";
@@ -631,6 +703,24 @@ export function ChatDock({
     },
     [],
   );
+
+  const advancePromptPhase = useCallback(
+    (calls?: AgentToolCall[]) => {
+      if (!promptStages || promptPhase === "style") return;
+      if (!callsCompleteSelectPhase(calls)) return;
+      setPromptPhase("style");
+      writeStoredPromptPhase("style");
+    },
+    [promptStages, promptPhase],
+  );
+
+  const stagePrompts =
+    promptStages == null
+      ? null
+      : promptPhase === "style"
+        ? promptStages.style
+        : promptStages.select;
+  const emptyRotatingPrompts = stagePrompts ?? rotatingPrompts;
 
   // Studio / Showcase: Gallery page is not mounted, so auto-open the static preview
   // when Agent emits the same gallery UI actions with /showcase paths.
@@ -788,7 +878,9 @@ export function ChatDock({
               guardrails: info.guardrail_events,
               streaming: false,
             }));
-            emitOnce(calls ?? turnToolCalls);
+            const doneCalls = calls ?? turnToolCalls;
+            emitOnce(doneCalls);
+            advancePromptPhase(doneCalls);
           },
           onError: (msg) =>
             patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false })),
@@ -806,6 +898,7 @@ export function ChatDock({
             streaming: false,
           }));
           emitGalleryUiActions(data.tool_calls ?? []);
+          if (!data.error) advancePromptPhase(data.tool_calls);
         }
       } catch (streamErr) {
         // Hard stream failure → fall back to the non-streaming endpoint once.
@@ -820,6 +913,7 @@ export function ChatDock({
             streaming: false,
           }));
           emitGalleryUiActions(data.tool_calls ?? []);
+          if (!data.error) advancePromptPhase(data.tool_calls);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : streamErr instanceof Error ? streamErr.message : "请求失败";
           patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false }));
@@ -828,7 +922,7 @@ export function ChatDock({
         setSending(false);
       }
     },
-    [apiBase, previewsDir, sending, mode, patchLastAssistant],
+    [apiBase, previewsDir, sending, mode, patchLastAssistant, advancePromptPhase],
   );
 
   sendRef.current = send;
@@ -837,7 +931,11 @@ export function ChatDock({
     setTurns([]);
     // Rotate to a brand-new persisted conversation for this mode.
     sessionIdRef.current = rotateSessionId(context, mode);
-  }, [context, mode]);
+    if (promptStages) {
+      setPromptPhase("select");
+      writeStoredPromptPhase("select");
+    }
+  }, [context, mode, promptStages]);
 
   const switchMode = useCallback(
     (next: AgentMode) => {
@@ -929,24 +1027,46 @@ export function ChatDock({
             {turns.length === 0 ? (
               <div className="space-y-3 pt-2">
                 <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
-                {rotatingPrompts && rotatingPrompts.length > 0 ? (
-                  <RotatingPromptStage prompts={rotatingPrompts} onPick={(p) => void send(p)} />
+                {promptStages ? (
+                  <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
+                    {promptPhase === "style" ? "Step 2 · 试试修成一种风格" : "Step 1 · 先选一批照片"}
+                  </p>
                 ) : null}
-                <div className="flex flex-col gap-1.5">
-                  {SUGGESTIONS[mode].map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => void send(s)}
-                      className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+                {emptyRotatingPrompts && emptyRotatingPrompts.length > 0 ? (
+                  <RotatingPromptStage
+                    key={promptPhase}
+                    prompts={emptyRotatingPrompts}
+                    onPick={(p) => void send(p)}
+                  />
+                ) : null}
+                {promptStages ? (
+                  <PromptChipList
+                    prompts={
+                      promptPhase === "style"
+                        ? promptStages.style
+                        : promptStages.select.slice(0, 4)
+                    }
+                    onPick={(p) => void send(p)}
+                    eyebrow={promptPhase === "style" ? "可选风格" : "常见选片"}
+                  />
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    {SUGGESTIONS[mode].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => void send(s)}
+                        className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
-              turns.map((t, i) => (
+              <>
+              {turns.map((t, i) => (
                 <div key={i} className={t.role === "user" ? "flex justify-end" : "flex justify-start"}>
                   <div
                     className={[
@@ -988,7 +1108,17 @@ export function ChatDock({
                     ) : null}
                   </div>
                 </div>
-              ))
+              ))}
+              {promptStages && promptPhase === "style" && !sending ? (
+                <div className="rounded-[6px] border border-amber-400/20 bg-amber-400/[0.04] px-2.5 py-2.5">
+                  <PromptChipList
+                    prompts={promptStages.style}
+                    onPick={(p) => void send(p)}
+                    eyebrow="选好了？试试修成一种风格"
+                  />
+                </div>
+              ) : null}
+              </>
             )}
           </div>
 
