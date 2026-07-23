@@ -118,6 +118,8 @@ export default function HomePage() {
 
   const [modal, setModal] = useState<GalleryItem | null>(null);
   const [selectionPreviewOpen, setSelectionPreviewOpen] = useState(false);
+  /** Copilot ``gallery_search`` hits — preview without mutating liked selection. */
+  const [agentPreviewItems, setAgentPreviewItems] = useState<GalleryItem[] | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [feedbackByKey, setFeedbackByKey] = useState<Record<string, CurationFeedbackEntry>>({});
   /** ``undefined`` = not loaded; ``null`` = no file; object = apply when ``items`` ready. */
@@ -478,11 +480,48 @@ export default function HomePage() {
     };
   }, [API_BASE, reloadNonce]);
 
-  // ChatDock write skills (select / vibe / export) → refresh Gallery state.
+  // ChatDock skills (search preview / select / vibe / export) → Gallery UI.
   useEffect(() => {
     const onAgentAction = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ action?: string }>).detail;
+      const detail = (
+        ev as CustomEvent<{ action?: string; metadata?: Record<string, unknown> }>
+      ).detail;
       const action = String(detail?.action || "");
+      const meta = detail?.metadata ?? {};
+      if (action === "search") {
+        const files = Array.isArray(meta.files)
+          ? meta.files.map((f) => String(f || "").trim()).filter(Boolean)
+          : [];
+        if (files.length === 0) {
+          setActionMsg("助手未找到匹配照片");
+          return;
+        }
+        const byBase = new Map<string, GalleryItem>();
+        for (const it of items) {
+          const base = catalogBasenameForExport(it);
+          if (base) byBase.set(base, it);
+          if (it.file?.trim()) byBase.set(it.file.trim(), it);
+        }
+        const root = (galleryBasePath || "").replace(/\/$/, "");
+        const resolved: GalleryItem[] = [];
+        for (const f of files) {
+          const hit = byBase.get(f);
+          if (hit) {
+            resolved.push(hit);
+            continue;
+          }
+          const abs = root ? `${root}/${f}` : f;
+          resolved.push({
+            file: f,
+            path: abs,
+            path_quoted: encodeURIComponent(abs),
+          });
+        }
+        setAgentPreviewItems(resolved);
+        setSelectionPreviewOpen(false);
+        setActionMsg(`助手筛选 ${resolved.length} 张，已打开预览`);
+        return;
+      }
       if (action === "reload_curation" || action === "reload_vibe" || action === "export_done") {
         setReloadNonce((n) => n + 1);
         if (action === "reload_curation") setActionMsg("助手已更新选片，正在刷新…");
@@ -492,7 +531,7 @@ export default function HomePage() {
     };
     window.addEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
     return () => window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
-  }, []);
+  }, [items, galleryBasePath]);
 
   const onApplySessionVibe = async () => {
     const text = vibePrompt.trim();
@@ -1121,6 +1160,20 @@ export default function HomePage() {
           exportByFile={exportByFile}
           apiBase={API_BASE}
           onClose={() => setSelectionPreviewOpen(false)}
+          sessionFilmVariant={
+            sessionVibeMatched(sessionVibe) ? sessionVibe?.film_variant ?? null : null
+          }
+          useSessionVibe={useSessionVibeForExport && sessionVibeMatched(sessionVibe)}
+        />
+      ) : null}
+
+      {agentPreviewItems && agentPreviewItems.length > 0 ? (
+        <SelectedPreviewModal
+          items={agentPreviewItems}
+          exportByFile={exportByFile}
+          apiBase={API_BASE}
+          variant="agent"
+          onClose={() => setAgentPreviewItems(null)}
           sessionFilmVariant={
             sessionVibeMatched(sessionVibe) ? sessionVibe?.film_variant ?? null : null
           }

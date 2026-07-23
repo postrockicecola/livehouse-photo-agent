@@ -63,3 +63,34 @@ def test_visual_mode_without_clip_returns_empty(tmp_path, monkeypatch):
     assert ranked == []
     assert citations == []
     assert meta["visual_available"] is False
+
+
+def test_hybrid_contrast_filters_negative_margin(tmp_path, monkeypatch):
+    """Wide-shot contrast must drop close-ups with negative pos−neg deltas."""
+    from services import embedding_service as es
+    from services.agent import rag as rag_mod
+
+    monkeypatch.setattr(es.EmbeddingService, "is_available", classmethod(lambda cls: True))
+
+    def _fake_visual(query, files, base_dir, *, top_k=50, negative_query=None):
+        # wide panorama ≫ close-up guitar
+        assert negative_query
+        return {"drum.jpg": 0.14, "guitar.jpg": -0.04}
+
+    monkeypatch.setattr(rag_mod, "visual_scores_for_query", _fake_visual)
+
+    ranked, citations, meta = hybrid_retrieve(
+        _rows(),
+        query="wide establishing shot",
+        query_terms=["全景", "wide shot"],
+        base_dir=tmp_path,
+        text_hit_score=lambda b, t: 0,
+        text_blob=lambda r: "",
+        mode="hybrid",
+        limit=5,
+        negative_query="tight close-up",
+        framing_intent="wide",
+    )
+    assert meta.get("contrastive") is True
+    assert [r["file"] for r in ranked] == ["drum.jpg"]
+    assert citations[0]["visual_score_raw"] == 0.14

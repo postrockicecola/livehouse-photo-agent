@@ -102,16 +102,49 @@ function ToolChip({ call }: { call: AgentToolCall }) {
       return "";
     }
   }, [call.args]);
+  const files = Array.isArray(call.metadata?.files)
+    ? (call.metadata.files as unknown[]).map((f) => String(f || "").trim()).filter(Boolean)
+    : [];
+  const canPreview =
+    call.ok &&
+    call.tool === "gallery_search" &&
+    String(call.metadata?.ui_action || "") === "search" &&
+    files.length > 0;
+
   return (
-    <span
-      title={argStr ? `args: ${argStr}` : undefined}
-      className="inline-flex items-center gap-1 rounded-[3px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[11px] text-white/55"
-    >
+    <span className="inline-flex flex-wrap items-center gap-1">
       <span
-        className={`h-1.5 w-1.5 rounded-full ${call.ok ? "bg-emerald-400/90" : "bg-rose-400/90"}`}
-        aria-hidden
-      />
-      <span className="font-mono">{call.tool}</span>
+        title={argStr ? `args: ${argStr}` : undefined}
+        className="inline-flex items-center gap-1 rounded-[3px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[11px] text-white/55"
+      >
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${call.ok ? "bg-emerald-400/90" : "bg-rose-400/90"}`}
+          aria-hidden
+        />
+        <span className="font-mono">{call.tool}</span>
+        {files.length > 0 ? (
+          <span className="tabular-nums text-white/35">{files.length}</span>
+        ) : null}
+      </span>
+      {canPreview ? (
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("luma:gallery-agent-action", {
+                detail: {
+                  action: "search",
+                  tool: call.tool,
+                  metadata: call.metadata ?? {},
+                },
+              }),
+            )
+          }
+          className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
+        >
+          打开预览
+        </button>
+      ) : null}
     </span>
   );
 }
