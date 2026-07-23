@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChatDock } from "@/components/agent/ChatDock";
 import { getApiBase } from "@/lib/apiBase";
-import { STUDIO_SELECT_PROMPTS, STUDIO_STYLE_PROMPTS } from "@/lib/productIa";
+import {
+  STUDIO_FIND_PROMPTS,
+  STUDIO_SELECT_PROMPTS,
+  STUDIO_STYLE_PROMPTS,
+} from "@/lib/productIa";
 
 const API_BASE = getApiBase();
 
@@ -71,7 +75,11 @@ export function GlobalChatDock() {
       defaultOpen={onStudio || Boolean(initialPrompt?.trim())}
       promptStages={
         onStudio
-          ? { select: STUDIO_SELECT_PROMPTS, style: STUDIO_STYLE_PROMPTS }
+          ? {
+              select: STUDIO_SELECT_PROMPTS,
+              style: STUDIO_STYLE_PROMPTS,
+              find: STUDIO_FIND_PROMPTS,
+            }
           : undefined
       }
     />

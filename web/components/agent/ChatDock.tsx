@@ -223,13 +223,21 @@ const SUGGESTIONS: Record<AgentMode, string[]> = {
   ],
 };
 
-type PromptPhase = "select" | "style";
+type PromptPhase = "select" | "style" | "find";
+
+type PromptStages = {
+  select: readonly string[];
+  style: readonly string[];
+  find: readonly string[];
+};
 
 const STUDIO_PROMPT_PHASE_KEY = "luma.studio_agent_prompt_phase";
 
 function readStoredPromptPhase(): PromptPhase {
   try {
-    return sessionStorage.getItem(STUDIO_PROMPT_PHASE_KEY) === "style" ? "style" : "select";
+    const v = sessionStorage.getItem(STUDIO_PROMPT_PHASE_KEY);
+    if (v === "style" || v === "find" || v === "select") return v;
+    return "select";
   } catch {
     return "select";
   }
@@ -253,6 +261,41 @@ function callsCompleteSelectPhase(calls: AgentToolCall[] | undefined): boolean {
         String(c.metadata?.ui_action || "") === "search",
     ),
   );
+}
+
+/** Film / dreamcore vibe advances Studio from style → find prompts. */
+function callsCompleteStylePhase(calls: AgentToolCall[] | undefined): boolean {
+  return Boolean(
+    calls?.some((c) => {
+      if (!c.ok || String(c.metadata?.ui_action || "") !== "reload_vibe") return false;
+      const sv = c.metadata?.session_vibe;
+      return Boolean(sv && typeof sv === "object" && (sv as Record<string, unknown>).film_variant);
+    }),
+  );
+}
+
+function promptsForPhase(stages: PromptStages, phase: PromptPhase): readonly string[] {
+  if (phase === "find") return stages.find;
+  if (phase === "style") return stages.style;
+  return stages.select;
+}
+
+function phaseStepLabel(phase: PromptPhase): string {
+  if (phase === "find") return "Step 3 · 再按主体找几张";
+  if (phase === "style") return "Step 2 · 试试修成一种风格";
+  return "Step 1 · 先选一批照片";
+}
+
+function phaseChipEyebrow(phase: PromptPhase): string {
+  if (phase === "find") return "常见检索";
+  if (phase === "style") return "可选风格";
+  return "常见选片";
+}
+
+function phaseFollowUpEyebrow(phase: PromptPhase): string {
+  if (phase === "find") return "风格好了？再试试找出主体";
+  if (phase === "style") return "选好了？试试修成一种风格";
+  return "还可以这样选";
 }
 
 function PromptChipList({
@@ -669,10 +712,10 @@ export function ChatDock({
   /** When set, empty state scrolls these prompts (click to send). */
   rotatingPrompts?: readonly string[];
   /**
-   * Studio two-step prompts: select first, then style chips after the first
-   * successful curation search (persisted in sessionStorage).
+   * Studio three-step prompts: select → style → find (e.g. 吉他手).
+   * Phase advances on tool success; persisted in sessionStorage.
    */
-  promptStages?: { select: readonly string[]; style: readonly string[] };
+  promptStages?: PromptStages;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
@@ -706,20 +749,19 @@ export function ChatDock({
 
   const advancePromptPhase = useCallback(
     (calls?: AgentToolCall[]) => {
-      if (!promptStages || promptPhase === "style") return;
-      if (!callsCompleteSelectPhase(calls)) return;
-      setPromptPhase("style");
-      writeStoredPromptPhase("style");
+      if (!promptStages) return;
+      let next: PromptPhase = promptPhase;
+      // Cascade so a single style turn (search + vibe) can skip select → find.
+      if (next === "select" && callsCompleteSelectPhase(calls)) next = "style";
+      if (next === "style" && callsCompleteStylePhase(calls)) next = "find";
+      if (next === promptPhase) return;
+      setPromptPhase(next);
+      writeStoredPromptPhase(next);
     },
     [promptStages, promptPhase],
   );
 
-  const stagePrompts =
-    promptStages == null
-      ? null
-      : promptPhase === "style"
-        ? promptStages.style
-        : promptStages.select;
+  const stagePrompts = promptStages ? promptsForPhase(promptStages, promptPhase) : null;
   const emptyRotatingPrompts = stagePrompts ?? rotatingPrompts;
 
   // Studio / Showcase: Gallery page is not mounted, so auto-open the static preview
@@ -1029,7 +1071,7 @@ export function ChatDock({
                 <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
                 {promptStages ? (
                   <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
-                    {promptPhase === "style" ? "Step 2 · 试试修成一种风格" : "Step 1 · 先选一批照片"}
+                    {phaseStepLabel(promptPhase)}
                   </p>
                 ) : null}
                 {emptyRotatingPrompts && emptyRotatingPrompts.length > 0 ? (
@@ -1042,12 +1084,12 @@ export function ChatDock({
                 {promptStages ? (
                   <PromptChipList
                     prompts={
-                      promptPhase === "style"
-                        ? promptStages.style
-                        : promptStages.select.slice(0, 4)
+                      promptPhase === "select"
+                        ? promptStages.select.slice(0, 4)
+                        : promptsForPhase(promptStages, promptPhase)
                     }
                     onPick={(p) => void send(p)}
-                    eyebrow={promptPhase === "style" ? "可选风格" : "常见选片"}
+                    eyebrow={phaseChipEyebrow(promptPhase)}
                   />
                 ) : (
                   <div className="flex flex-col gap-1.5">
@@ -1109,12 +1151,12 @@ export function ChatDock({
                   </div>
                 </div>
               ))}
-              {promptStages && promptPhase === "style" && !sending ? (
+              {promptStages && promptPhase !== "select" && !sending ? (
                 <div className="rounded-[6px] border border-amber-400/20 bg-amber-400/[0.04] px-2.5 py-2.5">
                   <PromptChipList
-                    prompts={promptStages.style}
+                    prompts={promptsForPhase(promptStages, promptPhase)}
                     onPick={(p) => void send(p)}
-                    eyebrow="选好了？试试修成一种风格"
+                    eyebrow={phaseFollowUpEyebrow(promptPhase)}
                   />
                 </div>
               ) : null}
