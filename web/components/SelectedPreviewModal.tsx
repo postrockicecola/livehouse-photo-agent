@@ -9,8 +9,6 @@ import {
   exportPreviewLabel,
   resolvePreviewExportSpec,
 } from "@/lib/exportPreviewUrl";
-import { useFocusTrap } from "@/lib/useFocusTrap";
-
 const PREVIEW_MAX_SIDE = 1200;
 
 type Props = {
@@ -110,7 +108,6 @@ function PreviewModalShell({
   variant?: "selection" | "agent" | "vibe";
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(true, dialogRef);
 
   const title =
     variant === "agent" ? "助手筛选预览" : variant === "vibe" ? "胶片风格预览" : "选中图片预览";
@@ -128,7 +125,7 @@ function PreviewModalShell({
       tabIndex={-1}
       className="fixed inset-0 z-[55] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label={title}
     >
       <div className="pointer-events-none absolute inset-0 bg-[#0a0a0a]" aria-hidden />

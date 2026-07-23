@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFocusTrap } from "@/lib/useFocusTrap";
 
 export type ShowcasePreviewItem = {
   path: string;
@@ -31,11 +30,14 @@ export function ShowcasePreviewModal({
   gradeClass = "showcase-grade-cinestill",
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(true, dialogRef);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      // Let the curator dock keep Esc for its own UI when the panel is focused.
+      const t = e.target;
+      if (t instanceof HTMLElement && t.closest("textarea, input, [data-chat-dock]")) return;
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -65,7 +67,7 @@ export function ShowcasePreviewModal({
       tabIndex={-1}
       className="fixed inset-0 z-[60] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label={title}
     >
       <div className="pointer-events-none absolute inset-0 bg-[#0a0a0a]" aria-hidden />

@@ -742,6 +742,8 @@ export function ChatDock({
   const openShowcasePreview = useCallback<OpenShowcaseFn>(
     (items, variant, filmLabel, gradeClass) => {
       if (!items.length) return;
+      // Keep the curator dock on top of the preview so the user can keep chatting.
+      setOpen(true);
       setShowcasePreview({ items, variant, filmLabel, gradeClass });
     },
     [],
@@ -1008,8 +1010,20 @@ export function ChatDock({
 
   return (
     <>
+    {showcasePreview ? (
+      <ShowcasePreviewModal
+        items={showcasePreview.items}
+        variant={showcasePreview.variant}
+        filmLabel={showcasePreview.filmLabel}
+        gradeClass={showcasePreview.gradeClass}
+        onClose={() => setShowcasePreview(null)}
+      />
+    ) : null}
+
+    {/* z-70: above ShowcasePreviewModal (60) / SelectedPreviewModal (55). */}
     <div
-      className="fixed right-4 z-50 flex flex-col items-end gap-2 transition-[bottom] duration-200"
+      data-chat-dock
+      className="fixed right-4 z-[70] flex flex-col items-end gap-2 transition-[bottom] duration-200"
       style={{ bottom: "var(--luma-chat-bottom, 1rem)" }}
     >
       {open ? (
@@ -1221,16 +1235,6 @@ export function ChatDock({
         )}
       </button>
     </div>
-
-    {showcasePreview ? (
-      <ShowcasePreviewModal
-        items={showcasePreview.items}
-        variant={showcasePreview.variant}
-        filmLabel={showcasePreview.filmLabel}
-        gradeClass={showcasePreview.gradeClass}
-        onClose={() => setShowcasePreview(null)}
-      />
-    ) : null}
     </>
   );
 }
