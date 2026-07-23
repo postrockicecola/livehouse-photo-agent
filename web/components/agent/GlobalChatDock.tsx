@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChatDock } from "@/components/agent/ChatDock";
 import { getApiBase } from "@/lib/apiBase";
+import { LANDING_HERO_PROMPTS } from "@/lib/productIa";
 
 const API_BASE = getApiBase();
 
@@ -19,12 +20,14 @@ function showChatOnPath(pathname: string | null): boolean {
 /**
  * Site-wide curation assistant FAB.
  * Reads landing hero `?q=` once to open + auto-send.
+ * On Studio: open by default and scroll the same preset prompts as the landing hero.
  * Film-vibe tools applied off-/gallery navigate to Gallery for graded preview.
  */
 export function GlobalChatDock() {
   const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const onStudio = Boolean(pathname?.startsWith("/studio"));
 
   useEffect(() => {
     try {
@@ -59,9 +62,12 @@ export function GlobalChatDock() {
 
   return (
     <ChatDock
+      key={onStudio ? "studio" : "gallery"}
       apiBase={API_BASE}
-      context="gallery"
+      context={onStudio ? "studio" : "gallery"}
       initialPrompt={initialPrompt}
+      defaultOpen={onStudio || Boolean(initialPrompt?.trim())}
+      rotatingPrompts={onStudio ? LANDING_HERO_PROMPTS : undefined}
     />
   );
 }

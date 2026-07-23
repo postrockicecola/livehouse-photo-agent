@@ -29,24 +29,123 @@ type ChatTurn = {
   streaming?: boolean;
 };
 
+/** Collect basenames from search/select metadata in this turn (for vibe preview pool). */
+function filesFromToolCalls(calls: AgentToolCall[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const call of calls) {
+    if (!call?.ok) continue;
+    const meta = call.metadata ?? {};
+    const raw = meta.files ?? meta.selected_keys;
+    if (!Array.isArray(raw)) continue;
+    for (const f of raw) {
+      const name = String(f || "").trim();
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      out.push(name);
+    }
+  }
+  return out;
+}
+
 /** Notify Gallery page to reload curation / vibe after write skills. */
-function emitGalleryUiActions(calls: AgentToolCall[]) {
+function emitGalleryUiActions(
+  calls: AgentToolCall[],
+  turnContext: AgentToolCall[] = calls,
+) {
   if (typeof window === "undefined") return;
+  const turnFiles = filesFromToolCalls(turnContext);
   for (const call of calls) {
     if (!call?.ok) continue;
     const action = String(call.metadata?.ui_action || "");
     if (!action) continue;
+    const meta = { ...(call.metadata ?? {}) };
+    // Style preview should prefer this turn's shortlist when the vibe skill itself
+    // has no files (e.g. select+vibe in one turn before curation is reloaded).
+    if (action === "reload_vibe" && turnFiles.length > 0) {
+      const existing = Array.isArray(meta.files) ? meta.files : [];
+      if (existing.length === 0) meta.files = turnFiles;
+    }
     window.dispatchEvent(
       new CustomEvent("luma:gallery-agent-action", {
-        detail: { action, tool: call.tool, metadata: call.metadata ?? {} },
+        detail: { action, tool: call.tool, metadata: meta },
       }),
     );
   }
 }
 
+/** Drop model-invented Markdown image grids (![](DSC….jpg)) — UI CTA handles preview. */
+function scrubAssistantText(text: string): string {
+  const withoutImgs = text.replace(/!\[[^\]]*]\([^)]+\)\s*/g, "");
+  return withoutImgs.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function AssistantActionBar({ calls }: { calls: AgentToolCall[] }) {
+  const searchCall = calls.find(
+    (c) =>
+      c.ok &&
+      c.tool === "gallery_search" &&
+      String(c.metadata?.ui_action || "") === "search" &&
+      Array.isArray(c.metadata?.files) &&
+      (c.metadata?.files as unknown[]).length > 0,
+  );
+  const vibeCall = calls.find(
+    (c) =>
+      c.ok &&
+      String(c.metadata?.ui_action || "") === "reload_vibe" &&
+      c.metadata?.session_vibe &&
+      typeof c.metadata.session_vibe === "object" &&
+      Boolean((c.metadata.session_vibe as Record<string, unknown>).film_variant),
+  );
+  if (!searchCall && !vibeCall) return null;
+
+  const emit = (call: AgentToolCall, action: string) => {
+    const meta = { ...(call.metadata ?? {}) };
+    if (action === "reload_vibe") {
+      const turnFiles = filesFromToolCalls(calls);
+      if (turnFiles.length > 0 && (!Array.isArray(meta.files) || meta.files.length === 0)) {
+        meta.files = turnFiles;
+      }
+    }
+    window.dispatchEvent(
+      new CustomEvent("luma:gallery-agent-action", {
+        detail: { action, tool: call.tool, metadata: meta },
+      }),
+    );
+  };
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {searchCall ? (
+        <button
+          type="button"
+          onClick={() => emit(searchCall, "search")}
+          className="rounded-[5px] border border-emerald-400/35 bg-emerald-400/15 px-2.5 py-1.5 text-[12px] font-medium text-emerald-100/95 transition-colors hover:bg-emerald-400/25"
+        >
+          打开预览
+          {Array.isArray(searchCall.metadata?.files) ? (
+            <span className="ml-1 tabular-nums text-emerald-100/55">
+              {(searchCall.metadata.files as unknown[]).length}
+            </span>
+          ) : null}
+        </button>
+      ) : null}
+      {vibeCall ? (
+        <button
+          type="button"
+          onClick={() => emit(vibeCall, "reload_vibe")}
+          className="rounded-[5px] border border-emerald-400/35 bg-emerald-400/15 px-2.5 py-1.5 text-[12px] font-medium text-emerald-100/95 transition-colors hover:bg-emerald-400/25"
+        >
+          打开风格预览
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 const SUGGESTIONS: Record<AgentMode, string[]> = {
   gallery: [
-    "帮我从这场里选出 40 张能交片的",
+    "帮我从这场里选出 20 张能交片的",
     "找出吉他手弹琴的特写",
     "修成复古胶片风预览看看",
   ],
@@ -56,6 +155,60 @@ const SUGGESTIONS: Record<AgentMode, string[]> = {
     "调研 SSE 与 WebSocket 的区别，写成一份 markdown 报告",
   ],
 };
+
+const ROTATE_MS = 3200;
+
+/** Empty-state rotating prompt (landing / Studio showcase copy). */
+function RotatingPromptStage({
+  prompts,
+  onPick,
+}: {
+  prompts: readonly string[];
+  onPick: (prompt: string) => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+  const active = prompts[index % Math.max(prompts.length, 1)] ?? "";
+
+  useEffect(() => {
+    if (prompts.length <= 1) return;
+    let fadeTimer = 0;
+    const id = window.setInterval(() => {
+      setFade(false);
+      fadeTimer = window.setTimeout(() => {
+        setIndex((i) => (i + 1) % prompts.length);
+        setFade(true);
+      }, 220);
+    }, ROTATE_MS);
+    return () => {
+      window.clearInterval(id);
+      window.clearTimeout(fadeTimer);
+    };
+  }, [prompts]);
+
+  if (!active) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onPick(active)}
+      className="group w-full rounded-[6px] border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-left transition-colors hover:border-emerald-400/30 hover:bg-emerald-400/[0.06]"
+    >
+      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/30 group-hover:text-emerald-200/50">
+        试试这样问
+      </p>
+      <p
+        className={[
+          "mt-2 min-h-[2.75rem] text-[13px] leading-relaxed text-white/70 transition-opacity duration-200",
+          fade ? "opacity-100" : "opacity-0",
+        ].join(" ")}
+      >
+        {active}
+      </p>
+      <p className="mt-2 font-mono text-[10px] text-white/28 group-hover:text-emerald-200/55">点击发送 →</p>
+    </button>
+  );
+}
 
 const MODE_LABEL: Record<AgentMode, string> = {
   gallery: "策展助手",
@@ -284,14 +437,20 @@ export function ChatDock({
   previewsDir,
   context = "gallery",
   initialPrompt,
+  defaultOpen = false,
+  rotatingPrompts,
 }: {
   apiBase: string;
   previewsDir?: string | null;
   context?: string;
   /** Prefill + open dock once (e.g. landing hero `?q=`), then auto-send. */
   initialPrompt?: string | null;
+  /** Open the panel on mount (Studio entry). */
+  defaultOpen?: boolean;
+  /** When set, empty state scrolls these prompts (click to send). */
+  rotatingPrompts?: readonly string[];
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -388,19 +547,25 @@ export function ChatDock({
 
       try {
         const emittedUiTools = new Set<string>();
+        const turnToolCalls: AgentToolCall[] = [];
         const emitOnce = (calls: AgentToolCall[]) => {
-          const fresh = calls.filter((c) => {
+          const fresh: AgentToolCall[] = [];
+          for (const c of calls) {
+            if (!c?.ok || !c.metadata?.ui_action) continue;
             const key = `${c.tool}:${String(c.metadata?.ui_action || "")}:${JSON.stringify(c.args ?? {})}`;
-            if (!c.metadata?.ui_action || emittedUiTools.has(key)) return false;
+            if (emittedUiTools.has(key)) continue;
             emittedUiTools.add(key);
-            return true;
-          });
-          emitGalleryUiActions(fresh);
+            fresh.push(c);
+          }
+          if (fresh.length === 0) return;
+          // Emit only fresh actions; pass whole turn so vibe can inherit search/select files.
+          emitGalleryUiActions(fresh, turnToolCalls.length ? turnToolCalls : fresh);
         };
         const { receivedToken } = await streamAgentChat(apiBase, body, {
           onToken: (text) =>
             patchLastAssistant((t) => ({ ...t, text: t.text + text })),
           onToolCall: (call) => {
+            turnToolCalls.push(call);
             patchLastAssistant((t) => ({ ...t, toolCalls: [...(t.toolCalls ?? []), call] }));
             // Open Gallery preview as soon as the write skill returns — don't wait for the
             // model's final prose (which often claims success without a CTA).
@@ -408,6 +573,10 @@ export function ChatDock({
           },
           onDone: (info) => {
             const calls = info.tool_calls?.length ? info.tool_calls : undefined;
+            if (calls?.length) {
+              turnToolCalls.length = 0;
+              turnToolCalls.push(...calls);
+            }
             patchLastAssistant((t) => ({
               ...t,
               text: (t.text || info.reply || "(空回复)").trim(),
@@ -415,7 +584,7 @@ export function ChatDock({
               guardrails: info.guardrail_events,
               streaming: false,
             }));
-            emitOnce(calls ?? []);
+            emitOnce(calls ?? turnToolCalls);
           },
           onError: (msg) =>
             patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false })),
@@ -555,6 +724,9 @@ export function ChatDock({
             {turns.length === 0 ? (
               <div className="space-y-3 pt-2">
                 <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
+                {rotatingPrompts && rotatingPrompts.length > 0 ? (
+                  <RotatingPromptStage prompts={rotatingPrompts} onPick={(p) => void send(p)} />
+                ) : null}
                 <div className="flex flex-col gap-1.5">
                   {SUGGESTIONS[mode].map((s) => (
                     <button
@@ -588,12 +760,19 @@ export function ChatDock({
                       </div>
                     ) : (
                       <div>
-                        {t.role === "assistant" ? <LinkifiedText text={t.text} /> : t.text}
+                        {t.role === "assistant" ? (
+                          <LinkifiedText text={scrubAssistantText(t.text)} />
+                        ) : (
+                          t.text
+                        )}
                         {t.streaming ? (
                           <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-white/50 align-[-0.15em]" aria-hidden />
                         ) : null}
                       </div>
                     )}
+                    {t.role === "assistant" && t.toolCalls?.length ? (
+                      <AssistantActionBar calls={t.toolCalls} />
+                    ) : null}
                     {(t.toolCalls?.length || t.guardrails?.length) ? (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {t.toolCalls?.map((c, j) => <ToolChip key={`t${j}`} call={c} />)}
