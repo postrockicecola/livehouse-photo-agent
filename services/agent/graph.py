@@ -17,7 +17,7 @@ import logging
 import os
 from typing import Any, Callable, Literal, Optional, TypedDict  # noqa: F401 — Literal used by platform graph
 
-from services.agent.planner import HeuristicPlanner, Planner
+from services.agent.planner import Planner, StratifiedHeuristicPlanner
 from services.agent.reflection import reflect as default_reflect
 from services.agent.tools import ToolRegistry
 from services.agent.types import (
@@ -229,7 +229,7 @@ def run_curation_graph(
     use_checkpointer: bool = False,
 ) -> AgentResult:
     """Execute curation on the LangGraph runtime (or raise ImportError)."""
-    planner = planner or HeuristicPlanner()
+    planner = planner or StratifiedHeuristicPlanner()
     checkpointer = None
     invoke_config: dict[str, Any] | None = None
     if use_checkpointer or thread_id:

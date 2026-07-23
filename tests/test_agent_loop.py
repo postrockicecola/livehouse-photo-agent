@@ -85,9 +85,11 @@ def test_heuristic_end_to_end_selects_top_scorers():
 def test_inference_budget_caps_analysis():
     cands = _make_candidates([(f"img{i}", float(10 - i)) for i in range(8)])
     analyze = _fake_analyze({f"img{i}": 85.0 for i in range(8)})
+    # Pin greedy heuristic: default StratifiedHeuristicPlanner intentionally explores.
     agent = CurationAgent(
         tools=_registry(analyze),
         config=AgentConfig(max_inferences=3, allow_escalation=False, target_keepers=10),
+        planner=HeuristicPlanner(),
     )
     res = agent.run(cands)
 

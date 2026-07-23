@@ -25,7 +25,13 @@ import requests
 
 from inference.providers.ollama import resolve_ollama_base_urls
 from inference.providers.vllm import chat_completions_url, resolve_vllm_base_urls
-from services.agent.planner import CompleteFn, HeuristicPlanner, LLMPlanner, Planner
+from services.agent.planner import (
+    CompleteFn,
+    HeuristicPlanner,
+    LLMPlanner,
+    Planner,
+    StratifiedHeuristicPlanner,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -155,10 +161,10 @@ def build_curation_llm_planner(
 ) -> Planner:
     """LLM tool-calling planner over the configured provider, heuristic fallback.
 
-    Returns the :class:`HeuristicPlanner` directly when the provider is ``mock`` or
+    Returns :class:`StratifiedHeuristicPlanner` when the provider is ``mock`` or
     the backend cannot be built, so callers can wire this unconditionally.
     """
-    fb = fallback or HeuristicPlanner()
+    fb = fallback or StratifiedHeuristicPlanner()
     try:
         complete_fn = build_planner_complete_fn(
             model_config,

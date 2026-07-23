@@ -43,12 +43,14 @@ export function SelectedPreviewModal({
   const rows = useMemo((): Row[] => {
     const out: Row[] = [];
     let i = 0;
+    const forceSessionVibe = variant === "vibe";
     for (const item of items) {
       const prefKey = gallerySelectionKey(item);
       const stored = prefKey ? exportByFile[prefKey] : undefined;
       const spec = resolvePreviewExportSpec(item, stored, {
         sessionFilmVariant,
-        useSessionVibe,
+        useSessionVibe: forceSessionVibe ? true : useSessionVibe,
+        forceSessionVibe,
       });
       if (!spec) continue;
       i += 1;
@@ -62,7 +64,7 @@ export function SelectedPreviewModal({
       });
     }
     return out;
-  }, [items, exportByFile, apiBase, sessionFilmVariant, useSessionVibe]);
+  }, [items, exportByFile, apiBase, sessionFilmVariant, useSessionVibe, variant]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

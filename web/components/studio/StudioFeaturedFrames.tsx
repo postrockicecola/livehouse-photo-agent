@@ -92,7 +92,9 @@ export function StudioFeaturedFrames({ previewsDir, canGallery }: Props) {
           Top frames — aesthetic, composition, emotion
         </p>
         <div className="rounded-lg border border-dashed border-white/[0.07] px-6 py-10 text-center">
-          <p className="text-sm text-white/38">Run analysis to surface top shots from this session.</p>
+          <p className="text-sm text-white/38">
+            Waiting for Previews — once files land, Open gallery works even before VLM finishes.
+          </p>
         </div>
       </section>
     );

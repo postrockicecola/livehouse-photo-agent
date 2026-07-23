@@ -222,6 +222,15 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 2
     topks = [int(x) for x in str(args.topk).split(",") if x.strip()]
     rep = build_report(joined, topks)
+    from scripts.eval.protocol import stamp_protocol
+
+    stamp_protocol(
+        rep,
+        labels_path=args.labels,
+        predictions_path=args.predictions,
+        config_path=getattr(args, "config", None) or "configs/eval_stage3.yaml",
+        seed=getattr(args, "seed", None),
+    )
     print_report(rep)
     if args.json:
         Path(args.json).parent.mkdir(parents=True, exist_ok=True)

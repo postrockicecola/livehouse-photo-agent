@@ -39,6 +39,8 @@ Batch E hooks (scaffolding, not full platform)
    When >0, PrioritizedInferenceQueue admits are counted per
    (namespace, project_key) hour window in SQLite table scope_quota_windows.
    Default 0 = disabled. Not cluster Redis fair-share.
+   Quota *check failures* are fail-closed (deny admit) unless
+   LIVEHOUSE_SCOPE_QUOTA_FAIL_OPEN=1 (emergency escape hatch only).
 
 4. LIVEHOUSE_OTEL=1 (+ optional OTEL_EXPORTER_OTLP_ENDPOINT)
    Optional TracerProvider bootstrap (infra/otel_bootstrap.py).

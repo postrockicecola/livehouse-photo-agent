@@ -91,7 +91,12 @@ function buildFilmRenderUrl(
 export function resolvePreviewExportSpec(
   item: GalleryItem,
   stored: GalleryExportItem | undefined,
-  options?: { sessionFilmVariant?: string | null; useSessionVibe?: boolean },
+  options?: {
+    sessionFilmVariant?: string | null;
+    useSessionVibe?: boolean;
+    /** When true (style-preview modal), always prefer session film over stored export picks. */
+    forceSessionVibe?: boolean;
+  },
 ): GalleryExportItem | null {
   const file = catalogBasenameForExport(item);
   if (!file) return null;
@@ -106,10 +111,14 @@ export function resolvePreviewExportSpec(
   const fv = (spec.film_variant ?? "").trim();
   if (!fv && !alt && def) spec = { ...def, file, rotate };
 
-  if (options?.useSessionVibe && options.sessionFilmVariant?.trim() && !alt) {
+  if (
+    (options?.forceSessionVibe || options?.useSessionVibe) &&
+    options.sessionFilmVariant?.trim() &&
+    !alt
+  ) {
     const sv = options.sessionFilmVariant.trim();
     const currentFv = (spec.film_variant ?? "").trim();
-    if (!currentFv || currentFv === DEFAULT_FILM_VARIANT) {
+    if (options.forceSessionVibe || !currentFv || currentFv === DEFAULT_FILM_VARIANT) {
       const pq = filmSourcePathQuotedForItem(item);
       if (pq) {
         spec = { file, rotate, film_variant: sv, film_source_path_quoted: pq };

@@ -201,6 +201,11 @@ export default function HomePage() {
   const curationHydratedRef = useRef(false);
   const curationSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingVibePreviewRef = useRef(false);
+  /** Last observed gallery totals for mid-job progressive refresh. */
+  const galleryPollTotalsRef = useRef<{ raw: number | null; count: number | null }>({
+    raw: null,
+    count: null,
+  });
   const [curationSaveState, setCurationSaveState] = useState<"idle" | "saving" | "saved" | "err">("idle");
 
   const paginated = loadSource === "results_api";
@@ -265,6 +270,10 @@ export default function HomePage() {
         setHasMore(Boolean(boot.hasMore));
         setDatasetTotal(boot.count);
         setDatasetTotalRaw(boot.totalRaw);
+        galleryPollTotalsRef.current = {
+          raw: boot.totalRaw,
+          count: boot.count,
+        };
         setLoadSource(boot.loadSource);
         if (boot.activeBaseDir) setGalleryBasePath(boot.activeBaseDir);
         setBootstrapErr(boot.error);
@@ -298,6 +307,50 @@ export default function HomePage() {
       ctrl.abort();
     };
   }, [reloadNonce, enqueueDecode, galleryBurstDedupe, gallerySort]);
+
+  // Mid-job: poll gallery totals and soft-reload when new Previews / scored rows appear.
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const data = await fetchGalleryResultsPage(
+          API_BASE,
+          0,
+          1,
+          undefined,
+          galleryBurstDedupe,
+          gallerySort,
+        );
+        if (cancelled || !data) return;
+        const raw = Number(data.total_raw ?? data.count ?? 0);
+        const count = Number(data.count ?? 0);
+        const prev = galleryPollTotalsRef.current;
+        const grew =
+          (prev.raw != null && raw > prev.raw) ||
+          (prev.count != null && count > prev.count) ||
+          ((prev.raw == null || prev.raw === 0) && raw > 0);
+        galleryPollTotalsRef.current = { raw, count };
+        // Avoid reload loops when totals are unchanged after bootstrap.
+        if (grew && (prev.raw !== raw || prev.count !== count)) {
+          setActionMsg(`会话进行中：已发现 ${raw} 张预览，正在刷新画廊…`);
+          setReloadNonce((n) => n + 1);
+        }
+      } catch {
+        /* ignore transient poll errors */
+      }
+    };
+    const deferId = globalThis.setTimeout(() => {
+      void tick();
+    }, 2500);
+    const intervalId = globalThis.setInterval(() => {
+      void tick();
+    }, 8_000);
+    return () => {
+      cancelled = true;
+      clearTimeout(deferId);
+      clearInterval(intervalId);
+    };
+  }, [API_BASE, galleryBurstDedupe, gallerySort]);
 
   useEffect(() => {
     if (!paginated || !hasMore) return;
@@ -1050,6 +1103,21 @@ export default function HomePage() {
                 >
                   {vibeBusy ? "应用中…" : "应用风格"}
                 </button>
+                {sessionVibeMatched(sessionVibe) && sessionVibe ? (
+                  <button
+                    type="button"
+                    disabled={vibeBusy || items.length === 0}
+                    onClick={() => {
+                      const liked = items.filter((it, idx) =>
+                        selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
+                      );
+                      openVibeStylePreview(sessionVibe, liked.length > 0 ? liked : items);
+                    }}
+                    className="shrink-0 rounded-[4px] border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-2 text-[11px] text-emerald-100/85 transition-colors hover:bg-emerald-400/[0.14] disabled:opacity-40"
+                  >
+                    预览风格
+                  </button>
+                ) : null}
                 {sessionVibe ? (
                   <button
                     type="button"

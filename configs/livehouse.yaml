@@ -215,8 +215,11 @@ processing:
   # keeps one representative per group, folds the rest as expandable group_members.
   diversity_selection:
     enabled: true
-    similarity_threshold: 0.85        # CLIP cosine; lower = merge more look-alikes (was 0.90)
-    fallback_phash_hamming: 12        # used only when CLIP embeddings are unavailable
+    # Higher CLIP cosine = harder to merge = smaller clusters (true near-dups / short bursts).
+    # 0.85 + single-link previously chained whole stage looks into 「同款 ×300+」.
+    similarity_threshold: 0.92
+    fallback_phash_hamming: 8         # used only when CLIP embeddings are unavailable
+    max_cluster_size: 20              # hard cap ≈ typical burst; opens a new group when full
     max_members_returned: 40          # cap folded frames returned per group (payload guard)
     mmr_lambda: 0.65                  # display order: quality vs spread (1=pure score, 0=max spread)
     representative_dims:              # in-cluster rep pick uses dims that vary within a burst

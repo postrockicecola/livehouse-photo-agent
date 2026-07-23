@@ -6,7 +6,13 @@
     "n_labeled": 250,
     "labels": "data/eval/labels.jsonl",
     "manifest": "data/eval/manifest.json",
-    "human_keepers_approx": 83
+    "human_keepers_approx": 83,
+    "preferences": "data/eval/preferences/pairs.jsonl"
+  },
+  "protocol": {
+    "helper": "scripts/eval/protocol.py",
+    "lockfile": "requirements.lock",
+    "eval_config_temp0": "configs/eval_stage3.yaml"
   },
   "reports": [
     {
@@ -22,6 +28,24 @@
       "headline": { "spearman": 0.362, "mae": 6.09, "precision_at_20": 0.55 }
     },
     {
+      "id": "two_stage_gating",
+      "path": "reports/eval/two_stage_gating.json",
+      "provenance": "recorded",
+      "real_run": true,
+      "method": "offline_replay_apply_stage3_candidates_gating",
+      "n": 250,
+      "predictions": "data/eval/images/analysis_results.json",
+      "config": "configs/livehouse.yaml",
+      "metrics": ["spearman", "mae", "vlm_call_share", "keeper_coverage", "precision_at_k"],
+      "headline": {
+        "full_spearman": 0.362,
+        "gated_spearman_on_admitted": 0.520,
+        "vlm_call_share": 0.064,
+        "keeper_coverage": 0.060
+      },
+      "note": "Production gating replay — not a second GPU pass. Gated Spearman is on the 16 admitted images only."
+    },
+    {
       "id": "agent_selection_250",
       "path": "reports/eval/agent_selection.json",
       "provenance": "recorded",
@@ -33,8 +57,8 @@
       "config": "scripts/eval/eval_agent_selection.py",
       "hardware": null,
       "metrics": ["selection_precision", "analyzed_keeper_recall", "precision_at_k"],
-      "arms": ["random", "heuristic", "oracle"],
-      "note": "No LLM arm in this file."
+      "arms": ["random", "heuristic", "stratified", "oracle"],
+      "note": "Default production planner is StratifiedHeuristicPlanner; beats greedy heuristic under same budget."
     },
     {
       "id": "agent_selection_llm_60",
@@ -71,8 +95,15 @@
   "gaps": [
     {
       "id": "two_stage_vs_full_vlm",
-      "status": "missing",
-      "note": "No committed head-to-head of production Stage1/2 gates vs full-VLM on the same 250 labels (quality · VLM call share · latency · cost)."
+      "status": "filled",
+      "path": "reports/eval/two_stage_gating.json",
+      "note": "Offline head-to-head committed; live GPU re-run of gated path still optional."
+    },
+    {
+      "id": "preference_training_loop",
+      "status": "scaffolded",
+      "path": "data/eval/preferences/",
+      "note": "Pairs exported; no SFT/DPO trainer wired yet."
     }
   ]
 }

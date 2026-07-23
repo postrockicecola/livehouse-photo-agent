@@ -129,24 +129,26 @@ UI: **`/eval`** (also summarized on the landing `#evaluation` section).
 Private interview notes (resume bullets / pitch scripts — not on the site): [`docs/interview_pitch.txt`](docs/interview_pitch.txt).  
 Report provenance index: [`reports/eval/meta.json`](reports/eval/meta.json).
 
-Fixed **250-image** human-labeled set (`data/eval/`). Config for full scoring: `configs/eval_stage3.yaml`. Hardware is **not** recorded in the Stage3 JSON — say so in interviews.
+Fixed **250-image** human-labeled set (`data/eval/`). Config for full scoring: `configs/eval_stage3.yaml` (temp=0).  
+Eval reports stamp a `protocol` block (seed, config hash, hardware, git sha) via `scripts/eval/protocol.py`. Dependency lock: `requirements.lock`.
 
 | 策略 | 质量 | VLM 调用 | 延迟 | 成本 | Provenance |
 |------|------|----------|------|------|-------------|
 | 全量 VLM（eval Stage3） | Spearman **0.36** · MAE **6.09** · P@20 **0.55** | 100% of 250 | — | — | Recorded · `reports/eval/stage3_v6_qwen2vl_temp0.json` |
-| 两阶段门控（生产路径） | — | — | — | — | Path exists; **no** committed head-to-head on the same 250 labels yet |
-| Agent 策展（budget 40） | heuristic sel. P **0.30** · keeper recall **0.16** | 40/250 = **16%** | — | lower VLM count by design | Recorded · `reports/eval/agent_selection.json` |
+| 两阶段门控（生产路径） | admitted Spearman **0.52** · MAE **4.48** · keeper coverage **0.06** | **6.4%** of 250 (16 calls) | — | ~15× fewer VLM calls | Recorded · offline replay · `reports/eval/two_stage_gating.json` |
+| Agent 策展（budget 40） | **stratified** sel. P **0.43** · keeper recall **0.20** | 40/250 = **16%** | — | lower VLM count by design | Recorded · `reports/eval/agent_selection.json` |
 
 **Agent vs baselines (n=250, budget=40, select 30):**
 
 | Arm | Selection precision | Keeper recall | P@10 |
 |-----|--------------------:|--------------:|-----:|
 | random | 0.40 | 0.205 | 0.40 |
-| heuristic | 0.30 | 0.157 | 0.40 |
+| heuristic (greedy fast_score) | 0.30 | 0.157 | 0.40 |
+| **stratified (default)** | **0.43** | **0.205** | **0.50** |
 | oracle | 0.93 | 0.458 | 0.80 |
 
 **LLM arm (n=60 subset):** selection precision heuristic 0.33 vs llm 0.36; `llm_decision_rate≈0.06` with heavy heuristic fallback (`reports/eval/agent_selection_llm.json`).  
-**Honesty:** runtime (budget, tools, harness) is ready; quality has **not** stably beaten the heuristic baseline.
+**Honesty:** stratified allocation now beats greedy heuristic (and random on P@10 / sel. P) under the same budget; LLM planner still does not stably beat stratified. Preference pairs for a future SFT/DPO loop: `data/eval/preferences/`.
 
 **Simulated / illustrative only (do not cite as production SLO):**
 
@@ -160,6 +162,15 @@ python run_pipeline.py --config configs/eval_stage3.yaml --source-dir data/eval/
 python scripts/label_server.py --images data/eval/images --labels data/eval/labels.jsonl
 python scripts/eval_stage3.py run --labels data/eval/labels.jsonl \
     --predictions data/eval/images/analysis_results.json
+# Production gating vs full-VLM (offline replay, no GPU):
+python scripts/eval/eval_two_stage_gating.py --out reports/eval/two_stage_gating.json
+# Planner arms (includes stratified default):
+python scripts/eval/eval_agent_selection.py --labels data/eval/labels.jsonl \
+    --predictions reports/eval/baseline_v4_stage1_two_merged_predictions.json \
+    --features data/eval/_temp0_run/.luma_pipeline_staged/eligible_after_stage2.jsonl \
+    --budget 40 --out reports/eval/agent_selection.json
+# Preference pairs for a future SFT/DPO loop:
+python scripts/eval/export_preferences.py --labels data/eval/labels.jsonl
 ```
 
 ---

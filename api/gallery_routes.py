@@ -229,15 +229,43 @@ def _analysis_results_has_entries(dir_path: str) -> bool:
     return not inner.startswith("]")
 
 
+def _previews_dir_has_images(dir_path: str, *, limit: int = 32) -> bool:
+    """True if Previews (or classified subfolders) contain any JPEG/PNG preview files."""
+    root = Path(dir_path)
+    if not root.is_dir():
+        return False
+    exts = {".jpg", ".jpeg", ".png"}
+    checked = 0
+    try:
+        for child in root.iterdir():
+            if checked >= limit:
+                break
+            checked += 1
+            if child.is_file() and child.suffix.lower() in exts and not child.name.startswith("._"):
+                return True
+            if child.is_dir() and child.name.startswith(("AI_", "best", "keep", "trash")):
+                try:
+                    for f in child.iterdir():
+                        if f.is_file() and f.suffix.lower() in exts and not f.name.startswith("._"):
+                            return True
+                        break
+                except OSError:
+                    continue
+    except OSError:
+        return False
+    return False
+
+
 def _runtime_base_dir() -> str:
     """Resolve active Previews directory for JSON + ``/image``.
 
     **Override:** set env ``LIVEHOUSE_GALLERY_PREVIEWS_DIR`` to an absolute Previews path to
     force Lab/API to that folder (ignores ``latest_session.json`` logic below).
 
-    Otherwise: prefer ``latest_session.json`` → ``previews_dir`` when it has gallery rows.
-    If that pointer is stale/empty while ``gallery_server`` was started with a populated
-    ``BASE_DIR``, fall back to ``BASE_DIR``.
+    Otherwise: prefer ``latest_session.json`` → ``previews_dir`` when that folder has
+    previews on disk *or* analysis rows — including mid-job sessions that have not
+    written ``analysis_results.json`` yet. Only fall back to ``BASE_DIR`` when the
+    pointer session is empty/missing while ``BASE_DIR`` still has content.
     """
     global _gallery_active_dir_cache
     override = (os.environ.get("LIVEHOUSE_GALLERY_PREVIEWS_DIR") or "").strip()
@@ -257,17 +285,27 @@ def _runtime_base_dir() -> str:
             if cand and os.path.isdir(cand):
                 cand_json = os.path.join(cand, "analysis_results.json")
                 base_json = os.path.join(base, "analysis_results.json")
+                # Include a cheap dir mtime so newly landed Previews mid-job invalidate cache.
+                try:
+                    cand_dir_mtime = float(os.path.getmtime(cand))
+                except OSError:
+                    cand_dir_mtime = -1.0
                 cache_key = (
                     str(refp.resolve()),
                     _mtime(str(refp)),
                     _mtime(cand_json),
                     _mtime(base_json),
+                    cand_dir_mtime,
                 )
                 if _gallery_active_dir_cache and _gallery_active_dir_cache[0] == cache_key:
                     return _gallery_active_dir_cache[1]
 
-                cand_ok = _analysis_results_has_entries(cand)
-                base_ok = _analysis_results_has_entries(base)
+                cand_ok = _analysis_results_has_entries(cand) or _previews_dir_has_images(cand)
+                base_ok = _analysis_results_has_entries(base) or (
+                    base != cand and _previews_dir_has_images(base)
+                )
+                # Prefer the active/latest session whenever it has anything to show —
+                # do not hide a running job behind an older BASE_DIR that already has JSON.
                 if cand_ok:
                     resolved = cand
                 elif base_ok:

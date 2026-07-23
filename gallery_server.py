@@ -113,10 +113,16 @@ app.include_router(auth_router)
 async def _unhandled_exception_handler(_request: Request, exc: Exception):
     import traceback
 
+    # Log the full exception server-side; never echo raw internals to clients.
     traceback.print_exc()
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc), "success": False, "error": "internal server error"},
+        content={
+            "detail": "internal server error",
+            "success": False,
+            "error": "internal server error",
+            "error_type": type(exc).__name__,
+        },
     )
 
 _static_dir = _REPO_ROOT / "static"

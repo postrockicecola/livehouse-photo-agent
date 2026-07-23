@@ -230,6 +230,12 @@ export async function fetchGalleryResultsPage(
   signal?: AbortSignal,
   dedupe = true,
   sort: GallerySort = "overall",
-): Promise<{ items: GalleryItem[]; next_offset: number | null; has_more: boolean; count?: number }> {
+): Promise<{
+  items: GalleryItem[];
+  next_offset: number | null;
+  has_more: boolean;
+  count?: number;
+  total_raw?: number;
+}> {
   return fetchJson(galleryResultsUrl(apiBase, offset, limit, true, dedupe, sort), signal);
 }

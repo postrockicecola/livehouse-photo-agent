@@ -35,15 +35,52 @@ def load_raw_results(base_dir: str) -> list[dict]:
     return data
 
 
+# Absolute Previews dir -> (scan_mtime_signal, rows). Invalidated when Previews / AI_* mtimes change.
+_DISK_ROWS_CACHE: dict[str, tuple[float, list[dict]]] = {}
+
+_DISK_SCAN_FOLDERS = (
+    "AI_Best_90+",
+    "AI_Keep_60-90",
+    "AI_Trash_Below60",
+    "best",
+    "keep",
+    "trash",
+)
+
+
+def _previews_scan_mtime(base: Path) -> float:
+    """Max mtime of Previews + classified subfolders (files landing mid-job bump these)."""
+    mt = -1.0
+    try:
+        mt = max(mt, float(os.path.getmtime(base)))
+    except OSError:
+        pass
+    for folder in _DISK_SCAN_FOLDERS:
+        d = base / folder
+        if not d.is_dir():
+            continue
+        try:
+            mt = max(mt, float(os.path.getmtime(d)))
+        except OSError:
+            continue
+    return mt
+
+
 def _discover_gallery_rows_from_disk(base_dir: str) -> list[dict]:
-    """When ``analysis_results.json`` is missing or ``[]``, build minimal rows from JPEG/PNG on disk.
+    """Build minimal unscored rows from JPEG/PNG on disk (running or completed sessions).
 
     Scans the same layout as :meth:`services.path_service.PathResolver._iter_preview_roots`
     (classified subfolders, then loose files directly under ``Previews``).
+    Cached by directory mtime so mid-job Gallery polls stay cheap.
     """
     base = Path(base_dir).expanduser().resolve()
     if not base.is_dir():
         return []
+    base_key = str(base)
+    scan_mtime = _previews_scan_mtime(base)
+    cached = _DISK_ROWS_CACHE.get(base_key)
+    if cached and cached[0] == scan_mtime:
+        return cached[1]
 
     seen: set[str] = set()
     rows: list[dict] = []
@@ -69,17 +106,11 @@ def _discover_gallery_rows_from_disk(base_dir: str) -> list[dict]:
                     "composition": 0.0,
                     "laplacian": 0.0,
                 },
+                "analysis_pending": True,
             }
         )
 
-    for folder in (
-        "AI_Best_90+",
-        "AI_Keep_60-90",
-        "AI_Trash_Below60",
-        "best",
-        "keep",
-        "trash",
-    ):
+    for folder in _DISK_SCAN_FOLDERS:
         d = base / folder
         if not d.is_dir():
             continue
@@ -97,7 +128,44 @@ def _discover_gallery_rows_from_disk(base_dir: str) -> list[dict]:
     except OSError:
         pass
 
+    _DISK_ROWS_CACHE[base_key] = (scan_mtime, rows)
     return rows
+
+
+def _row_basename(row: dict) -> str:
+    name = str(row.get("file") or "").strip()
+    if name:
+        return name
+    path = str(row.get("path") or "").strip()
+    return Path(path).name if path else ""
+
+
+def merge_json_and_disk_gallery_rows(json_rows: list[dict], disk_rows: list[dict]) -> list[dict]:
+    """Union JSON analysis rows with on-disk previews (JSON wins on basename).
+
+    Lets Gallery show every preview in a running session while VLM is still writing
+    scores into ``analysis_results.json``.
+    """
+    if not disk_rows:
+        return list(json_rows)
+    if not json_rows:
+        return list(disk_rows)
+
+    by_name: dict[str, dict] = {}
+    order: list[str] = []
+    for row in json_rows:
+        name = _row_basename(row)
+        if not name or name in by_name:
+            continue
+        by_name[name] = row
+        order.append(name)
+    for row in disk_rows:
+        name = _row_basename(row)
+        if not name or name in by_name:
+            continue
+        by_name[name] = row
+        order.append(name)
+    return [by_name[n] for n in order]
 
 
 # Absolute path ``analysis_results.json`` -> (mtime, rows). Rows are **never** mutated once cached.
@@ -354,9 +422,10 @@ def load_gallery_page(
     enrichment (same as ``load_results`` per row).
     """
     json_abs = os.path.abspath(_results_json_path(base_dir))
-    rows_ro = _read_json_rows_cached(json_abs)
-    if not rows_ro:
-        rows_ro = _discover_gallery_rows_from_disk(base_dir)
+    json_rows = _read_json_rows_cached(json_abs)
+    disk_rows = _discover_gallery_rows_from_disk(base_dir)
+    # Always union: scored JSON rows win; unscored on-disk previews fill gaps mid-job.
+    rows_ro = merge_json_and_disk_gallery_rows(json_rows, disk_rows)
     total_raw = len(rows_ro)
 
     from utils.config_loader import ConfigLoader

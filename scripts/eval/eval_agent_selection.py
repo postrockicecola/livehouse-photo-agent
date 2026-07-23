@@ -43,8 +43,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.eval.metrics import precision_recall_at_k  # noqa: E402
+from scripts.eval.protocol import stamp_protocol  # noqa: E402
 from services.agent.loop import CurationAgent  # noqa: E402
-from services.agent.planner import HeuristicPlanner  # noqa: E402
+from services.agent.planner import HeuristicPlanner, StratifiedHeuristicPlanner  # noqa: E402
 from services.agent.tools import AnalyzeFn, AnalyzeTool, FinalizeTool, InspectTool, ToolRegistry  # noqa: E402
 from services.agent.types import ActionType, AgentConfig, Candidate, ToolCall  # noqa: E402
 
@@ -223,6 +224,7 @@ def build_planners(
     arms: dict[str, Any] = {
         "random": RandomAllocationPlanner(seed=seed),
         "heuristic": HeuristicPlanner(),
+        "stratified": StratifiedHeuristicPlanner(seed=seed),
         "oracle": OracleAllocationPlanner(truth),
     }
     if include_llm:
@@ -300,6 +302,15 @@ def main() -> int:
         logger.info("arm=%-9s analyzed_keeper_recall=%.3f", name, report["arms"][name]["analyzed_keeper_recall"])
 
     _print_table(report, topks)
+
+    stamp_protocol(
+        report,
+        labels_path=args.labels,
+        predictions_path=args.predictions,
+        config_path=args.config,
+        seed=args.seed,
+        extra={"budget": args.budget, "features": args.features, "arms": list(planners)},
+    )
 
     if args.out:
         out = Path(args.out)

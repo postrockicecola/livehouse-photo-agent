@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable, Optional
 
-from services.agent.planner import HeuristicPlanner, Planner
+from services.agent.planner import Planner, StratifiedHeuristicPlanner
 from services.agent.reflection import reflect as default_reflect
 from services.agent.tools import ToolRegistry
 from services.agent.types import (
@@ -46,7 +46,7 @@ class CurationAgent:
     ) -> None:
         self._tools = tools
         self._config = config
-        self._planner = planner or HeuristicPlanner()
+        self._planner = planner or StratifiedHeuristicPlanner()
         self._reflect = reflect_fn
         self._metrics_hook = metrics_hook
         self._step_hook = step_hook

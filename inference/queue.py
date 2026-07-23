@@ -535,8 +535,38 @@ class PrioritizedInferenceQueue:
                     }
                 )
                 return fut
-        except Exception:
-            logger.exception("scope quota check failed; allowing admit (fail-open)")
+        except Exception as quota_exc:
+            # Default fail-closed: a broken quota path must not become unbounded VLM.
+            # Escape hatch for emergency demos: LIVEHOUSE_SCOPE_QUOTA_FAIL_OPEN=1.
+            fail_open = (os.environ.get("LIVEHOUSE_SCOPE_QUOTA_FAIL_OPEN") or "").strip() in (
+                "1",
+                "true",
+                "TRUE",
+                "yes",
+                "YES",
+            )
+            if fail_open:
+                logger.exception(
+                    "scope quota check failed; allowing admit (fail-open escape hatch)"
+                )
+            else:
+                logger.exception("scope quota check failed; denying admit (fail-closed)")
+                fut = concurrent_futures.Future()
+                fut.set_result(
+                    {
+                        "status": "error",
+                        "error": "scope_quota_check_failed",
+                        "text": "",
+                        "model": "",
+                        "scope_quota": {
+                            "ok": False,
+                            "enforced": True,
+                            "error": "scope_quota_check_failed",
+                            "detail": str(quota_exc)[:200],
+                        },
+                    }
+                )
+                return fut
         req = InferenceRequest(
             image_path=image_path,
             prompt=prompt,

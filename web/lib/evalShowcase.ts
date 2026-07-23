@@ -45,12 +45,12 @@ export const EVAL_DATASET_META: EvalMeta = {
   n: 250,
   model: "qwen2-vl (temp0; see stage3_v6_qwen2vl_temp0 report)",
   config: "configs/eval_stage3.yaml (admission gates opened for full scoring)",
-  hardware: "not recorded in report JSON",
+  hardware: "stamped in report.protocol.hardware when regenerated via scripts/eval/protocol.py",
   realRun: true,
   provenance: "recorded",
   reportPath: "reports/eval/stage3_v6_qwen2vl_temp0.json",
   metricNotes:
-    "Quality = Spearman / MAE on overall vs human labels; Precision@K on human keepers. Eval config admits all frames to Stage3 (not production cull rates).",
+    "Quality = Spearman / MAE on overall vs human labels; Precision@K on human keepers. Eval config admits all frames to Stage3 (not production cull rates). New reports include protocol (seed/config/hardware/git).",
 };
 
 /** Guide §4.4 strategy table — only fill cells backed by reports. */
@@ -69,25 +69,25 @@ export const STRATEGY_ROWS: StrategyRow[] = [
   {
     id: "two-stage",
     strategy: "两阶段门控（生产路径）",
-    quality: "—",
-    vlmCallShare: "—",
+    quality: "admitted Spearman 0.52 · MAE 4.48 · keeper coverage 0.06",
+    vlmCallShare: "16 / 250 = 6.4%",
     latency: "—",
-    cost: "—",
+    cost: "~15× fewer VLM calls vs full",
     provenance: "recorded",
     notes:
-      "Production OpenCV → aesthetic → VLM path exists, but no committed head-to-head vs full-VLM on the same 250 labels yet. Left blank on purpose.",
-    reportPath: "configs/livehouse.yaml · services/processor/",
+      "Offline replay of production apply_stage3_candidates_gating on the same 250 labels (not a second GPU pass). Gated Spearman is on the 16 admitted images only.",
+    reportPath: "reports/eval/two_stage_gating.json",
   },
   {
     id: "agent-curate",
     strategy: "Agent 策展（budgeted planner）",
-    quality: "P@30 0.30 (heuristic) · keeper recall 0.16",
+    quality: "sel. P 0.43 (stratified) · keeper recall 0.20",
     vlmCallShare: "40 / 250 = 16% (budget)",
     latency: "—",
     cost: "lower VLM count by design",
     provenance: "recorded",
     notes:
-      "Quality has not stably beaten the heuristic baseline. LLM planner arm (60-img subset) ≈ heuristic with high fallback rate.",
+      "Default StratifiedHeuristicPlanner beats greedy heuristic (and random on P@10 / sel. P) under the same budget. LLM planner arm still ≈ heuristic with high fallback.",
     reportPath: "reports/eval/agent_selection.json",
   },
 ];
@@ -131,6 +131,17 @@ export const AGENT_SELECTION_250: AgentArmRow[] = [
     reportPath: "reports/eval/agent_selection.json",
   },
   {
+    arm: "stratified",
+    n: 250,
+    budget: 40,
+    selectionPrecision: 0.433,
+    analyzedKeeperRecall: 0.205,
+    precisionAt10: 0.5,
+    vlmCallsUsed: 40,
+    provenance: "recorded",
+    reportPath: "reports/eval/agent_selection.json",
+  },
+  {
     arm: "oracle",
     n: 250,
     budget: 40,
@@ -155,7 +166,7 @@ export const AGENT_SELECTION_LLM_60 = {
     { arm: "llm", selectionPrecision: 0.357, analyzedKeeperRecall: 0.06, llmDecisionRate: 0.063 },
   ],
   honesty:
-    "LLM planner ≈ heuristic on this 60-image slice; llm_decision_rate ≈ 6% with frequent heuristic fallback. Runtime (budget, tools, eval harness) is ready; quality upside is not yet proven.",
+    "LLM planner ≈ greedy heuristic on this 60-image slice; llm_decision_rate ≈ 6% with frequent fallback. Stratified (default) already beats greedy on the full 250-set; LLM has not yet beaten stratified.",
 };
 
 export const QUANT_COMPARE_NOTE = {
@@ -165,13 +176,13 @@ export const QUANT_COMPARE_NOTE = {
   note: "Example / illustrative quant_compare payload — mark Simulated. Do not cite as measured production SLO.",
 };
 
-/** Known missing experiments — keep blank in tables until a real report lands. */
+/** Remaining gaps after the offline two-stage / stratified / preference scaffold. */
 export const EVAL_GAPS = [
   {
-    id: "two_stage_vs_full_vlm",
-    title: "两阶段门控 vs 全量 VLM",
+    id: "preference_training_loop",
+    title: "偏好数据 → SFT/DPO",
     detail:
-      "生产路径（OpenCV → 美学分 → VLM）已实现，但仓库里还没有同一 250 标注集上的质量 / 调用比例 / 延迟 / 成本对照报告。",
+      "data/eval/preferences/ 已导出 keep/reject pairs；训练与线上 reward 闭环尚未接入。",
   },
 ] as const;
 
@@ -181,6 +192,12 @@ export const EVAL_REPORT_INDEX = [
     path: "reports/eval/stage3_v6_qwen2vl_temp0.json",
     provenance: "recorded" as const,
     summary: "Stage3 vs human · n=250",
+  },
+  {
+    id: "two_stage",
+    path: "reports/eval/two_stage_gating.json",
+    provenance: "recorded" as const,
+    summary: "Prod gating vs full-VLM · offline replay",
   },
   {
     id: "agent250",
@@ -212,7 +229,9 @@ export const EVAL_REPORT_INDEX = [
 export const QUALITY_COST_POINTS = [
   { arm: "heuristic", vlmSharePct: 16, precision: 0.3, label: "heuristic @40" },
   { arm: "random", vlmSharePct: 16, precision: 0.4, label: "random @40" },
+  { arm: "stratified", vlmSharePct: 16, precision: 0.433, label: "stratified @40" },
   { arm: "oracle", vlmSharePct: 16, precision: 0.933, label: "oracle @40" },
+  { arm: "two-stage", vlmSharePct: 6.4, precision: 0.3125, label: "gated P@eff20" },
   { arm: "full-vlm", vlmSharePct: 100, precision: 0.55, label: "Stage3 P@20 (full)" },
 ] as const;
 

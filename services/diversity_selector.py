@@ -14,8 +14,9 @@ Design
 - Similarity signal: CLIP ViT-B-32 cosine (``EmbeddingService``). When ``open-clip-torch``
   is unavailable it **degrades gracefully** to pHash Hamming clustering (same signal the
   Stage2 / gallery-view dedupe already uses), so ``sort=diverse`` always works.
-- Greedy single-link clustering (similar to *any* cluster member, not only the seed)
-  so lighting-drift bursts still collapse into one group.
+- Centroid / seed link (not single-link-to-any-member): join only when similar to the
+  cluster centroid (CLIP) or seed (pHash). Hard ``max_cluster_size`` caps each group at
+  a typical burst (~20) so same-stage lighting cannot chain into hundreds of frames.
 - In-cluster representative pick uses *differentiating* VLM dimensions, not ``overall``.
 - Representatives are then MMR-ordered so the front page spreads scenes instead of
   stacking look-alike high scorers.
@@ -57,11 +58,13 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
     else:
         dims = {str(k): float(v) for k, v in dims.items()}
 
-    thr = raw.get("similarity_threshold", 0.85)
+    # Higher cosine → harder to merge → smaller clusters. Default 0.92 ≈ true near-dups /
+    # short bursts; 0.85 previously chained whole stage looks into one giant group.
+    thr = raw.get("similarity_threshold", 0.92)
     try:
         thr = float(thr)
     except (TypeError, ValueError):
-        thr = 0.85
+        thr = 0.92
 
     agent_fin = raw.get("agent_finalize")
     if not isinstance(agent_fin, dict):
@@ -78,12 +81,20 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
     except (TypeError, ValueError):
         mmr_lambda = 0.65
 
+    try:
+        max_cluster_size = int(raw.get("max_cluster_size", 20) or 20)
+    except (TypeError, ValueError):
+        max_cluster_size = 20
+
     return {
         "enabled": bool(raw.get("enabled", True)),
         "similarity_threshold": max(0.0, min(1.0, thr)),
         "representative_dims": dims,
-        "fallback_phash_hamming": int(raw.get("fallback_phash_hamming", 10) or 10),
+        # Tighter than gallery_view_dedupe: diversity groups should stay burst-sized.
+        "fallback_phash_hamming": int(raw.get("fallback_phash_hamming", 8) or 8),
         "max_members_returned": int(raw.get("max_members_returned", 40) or 40),
+        # Hard cap so same-stage CLIP chaining cannot produce 「同款 ×354」.
+        "max_cluster_size": max(2, min(64, max_cluster_size)),
         # Agent finalize / merge: at most N keepers per visual (or burst) cluster.
         "finalize_enabled": bool(agent_fin.get("enabled", True)),
         "max_per_cluster": max(1, max_per),
@@ -148,6 +159,75 @@ def _representative_score(entry: Mapping[str, Any], dim_weights: Mapping[str, fl
     return (acc / total_w) * 10.0  # 0-10 dims -> 0-100
 
 
+def _cluster_by_affinity(
+    order: list[int],
+    *,
+    affinity_fn: Callable[[int, list[int]], float],
+    threshold: float,
+    max_cluster_size: int,
+) -> list[list[int]]:
+    """Greedy clustering: join the highest-affinity cluster above ``threshold``.
+
+    ``affinity_fn(idx, members)`` returns similarity to that cluster (centroid/seed).
+    Unlike single-link-to-any-member, this avoids chaining whole stage looks into one group.
+    Full clusters (``>= max_cluster_size``) are skipped so a new burst group can open.
+    """
+    clusters: list[list[int]] = []
+    for idx in order:
+        best_i = -1
+        best_aff = -1.0
+        for i, members in enumerate(clusters):
+            if len(members) >= max_cluster_size:
+                continue
+            aff = float(affinity_fn(idx, members))
+            if aff >= threshold and aff > best_aff:
+                best_aff = aff
+                best_i = i
+        if best_i >= 0:
+            clusters[best_i].append(idx)
+        else:
+            clusters.append([idx])
+    return clusters
+
+
+def _cluster_clip_centroids(
+    order: list[int],
+    embeddings: Mapping[int, np.ndarray | None],
+    *,
+    tau: float,
+    max_cluster_size: int,
+) -> list[list[int]]:
+    """CLIP clustering against a live L2-normalized mean of each cluster's members."""
+    clusters: list[list[int]] = []
+    sums: list[np.ndarray | None] = []
+    for idx in order:
+        vec = embeddings.get(idx)
+        best_i = -1
+        best_aff = -1.0
+        if vec is not None:
+            for i, members in enumerate(clusters):
+                if len(members) >= max_cluster_size:
+                    continue
+                acc = sums[i]
+                if acc is None:
+                    continue
+                norm = float(np.linalg.norm(acc))
+                if norm <= 1e-8:
+                    continue
+                aff = float(np.dot(vec, acc / norm))
+                if aff >= tau and aff > best_aff:
+                    best_aff = aff
+                    best_i = i
+        if best_i >= 0 and vec is not None:
+            clusters[best_i].append(idx)
+            acc = sums[best_i]
+            sums[best_i] = vec.astype(np.float32, copy=True) if acc is None else acc + vec
+        else:
+            clusters.append([idx])
+            sums.append(vec.astype(np.float32, copy=True) if vec is not None else None)
+    return clusters
+
+
 def apply_diversity_selection(
     rows: list[dict],
     settings: Mapping[str, Any],
@@ -172,6 +252,7 @@ def apply_diversity_selection(
         return [], {}, {}
 
     dim_weights = settings.get("representative_dims") or _DEFAULT_REPRESENTATIVE_DIMS
+    max_cluster_size = int(settings.get("max_cluster_size", 20) or 20)
 
     # Seed clusters best-quality first so representatives start from strong frames.
     order = sorted(range(n), key=lambda i: order_key_fn(rows[i]), reverse=True)
@@ -180,16 +261,11 @@ def apply_diversity_selection(
 
     use_clip = bool(settings.get("enabled", True)) and EmbeddingService.is_available()
     sim_fn: Callable[[int, int], float] | None = None
+    clusters: list[list[int]]
 
     if use_clip:
-        tau = float(settings.get("similarity_threshold", 0.85))
+        tau = float(settings.get("similarity_threshold", 0.92))
         embeddings: dict[int, np.ndarray | None] = {i: _row_embedding(rows[i]) for i in order}
-
-        def _similar(idx: int, other: int) -> bool:
-            a, b = embeddings.get(idx), embeddings.get(other)
-            if a is None or b is None:
-                return False
-            return float(np.dot(a, b)) >= tau
 
         def _sim_score(a: int, b: int) -> float:
             va, vb = embeddings.get(a), embeddings.get(b)
@@ -198,55 +274,51 @@ def apply_diversity_selection(
             return float(np.dot(va, vb))
 
         sim_fn = _sim_score
+        clusters = _cluster_clip_centroids(
+            order, embeddings, tau=tau, max_cluster_size=max_cluster_size
+        )
     else:
         try:
             from services.gallery_dedupe import resolve_row_phash
             from engine.operators.stage2_prefilter import hamming_64
 
-            max_h = int(settings.get("fallback_phash_hamming", 10))
+            max_h = int(settings.get("fallback_phash_hamming", 8))
             phashes: dict[int, int] = {i: resolve_row_phash(rows[i]) for i in order}
-
-            def _similar(idx: int, other: int) -> bool:
-                a, b = phashes.get(idx, 0), phashes.get(other, 0)
-                if not a or not b:
-                    return False
-                return hamming_64(a, b) <= max_h
 
             def _sim_score(a: int, b: int) -> float:
                 pa, pb = phashes.get(a, 0), phashes.get(b, 0)
                 if not pa or not pb:
                     return 0.0
-                # Map Hamming 0..max_h → 1..~0 so MMR can still spread near-dups.
                 return max(0.0, 1.0 - (hamming_64(pa, pb) / float(max(max_h, 1))))
 
+            def _affinity(idx: int, members: list[int]) -> float:
+                # Seed-only: pHash single-link-to-any-member chains stage looks badly.
+                if not members:
+                    return -1.0
+                pa, pb = phashes.get(idx, 0), phashes.get(members[0], 0)
+                if not pa or not pb:
+                    return -1.0
+                return 1.0 if hamming_64(pa, pb) <= max_h else -1.0
+
             sim_fn = _sim_score
+            clusters = _cluster_by_affinity(
+                order,
+                affinity_fn=_affinity,
+                threshold=1.0,
+                max_cluster_size=max_cluster_size,
+            )
         except Exception:
-            # Neither CLIP nor pHash available: degrade to no folding (plain quality order).
             logger.warning("diversity_selection: no similarity signal available; returning ungrouped order")
-
-            def _similar(idx: int, other: int) -> bool:
-                return False
-
+            clusters = [[i] for i in order]
             sim_fn = None
-
-    # True single-link: join if similar to *any* member (not only the seed).
-    # Seed-only compare splits livehouse bursts when lighting drifts along the sequence.
-    clusters: list[dict[str, Any]] = []  # {seed: int, members: [int]}
-    for idx in order:
-        placed = False
-        for c in clusters:
-            if any(_similar(idx, m) for m in c["members"]):
-                c["members"].append(idx)
-                placed = True
-                break
-        if not placed:
-            clusters.append({"seed": idx, "members": [idx]})
 
     rep_indices: list[int] = []
     members_by_rep: dict[int, list[int]] = {}
-    for c in clusters:
-        members = c["members"]
-        rep = max(members, key=lambda i: (_representative_score(rows[i], dim_weights), order_key_fn(rows[i])))
+    for members in clusters:
+        rep = max(
+            members,
+            key=lambda i: (_representative_score(rows[i], dim_weights), order_key_fn(rows[i])),
+        )
         others = [i for i in members if i != rep]
         others.sort(key=lambda i: _representative_score(rows[i], dim_weights), reverse=True)
         rep_indices.append(rep)

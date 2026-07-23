@@ -172,7 +172,15 @@ export default function StudioPage() {
   // Only hard-lock while a job is actually running (or the POST is in flight via `busy`).
   // `pendingAnalyzeJobId` is optimistic UI only — must not permanently disable the button.
   const analyzeLocked = jobRunning;
-  const canGallery = Boolean(selected?.has_analysis_results || status?.session?.has_analysis_results);
+  // Allow opening Gallery as soon as Previews exist — do not wait for full VLM JSON.
+  const previewCountForGallery = Number(
+    status?.session?.preview_count ?? selected?.preview_count ?? 0,
+  );
+  const canGallery = Boolean(
+    previewCountForGallery > 0 ||
+      selected?.has_analysis_results ||
+      status?.session?.has_analysis_results,
+  );
 
   const setList = useMemo(
     () => sortStudioSessions(sessions, setListSort),

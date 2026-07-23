@@ -8,7 +8,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from services.path_service import PathResolver
-from services.result_service import load_gallery_page, load_results
+from services.result_service import (
+    load_gallery_page,
+    load_results,
+    merge_json_and_disk_gallery_rows,
+)
 
 
 class PathResolverTests(unittest.TestCase):
@@ -227,6 +231,54 @@ class ResultServiceTests(unittest.TestCase):
                 load_gallery_page(str(previews), "overall", 0, 10, lite=False)
                 self.assertEqual(inj_lay.call_count, 1)
                 self.assertEqual(inj_ori.call_count, 1)
+
+    def test_load_gallery_page_merges_disk_previews_while_json_partial(self):
+        """Running session: scored JSON + still-unscored Previews should both appear."""
+        with tempfile.TemporaryDirectory() as tmp:
+            previews = Path(tmp)
+            previews.mkdir(parents=True, exist_ok=True)
+            (previews / "scored.jpg").write_bytes(b"jpeg")
+            (previews / "pending.jpg").write_bytes(b"jpeg")
+            (previews / "analysis_results.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "file": "scored.jpg",
+                            "path": "scored.jpg",
+                            "scores": {
+                                "overall": 80,
+                                "energy": 8,
+                                "technical": 8,
+                                "composition": 8,
+                            },
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            sliced, total, _s, _e, _more, total_raw = load_gallery_page(
+                str(previews), "overall", 0, 50, lite=True, dedupe=False
+            )
+            names = {str(r.get("file")) for r in sliced}
+            self.assertEqual(total, 2)
+            self.assertEqual(total_raw, 2)
+            self.assertEqual(names, {"scored.jpg", "pending.jpg"})
+            scored = next(r for r in sliced if r.get("file") == "scored.jpg")
+            pending = next(r for r in sliced if r.get("file") == "pending.jpg")
+            self.assertEqual(scored.get("overall_score"), 80.0)
+            self.assertEqual(pending.get("overall_score"), 0.0)
+            self.assertTrue(pending.get("analysis_pending"))
+
+    def test_merge_json_and_disk_gallery_rows_prefers_json(self):
+        json_rows = [{"file": "a.jpg", "overall_score": 90}]
+        disk_rows = [
+            {"file": "a.jpg", "overall_score": 0.0, "analysis_pending": True},
+            {"file": "b.jpg", "overall_score": 0.0, "analysis_pending": True},
+        ]
+        merged = merge_json_and_disk_gallery_rows(json_rows, disk_rows)
+        self.assertEqual(len(merged), 2)
+        self.assertEqual(merged[0]["overall_score"], 90)
+        self.assertEqual(merged[1]["file"], "b.jpg")
 
 
 @unittest.skipUnless(

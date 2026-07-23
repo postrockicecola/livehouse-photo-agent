@@ -15,7 +15,7 @@ import json
 import logging
 from typing import Any, Callable, Optional, Protocol
 
-from services.agent.types import ActionType, AgentState, ToolCall
+from services.agent.types import ActionType, AgentState, Candidate, ToolCall
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class HeuristicPlanner:
         if state.can_analyze_more():
             pool = state.analyzable()
             if pool:
-                c = max(pool, key=lambda x: x.fast_score())
+                c = max(pool, key=lambda x: (x.fast_score(), x.image_id))
                 return ToolCall(
                     action=ActionType.ANALYZE,
                     image_id=c.image_id,
@@ -94,6 +94,78 @@ class HeuristicPlanner:
             action=ActionType.FINALIZE,
             reason="no affordable work remaining; commit keepers",
         )
+
+
+class StratifiedHeuristicPlanner:
+    """Explore/exploit allocation over Stage2 ``fast_score`` bands.
+
+    Pure top-k by cheap score underperforms random on the labeled 250-set (human
+    keepers are not concentrated at the Stage2 top). This planner spends the first
+    ``exploit_ratio`` fraction of the inference budget on the highest fast_score
+    candidates, then probes the middle score band with a deterministic cursor so
+    mid-tier keepers are still analyzed under the same budget.
+    """
+
+    def __init__(self, *, exploit_ratio: float = 0.55, seed: int = 0) -> None:
+        self._exploit_ratio = max(0.0, min(1.0, float(exploit_ratio)))
+        self._seed = int(seed)
+
+    def next_action(self, state: AgentState) -> ToolCall:
+        cfg = state.config
+
+        esc = _pop_escalation_call(state)
+        if esc is not None:
+            return esc
+
+        not_inspected = state.not_inspected()
+        if not_inspected:
+            c = not_inspected[0]
+            return ToolCall(
+                action=ActionType.INSPECT,
+                image_id=c.image_id,
+                reason=f"inspect cheap features for {c.image_id}",
+            )
+
+        if state.can_analyze_more():
+            pool = state.analyzable()
+            if pool:
+                c = self._pick_analyze_target(state, pool)
+                mode = "exploit" if state.inferences_used < self._exploit_slots(state) else "explore"
+                return ToolCall(
+                    action=ActionType.ANALYZE,
+                    image_id=c.image_id,
+                    args={"tier": cfg.base_tier},
+                    reason=(
+                        f"stratified-{mode} analyze {c.image_id} "
+                        f"(fast_score={c.fast_score():.1f})"
+                    ),
+                    source="heuristic",
+                )
+
+        return ToolCall(
+            action=ActionType.FINALIZE,
+            reason="no affordable work remaining; commit keepers",
+        )
+
+    def _exploit_slots(self, state: AgentState) -> int:
+        budget = max(0, int(state.config.max_inferences))
+        if budget <= 0:
+            return 0
+        return max(1, int(round(budget * self._exploit_ratio)))
+
+    def _pick_analyze_target(self, state: AgentState, pool: list[Candidate]) -> Candidate:
+        ranked = sorted(pool, key=lambda x: (-x.fast_score(), x.image_id))
+        exploit_n = self._exploit_slots(state)
+        if state.inferences_used < exploit_n:
+            return ranked[0]
+        if len(ranked) == 1:
+            return ranked[0]
+        # Middle half of the remaining pool — avoid re-greedy on the current top.
+        lo = len(ranked) // 4
+        hi = max(lo + 1, (3 * len(ranked)) // 4)
+        band = ranked[lo:hi]
+        idx = (state.inferences_used + self._seed) % len(band)
+        return band[idx]
 
 
 class LLMPlanner:

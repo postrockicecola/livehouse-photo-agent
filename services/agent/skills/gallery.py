@@ -1019,7 +1019,7 @@ class ApplyFilmVibeSkill:
         variant = (vibe or {}).get("film_variant") or decision.film_variant
         summary = (
             f"已应用风格「{label}」（{variant}）。"
-            "Gallery 会自动打开套用该胶片的风格预览（ui_action=reload_vibe）。"
+            "Gallery 会自动打开套用该胶片的风格预览；若未弹出，请点工具旁的「打开风格预览」。"
         )
         return SkillResult(
             ok=True,

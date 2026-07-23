@@ -24,7 +24,7 @@ from services.agent.llm_backend import (
     build_planner_complete_fn,
 )
 from services.agent.loop import CurationAgent
-from services.agent.planner import HeuristicPlanner, LLMPlanner, Planner
+from services.agent.planner import HeuristicPlanner, LLMPlanner, Planner, StratifiedHeuristicPlanner
 from services.agent.reflection import ReflectionVerdict, reflect, validate_analysis
 from services.agent.tools import (
     AnalyzeTool,
@@ -55,6 +55,7 @@ __all__ = [
     "CurationAgent",
     "FinalizeTool",
     "HeuristicPlanner",
+    "StratifiedHeuristicPlanner",
     "LANGGRAPH_MAPPING",
     "build_curation_llm_planner",
     "build_curation_llm_planner_from_config",

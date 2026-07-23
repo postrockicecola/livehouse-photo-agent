@@ -1,0 +1,150 @@
+{
+  "eval_set_size": 250,
+  "human_keepers": 83,
+  "stage2_eligible_in_eval": 238,
+  "gating": {
+    "admitted": 16,
+    "skipped_after_gate": 222,
+    "diagnostics": {
+      "before": 238,
+      "after": 16,
+      "skipped": 222,
+      "gating_source": "yaml_legacy",
+      "pipeline_mode": null,
+      "stage3_threshold": 0.66,
+      "top_k_ratio": 0.24,
+      "effective_threshold": null,
+      "effective_top_k_ratio": null,
+      "max_candidates": null
+    }
+  },
+  "arms": {
+    "full_vlm": {
+      "arm": "full_vlm",
+      "scored_count": 250,
+      "vlm_calls": 250,
+      "vlm_call_share": 1.0,
+      "keeper_coverage": 1.0,
+      "keeper_in_pool": 83,
+      "overall": {
+        "n": 250,
+        "spearman": 0.36248160609111757,
+        "pearson": 0.8425757990990802,
+        "mae": 6.0908
+      },
+      "precision_recall_at_k": {
+        "10": {
+          "k": 10,
+          "effective_k": 10,
+          "precision": 0.4,
+          "recall": 0.0482,
+          "hits": 4,
+          "pool_smaller_than_k": false
+        },
+        "20": {
+          "k": 20,
+          "effective_k": 20,
+          "precision": 0.5,
+          "recall": 0.1205,
+          "hits": 10,
+          "pool_smaller_than_k": false
+        },
+        "30": {
+          "k": 30,
+          "effective_k": 30,
+          "precision": 0.4333,
+          "recall": 0.1566,
+          "hits": 13,
+          "pool_smaller_than_k": false
+        }
+      }
+    },
+    "two_stage_gated": {
+      "arm": "two_stage_gated",
+      "scored_count": 16,
+      "vlm_calls": 16,
+      "vlm_call_share": 0.064,
+      "keeper_coverage": 0.0602,
+      "keeper_in_pool": 5,
+      "overall": {
+        "n": 16,
+        "spearman": 0.5204581982360458,
+        "pearson": 0.5054113637045144,
+        "mae": 4.475000000000001
+      },
+      "precision_recall_at_k": {
+        "10": {
+          "k": 10,
+          "effective_k": 10,
+          "precision": 0.3,
+          "recall": 0.0361,
+          "hits": 3,
+          "pool_smaller_than_k": false
+        },
+        "20": {
+          "k": 20,
+          "effective_k": 16,
+          "precision": 0.3125,
+          "recall": 0.0602,
+          "hits": 5,
+          "pool_smaller_than_k": true
+        },
+        "30": {
+          "k": 30,
+          "effective_k": 16,
+          "precision": 0.3125,
+          "recall": 0.0602,
+          "hits": 5,
+          "pool_smaller_than_k": true
+        }
+      }
+    }
+  },
+  "delta": {
+    "vlm_calls_saved": 234,
+    "vlm_call_share_drop": 0.936,
+    "spearman_full": 0.36248160609111757,
+    "spearman_gated_on_admitted": 0.5204581982360458,
+    "note": "Gated Spearman is computed only on admitted images (honest production scoring set). Selection@K for gated uses only the admitted pool."
+  },
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-07-23T15:03:32.910804+00:00",
+    "git_sha": "d37eebd",
+    "seed": 20260625,
+    "hardware": {
+      "platform": "macOS-15.3.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.14.2",
+      "cpu_count": 10,
+      "torch": "2.13.0",
+      "cuda_available": false,
+      "system": "Darwin"
+    },
+    "model": {
+      "config_path": "configs/livehouse.yaml",
+      "config_sha256_prefix": "c771e227af35ef75",
+      "provider": "ollama",
+      "model_name": "llava",
+      "temperature": 0.8,
+      "num_predict": 512,
+      "fallback_model_name": null
+    },
+    "inputs": {
+      "labels": {
+        "path": "data/eval/labels.jsonl",
+        "sha256_prefix": "225568bc7b31a490"
+      },
+      "predictions": {
+        "path": "data/eval/images/analysis_results.json",
+        "sha256_prefix": "f98b6efd42539e4a"
+      }
+    },
+    "extra": {
+      "stage2_features": "data/eval/_temp0_run/.luma_pipeline_staged/eligible_after_stage2.jsonl",
+      "method": "offline_replay_apply_stage3_candidates_gating",
+      "provenance": "recorded"
+    }
+  }
+}

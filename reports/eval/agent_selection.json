@@ -39,6 +39,18 @@
         },
         "planner_source_counts": {
           "heuristic": 291
+        },
+        "backend": "imperative",
+        "langgraph_mapping": {
+          "AgentState": "CurationGraphState.agent_state",
+          "planner.next_action": "node: plan",
+          "tools.dispatch": "node: act",
+          "reflect / escalate": "node: reflect",
+          "FINALIZE / max_steps": "conditional edge → END",
+          "AgentStep + step_hook": "emitted after reflect (job_events timeline)",
+          "Gallery chat turn": "conversation_graph decide→act→answer (subgraph)",
+          "Platform router": "compile_agent_platform_graph → curation | gallery_chat",
+          "MultiAgentOrchestrator": "fan-out of compiled subgraphs / Send API"
         }
       }
     },
@@ -78,6 +90,69 @@
         },
         "planner_source_counts": {
           "heuristic": 291
+        },
+        "backend": "imperative",
+        "langgraph_mapping": {
+          "AgentState": "CurationGraphState.agent_state",
+          "planner.next_action": "node: plan",
+          "tools.dispatch": "node: act",
+          "reflect / escalate": "node: reflect",
+          "FINALIZE / max_steps": "conditional edge → END",
+          "AgentStep + step_hook": "emitted after reflect (job_events timeline)",
+          "Gallery chat turn": "conversation_graph decide→act→answer (subgraph)",
+          "Platform router": "compile_agent_platform_graph → curation | gallery_chat",
+          "MultiAgentOrchestrator": "fan-out of compiled subgraphs / Send API"
+        }
+      }
+    },
+    "stratified": {
+      "analyzed_count": 40,
+      "analyzed_keeper_recall": 0.2048,
+      "selection_size": 30,
+      "selection_precision": 0.4333,
+      "selection_keeper_hits": 13,
+      "precision_recall_at_k": {
+        "10": {
+          "precision": 0.5,
+          "recall": 0.2941,
+          "overlap": 5
+        },
+        "30": {
+          "precision": 0.4333,
+          "recall": 0.7647,
+          "overlap": 13
+        }
+      },
+      "metrics": {
+        "steps": 291,
+        "inferences_used": 40,
+        "max_inferences": 40,
+        "budget_exhausted": true,
+        "escalations": 0,
+        "llm_fallback_calls": 0,
+        "llm_decision_rate": null,
+        "candidates_total": 250,
+        "candidates_analyzed": 40,
+        "selected_count": 30,
+        "action_counts": {
+          "inspect": 250,
+          "analyze": 40,
+          "finalize": 1
+        },
+        "planner_source_counts": {
+          "heuristic": 291
+        },
+        "backend": "imperative",
+        "langgraph_mapping": {
+          "AgentState": "CurationGraphState.agent_state",
+          "planner.next_action": "node: plan",
+          "tools.dispatch": "node: act",
+          "reflect / escalate": "node: reflect",
+          "FINALIZE / max_steps": "conditional edge → END",
+          "AgentStep + step_hook": "emitted after reflect (job_events timeline)",
+          "Gallery chat turn": "conversation_graph decide→act→answer (subgraph)",
+          "Platform router": "compile_agent_platform_graph → curation | gallery_chat",
+          "MultiAgentOrchestrator": "fan-out of compiled subgraphs / Send API"
         }
       }
     },
@@ -117,8 +192,65 @@
         },
         "planner_source_counts": {
           "heuristic": 291
+        },
+        "backend": "imperative",
+        "langgraph_mapping": {
+          "AgentState": "CurationGraphState.agent_state",
+          "planner.next_action": "node: plan",
+          "tools.dispatch": "node: act",
+          "reflect / escalate": "node: reflect",
+          "FINALIZE / max_steps": "conditional edge → END",
+          "AgentStep + step_hook": "emitted after reflect (job_events timeline)",
+          "Gallery chat turn": "conversation_graph decide→act→answer (subgraph)",
+          "Platform router": "compile_agent_platform_graph → curation | gallery_chat",
+          "MultiAgentOrchestrator": "fan-out of compiled subgraphs / Send API"
         }
       }
+    }
+  },
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-07-23T15:02:11.855240+00:00",
+    "git_sha": "d37eebd",
+    "seed": 20260625,
+    "hardware": {
+      "platform": "macOS-15.3.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.14.2",
+      "cpu_count": 10,
+      "torch": "2.13.0",
+      "cuda_available": false,
+      "system": "Darwin"
+    },
+    "model": {
+      "config_path": "configs/livehouse.yaml",
+      "config_sha256_prefix": "c771e227af35ef75",
+      "provider": "ollama",
+      "model_name": "llava",
+      "temperature": 0.8,
+      "num_predict": 512,
+      "fallback_model_name": null
+    },
+    "inputs": {
+      "labels": {
+        "path": "data/eval/labels.jsonl",
+        "sha256_prefix": "225568bc7b31a490"
+      },
+      "predictions": {
+        "path": "reports/eval/baseline_v4_stage1_two_merged_predictions.json",
+        "sha256_prefix": "93b4cff316232f53"
+      }
+    },
+    "extra": {
+      "budget": 40,
+      "features": "data/eval/_temp0_run/.luma_pipeline_staged/eligible_after_stage2.jsonl",
+      "arms": [
+        "random",
+        "heuristic",
+        "stratified",
+        "oracle"
+      ]
     }
   }
 }

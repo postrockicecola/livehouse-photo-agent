@@ -105,11 +105,21 @@ function ToolChip({ call }: { call: AgentToolCall }) {
   const files = Array.isArray(call.metadata?.files)
     ? (call.metadata.files as unknown[]).map((f) => String(f || "").trim()).filter(Boolean)
     : [];
-  const canPreview =
+  const uiAction = String(call.metadata?.ui_action || "");
+  const canPreviewSearch =
     call.ok &&
     call.tool === "gallery_search" &&
-    String(call.metadata?.ui_action || "") === "search" &&
+    uiAction === "search" &&
     files.length > 0;
+  const vibeMeta =
+    call.metadata?.session_vibe && typeof call.metadata.session_vibe === "object"
+      ? (call.metadata.session_vibe as Record<string, unknown>)
+      : null;
+  const canPreviewVibe =
+    call.ok &&
+    uiAction === "reload_vibe" &&
+    Boolean(vibeMeta?.film_variant) &&
+    (call.tool === "apply_film_vibe" || Boolean(vibeMeta));
 
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
@@ -126,7 +136,7 @@ function ToolChip({ call }: { call: AgentToolCall }) {
           <span className="tabular-nums text-white/35">{files.length}</span>
         ) : null}
       </span>
-      {canPreview ? (
+      {canPreviewSearch ? (
         <button
           type="button"
           onClick={() =>
@@ -143,6 +153,25 @@ function ToolChip({ call }: { call: AgentToolCall }) {
           className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
         >
           打开预览
+        </button>
+      ) : null}
+      {canPreviewVibe ? (
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("luma:gallery-agent-action", {
+                detail: {
+                  action: "reload_vibe",
+                  tool: call.tool,
+                  metadata: call.metadata ?? {},
+                },
+              }),
+            )
+          }
+          className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
+        >
+          打开风格预览
         </button>
       ) : null}
     </span>
@@ -356,11 +385,25 @@ export function ChatDock({
       };
 
       try {
+        const emittedUiTools = new Set<string>();
+        const emitOnce = (calls: AgentToolCall[]) => {
+          const fresh = calls.filter((c) => {
+            const key = `${c.tool}:${String(c.metadata?.ui_action || "")}:${JSON.stringify(c.args ?? {})}`;
+            if (!c.metadata?.ui_action || emittedUiTools.has(key)) return false;
+            emittedUiTools.add(key);
+            return true;
+          });
+          emitGalleryUiActions(fresh);
+        };
         const { receivedToken } = await streamAgentChat(apiBase, body, {
           onToken: (text) =>
             patchLastAssistant((t) => ({ ...t, text: t.text + text })),
-          onToolCall: (call) =>
-            patchLastAssistant((t) => ({ ...t, toolCalls: [...(t.toolCalls ?? []), call] })),
+          onToolCall: (call) => {
+            patchLastAssistant((t) => ({ ...t, toolCalls: [...(t.toolCalls ?? []), call] }));
+            // Open Gallery preview as soon as the write skill returns — don't wait for the
+            // model's final prose (which often claims success without a CTA).
+            emitOnce([call]);
+          },
           onDone: (info) => {
             const calls = info.tool_calls?.length ? info.tool_calls : undefined;
             patchLastAssistant((t) => ({
@@ -370,7 +413,7 @@ export function ChatDock({
               guardrails: info.guardrail_events,
               streaming: false,
             }));
-            emitGalleryUiActions(calls ?? []);
+            emitOnce(calls ?? []);
           },
           onError: (msg) =>
             patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false })),
