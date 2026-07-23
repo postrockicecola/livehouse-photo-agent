@@ -1,35 +1,35 @@
 {
   "window_hours": 168.0,
-  "since_ts": 1782394335,
+  "since_ts": 1784187352,
   "pricing": {
     "input_usd_per_mtok": 0.5,
     "output_usd_per_mtok": 1.5
   },
   "totals": {
-    "runs": 224,
-    "runs_with_token_usage": 224,
-    "prompt_tokens": 209609,
-    "completion_tokens": 18391,
-    "total_tokens": 228000,
-    "avg_latency_ms": 14583,
-    "p95_latency_ms": 33002,
-    "est_cost_usd": 0.132391,
-    "est_cost_per_1k_usd": 0.591031,
-    "avg_completion_tokens": 82.1
+    "runs": 10,
+    "runs_with_token_usage": 10,
+    "prompt_tokens": 11128,
+    "completion_tokens": 1147,
+    "total_tokens": 12275,
+    "avg_latency_ms": 8729,
+    "p95_latency_ms": 12687,
+    "est_cost_usd": 0.007285,
+    "est_cost_per_1k_usd": 0.72845,
+    "avg_completion_tokens": 114.7
   },
   "by_model": [
     {
       "final_model": "llava",
-      "runs": 224,
-      "runs_with_token_usage": 224,
-      "prompt_tokens": 209609,
-      "completion_tokens": 18391,
-      "total_tokens": 228000,
-      "avg_latency_ms": 14583,
-      "p95_latency_ms": 33002,
-      "est_cost_usd": 0.132391,
-      "est_cost_per_1k_usd": 0.591031,
-      "avg_completion_tokens": 82.1
+      "runs": 10,
+      "runs_with_token_usage": 10,
+      "prompt_tokens": 11128,
+      "completion_tokens": 1147,
+      "total_tokens": 12275,
+      "avg_latency_ms": 8729,
+      "p95_latency_ms": 12687,
+      "est_cost_usd": 0.007285,
+      "est_cost_per_1k_usd": 0.72845,
+      "avg_completion_tokens": 114.7
     }
   ],
   "token_coverage_pct": 100.0

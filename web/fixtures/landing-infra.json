@@ -1,49 +1,49 @@
 {
   "metrics": {
     "queue_depth": 0,
-    "workers_online": 2,
+    "workers_online": 1,
     "workers_total": 3,
     "retry_pending": 0,
     "recovery_requeues": 0,
     "pipeline_active": 0,
-    "monitoring_snapshots": 75,
+    "monitoring_snapshots": 82,
     "dead_letter": 0
   },
   "flow": [
     {
-      "id": 337,
-      "job_id": 61,
+      "id": 392,
+      "job_id": 72,
       "from_status": "INFERENCING",
       "to_status": "SUCCEEDED",
-      "created_at": 1782707714
+      "created_at": 1784780017
     },
     {
-      "id": 333,
-      "job_id": 61,
+      "id": 388,
+      "job_id": 72,
       "from_status": "",
       "to_status": "QUEUED",
-      "created_at": 1782706964
+      "created_at": 1784779490
     },
     {
-      "id": 334,
-      "job_id": 61,
+      "id": 389,
+      "job_id": 72,
       "from_status": "QUEUED",
       "to_status": "CLAIMED",
-      "created_at": 1782706964
+      "created_at": 1784779490
     },
     {
-      "id": 332,
-      "job_id": 60,
+      "id": 387,
+      "job_id": 71,
       "from_status": "INFERENCING",
       "to_status": "SUCCEEDED",
-      "created_at": 1782704353
+      "created_at": 1784726106
     },
     {
-      "id": 328,
-      "job_id": 60,
+      "id": 383,
+      "job_id": 71,
       "from_status": "",
       "to_status": "QUEUED",
-      "created_at": 1782704213
+      "created_at": 1784725559
     }
   ]
 }

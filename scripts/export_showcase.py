@@ -317,7 +317,13 @@ def export_studio(dry_run: bool) -> int:
 # serialization — then scrub paths/hostnames. Requires ``fastapi`` installed;
 # import lazily so landing/studio export still works without it.
 #
-# (URL path, query string, fixture name). Drill-downs use one representative id.
+# Walkthrough pins (must stay stable for /infra?tour=1 + README):
+#   #61 = real ANALYZE_SESSION success drill-down
+#   #62 = curated fallback-recovery case (fixture-only; not overwritten from live DB)
+SHOWCASE_SUCCESS_JOB_ID = 61
+SHOWCASE_FALLBACK_JOB_ID = 62
+
+# (URL path, query string, fixture name). Drill-downs use pinned success id.
 INFRA_ENDPOINTS: list[tuple[str, str, str]] = [
     ("metrics", "", "infra-metrics"),
     ("metrics/history", "window_sec=3600&limit=240", "infra-metrics-history"),
@@ -332,7 +338,89 @@ INFRA_ENDPOINTS: list[tuple[str, str, str]] = [
 ]
 
 
-def export_infra(dry_run: bool) -> int:
+def _collect_session_keys(obj, out: set[str] | None = None) -> set[str]:
+    """Gather every ``session_key`` string under a JSON-like object."""
+    if out is None:
+        out = set()
+    if isinstance(obj, dict):
+        sk = obj.get("session_key")
+        if isinstance(sk, str) and sk.strip():
+            out.add(sk.strip())
+        for v in obj.values():
+            _collect_session_keys(v, out)
+    elif isinstance(obj, list):
+        for v in obj:
+            _collect_session_keys(v, out)
+    return out
+
+
+def _anon_session_keys(obj, label_map: dict[str, str]):
+    """Replace real session_key values with Session NN labels (in-place walk)."""
+    if isinstance(obj, dict):
+        sk = obj.get("session_key")
+        if isinstance(sk, str) and sk.strip() in label_map:
+            obj["session_key"] = label_map[sk.strip()]
+        for v in obj.values():
+            _anon_session_keys(v, label_map)
+    elif isinstance(obj, list):
+        for v in obj:
+            _anon_session_keys(v, label_map)
+    return obj
+
+
+def _session_label_map_from(*objs) -> dict[str, str]:
+    keys: set[str] = set()
+    for o in objs:
+        _collect_session_keys(o, keys)
+    ordered = sorted(keys)
+    return {k: f"Session {i + 1:02d}" for i, k in enumerate(ordered)}
+
+
+def _load_fallback_job_row() -> dict | None:
+    """List-row shape for curated #62, derived from the committed detail fixture."""
+    path = FIXTURES_DIR / "infra-job-detail-fallback.json"
+    if not path.is_file():
+        return None
+    try:
+        detail = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    job = detail.get("job") if isinstance(detail, dict) else None
+    if not isinstance(job, dict) or job.get("id") != SHOWCASE_FALLBACK_JOB_ID:
+        return None
+    # Strip detail-only fields so the jobs list stays list-shaped.
+    skip = {"degraded", "output_artifacts"}
+    return {k: v for k, v in job.items() if k not in skip}
+
+
+def _pin_showcase_jobs(jobs_payload: dict, fallback_row: dict | None) -> dict:
+    """Keep live jobs, but force walkthrough rows #61/#62 to the top; replace live #62."""
+    out = dict(jobs_payload)
+    items = list(out.get("items") or [])
+    by_id = {int(j["id"]): j for j in items if isinstance(j, dict) and j.get("id") is not None}
+
+    success = by_id.get(SHOWCASE_SUCCESS_JOB_ID)
+    if fallback_row is not None:
+        by_id[SHOWCASE_FALLBACK_JOB_ID] = _scrub(fallback_row)
+
+    pinned: list[dict] = []
+    if success is not None:
+        pinned.append(success)
+    if SHOWCASE_FALLBACK_JOB_ID in by_id:
+        pinned.append(by_id[SHOWCASE_FALLBACK_JOB_ID])
+
+    rest = [
+        j
+        for j in items
+        if int(j.get("id") or -1) not in (SHOWCASE_SUCCESS_JOB_ID, SHOWCASE_FALLBACK_JOB_ID)
+    ]
+    merged = pinned + rest
+    out["items"] = merged
+    out["count"] = max(int(out.get("count") or 0), len(merged))
+    return out
+
+
+def export_infra(dry_run: bool, infra_only: bool = False) -> int:
     print("Exporting infra console fixtures from local data (anonymized):")
     try:
         from fastapi import FastAPI
@@ -348,40 +436,62 @@ def export_infra(dry_run: bool) -> int:
     app.include_router(router)
     client = TestClient(app)
     failed = 0
+    fallback_row = _load_fallback_job_row()
+    if fallback_row is None:
+        print(
+            "  · warn: infra-job-detail-fallback.json missing/invalid — "
+            f"live job #{SHOWCASE_FALLBACK_JOB_ID} will not be replaced",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            f"  · preserving curated fallback job #{SHOWCASE_FALLBACK_JOB_ID} "
+            "(infra-job-detail-fallback.json not overwritten)"
+        )
 
-    def dump(path: str, query: str, name: str) -> dict | None:
+    pending: list[tuple[str, dict]] = []
+
+    def fetch(path: str, query: str, name: str) -> dict | None:
         url = f"/api/infra/{path}" + (f"?{query}" if query else "")
         res = client.get(url)
         if res.status_code != 200:
             print(f"  ✗ {name}: HTTP {res.status_code} {url}", file=sys.stderr)
             return None
         data = _scrub(res.json())
-        if dry_run:
-            print(f"  · {name}: {json.dumps(data, ensure_ascii=False)[:110]}…")
-        else:
-            write_fixture(name, data)
+        if name == "infra-jobs":
+            data = _pin_showcase_jobs(data, fallback_row)
+        pending.append((name, data))
         return data
 
     for path, query, name in INFRA_ENDPOINTS:
         try:
-            data = dump(path, query, name)
-            if data is None:
+            if fetch(path, query, name) is None:
                 failed += 1
         except Exception as exc:  # noqa: BLE001
             print(f"  ✗ {name}: {exc}", file=sys.stderr)
             failed += 1
 
-    # Representative drill-downs: pick the newest job id (+ its trace) from the list.
-    job_id = None
+    # Pin drill-downs to the walkthrough success job (not "newest"), so tour IDs stay stable.
+    job_id = SHOWCASE_SUCCESS_JOB_ID
     trace_id = None
     try:
-        jobs = client.get("/api/infra/jobs?limit=1&offset=0").json()
-        items = jobs.get("items") or []
-        if items:
-            job_id = items[0].get("id")
-            trace_id = items[0].get("trace_id")
-    except Exception:  # noqa: BLE001
-        pass
+        detail = client.get(f"/api/infra/jobs/{job_id}")
+        if detail.status_code == 200:
+            body = detail.json()
+            job = body.get("job") if isinstance(body, dict) else None
+            if isinstance(job, dict):
+                trace_id = job.get("trace_id")
+        else:
+            print(
+                f"  ✗ infra-job-detail: HTTP {detail.status_code} /api/infra/jobs/{job_id}",
+                file=sys.stderr,
+            )
+            failed += 1
+            job_id = None
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ✗ infra-job-detail: {exc}", file=sys.stderr)
+        failed += 1
+        job_id = None
 
     if job_id is not None:
         for path, name in [
@@ -390,19 +500,41 @@ def export_infra(dry_run: bool) -> int:
             (f"jobs/{job_id}/timeline", "infra-job-timeline"),
         ]:
             try:
-                if dump(path, "", name) is None:
+                if fetch(path, "", name) is None:
                     failed += 1
             except Exception as exc:  # noqa: BLE001
                 print(f"  ✗ {name}: {exc}", file=sys.stderr)
                 failed += 1
     if trace_id:
         try:
-            if dump(f"traces/{trace_id}", "", "infra-trace") is None:
+            if fetch(f"traces/{trace_id}", "", "infra-trace") is None:
                 failed += 1
         except Exception as exc:  # noqa: BLE001
             print(f"  ✗ infra-trace: {exc}", file=sys.stderr)
             failed += 1
 
+    # Curated fallback detail: rescrub paths only; never replace from live #62.
+    fb_path = FIXTURES_DIR / "infra-job-detail-fallback.json"
+    if fb_path.is_file():
+        try:
+            pending.append(("infra-job-detail-fallback", _scrub(json.loads(fb_path.read_text(encoding="utf-8")))))
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ✗ infra-job-detail-fallback rescrub: {exc}", file=sys.stderr)
+            failed += 1
+
+    # Anonymize real archive session keys (dates / venue suffixes) → Session NN.
+    label_map = _session_label_map_from(*(data for _, data in pending))
+    if label_map:
+        print(f"  · anonymized {len(label_map)} session_key value(s)")
+        pending = [(name, _anon_session_keys(data, label_map)) for name, data in pending]
+
+    for name, data in pending:
+        if dry_run:
+            print(f"  · {name}: {json.dumps(data, ensure_ascii=False)[:110]}…")
+        else:
+            write_fixture(name, data)
+
+    _ = infra_only  # reserved for callers; landing/studio skipped via CLI flag
     return failed
 
 
@@ -413,11 +545,18 @@ def main() -> int:
         action="store_true",
         help="Print what would be exported without writing fixtures.",
     )
+    parser.add_argument(
+        "--infra-only",
+        action="store_true",
+        help="Only refresh infra console fixtures (skip landing/studio).",
+    )
     args = parser.parse_args()
 
-    failed = export_landing(args.dry_run)
-    failed += export_studio(args.dry_run)
-    failed += export_infra(args.dry_run)
+    failed = 0
+    if not args.infra_only:
+        failed += export_landing(args.dry_run)
+        failed += export_studio(args.dry_run)
+    failed += export_infra(args.dry_run, infra_only=args.infra_only)
 
     if failed:
         print(f"\nDone with {failed} failure(s).", file=sys.stderr)

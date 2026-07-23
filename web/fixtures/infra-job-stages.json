@@ -38,7 +38,8 @@
       "namespace": "default",
       "project_key": "default",
       "created_at": 1782706964,
-      "updated_at": 1782707714
+      "updated_at": 1782707714,
+      "claim_generation": 0
     }
   ]
 }
