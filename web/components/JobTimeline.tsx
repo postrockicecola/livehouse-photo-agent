@@ -178,7 +178,18 @@ export function JobTimeline({ apiPath, backHref = "/infra", title = "Job timelin
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
+        <div className="min-w-0">
+          <nav className="mb-2 flex flex-wrap items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500" aria-label="Breadcrumb">
+            <Link href="/infra" className="hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50">
+              Infra
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href="/infra/brain" className="hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50">
+              Brain
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="truncate text-zinc-400">{title}</span>
+          </nav>
           <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">{title}</div>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">
             {Number.isFinite(jid) ? `Job #${jid}` : "—"}
@@ -192,12 +203,20 @@ export function JobTimeline({ apiPath, backHref = "/infra", title = "Job timelin
             )}
           </h1>
         </div>
-        <Link
-          href={backHref}
-          className="rounded-lg border border-stroke px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800"
-        >
-          返回 Console
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/studio"
+            className="rounded-lg border border-stroke px-3 py-2 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+          >
+            Studio
+          </Link>
+          <Link
+            href={backHref}
+            className="rounded-lg border border-stroke px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+          >
+            返回 Console
+          </Link>
+        </div>
       </div>
 
       {error ? (

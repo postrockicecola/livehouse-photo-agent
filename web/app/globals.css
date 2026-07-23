@@ -4,6 +4,27 @@
 
 :root {
   color-scheme: dark;
+
+  /* Surface */
+  --luma-bg: #0a0a0a;
+  --luma-bg-elevated: #0e0e0e;
+  --luma-panel: #111317;
+  --luma-stroke: rgba(255, 255, 255, 0.08);
+  --luma-text: #ffffff;
+  --luma-text-muted: rgba(255, 255, 255, 0.45);
+  --luma-text-faint: rgba(255, 255, 255, 0.28);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+
+  /* Focus */
+  --luma-focus: rgba(255, 255, 255, 0.35);
+  --luma-focus-offset: var(--luma-bg);
 }
 
 html {
@@ -17,10 +38,29 @@ body {
 
 body {
   margin: 0;
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: var(--luma-bg);
+  color: var(--luma-text);
+  font-family: var(--font-luma-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono,
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-luma-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Global keyboard focus — do not rely on hover alone */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--luma-focus);
+  outline-offset: 2px;
 }
 
 .glass {

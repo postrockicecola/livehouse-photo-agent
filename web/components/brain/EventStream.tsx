@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fmtTime, formatEventLine } from "./utils";
 import type { RuntimeEvent } from "./types";
 
@@ -36,13 +36,18 @@ const KIND_CLS: Record<string, string> = {
 export function EventStream({ events, loading }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevLen = useRef(0);
+  const [followLatest, setFollowLatest] = useState(true);
 
   useEffect(() => {
+    if (!followLatest) {
+      prevLen.current = events.length;
+      return;
+    }
     if (events.length > prevLen.current) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }
     prevLen.current = events.length;
-  }, [events.length]);
+  }, [events.length, followLatest]);
 
   const visible = events.slice(-40);
 
@@ -53,9 +58,20 @@ export function EventStream({ events, loading }: Props) {
           <h2 className="text-xs uppercase tracking-[0.22em] text-zinc-500">Recent runtime events</h2>
           <p className="mt-0.5 font-mono text-[10px] text-zinc-600">continuous state transitions · job_events stream</p>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-600">
-          <span className="runtime-pulse-dot h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
-          live
+        <div className="flex items-center gap-3 font-mono text-[10px] text-zinc-600">
+          <label className="inline-flex cursor-pointer items-center gap-1.5 text-zinc-500">
+            <input
+              type="checkbox"
+              checked={followLatest}
+              onChange={(e) => setFollowLatest(e.target.checked)}
+              className="rounded border-zinc-600 bg-zinc-900"
+            />
+            跟随最新
+          </label>
+          <span className="inline-flex items-center gap-2">
+            <span className="runtime-pulse-dot h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
+            live
+          </span>
         </div>
       </div>
 

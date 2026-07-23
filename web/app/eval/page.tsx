@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { AppNav } from "@/components/ui/AppNav";
 import {
   AGENT_SELECTION_250,
   AGENT_SELECTION_LLM_60,
@@ -26,7 +27,9 @@ export default function EvalPage() {
   const maxPrec = Math.max(...QUALITY_COST_POINTS.map((p) => p.precision));
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] px-5 py-10 text-white sm:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <AppNav />
+      <main className="px-5 py-10 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">Evaluation</p>
         <h1 className="mt-3 text-3xl font-light tracking-tight text-white/[0.92] sm:text-4xl">
@@ -276,6 +279,7 @@ export default function EvalPage() {
           </Link>
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

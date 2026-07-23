@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   productModeHref,
   productModeLabel,
@@ -111,18 +111,12 @@ export function ProductGatePortal() {
   const router = useRouter();
   const [remember, setRemember] = useState(false);
   const [lastMode, setLastMode] = useState<ProductMode | null>(null);
-  const autoRedirectDone = useRef(false);
 
   useEffect(() => {
     const mode = readProductMode();
-    const remembered = readRememberProductMode();
-    setRemember(remembered);
+    setRemember(readRememberProductMode());
     setLastMode(mode);
-    if (remembered && mode && !autoRedirectDone.current) {
-      autoRedirectDone.current = true;
-      router.replace(productModeHref(mode));
-    }
-  }, [router]);
+  }, []);
 
   const onEnter = (mode: ProductMode) => {
     saveProductMode(mode, remember);

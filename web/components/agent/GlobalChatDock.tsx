@@ -9,6 +9,13 @@ const API_BASE = getApiBase();
 
 const OPEN_VIBE_PREVIEW_KEY = "luma.open_vibe_preview";
 
+/** Surfaces where the curation assistant is in-context. */
+function showChatOnPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  if (pathname === "/" || pathname.startsWith("/gallery") || pathname.startsWith("/studio")) return true;
+  return false;
+}
+
 /**
  * Site-wide curation assistant FAB.
  * Reads landing hero `?q=` once to open + auto-send.
@@ -47,6 +54,8 @@ export function GlobalChatDock() {
     return () =>
       window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
   }, [pathname, router]);
+
+  if (!showChatOnPath(pathname)) return null;
 
   return (
     <ChatDock

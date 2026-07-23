@@ -8,6 +8,7 @@ import {
   type StudioIngestConfig,
 } from "@/lib/studioApi";
 import { StudioAppNav } from "@/components/studio/StudioAppNav";
+import { ErrorState, LoadingState } from "@/components/ui/states";
 
 export default function StudioConfigPage() {
   const [loaded, setLoaded] = useState<StudioIngestConfig | null>(null);
@@ -81,9 +82,17 @@ export default function StudioConfigPage() {
       </header>
 
       <section className="relative z-10 mx-auto w-full max-w-lg">
-        {loading ? <p className="font-mono text-[11px] text-white/30">loading config…</p> : null}
-        {error ? <p className="mb-4 font-mono text-[11px] text-rose-400/90">{error}</p> : null}
-        {message ? <p className="mb-4 font-mono text-[10px] text-emerald-400/80">{message}</p> : null}
+        {loading ? <LoadingState label="loading config…" bare className="mb-4 font-mono text-[11px]" /> : null}
+        {error ? (
+          <div className="mb-4">
+            <ErrorState message={error} onRetry={() => window.location.reload()} />
+          </div>
+        ) : null}
+        {message ? (
+          <p className="mb-4 font-mono text-[10px] text-emerald-400/80" role="status" aria-live="polite">
+            {message}
+          </p>
+        ) : null}
 
         {!loading ? (
           <form

@@ -158,6 +158,7 @@ export default function InfraPage() {
   const [expandedJobId, setExpandedJobId] = useState<number | null>(
     showcase ? SHOWCASE_SUCCESS_JOB_ID : null,
   );
+  const [infraTab, setInfraTab] = useState<"overview" | "jobs" | "capacity" | "experiments">("overview");
 
   useEffect(() => {
     // Client-only query read — avoids Next Suspense/SSG bailout from useSearchParams.
@@ -375,91 +376,117 @@ export default function InfraPage() {
           autoStart={tourAutoStart}
           onExpandJob={(jobId) => {
             setExpandedJobId(jobId);
+            setInfraTab("jobs");
             document.getElementById("tour-jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
         />
 
-        {/* SLO + error budget (SRE framing) */}
-        <SLOStrip slo={slo} loading={loading} />
+        <div
+          className="flex flex-wrap gap-1 rounded-lg border border-stroke/70 bg-zinc-950/50 p-1"
+          role="tablist"
+          aria-label="Infra sections"
+        >
+          {(
+            [
+              ["overview", "Overview"],
+              ["jobs", "Jobs"],
+              ["capacity", "Capacity"],
+              ["experiments", "Experiments"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={infraTab === id}
+              onClick={() => setInfraTab(id)}
+              className={`rounded-md px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 ${
+                infraTab === id
+                  ? "bg-zinc-800 text-zinc-100"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-        {/* Hero: at-a-glance golden signals with real trends (p95 from SSOT) */}
-        <GoldenSignals
-          throughputPerMin={throughputPerMin}
-          queueDepth={jobsQueued}
-          latencyP95Ms={latencyP95Ms}
-          latencyP50Ms={latencyP50Ms}
-          errorRatePct={errRate}
-          failedJobs={failedJobs}
-          utilPct={utilPct}
-          headroom={admission?.headroom}
-          inflight={inflight}
-          maxInflight={maxInflight}
-          history={history}
-          loading={loading}
-        />
+        {infraTab === "overview" ? (
+          <>
+            <SLOStrip slo={slo} loading={loading} />
+            <GoldenSignals
+              throughputPerMin={throughputPerMin}
+              queueDepth={jobsQueued}
+              latencyP95Ms={latencyP95Ms}
+              latencyP50Ms={latencyP50Ms}
+              errorRatePct={errRate}
+              failedJobs={failedJobs}
+              utilPct={utilPct}
+              headroom={admission?.headroom}
+              inflight={inflight}
+              maxInflight={maxInflight}
+              history={history}
+              loading={loading}
+            />
+            <PipelineTopology stages={stages} jobsByStatus={jobsByStatus} loading={loading} />
+            <FailureCenter
+              buckets={failureBuckets}
+              deadLetterItems={deadLetter as DeadLetterJobRow[]}
+              loading={loading}
+              apiBase={API_BASE}
+            />
+            <LivePipelineTimeline events={runtimeStream?.events ?? []} loading={loading} limit={20} />
+          </>
+        ) : null}
 
-        {/* Scheduler gate detail */}
-        <CapacityAdmissionPanel
-          workerTotal={workerTotal}
-          runningJobs={inflight}
-          queueDepth={jobsQueued}
-          admission={admission}
-          celeryUnavailable={celeryUnavailable}
-          inferenceMaxInflight={metrics?.inference_queue?.max_inflight}
-          loading={loading}
-        />
+        {infraTab === "jobs" ? (
+          <JobsTable
+            apiBase={API_BASE}
+            byStatus={jobsByStatus}
+            workers={workers as InfraWorkerRow[]}
+            loading={loading}
+            expandedId={expandedJobId}
+            onExpandedIdChange={setExpandedJobId}
+            defaultExpandedId={showcase ? SHOWCASE_SUCCESS_JOB_ID : null}
+            highlightJobIds={
+              showcase ? [SHOWCASE_SUCCESS_JOB_ID, SHOWCASE_FALLBACK_JOB_ID] : []
+            }
+          />
+        ) : null}
 
-        {/* Primary diagnostic: the pipeline spine */}
-        <PipelineTopology stages={stages} jobsByStatus={jobsByStatus} loading={loading} />
+        {infraTab === "capacity" ? (
+          <>
+            <CapacityAdmissionPanel
+              workerTotal={workerTotal}
+              runningJobs={inflight}
+              queueDepth={jobsQueued}
+              admission={admission}
+              celeryUnavailable={celeryUnavailable}
+              inferenceMaxInflight={metrics?.inference_queue?.max_inflight}
+              loading={loading}
+            />
+            <WorkerPoolPanel
+              apiBase={API_BASE}
+              workers={workers as InfraWorkerRow[]}
+              loading={loading}
+              admissionHeadroom={admission?.headroom}
+              brokerWorkerCount={workersBroker?.worker_count}
+              celeryUnavailable={workersBroker?.celery_unavailable}
+              unmatchedCount={unmatchedBrokerWorkers.length}
+            />
+            <ProviderRuntimePanel providers={providers} activeProvider={activeProvider} loading={loading} />
+            <ServingThroughputPanel inferenceQueue={metrics?.inference_queue} cost={costData} loading={loading} />
+            <CostAttributionPanel data={costData} loading={loading} />
+          </>
+        ) : null}
 
-        {/* Promoted: reliability / dead-letter is incident-critical */}
-        <FailureCenter
-          buckets={failureBuckets}
-          deadLetterItems={deadLetter as DeadLetterJobRow[]}
-          loading={loading}
-          apiBase={API_BASE}
-        />
-
-        <WorkerPoolPanel
-          apiBase={API_BASE}
-          workers={workers as InfraWorkerRow[]}
-          loading={loading}
-          admissionHeadroom={admission?.headroom}
-          brokerWorkerCount={workersBroker?.worker_count}
-          celeryUnavailable={workersBroker?.celery_unavailable}
-          unmatchedCount={unmatchedBrokerWorkers.length}
-        />
-
-        <ProviderRuntimePanel providers={providers} activeProvider={activeProvider} loading={loading} />
-
-        {/* Cost attribution: token spend + per-model breakdown */}
-        {/* Real Apple-Silicon GPU saturation + decode throughput (powermetrics sampler) */}
-        <ServingThroughputPanel inferenceQueue={metrics?.inference_queue} cost={costData} loading={loading} />
-
-        <CostAttributionPanel data={costData} loading={loading} />
-
-        {/* Demoted: activity stream is a detail feed, not a headline */}
-        <LivePipelineTimeline events={runtimeStream?.events ?? []} loading={loading} limit={20} />
-
-        <JobsTable
-          apiBase={API_BASE}
-          byStatus={jobsByStatus}
-          workers={workers as InfraWorkerRow[]}
-          loading={loading}
-          expandedId={expandedJobId}
-          onExpandedIdChange={setExpandedJobId}
-          defaultExpandedId={showcase ? SHOWCASE_SUCCESS_JOB_ID : null}
-          highlightJobIds={
-            showcase ? [SHOWCASE_SUCCESS_JOB_ID, SHOWCASE_FALLBACK_JOB_ID] : []
-          }
-        />
-
-        {/* Extensions: Agent / RLHF / Prompt — not the production main path */}
-        <InfraExperimentsSection>
-          <AgentCurationPanel apiBase={API_BASE} />
-          <RLHFVotePanel sessionKey={null} apiBase={API_BASE} />
-          <PromptExperimentPanel experimentName="prompt_ab_demo" apiBase={API_BASE} />
-        </InfraExperimentsSection>
+        {infraTab === "experiments" ? (
+          <InfraExperimentsSection>
+            <AgentCurationPanel apiBase={API_BASE} />
+            <RLHFVotePanel sessionKey={null} apiBase={API_BASE} />
+            <PromptExperimentPanel experimentName="prompt_ab_demo" apiBase={API_BASE} />
+          </InfraExperimentsSection>
+        ) : null}
       </div>
     </main>
   );

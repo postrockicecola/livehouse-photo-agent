@@ -338,7 +338,7 @@ export function JobsTable({
                 return (
                   <Fragment key={`${jid ?? "job"}-${idx}`}>
                     <tr
-                      className={`cursor-pointer border-b border-stroke/60 text-zinc-300 transition-colors hover:bg-zinc-900/40 ${rowVisualClass(job)} ${
+                      className={`cursor-pointer border-b border-stroke/60 text-zinc-300 transition-colors hover:bg-zinc-900/40 focus-within:bg-zinc-900/50 ${rowVisualClass(job)} ${
                         walkthrough ? "ring-1 ring-inset ring-sky-500/35" : ""
                       }`}
                       onClick={() => {
@@ -346,7 +346,30 @@ export function JobsTable({
                         setExpandedId(open ? null : jid);
                       }}
                     >
-                      <td className="px-1 py-2 text-center text-zinc-600">{open ? "▼" : "▶"}</td>
+                      <td className="px-1 py-2 text-center text-zinc-600">
+                        <button
+                          type="button"
+                          className="rounded px-1.5 py-0.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+                          aria-expanded={open}
+                          aria-label={open ? `Collapse job ${jid ?? ""}` : `Expand job ${jid ?? ""}`}
+                          disabled={jid == null}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (jid == null) return;
+                            setExpandedId(open ? null : jid);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (jid == null) return;
+                              setExpandedId(open ? null : jid);
+                            }
+                          }}
+                        >
+                          {open ? "▼" : "▶"}
+                        </button>
+                      </td>
                       <td className="px-2 py-2 font-medium text-zinc-200">
                         {jid != null ? (
                           <Link

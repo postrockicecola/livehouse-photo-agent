@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { PreviewMosaicGrid } from "@/components/PreviewMosaicGrid";
 import type { GalleryExportItem, GalleryItem } from "@/components/types";
 import { gallerySelectionKey } from "@/lib/defaultFilmExport";
@@ -9,6 +9,7 @@ import {
   exportPreviewLabel,
   resolvePreviewExportSpec,
 } from "@/lib/exportPreviewUrl";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 const PREVIEW_MAX_SIDE = 1200;
 
@@ -108,6 +109,9 @@ function PreviewModalShell({
   children: ReactNode;
   variant?: "selection" | "agent" | "vibe";
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(true, dialogRef);
+
   const title =
     variant === "agent" ? "助手筛选预览" : variant === "vibe" ? "胶片风格预览" : "选中图片预览";
   const eyebrow =
@@ -120,7 +124,9 @@ function PreviewModalShell({
         : "导出前效果确认";
   return (
     <div
-      className="fixed inset-0 z-[55] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden font-[system-ui,-apple-system,sans-serif] text-white"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[55] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
       role="dialog"
       aria-modal="true"
       aria-label={title}

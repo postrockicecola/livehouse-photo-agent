@@ -17,6 +17,7 @@ import {
   type StudioSessionSortOrder,
 } from "@/lib/studioSessionSort";
 import { StudioAppNav } from "@/components/studio/StudioAppNav";
+import { ErrorState, LoadingState } from "@/components/ui/states";
 import { ShowcaseBanner } from "@/components/ShowcaseBanner";
 import { StudioCurrentSessionHero } from "@/components/studio/StudioCurrentSessionHero";
 import { StudioFeaturedFrames } from "@/components/studio/StudioFeaturedFrames";
@@ -274,12 +275,12 @@ export default function StudioPage() {
       <StudioAppNav />
       <ShowcaseBanner />
 
-      {loading ? (
-        <p className="px-6 py-4 text-sm text-white/35">Loading sessions…</p>
-      ) : null}
+      {loading ? <LoadingState label="Loading sessions…" className="px-6 py-4" /> : null}
 
       {error ? (
-        <p className="px-6 py-2 text-sm text-rose-400/90">{error}</p>
+        <div className="px-6 py-2">
+          <ErrorState message={error} onRetry={() => window.location.reload()} />
+        </div>
       ) : null}
 
       {message ? (
@@ -310,10 +311,12 @@ export default function StudioPage() {
           </StudioCurrentSessionHero>
         </div>
       ) : !loading && !error ? (
-        <div className="relative h-[220px] overflow-hidden sm:h-[300px] lg:h-[360px]">
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,#1a1200_0%,#3d2800_40%,#1a0a00_100%)]" />
-          <div className="absolute inset-0 flex items-end px-6 pb-5">
+        <div className="relative flex h-[220px] flex-col justify-end overflow-hidden px-6 pb-6 sm:h-[300px] lg:h-[360px]">
+          <div className="absolute inset-0 bg-[#14110c]" />
+          <div className="relative z-[1] max-w-md">
             <p className="text-[10px] uppercase tracking-[0.12em] text-white/40">No sessions yet</p>
+            <p className="mt-2 text-sm text-white/55">导入场次预览后，这里会显示当前 Session Hero。</p>
+            <p className="mt-1 text-[11px] text-white/30">配置 source_dir 并运行 ingest / ANALYZE。</p>
           </div>
         </div>
       ) : null}

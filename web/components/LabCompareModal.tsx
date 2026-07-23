@@ -16,6 +16,7 @@ import {
   opticalStateToApiPayload,
   type OpticalConsoleState,
 } from "@/lib/opticalConsole";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 type Props = {
   item: GalleryItem | null;
@@ -902,6 +903,7 @@ export function LabCompareModal({
   const suppressScrollSyncUntil = useRef(0);
   const [optical, setOptical] = useState<OpticalConsoleState>(OPTICAL_NEUTRAL);
   const [debouncedOptical, setDebouncedOptical] = useState<OpticalConsoleState>(OPTICAL_NEUTRAL);
+  const [opticalDrawerOpen, setOpticalDrawerOpen] = useState(false);
   const opticalDebounceRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -1088,11 +1090,16 @@ export function LabCompareModal({
     onPickExportStyle(finalExportSpec, selected.label);
   }, [onPickExportStyle, item, selected, finalExportSpec]);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(Boolean(isOpen && item), dialogRef);
+
   if (!item || !entries.some(stripEntryEnabled)) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col font-[system-ui,-apple-system,sans-serif]"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-50 flex flex-col outline-none"
       role="dialog"
       aria-modal="true"
       aria-label="风格对比"
@@ -1145,6 +1152,29 @@ export function LabCompareModal({
               pendingPreview={opticalPending && Boolean(selected?.filmVariant)}
             />
           </div>
+        </div>
+
+        <div className="relative z-20 shrink-0 border-t border-white/[0.06] bg-[#0c0c0e]/95 lg:hidden">
+          <button
+            type="button"
+            aria-expanded={opticalDrawerOpen}
+            onClick={() => setOpticalDrawerOpen((v) => !v)}
+            className="flex w-full items-center justify-between px-4 py-2.5 text-left text-[11px] text-white/55"
+          >
+            <span>光呼吸控制台</span>
+            <span className="font-mono text-[10px] text-white/30">{opticalDrawerOpen ? "收起" : "展开"}</span>
+          </button>
+          {opticalDrawerOpen ? (
+            <div className="max-h-[42dvh] overflow-y-auto border-t border-white/[0.05]">
+              <OpticalConsolePanel
+                value={optical}
+                onChange={setOptical}
+                onScrubEnd={flushOpticalPreview}
+                filmMode={Boolean(selected?.filmVariant)}
+                pendingPreview={opticalPending && Boolean(selected?.filmVariant)}
+              />
+            </div>
+          ) : null}
         </div>
 
         <LabBottomBar

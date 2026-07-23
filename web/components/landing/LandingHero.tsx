@@ -19,12 +19,6 @@ export function LandingHero() {
         backgroundColor: "#0a0a0a",
       }}
     >
-      {/* Decorative layers sit above the photo; keep subtle so the frame reads as one image. */}
-      <div className="landing-hero-glow pointer-events-none absolute inset-0" />
-      <div className="landing-hero-grid pointer-events-none absolute inset-0 opacity-[0.12]" />
-      <div className="landing-hero-arc pointer-events-none absolute inset-0" aria-hidden />
-      <div className="landing-hero-flare pointer-events-none absolute inset-0" aria-hidden />
-
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={backgroundSrc}
@@ -33,8 +27,8 @@ export function LandingHero() {
         decoding="async"
         className="pointer-events-none absolute inset-0 h-full w-full object-cover"
       />
-      <div className="pointer-events-none absolute inset-0 bg-[#0a0a0a]/72" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/90 via-[#0a0a0a]/55 to-[#0a0a0a]" />
+      <div className="pointer-events-none absolute inset-0 bg-[#0a0a0a]/68" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/85 via-[#0a0a0a]/50 to-[#0a0a0a]" />
 
       <div className="landing-hero-stage">
         <h1 className="landing-hero-slogan">{title}</h1>

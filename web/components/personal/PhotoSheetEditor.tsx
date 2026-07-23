@@ -61,9 +61,12 @@ export function PhotoSheetEditor() {
     for (const p of items) URL.revokeObjectURL(p.url);
   }, []);
 
+  // Revoke only on unmount — per-photo revoke happens in removePhoto / clearAll.
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
   useEffect(() => {
-    return () => revokeAll(photos);
-  }, [photos, revokeAll]);
+    return () => revokeAll(photosRef.current);
+  }, [revokeAll]);
 
   const addFiles = (files: FileList | File[]) => {
     const list = Array.from(files).filter(acceptImage);
@@ -199,10 +202,10 @@ export function PhotoSheetEditor() {
               <button
                 type="button"
                 onClick={() => removePhoto(p.id)}
-                className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 transition group-hover:opacity-100"
+                className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded bg-black/70 font-mono text-[11px] text-white/90 transition hover:bg-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 aria-label={`移除 ${p.name}`}
               >
-                <span className="font-mono text-[10px] text-white/90">×</span>
+                ×
               </button>
             </div>
           ))}

@@ -184,7 +184,9 @@ function GuardrailChip({ ev }: { ev: AgentGuardrailEvent }) {
       title={ev.matches?.length ? ev.matches.join(", ") : ev.kind}
       className="inline-flex items-center gap-1 rounded-[3px] border border-amber-500/25 bg-amber-500/10 px-1.5 py-0.5 text-[11px] text-amber-100/80"
     >
-      <span aria-hidden>⚠</span>
+      <span aria-hidden className="font-mono text-[10px] text-amber-300/80">
+        !
+      </span>
       <span className="font-mono">{ev.kind}</span>
     </span>
   );

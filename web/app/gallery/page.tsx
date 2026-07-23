@@ -7,6 +7,7 @@ import { StudioAppNav } from "@/components/studio/StudioAppNav";
 import { GalleryMasonry } from "@/components/GalleryMasonry";
 import { LabCompareModal } from "@/components/LabCompareModal";
 import { SelectedPreviewModal } from "@/components/SelectedPreviewModal";
+import { LoadingState } from "@/components/ui/states";
 import type { GalleryExportItem, GalleryItem } from "@/components/types";
 import { getApiBase } from "@/lib/apiBase";
 import {
@@ -112,6 +113,7 @@ export default function HomePage() {
   const [bootstrapErr, setBootstrapErr] = useState<string | null>(null);
   const [loadSource, setLoadSource] = useState<GalleryLoadSource>("none");
   const [reloadNonce, setReloadNonce] = useState(0);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   const [modal, setModal] = useState<GalleryItem | null>(null);
   const [selectionPreviewOpen, setSelectionPreviewOpen] = useState(false);
@@ -971,45 +973,7 @@ export default function HomePage() {
                 {loadSource === "results_api" ? "API（分页）" : "analysis_results.json（客户端回退）"}
               </p>
             ) : null}
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] text-white/30">连拍</span>
-              <div
-                className="inline-flex rounded-[4px] border border-white/[0.08] p-0.5"
-                role="group"
-                aria-label="连拍折叠"
-              >
-                <button
-                  type="button"
-                  aria-pressed={galleryBurstDedupe}
-                  onClick={() => setGalleryBurstDedupePref(true)}
-                  className={[
-                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
-                    galleryBurstDedupe
-                      ? "bg-white/[0.12] text-white/85"
-                      : "text-white/45 hover:text-white/65",
-                  ].join(" ")}
-                >
-                  精简（每簇 1 张）
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={!galleryBurstDedupe}
-                  onClick={() => setGalleryBurstDedupePref(false)}
-                  className={[
-                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
-                    !galleryBurstDedupe
-                      ? "bg-white/[0.12] text-white/85"
-                      : "text-white/45 hover:text-white/65",
-                  ].join(" ")}
-                >
-                  显示全部
-                </button>
-              </div>
-              <span className="text-[10px] text-white/22">
-                按画面相似度折叠连拍；相似场景只留分数最高的一张
-              </span>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="text-[10px] text-white/30">排序</span>
               <div
                 className="inline-flex rounded-[4px] border border-white/[0.08] p-0.5"
@@ -1064,115 +1028,164 @@ export default function HomePage() {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  void rebuildTasteProfile(API_BASE)
-                    .then(() => refreshTasteProfile())
-                    .then(() => setTasteMsg("口味模型已更新"))
-                    .catch((e: unknown) =>
-                      setTasteMsg(e instanceof Error ? e.message : "更新失败（需≥5张已选且有 audit 维度）"),
-                    );
-                }}
-                className="rounded-[3px] border border-white/[0.06] px-2 py-1 text-[10px] text-white/40 hover:text-white/60"
+                aria-expanded={toolsOpen}
+                onClick={() => setToolsOpen((v) => !v)}
+                className="rounded-[3px] border border-white/[0.08] px-2.5 py-1 text-[10px] text-white/45 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
               >
-                重新学习
+                {toolsOpen ? "收起工具" : "更多工具"}
               </button>
-              {tasteTopHints(tasteProfile).length > 0 ? (
-                <span className="text-[10px] text-white/28">{tasteTopHints(tasteProfile).join(" · ")}</span>
-              ) : tasteMsg ? (
-                <span className="text-[10px] text-white/22">{tasteMsg}</span>
-              ) : null}
             </div>
-            <div className="mt-4 w-full max-w-xl">
-              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/35">Vibe 修图</p>
-              <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-                <input
-                  type="text"
-                  value={vibePrompt}
-                  onChange={(e) => setVibePrompt(e.target.value)}
-                  placeholder="例如：浪漫复古、理光街拍、电影感"
-                  className="min-w-0 flex-1 rounded-[4px] border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[12px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") void onApplySessionVibe();
-                  }}
-                />
-                <button
-                  type="button"
-                  disabled={vibeBusy}
-                  onClick={() => void onApplySessionVibe()}
-                  className="shrink-0 rounded-[4px] border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-[11px] text-white/70 transition-colors hover:bg-white/[0.1] disabled:opacity-40"
-                >
-                  {vibeBusy ? "应用中…" : "应用风格"}
-                </button>
-                {sessionVibeMatched(sessionVibe) && sessionVibe ? (
+
+            {toolsOpen ? (
+              <div className="mt-4 space-y-4 border-t border-white/[0.05] pt-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] text-white/30">连拍</span>
+                  <div
+                    className="inline-flex rounded-[4px] border border-white/[0.08] p-0.5"
+                    role="group"
+                    aria-label="连拍折叠"
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={galleryBurstDedupe}
+                      onClick={() => setGalleryBurstDedupePref(true)}
+                      className={[
+                        "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                        galleryBurstDedupe
+                          ? "bg-white/[0.12] text-white/85"
+                          : "text-white/45 hover:text-white/65",
+                      ].join(" ")}
+                    >
+                      精简（每簇 1 张）
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={!galleryBurstDedupe}
+                      onClick={() => setGalleryBurstDedupePref(false)}
+                      className={[
+                        "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                        !galleryBurstDedupe
+                          ? "bg-white/[0.12] text-white/85"
+                          : "text-white/45 hover:text-white/65",
+                      ].join(" ")}
+                    >
+                      显示全部
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    disabled={vibeBusy || items.length === 0}
                     onClick={() => {
-                      const liked = items.filter((it, idx) =>
-                        selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
-                      );
-                      openVibeStylePreview(sessionVibe, liked.length > 0 ? liked : items);
+                      void rebuildTasteProfile(API_BASE)
+                        .then(() => refreshTasteProfile())
+                        .then(() => setTasteMsg("口味模型已更新"))
+                        .catch((e: unknown) =>
+                          setTasteMsg(e instanceof Error ? e.message : "更新失败（需≥5张已选且有 audit 维度）"),
+                        );
                     }}
-                    className="shrink-0 rounded-[4px] border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-2 text-[11px] text-emerald-100/85 transition-colors hover:bg-emerald-400/[0.14] disabled:opacity-40"
+                    className="rounded-[3px] border border-white/[0.06] px-2 py-1 text-[10px] text-white/40 hover:text-white/60"
                   >
-                    预览风格
+                    重新学习口味
                   </button>
-                ) : null}
-                {sessionVibe ? (
-                  <button
-                    type="button"
-                    disabled={vibeBusy}
-                    onClick={() => void onClearSessionVibe()}
-                    className="shrink-0 rounded-[4px] border border-white/[0.06] px-3 py-2 text-[11px] text-white/40 hover:text-white/55 disabled:opacity-40"
-                  >
-                    清除
-                  </button>
-                ) : null}
-              </div>
-              {sessionVibe ? (
-                <div className="mt-2 space-y-1.5">
-                  {sessionVibeMatched(sessionVibe) ? (
-                    <p className="text-[11px] text-white/40">
-                      当前会话：<span className="text-white/65">{sessionVibe.label_zh}</span>
-                      <span className="text-white/25"> · {sessionVibe.film_variant}</span>
-                      {sessionVibe.reason_zh ? (
-                        <span className="block text-[10px] text-white/28">{sessionVibe.reason_zh}</span>
-                      ) : null}
-                    </p>
+                  {tasteTopHints(tasteProfile).length > 0 ? (
+                    <span className="text-[10px] text-white/28">{tasteTopHints(tasteProfile).join(" · ")}</span>
+                  ) : tasteMsg ? (
+                    <span className="text-[10px] text-white/22">{tasteMsg}</span>
+                  ) : null}
+                </div>
+
+                <div className="w-full max-w-xl">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/35">Vibe 修图</p>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <input
+                      type="text"
+                      value={vibePrompt}
+                      onChange={(e) => setVibePrompt(e.target.value)}
+                      placeholder="例如：浪漫复古、理光街拍、电影感"
+                      className="min-w-0 flex-1 rounded-[4px] border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[12px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") void onApplySessionVibe();
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={vibeBusy}
+                      onClick={() => void onApplySessionVibe()}
+                      className="shrink-0 rounded-[4px] border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-[11px] text-white/70 transition-colors hover:bg-white/[0.1] disabled:opacity-40"
+                    >
+                      {vibeBusy ? "应用中…" : "应用风格"}
+                    </button>
+                    {sessionVibeMatched(sessionVibe) && sessionVibe ? (
+                      <button
+                        type="button"
+                        disabled={vibeBusy || items.length === 0}
+                        onClick={() => {
+                          const liked = items.filter((it, idx) =>
+                            selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
+                          );
+                          openVibeStylePreview(sessionVibe, liked.length > 0 ? liked : items);
+                        }}
+                        className="shrink-0 rounded-[4px] border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-2 text-[11px] text-emerald-100/85 transition-colors hover:bg-emerald-400/[0.14] disabled:opacity-40"
+                      >
+                        预览风格
+                      </button>
+                    ) : null}
+                    {sessionVibe ? (
+                      <button
+                        type="button"
+                        disabled={vibeBusy}
+                        onClick={() => void onClearSessionVibe()}
+                        className="shrink-0 rounded-[4px] border border-white/[0.06] px-3 py-2 text-[11px] text-white/40 hover:text-white/55 disabled:opacity-40"
+                      >
+                        清除
+                      </button>
+                    ) : null}
+                  </div>
+                  {sessionVibe ? (
+                    <div className="mt-2 space-y-1.5">
+                      {sessionVibeMatched(sessionVibe) ? (
+                        <p className="text-[11px] text-white/40">
+                          当前会话：<span className="text-white/65">{sessionVibe.label_zh}</span>
+                          <span className="text-white/25"> · {sessionVibe.film_variant}</span>
+                          {sessionVibe.reason_zh ? (
+                            <span className="block text-[10px] text-white/28">{sessionVibe.reason_zh}</span>
+                          ) : null}
+                        </p>
+                      ) : (
+                        <p className="rounded-[4px] border border-amber-500/25 bg-amber-500/10 px-2.5 py-2 text-[11px] leading-relaxed text-amber-100/85">
+                          未能匹配胶片风格，批量导出不会自动套用会话 Vibe。请修改描述后重新「应用风格」，或在 Lab
+                          里手动选胶片。
+                          {sessionVibe.reason_zh ? (
+                            <span className="mt-1 block text-[10px] text-amber-100/60">{sessionVibe.reason_zh}</span>
+                          ) : null}
+                        </p>
+                      )}
+                    </div>
                   ) : (
-                    <p className="rounded-[4px] border border-amber-500/25 bg-amber-500/10 px-2.5 py-2 text-[11px] leading-relaxed text-amber-100/85">
-                      未能匹配胶片风格，批量导出不会自动套用会话 Vibe。请修改描述后重新「应用风格」，或在 Lab
-                      里手动选胶片。
-                      {sessionVibe.reason_zh ? (
-                        <span className="mt-1 block text-[10px] text-amber-100/60">{sessionVibe.reason_zh}</span>
-                      ) : null}
+                    <p className="mt-2 text-[10px] text-white/25">
+                      输入描述后应用；Lab 打开时会默认选中对应胶片预览。
                     </p>
                   )}
                 </div>
-              ) : (
-                <p className="mt-2 text-[10px] text-white/25">
-                  输入描述后应用；Lab 打开时会默认选中对应胶片预览。
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2 lg:pt-1">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-normal tabular-nums text-white/55">
-              Workers: <span className="text-white/75">{headerStatus.workerCount}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-normal tabular-nums text-white/55">
-              Queue: <span className="text-white/75">{headerStatus.queueLabel}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-normal text-white/55">
-              <span
-                className="h-1.5 w-1.5 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.45)]"
-                aria-hidden
-              />
-              Redis:{" "}
-              <span className={headerStatus.redisOk ? "text-emerald-300/90" : "text-rose-300/90"}>
-                {headerStatus.redisOk ? "OK" : "err"}
-              </span>
-            </span>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-normal tabular-nums text-white/55">
+                    Workers: <span className="text-white/75">{headerStatus.workerCount}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-normal tabular-nums text-white/55">
+                    Queue: <span className="text-white/75">{headerStatus.queueLabel}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-normal text-white/55">
+                    Redis:{" "}
+                    <span className={headerStatus.redisOk ? "text-emerald-300/90" : "text-rose-300/90"}>
+                      {headerStatus.redisOk ? "OK" : "err"}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </header>
@@ -1185,8 +1198,8 @@ export default function HomePage() {
 
       <div className="flex w-full min-w-0 flex-1 flex-col pt-2">
         {loadingItems && items.length === 0 ? (
-          <div className="flex min-h-[70svh] items-center justify-center px-4 text-center text-[12px] text-white/30">
-            加载相册…
+          <div className="flex min-h-[70svh] items-center justify-center">
+            <LoadingState label="加载相册…" />
           </div>
         ) : showEmptyPanel ? (
           <GalleryEmptyState

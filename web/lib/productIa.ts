@@ -147,12 +147,11 @@ export type NavLink = {
   description?: string;
 };
 
-/** Landing top nav — product surfaces only. */
+/** Landing top nav — keep short; deep pages live in footer / CTA. */
 export const LANDING_NAV: NavLink[] = [
   { label: "结果", href: "#outcome", description: "一次运行的交付指标" },
   { label: "画廊", href: "#gallery", description: "筛选与确认" },
   { label: "主链路", href: "#workflow", description: "门控 → 作业 → VLM" },
-  { label: "评估", href: "#evaluation", description: "固定评估集对比" },
   { label: "Infra", href: "#infra", description: "队列、Worker、账本" },
   { label: "工作台", href: "#products", description: "Studio / Gallery / Console" },
 ];
@@ -503,16 +502,23 @@ export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   },
 ];
 
-/** Studio app shell — primary work routes. */
-export const STUDIO_PRIMARY_NAV: NavLink[] = [
-  { label: "Sessions", href: "/studio" },
+/** App shell — primary work routes (Studio / Gallery / Infra). */
+export const APP_PRIMARY_NAV: NavLink[] = [
+  { label: "Studio", href: "/studio" },
   { label: "Gallery", href: "/gallery" },
-  { label: "Settings", href: "/config" },
-];
-
-/** Studio app shell — secondary / operator routes. */
-export const STUDIO_SECONDARY_NAV: NavLink[] = [
-  { label: "Site", href: "/" },
-  { label: "Eval", href: "/eval" },
   { label: "Infra", href: "/infra" },
 ];
+
+/** App shell — secondary routes. */
+export const APP_MORE_NAV: NavLink[] = [
+  { label: "Eval", href: "/eval" },
+  { label: "Settings", href: "/config" },
+  { label: "Personal", href: "/personal" },
+  { label: "Site", href: "/" },
+];
+
+/** @deprecated Prefer APP_PRIMARY_NAV */
+export const STUDIO_PRIMARY_NAV: NavLink[] = APP_PRIMARY_NAV;
+
+/** @deprecated Prefer APP_MORE_NAV */
+export const STUDIO_SECONDARY_NAV: NavLink[] = APP_MORE_NAV;

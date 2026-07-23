@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EventStream } from "@/components/brain/EventStream";
 import { FlowGraph } from "@/components/brain/FlowGraph";
@@ -15,6 +14,7 @@ import type {
   RuntimeStreamData,
 } from "@/components/brain/types";
 import { WorkerPanel } from "@/components/brain/WorkerPanel";
+import { AppNav } from "@/components/ui/AppNav";
 import { getApiBase } from "@/lib/apiBase";
 import { ShowcaseBanner } from "@/components/ShowcaseBanner";
 
@@ -83,41 +83,21 @@ export default function InfraBrainPage() {
   }, []);
 
   return (
-    <main className="runtime-shell studio-grain relative min-h-screen px-3 py-4 sm:px-5 sm:py-5">
+    <div className="runtime-shell studio-grain relative min-h-screen">
+      <AppNav />
+      <main className="relative px-3 py-4 sm:px-5 sm:py-5">
       <ShowcaseBanner />
-      <header className="relative z-10 mb-5 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-zinc-600">
-            <span className="runtime-pulse-dot h-1 w-1 rounded-full bg-violet-400/60" />
-            Brain · nervous system
-          </div>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-zinc-100 sm:text-2xl">
-            Inference Orchestration
-          </h1>
-          <p className="mt-1 max-w-xl font-mono text-[11px] text-zinc-600">
-            runtime-first control plane · queue · workers · stage flow · event stream
-          </p>
+      <header className="relative z-10 mb-5">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-zinc-600">
+          <span className="runtime-pulse-dot h-1 w-1 rounded-full bg-violet-400/60" />
+          Brain · nervous system
         </div>
-        <nav className="flex flex-wrap gap-2">
-          <Link
-            href="/infra"
-            className="rounded-lg border border-stroke/80 px-3 py-1.5 font-mono text-[11px] text-zinc-400 transition hover:border-stroke hover:bg-zinc-900 hover:text-zinc-200"
-          >
-            Jobs console
-          </Link>
-          <Link
-            href="/studio"
-            className="rounded-lg border border-stroke/80 px-3 py-1.5 font-mono text-[11px] text-zinc-400 transition hover:border-stroke hover:bg-zinc-900 hover:text-zinc-200"
-          >
-            Studio
-          </Link>
-          <Link
-            href="/gallery"
-            className="rounded-lg border border-stroke/80 px-3 py-1.5 font-mono text-[11px] text-zinc-400 transition hover:border-stroke hover:bg-zinc-900 hover:text-zinc-200"
-          >
-            Gallery
-          </Link>
-        </nav>
+        <h1 className="mt-1 text-xl font-semibold tracking-tight text-zinc-100 sm:text-2xl">
+          Inference Orchestration
+        </h1>
+        <p className="mt-1 max-w-xl font-mono text-[11px] text-zinc-600">
+          runtime-first control plane · queue · workers · stage flow · event stream
+        </p>
       </header>
 
       {error ? (
@@ -149,6 +129,7 @@ export default function InfraBrainPage() {
         </div>
         <LedgerSection data={ledger} loading={loading} />
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AppNav } from "@/components/ui/AppNav";
 import { freshnessLabel, type InfraHealthVerdict } from "@/lib/infraControlPlane";
 
 type Props = {
@@ -35,12 +36,6 @@ const VERDICT_META: Record<
   },
 };
 
-const NAV = [
-  { href: "/infra/brain", label: "Brain Runtime" },
-  { href: "/studio", label: "Studio" },
-  { href: "/gallery", label: "Gallery" },
-];
-
 export function SystemStatusBar({ verdict, reason, lastUpdatedMs, degradedSources, loading }: Props) {
   const meta = VERDICT_META[verdict];
   const [now, setNow] = useState(() => Date.now());
@@ -52,32 +47,34 @@ export function SystemStatusBar({ verdict, reason, lastUpdatedMs, degradedSource
 
   const stale = lastUpdatedMs != null && now - lastUpdatedMs > 10_000;
 
+  const healthChip = (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${meta.ring} ${meta.text}`}
+      title={reason}
+    >
+      <span className={`relative h-1.5 w-1.5 rounded-full ${meta.dot}`}>
+        {verdict !== "operational" ? (
+          <span className={`absolute inset-0 animate-ping rounded-full ${meta.dot} opacity-60`} />
+        ) : null}
+      </span>
+      {loading ? "Checking…" : meta.label}
+    </span>
+  );
+
   return (
-    <div className="sticky top-0 z-30 -mx-4 mb-5 border-b border-stroke/70 bg-zinc-950/80 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="flex items-center gap-3">
-          <div>
+    <div className="mb-5">
+      <AppNav trailing={healthChip} />
+      <div className="border-b border-stroke/70 bg-zinc-950/80 px-4 py-3 backdrop-blur sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0">
             <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
               AI Pipeline Control Plane
             </div>
             <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Luma Infra</h1>
+            <p className="mt-0.5 text-xs text-zinc-500">{reason}</p>
           </div>
-          <span
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${meta.ring} ${meta.text}`}
-          >
-            <span className={`relative h-2 w-2 rounded-full ${meta.dot}`}>
-              {verdict !== "operational" ? (
-                <span className={`absolute inset-0 animate-ping rounded-full ${meta.dot} opacity-60`} />
-              ) : null}
-            </span>
-            {loading ? "Checking…" : meta.label}
-          </span>
-          <span className="hidden text-xs text-zinc-500 sm:inline">{reason}</span>
-        </div>
-
-        <div className="flex items-center gap-3">
           <div className="text-right">
-            <div className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-400">
+            <div className="flex items-center justify-end gap-1.5 font-mono text-[11px] text-zinc-400">
               <span className={`h-1.5 w-1.5 rounded-full ${stale ? "bg-amber-400" : "bg-emerald-400"}`} />
               {stale ? "stale" : "live"} · {freshnessLabel(lastUpdatedMs, now)}
             </div>
@@ -87,20 +84,8 @@ export function SystemStatusBar({ verdict, reason, lastUpdatedMs, degradedSource
               </div>
             ) : null}
           </div>
-          <div className="hidden gap-2 md:flex">
-            {NAV.map((n) => (
-              <a
-                key={n.href}
-                href={n.href}
-                className="rounded-lg border border-stroke px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
-              >
-                {n.label}
-              </a>
-            ))}
-          </div>
         </div>
       </div>
-      {reason ? <div className="mt-1 text-xs text-zinc-500 sm:hidden">{reason}</div> : null}
     </div>
   );
 }
