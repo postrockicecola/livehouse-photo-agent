@@ -659,6 +659,45 @@ input.optical-slider:disabled::-webkit-slider-thumb {
   }
 }
 
+/* Showcase Agent film vibes — CSS grade stand-ins (no gallery_server optical render). */
+.showcase-film-grade,
+.showcase-grade-cinestill {
+  filter: sepia(0.28) contrast(1.22) saturate(1.4) brightness(0.9) hue-rotate(-18deg);
+}
+
+/* Kodak Portra — warm soft pastel skin */
+.showcase-grade-portra {
+  filter: sepia(0.42) contrast(0.92) saturate(1.12) brightness(1.1) hue-rotate(12deg);
+}
+
+/* Fuji Superia — green/magenta punch */
+.showcase-grade-superia {
+  filter: contrast(1.2) saturate(1.65) brightness(1.04) hue-rotate(28deg) sepia(0.08);
+}
+
+/* Ilford HP5 — hard silver B&W */
+.showcase-grade-hp5 {
+  filter: grayscale(1) contrast(1.42) brightness(1.06);
+}
+
+/* Dreamcore / 梦核 — washed liminal fog */
+.showcase-grade-dreamcore {
+  filter: saturate(0.62) contrast(0.78) brightness(1.18) sepia(0.18) hue-rotate(195deg);
+}
+.showcase-grade-dreamcore-wrap {
+  position: relative;
+}
+.showcase-grade-dreamcore-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(190, 210, 255, 0.35), transparent 62%),
+    linear-gradient(160deg, rgba(255, 190, 220, 0.18), rgba(40, 20, 70, 0.28));
+  mix-blend-mode: soft-light;
+}
+
 .landing-placeholder {
   position: relative;
 }

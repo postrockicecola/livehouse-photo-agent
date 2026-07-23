@@ -19,6 +19,10 @@ import {
   registerUser,
   type AuthUser,
 } from "@/components/agent/agentAuth";
+import {
+  ShowcasePreviewModal,
+  type ShowcasePreviewItem,
+} from "@/components/agent/ShowcasePreviewModal";
 
 type ChatTurn = {
   role: "user" | "assistant";
@@ -80,7 +84,43 @@ function scrubAssistantText(text: string): string {
   return withoutImgs.replace(/\n{3,}/g, "\n\n").trim();
 }
 
-function AssistantActionBar({ calls }: { calls: AgentToolCall[] }) {
+function previewItemsFromCall(call: AgentToolCall): ShowcasePreviewItem[] {
+  const paths = showcasePathsFromCall(call);
+  const files = Array.isArray(call.metadata?.files)
+    ? (call.metadata.files as unknown[]).map((f) => String(f || "").trim())
+    : [];
+  const scores =
+    call.metadata?.scores && typeof call.metadata.scores === "object"
+      ? (call.metadata.scores as Record<string, number>)
+      : {};
+  return paths.map((path, i) => {
+    const file = files[i] || path.split("/").pop() || path;
+    return { path, file, score: scores[file] };
+  });
+}
+
+function isShowcaseCall(call: AgentToolCall | undefined): boolean {
+  return Boolean(call?.metadata?.showcase) || showcasePathsFromCall(call ?? { tool: "", args: {}, ok: false }).length > 0;
+}
+
+type OpenShowcaseFn = (
+  items: ShowcasePreviewItem[],
+  variant: "agent" | "vibe",
+  filmLabel?: string,
+  gradeClass?: string,
+) => void;
+
+function gradeClassFromVibe(sv: Record<string, unknown> | null | undefined): string | undefined {
+  return typeof sv?.grade_class === "string" ? sv.grade_class : undefined;
+}
+
+function AssistantActionBar({
+  calls,
+  onOpenShowcase,
+}: {
+  calls: AgentToolCall[];
+  onOpenShowcase: OpenShowcaseFn;
+}) {
   const searchCall = calls.find(
     (c) =>
       c.ok &&
@@ -99,7 +139,7 @@ function AssistantActionBar({ calls }: { calls: AgentToolCall[] }) {
   );
   if (!searchCall && !vibeCall) return null;
 
-  const emit = (call: AgentToolCall, action: string) => {
+  const emitGallery = (call: AgentToolCall, action: string) => {
     const meta = { ...(call.metadata ?? {}) };
     if (action === "reload_vibe") {
       const turnFiles = filesFromToolCalls(calls);
@@ -114,12 +154,39 @@ function AssistantActionBar({ calls }: { calls: AgentToolCall[] }) {
     );
   };
 
+  const openSearch = () => {
+    if (!searchCall) return;
+    if (isShowcaseCall(searchCall)) {
+      onOpenShowcase(previewItemsFromCall(searchCall), "agent");
+      return;
+    }
+    emitGallery(searchCall, "search");
+  };
+
+  const openVibe = () => {
+    if (!vibeCall) return;
+    if (isShowcaseCall(vibeCall) || isShowcaseCall(searchCall)) {
+      const src = isShowcaseCall(vibeCall) ? vibeCall : searchCall!;
+      const sv = vibeCall.metadata?.session_vibe as Record<string, unknown> | undefined;
+      const label = typeof sv?.label_zh === "string" ? sv.label_zh : undefined;
+      // Prefer vibe paths; fall back to search paths from the same turn.
+      const items = previewItemsFromCall(src).length
+        ? previewItemsFromCall(src)
+        : searchCall
+          ? previewItemsFromCall(searchCall)
+          : [];
+      onOpenShowcase(items, "vibe", label, gradeClassFromVibe(sv));
+      return;
+    }
+    emitGallery(vibeCall, "reload_vibe");
+  };
+
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
       {searchCall ? (
         <button
           type="button"
-          onClick={() => emit(searchCall, "search")}
+          onClick={openSearch}
           className="rounded-[5px] border border-emerald-400/35 bg-emerald-400/15 px-2.5 py-1.5 text-[12px] font-medium text-emerald-100/95 transition-colors hover:bg-emerald-400/25"
         >
           打开预览
@@ -133,8 +200,8 @@ function AssistantActionBar({ calls }: { calls: AgentToolCall[] }) {
       {vibeCall ? (
         <button
           type="button"
-          onClick={() => emit(vibeCall, "reload_vibe")}
-          className="rounded-[5px] border border-emerald-400/35 bg-emerald-400/15 px-2.5 py-1.5 text-[12px] font-medium text-emerald-100/95 transition-colors hover:bg-emerald-400/25"
+          onClick={openVibe}
+          className="rounded-[5px] border border-amber-400/35 bg-amber-400/15 px-2.5 py-1.5 text-[12px] font-medium text-amber-100/95 transition-colors hover:bg-amber-400/25"
         >
           打开风格预览
         </button>
@@ -147,7 +214,7 @@ const SUGGESTIONS: Record<AgentMode, string[]> = {
   gallery: [
     "帮我从这场里选出 20 张能交片的",
     "找出吉他手弹琴的特写",
-    "修成复古胶片风预览看看",
+    "修成梦核式修图预览看看",
   ],
   general: [
     "搜索 KEDA 的最新版本并总结它的用途",
@@ -253,21 +320,25 @@ function showcasePathsFromCall(call: AgentToolCall): string[] {
   return paths.filter((p) => p.startsWith("/showcase/") || p.startsWith("/demo/"));
 }
 
-function ShowcaseThumbStrip({ paths, scores }: { paths: string[]; scores?: Record<string, number> }) {
+function ShowcaseThumbStrip({
+  paths,
+  scores,
+  onOpen,
+}: {
+  paths: string[];
+  scores?: Record<string, number>;
+  onOpen?: () => void;
+}) {
   if (!paths.length) return null;
   return (
     <div className="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-4">
       {paths.map((src) => {
         const file = src.split("/").pop() || src;
         const score = scores?.[file];
-        return (
-          <a
-            key={src}
-            href={src}
-            target="_blank"
-            rel="noreferrer"
-            className="group relative block overflow-hidden rounded-[4px] border border-white/[0.08] bg-black/40"
-          >
+        const className =
+          "group relative block overflow-hidden rounded-[4px] border border-white/[0.08] bg-black/40 text-left";
+        const body = (
+          <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={src} alt="" className="aspect-[4/3] h-full w-full object-cover transition-opacity group-hover:opacity-90" />
             {score != null ? (
@@ -275,6 +346,18 @@ function ShowcaseThumbStrip({ paths, scores }: { paths: string[]; scores?: Recor
                 {Number(score).toFixed(1)}
               </span>
             ) : null}
+          </>
+        );
+        if (onOpen) {
+          return (
+            <button key={src} type="button" onClick={onOpen} className={className}>
+              {body}
+            </button>
+          );
+        }
+        return (
+          <a key={src} href={src} target="_blank" rel="noreferrer" className={className}>
+            {body}
           </a>
         );
       })}
@@ -282,7 +365,13 @@ function ShowcaseThumbStrip({ paths, scores }: { paths: string[]; scores?: Recor
   );
 }
 
-function ToolChip({ call }: { call: AgentToolCall }) {
+function ToolChip({
+  call,
+  onOpenShowcase,
+}: {
+  call: AgentToolCall;
+  onOpenShowcase?: OpenShowcaseFn;
+}) {
   const argStr = useMemo(() => {
     try {
       const s = JSON.stringify(call.args ?? {});
@@ -300,12 +389,12 @@ function ToolChip({ call }: { call: AgentToolCall }) {
       ? (call.metadata.scores as Record<string, number>)
       : undefined;
   const uiAction = String(call.metadata?.ui_action || "");
+  const showcase = isShowcaseCall(call);
   const canPreviewSearch =
     call.ok &&
     call.tool === "gallery_search" &&
     uiAction === "search" &&
-    files.length > 0 &&
-    showcasePaths.length === 0;
+    files.length > 0;
   const vibeMeta =
     call.metadata?.session_vibe && typeof call.metadata.session_vibe === "object"
       ? (call.metadata.session_vibe as Record<string, unknown>)
@@ -315,6 +404,31 @@ function ToolChip({ call }: { call: AgentToolCall }) {
     uiAction === "reload_vibe" &&
     Boolean(vibeMeta?.film_variant) &&
     (call.tool === "apply_film_vibe" || Boolean(vibeMeta));
+
+  const openSearch = () => {
+    if (showcase && onOpenShowcase) {
+      onOpenShowcase(previewItemsFromCall(call), "agent");
+      return;
+    }
+    window.dispatchEvent(
+      new CustomEvent("luma:gallery-agent-action", {
+        detail: { action: "search", tool: call.tool, metadata: call.metadata ?? {} },
+      }),
+    );
+  };
+
+  const openVibe = () => {
+    if (showcase && onOpenShowcase) {
+      const label = typeof vibeMeta?.label_zh === "string" ? vibeMeta.label_zh : undefined;
+      onOpenShowcase(previewItemsFromCall(call), "vibe", label, gradeClassFromVibe(vibeMeta));
+      return;
+    }
+    window.dispatchEvent(
+      new CustomEvent("luma:gallery-agent-action", {
+        detail: { action: "reload_vibe", tool: call.tool, metadata: call.metadata ?? {} },
+      }),
+    );
+  };
 
   return (
     <span className="flex w-full min-w-[12rem] flex-col gap-1.5">
@@ -335,17 +449,7 @@ function ToolChip({ call }: { call: AgentToolCall }) {
         {canPreviewSearch ? (
           <button
             type="button"
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("luma:gallery-agent-action", {
-                  detail: {
-                    action: "search",
-                    tool: call.tool,
-                    metadata: call.metadata ?? {},
-                  },
-                }),
-              )
-            }
+            onClick={openSearch}
             className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
           >
             打开预览
@@ -354,24 +458,30 @@ function ToolChip({ call }: { call: AgentToolCall }) {
         {canPreviewVibe ? (
           <button
             type="button"
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("luma:gallery-agent-action", {
-                  detail: {
-                    action: "reload_vibe",
-                    tool: call.tool,
-                    metadata: call.metadata ?? {},
-                  },
-                }),
-              )
-            }
-            className="rounded-[3px] border border-emerald-400/25 bg-emerald-400/[0.08] px-1.5 py-0.5 text-[11px] text-emerald-200/85 transition-colors hover:bg-emerald-400/[0.14]"
+            onClick={openVibe}
+            className="rounded-[3px] border border-amber-400/25 bg-amber-400/[0.08] px-1.5 py-0.5 text-[11px] text-amber-200/85 transition-colors hover:bg-amber-400/[0.14]"
           >
             打开风格预览
           </button>
         ) : null}
       </span>
-      {showcasePaths.length ? <ShowcaseThumbStrip paths={showcasePaths} scores={scores} /> : null}
+      {showcasePaths.length ? (
+        <ShowcaseThumbStrip
+          paths={showcasePaths}
+          scores={scores}
+          onOpen={
+            onOpenShowcase
+              ? () =>
+                  onOpenShowcase(
+                    previewItemsFromCall(call),
+                    canPreviewVibe ? "vibe" : "agent",
+                    typeof vibeMeta?.label_zh === "string" ? vibeMeta.label_zh : undefined,
+                    canPreviewVibe ? gradeClassFromVibe(vibeMeta) : undefined,
+                  )
+              : undefined
+          }
+        />
+      ) : null}
     </span>
   );
 }
@@ -502,11 +612,60 @@ export function ChatDock({
   const [mode, setMode] = useState<AgentMode>("gallery");
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [showcasePreview, setShowcasePreview] = useState<{
+    items: ShowcasePreviewItem[];
+    variant: "agent" | "vibe";
+    filmLabel?: string;
+    gradeClass?: string;
+  } | null>(null);
   const sessionIdRef = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const consumedInitialPrompt = useRef(false);
   const pendingAutoSend = useRef<string | null>(null);
   const sendRef = useRef<(raw: string) => Promise<void>>(async () => {});
+
+  const openShowcasePreview = useCallback<OpenShowcaseFn>(
+    (items, variant, filmLabel, gradeClass) => {
+      if (!items.length) return;
+      setShowcasePreview({ items, variant, filmLabel, gradeClass });
+    },
+    [],
+  );
+
+  // Studio / Showcase: Gallery page is not mounted, so auto-open the static preview
+  // when Agent emits the same gallery UI actions with /showcase paths.
+  useEffect(() => {
+    const onAgentAction = (ev: Event) => {
+      const detail = (ev as CustomEvent).detail as {
+        action?: string;
+        metadata?: Record<string, unknown>;
+      } | null;
+      const meta = detail?.metadata;
+      if (!meta) return;
+      const fakeCall: AgentToolCall = { tool: "gallery_search", args: {}, ok: true, metadata: meta };
+      const items = previewItemsFromCall(fakeCall);
+      if (!items.length) return;
+      const action = String(detail?.action || "");
+      const sv =
+        meta.session_vibe && typeof meta.session_vibe === "object"
+          ? (meta.session_vibe as Record<string, unknown>)
+          : null;
+      if (action === "reload_vibe" && sv?.film_variant) {
+        openShowcasePreview(
+          items,
+          "vibe",
+          typeof sv.label_zh === "string" ? sv.label_zh : undefined,
+          gradeClassFromVibe(sv),
+        );
+        return;
+      }
+      if (action === "search") {
+        openShowcasePreview(items, "agent");
+      }
+    };
+    window.addEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
+    return () => window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
+  }, [openShowcasePreview]);
 
   if (!sessionIdRef.current) {
     sessionIdRef.current = persistentSessionId(context, mode);
@@ -708,6 +867,7 @@ export function ChatDock({
   }, [apiBase]);
 
   return (
+    <>
     <div
       className="fixed right-4 z-50 flex flex-col items-end gap-2 transition-[bottom] duration-200"
       style={{ bottom: "var(--luma-chat-bottom, 1rem)" }}
@@ -816,11 +976,13 @@ export function ChatDock({
                       </div>
                     )}
                     {t.role === "assistant" && t.toolCalls?.length ? (
-                      <AssistantActionBar calls={t.toolCalls} />
+                      <AssistantActionBar calls={t.toolCalls} onOpenShowcase={openShowcasePreview} />
                     ) : null}
                     {(t.toolCalls?.length || t.guardrails?.length) ? (
                       <div className="mt-1.5 flex flex-wrap gap-1">
-                        {t.toolCalls?.map((c, j) => <ToolChip key={`t${j}`} call={c} />)}
+                        {t.toolCalls?.map((c, j) => (
+                          <ToolChip key={`t${j}`} call={c} onOpenShowcase={openShowcasePreview} />
+                        ))}
                         {t.guardrails?.map((g, j) => <GuardrailChip key={`g${j}`} ev={g} />)}
                       </div>
                     ) : null}
@@ -887,5 +1049,16 @@ export function ChatDock({
         )}
       </button>
     </div>
+
+    {showcasePreview ? (
+      <ShowcasePreviewModal
+        items={showcasePreview.items}
+        variant={showcasePreview.variant}
+        filmLabel={showcasePreview.filmLabel}
+        gradeClass={showcasePreview.gradeClass}
+        onClose={() => setShowcasePreview(null)}
+      />
+    ) : null}
+    </>
   );
 }
