@@ -1,13 +1,33 @@
 /**
  * Luma product information architecture
  *
- * Portfolio copy: plain, role-aligned (AI fullstack / AI infra / Agent).
- * Default path = Stage 1–3 analysis jobs + queue/workers.
- * Agent path   = ReAct curation + Gallery ChatDock.
+ * Portfolio narrative (Batch A): product value first, then job-centric AI runtime.
+ * Main path = ingest → cheap gates → durable jobs → bounded VLM → ledger → Gallery/Infra.
+ * Agent / KEDA / RLHF / prompt labs = Infra Experiments (extensions), not co-equal headlines.
  */
 
 export const MARKETING_HOME = "/";
 export const STUDIO_HOME = "/studio";
+
+/** Shared one-liner — keep README / landing / interview pitch aligned. */
+export const PROJECT_POSITIONING = {
+  oneLinerZh:
+    "面向视觉工作流的 job-centric AI runtime：用持久作业状态机管理 VLM 推理，通过背压、降级、运行账本和控制台保证任务可恢复、可观察、可评估。",
+  oneLinerEn:
+    "A job-centric AI runtime for vision workflows: durable job state machines for VLM inference, with backpressure, fallback, a run ledger, and an operator console so work is recoverable, observable, and evaluable.",
+  mainPathZh: "照片导入 → 低成本视觉门控 → 持久作业系统 → 有界 VLM 推理 → 模型与运行账本 → Gallery / Infra Console",
+  sells: [
+    { id: "durable", label: "Durable Jobs", caption: "任务状态可恢复" },
+    { id: "bounded", label: "Bounded Inference", caption: "并发与背压有边界" },
+    { id: "fallback", label: "Model Fallback", caption: "主模型异常可降级" },
+    { id: "obs", label: "End-to-end Observability", caption: "作业与模型调用可追踪" },
+  ],
+  boundaries: [
+    "SQLite 作为单节点执行事实源（非集群分布式数据库）",
+    "推理准入与背压以进程内队列为主（非集群级配额）",
+    "产物依赖单节点共享卷 / 本地 archive 路径",
+  ],
+} as const;
 
 /** Primary CTA — nav + hero + closing. */
 export const LANDING_STUDIO_CTA = "打开 Studio";
@@ -33,14 +53,14 @@ export const LANDING_HERO_PROMPTS = [
 ] as const;
 
 export const LANDING_HERO = {
-  eyebrow: "个人项目 · AI 全栈 / Infra / Agent",
-  /** First-screen slogan — what this project is. */
-  title: "看得见的 AI 工作流。",
-  subtitle: "Go 入库，Python 跑 Stage / VLM，Next.js 做工作台。用 Live 摄影场次压真实数据量。",
-  description:
-    "默认链路：入库 → 建 job → Stage 1–3（OpenCV / 美学分 / VLM）→ 结构化结果 → Gallery 人工确认。另有 ReAct 选片 Agent 和 ChatDock。",
+  eyebrow: "个人项目 · Job-centric AI Runtime",
+  /** First-screen slogan — product value before infra nouns. */
+  title: "现场照片，变成可交付的选片结果。",
+  subtitle:
+    "低成本视觉门控 → 持久作业 → 有界 VLM → Gallery / Infra Console。摄影是真实业务负载，用来验证可恢复、可观察的推理作业系统。",
+  description: PROJECT_POSITIONING.oneLinerZh,
   ctaPrimary: LANDING_STUDIO_CTA,
-  ctaSecondary: { label: "看处理链路", href: "#workflow" },
+  ctaSecondary: { label: "看主链路", href: "#workflow" },
   promptIdle: "试试：找出吉他手特写…",
   promptSubmitHref: "/gallery",
   promptCtas: [
@@ -71,8 +91,9 @@ export type LandingScaleStat = {
 
 export const LANDING_SCALE_INTRO = {
   eyebrow: "数据规模",
-  title: "真实场次上的推理规模。",
-  subtitle: "持续入库、排队推理后留下的统计，不是演示素材凑的。",
+  title: "真实场次上的处理规模。",
+  subtitle:
+    "优先显示当前系统统计；不可达时回退到历史归档数量级。每项数字都带 Live / Recorded / Showcase 标签。",
 } as const;
 
 export const LANDING_SCALE_STATS: LandingScaleStat[] = [
@@ -121,15 +142,12 @@ export type NavLink = {
   description?: string;
 };
 
-/**
- * Landing top nav
- * Pipeline → Infra → Agent → Fullstack surfaces
- */
+/** Landing top nav — product surfaces only. */
 export const LANDING_NAV: NavLink[] = [
-  { label: "Pipeline", href: "#workflow", description: "作业与阶段处理" },
-  { label: "Infra", href: "#infra", description: "队列、Worker、重试" },
-  { label: "Agent", href: "#agent", description: "ReAct 选片与 ChatDock" },
-  { label: "Stack", href: "#products", description: "前后端与运维界面" },
+  { label: "结果", href: "#gallery", description: "筛选与画廊交付" },
+  { label: "主链路", href: "#workflow", description: "门控 → 作业 → VLM" },
+  { label: "Infra", href: "#infra", description: "队列、Worker、账本" },
+  { label: "工作台", href: "#products", description: "Studio / Gallery / Console" },
 ];
 
 export type WorkflowStep = {
@@ -139,22 +157,23 @@ export type WorkflowStep = {
 };
 
 export const LANDING_WORKFLOW = {
-  eyebrow: "Pipeline",
-  title: "从入库到 VLM 结构化输出。",
-  subtitle: "默认跑 ANALYZE 作业：建队、领取、分阶段处理、落盘。状态都能查。",
+  eyebrow: "主链路",
+  title: "从入库到可追踪的推理作业。",
+  subtitle:
+    "场次先建成可恢复的作业，再经低成本门控进入有界 VLM；状态、调用与产物都写进账本，可在 Infra 里回看。",
   phases: [
     { id: "ingest", label: "Ingest", range: [0, 0] },
     { id: "orchestrate", label: "Run", range: [1, 4] },
     { id: "deliver", label: "Deliver", range: [5, 6] },
   ],
   steps: [
-    { id: "ingest", title: "Ingest", tagline: "Go 扫卡，建 session 和文件索引。" },
-    { id: "seed-jobs", title: "Create Jobs", tagline: "按场次拆成 job，写入队列。" },
-    { id: "run-job", title: "Claim & Run", tagline: "Worker 领任务并执行。" },
-    { id: "pipeline-runner", title: "Pipeline Runner", tagline: "按 Stage 1–3 顺序跑，阶段结果可回看。" },
-    { id: "inference", title: "Inference", tagline: "VLM 出 caption、tags、分数；并发有上限。" },
-    { id: "artifacts", title: "Artifacts", tagline: "结果落盘，job / event / artifact 可追。" },
-    { id: "gallery", title: "Gallery", tagline: "人在界面里确认选片和导出。" },
+    { id: "ingest", title: "Ingest", tagline: "导入现场预览与 RAW 索引。" },
+    { id: "seed-jobs", title: "Create Jobs", tagline: "按场次写入可恢复作业。" },
+    { id: "run-job", title: "Claim & Run", tagline: "Worker 原子认领后执行。" },
+    { id: "pipeline-runner", title: "Cheap Gates", tagline: "OpenCV / 快速美学分先过滤。" },
+    { id: "inference", title: "Bounded VLM", tagline: "有界并发、可降级的多模态推理。" },
+    { id: "artifacts", title: "Ledger", tagline: "job / event / model_run / artifact 可追。" },
+    { id: "gallery", title: "Gallery", tagline: "人工确认选片并导出。" },
   ] satisfies WorkflowStep[],
 } as const;
 
@@ -233,27 +252,27 @@ export const LANDING_INFRA = {
   id: "infra",
   eyebrow: "AI Infra",
   title: "推理作业的控制面。",
-  subtitle: "一场 VLM 处理经常要跑很久。所以做了队列、Worker 恢复、重试和运行观测。",
+  subtitle: "看队列深度、作业时间线、模型调用与失败恢复——同一套 API 驱动执行与控制台。",
   highlights: [
     {
       id: "recovery",
-      title: "Worker 恢复",
-      description: "Worker 掉线或 DRAINING 后可以再上线，任务尽量续跑。",
+      title: "Durable Jobs",
+      description: "认领、重试、死信写在 SQL；Celery 结果不是权威状态。",
     },
     {
       id: "retry",
-      title: "重试与死信",
+      title: "失败可恢复",
       description: "失败可重试，attempt 可查；确认搞不定的进 dead letter。",
     },
     {
       id: "scheduling",
-      title: "准入控制",
-      description: "按 executor pool 控制并发，避免把推理端打满。",
+      title: "Bounded Inference",
+      description: "有界队列与准入控制，避免把推理端打满。",
     },
     {
       id: "queue",
-      title: "队列与背压",
-      description: "能看队列深度、排队情况和 inflight 上限。",
+      title: "可观察账本",
+      description: "作业时间线、模型调用、成本与产物可 drill-down。",
     },
   ],
   pillars: [
@@ -278,9 +297,9 @@ export type ProductMatrixItem = {
 
 export const LANDING_PRODUCT_MATRIX = {
   id: "products",
-  eyebrow: "全栈界面",
-  title: "AI 工作台到运维台。",
-  subtitle: "Studio / Gallery / Brain / Infra——分别对应触发推理、确认结果、查账、看运行态。",
+  eyebrow: "工作台",
+  title: "从提交作业到确认交付。",
+  subtitle: "Studio 触发分析，Gallery 确认选片，Brain 查账，Infra 看运行态。",
   products: [
     {
       id: "studio",
@@ -294,7 +313,7 @@ export const LANDING_PRODUCT_MATRIX = {
       id: "gallery",
       name: "Gallery",
       role: "选片界面",
-      description: "看分数和标签，人工确认导出；也可开 ChatDock。",
+      description: "看分数和标签，人工确认导出。",
       href: "/gallery",
       showcaseHref: "#gallery",
     },
@@ -310,7 +329,7 @@ export const LANDING_PRODUCT_MATRIX = {
       id: "infra",
       name: "Infra",
       role: "运维台",
-      description: "队列、Worker、重试，以及 Agent step 回放。",
+      description: "队列、Worker、重试与模型调用归因。",
       href: "/infra",
       showcaseHref: "#infra",
     },
@@ -390,14 +409,13 @@ export type AgentSurface = {
   cta: string;
 };
 
-/** ReAct curation + ChatDock — separate from default ANALYZE jobs. */
+/** Optional curation loop + ChatDock (shown in Infra / Gallery, not as a landing pitch). */
 export const LANDING_AGENT = {
   id: "agent",
   eyebrow: "Agent",
-  title: "ReAct 选片 Agent。",
-  subtitle:
-    "默认 Studio 跑 ANALYZE。CURATE_* 才走 plan → tool → reflect：决定下一张深读谁，直到 finalize 或预算用完。",
-  honesty: "优先用 LLM planner，不行就 heuristic。每一步记进 job_events，Infra 可以回放。",
+  title: "预算内的选片循环。",
+  subtitle: "在候选集上 inspect / analyze / finalize，把每一步决策记进作业时间线。",
+  honesty: "步数与推理次数有上限；异常输出时回退到确定性策略。",
   loop: [
     { id: "observe", label: "Observe", tagline: "看候选和已有分数" },
     { id: "plan", label: "Plan", tagline: "选下一个 tool" },
@@ -434,9 +452,9 @@ export const LANDING_AGENT = {
 
 export const LANDING_DOC_LINKS: NavLink[] = [
   { label: "上手", href: "#", description: "从入库到第一次 Gallery 选片" },
-  { label: "处理链路", href: "#ai-layer", description: "Stage 1–3 和 VLM 输出" },
-  { label: "选片 Agent", href: "#agent", description: "ReAct、tools、预算停止" },
+  { label: "主链路", href: "#workflow", description: "门控 → 作业 → 有界 VLM" },
   { label: "Infra", href: "#infra", description: "队列、Worker、重试、死信" },
+  { label: "Gallery", href: "#gallery", description: "读结果并确认选片" },
 ];
 
 export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
@@ -451,10 +469,10 @@ export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   {
     title: "内容",
     links: [
-      { label: "Pipeline", href: "#workflow" },
+      { label: "主链路", href: "#workflow" },
       { label: "推理阶段", href: "#ai-layer" },
       { label: "Infra", href: "#infra" },
-      { label: "Agent", href: "#agent" },
+      { label: "Gallery", href: "#gallery" },
       { label: "Brain", href: "#brain" },
       { label: "Personal", href: "/personal" },
     ],

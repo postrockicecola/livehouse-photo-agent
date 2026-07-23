@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 import {
   LANDING_INFRA,
   LANDING_INFRA_FALLBACK_METRICS,
   type LandingInfraMetrics,
 } from "@/lib/productIa";
+import { resolveClientProvenance } from "@/lib/provenance";
 
 type FlowItem = {
   id: number;
@@ -156,7 +158,10 @@ export function LandingInfraSection() {
 
       <div className="relative mx-auto w-full max-w-[104rem] px-5 py-24 sm:px-8 sm:py-32 lg:px-12">
         <header className="max-w-3xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">{eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">{eyebrow}</p>
+            <ProvenanceBadge kind={resolveClientProvenance()} />
+          </div>
           <h2
             id="landing-infra-title"
             className="landing-infra-headline mt-4 text-[clamp(2rem,4.8vw,3.25rem)] font-light leading-[1.08] tracking-[-0.03em] text-white/[0.92]"

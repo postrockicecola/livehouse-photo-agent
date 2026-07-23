@@ -9,7 +9,7 @@ export function LandingFooter() {
           <div className="lg:col-span-1">
             <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/75">Luma Studio</p>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/32">
-              个人项目：视觉处理 pipeline、作业 Infra、选片 Agent。用 Live 摄影场次跑真实数据。
+              以现场摄影为真实负载的视觉作业系统：可恢复的推理任务、有界模型调用，以及可回看的运行账本。
             </p>
           </div>
 
@@ -44,7 +44,9 @@ export function LandingFooter() {
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/24">
             © {new Date().getFullYear()} Luma Studio
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/24">AI fullstack · Infra · Agent</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/24">
+            Job-centric AI Runtime
+          </p>
         </div>
       </div>
     </footer>

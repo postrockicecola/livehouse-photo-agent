@@ -14,7 +14,7 @@ function buildImageUrl(path: string): string {
 }
 
 export function LandingHero() {
-  const { title } = LANDING_HERO;
+  const { title, subtitle } = LANDING_HERO;
   const { preview } = LANDING_AI_LAYER;
 
   const [src, setSrc] = useState<string | null>(null);
@@ -62,6 +62,9 @@ export function LandingHero() {
 
       <div className="landing-hero-stage">
         <h1 className="landing-hero-slogan">{title}</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-white/45 sm:text-base">
+          {subtitle}
+        </p>
         <LandingHeroPrompt />
       </div>
 

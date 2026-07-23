@@ -1,9 +1,10 @@
 /** Gallery product showcase on the marketing page. */
 export const LANDING_GALLERY_SECTION = {
   id: "gallery",
-  eyebrow: "Gallery",
+  eyebrow: "产品结果",
   title: "读 AI 结果，人做最终确认。",
-  subtitle: "分数和标签来自上游 VLM；这里做人工确认，也可以开 ChatDock 问场次。",
+  subtitle:
+    "输入现场照片，输出筛选、评分、双语解释与画廊。分数和标签来自上游 VLM；这里做人工确认。界面上的分数字段为产品示意叠加（Simulated overlay），底图来自真实场次。",
 } as const;
 
 export type LandingGalleryFeature = {

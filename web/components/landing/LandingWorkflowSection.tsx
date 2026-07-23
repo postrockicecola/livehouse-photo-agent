@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LANDING_WORKFLOW } from "@/lib/productIa";
+import { LANDING_WORKFLOW, PROJECT_POSITIONING } from "@/lib/productIa";
 
 function WorkflowStepItem({
   title,
@@ -77,16 +77,14 @@ export function LandingWorkflowSection() {
             </h2>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/38 sm:text-base">{subtitle}</p>
 
-            <div className="mt-10 hidden flex-wrap gap-2 lg:flex">
-              {LANDING_WORKFLOW.phases.map((phase) => (
-                <span
-                  key={phase.id}
-                  className="rounded-full border border-white/[0.08] px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-white/35"
-                >
-                  {phase.label}
-                </span>
+            <ul className="mt-10 hidden flex-col gap-3 lg:flex" aria-label="Main-path sells">
+              {PROJECT_POSITIONING.sells.map((sell) => (
+                <li key={sell.id} className="border-l border-white/15 pl-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">{sell.label}</p>
+                  <p className="mt-0.5 text-sm text-white/35">{sell.caption}</p>
+                </li>
               ))}
-            </div>
+            </ul>
           </header>
 
           <ol className="landing-workflow-list" aria-label="Workflow steps">

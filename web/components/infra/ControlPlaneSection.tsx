@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { provenanceMeta, resolveClientProvenance } from "@/lib/provenance";
 
 type Props = {
   eyebrow: string;
@@ -29,17 +30,24 @@ export function ControlPlaneSection({ eyebrow, title, subtitle, right, children,
   );
 }
 
+/** Pulse chip: "Live" locally, "Showcase Fixture" on the read-only deploy. */
 export function LivePulse({ active, intervalSec = 3 }: { active?: boolean; intervalSec?: number }) {
   const on = active !== false;
+  const kind = resolveClientProvenance();
+  const label = provenanceMeta(kind).label;
+  const pulseOn = on && kind === "live";
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+    <span
+      className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-zinc-600"
+      title={provenanceMeta(kind).description}
+    >
       <span
-        className={`relative h-2 w-2 rounded-full ${on ? "bg-emerald-400" : "bg-zinc-600"}`}
+        className={`relative h-2 w-2 rounded-full ${pulseOn ? "bg-emerald-400" : "bg-zinc-600"}`}
         aria-hidden
       >
-        {on ? <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/50" /> : null}
+        {pulseOn ? <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/50" /> : null}
       </span>
-      Live · {intervalSec}s
+      {kind === "live" ? `${label} · ${intervalSec}s` : label}
     </span>
   );
 }

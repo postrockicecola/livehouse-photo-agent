@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { resolveClientProvenance } from "@/lib/provenance";
 import { LANDING_GALLERY_SECTION } from "./landingConfig";
 import { LandingGalleryMarquee } from "./LandingGalleryMarquee";
 import { LandingGalleryProductMock } from "./LandingGalleryProductMock";
@@ -50,7 +52,11 @@ export function LandingGallerySection() {
     >
       <div className="mx-auto w-full max-w-[104rem] px-5 sm:px-8 lg:px-12">
         <header className="max-w-2xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">{eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">{eyebrow}</p>
+            <ProvenanceBadge kind={resolveClientProvenance()} />
+            <ProvenanceBadge kind="simulated" />
+          </div>
           <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-5xl">{title}</h2>
           {subtitle ? <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/38 sm:text-base">{subtitle}</p> : null}
         </header>

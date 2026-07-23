@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 import {
   LANDING_SCALE_INTRO,
   LANDING_SCALE_STATS,
   type LandingScaleStat,
   type LandingStatKey,
 } from "@/lib/productIa";
+import { resolveClientProvenance, type ProvenanceKind } from "@/lib/provenance";
 
 type LiveStats = Partial<Record<LandingStatKey, number>>;
 
@@ -47,26 +49,36 @@ function ScaleCell({
   stat,
   active,
   liveValue,
+  sectionKind,
 }: {
   stat: LandingScaleStat;
   active: boolean;
   liveValue?: number;
+  sectionKind: ProvenanceKind;
 }) {
-  // Live value (real data) wins; the config `value` is only a fallback. A precise live
-  // count is shown verbatim, so drop the marketing "+" suffix when real data is present.
-  const isLive = typeof liveValue === "number" && Number.isFinite(liveValue);
-  const target = isLive ? liveValue : stat.value;
+  // Live/showcase API value wins; the config `value` is a Recorded Run fallback floor.
+  const hasApiValue = typeof liveValue === "number" && Number.isFinite(liveValue);
+  const target = hasApiValue ? liveValue : stat.value;
   const display = useCountUp(target, active);
+  const kind: ProvenanceKind = hasApiValue ? sectionKind : "recorded";
 
   return (
     <article className="landing-scale-cell" aria-labelledby={`scale-${stat.id}-value`}>
       <div className="landing-scale-cell-rule" aria-hidden />
+      <div className="mb-3">
+        <ProvenanceBadge kind={kind} />
+      </div>
       <p id={`scale-${stat.id}-value`} className="landing-scale-value tabular-nums">
         {formatCount(display)}
-        {!isLive && stat.suffix ? <span className="landing-scale-suffix">{stat.suffix}</span> : null}
+        {!hasApiValue && stat.suffix ? <span className="landing-scale-suffix">{stat.suffix}</span> : null}
       </p>
       <h3 className="landing-scale-label">{stat.label}</h3>
       <p className="landing-scale-caption">{stat.caption}</p>
+      {!hasApiValue ? (
+        <p className="mt-2 text-[11px] leading-snug text-white/28">
+          API 不可达时的历史归档数量级，不是当前 Live 计数。
+        </p>
+      ) : null}
       {stat.detailHref && stat.detailLabel ? (
         <Link
           href={stat.detailHref}
@@ -83,6 +95,7 @@ export function LandingStatsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState(false);
   const [live, setLive] = useState<LiveStats | null>(null);
+  const sectionKind = resolveClientProvenance();
 
   useEffect(() => {
     let cancelled = false;
@@ -92,7 +105,7 @@ export function LandingStatsSection() {
         if (!cancelled && data) setLive(data);
       })
       .catch(() => {
-        /* keep static fallback values */
+        /* keep static fallback values — labeled Recorded Run */
       });
     return () => {
       cancelled = true;
@@ -126,7 +139,12 @@ export function LandingStatsSection() {
     >
       <div className="landing-scale-inner mx-auto w-full max-w-[104rem] px-5 py-24 sm:px-8 sm:py-32 lg:px-12">
         <header className="landing-scale-intro max-w-2xl">
-          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/32">{LANDING_SCALE_INTRO.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/32">
+              {LANDING_SCALE_INTRO.eyebrow}
+            </p>
+            <ProvenanceBadge kind={sectionKind} />
+          </div>
           <h2 id="landing-scale-intro" className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">
             {LANDING_SCALE_INTRO.title}
           </h2>
@@ -135,7 +153,13 @@ export function LandingStatsSection() {
 
         <div className="landing-scale-row mt-14 sm:mt-20">
           {LANDING_SCALE_STATS.map((stat) => (
-            <ScaleCell key={stat.id} stat={stat} active={active} liveValue={live?.[stat.statKey]} />
+            <ScaleCell
+              key={stat.id}
+              stat={stat}
+              active={active}
+              liveValue={live?.[stat.statKey]}
+              sectionKind={sectionKind}
+            />
           ))}
         </div>
       </div>

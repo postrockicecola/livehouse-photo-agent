@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { LANDING_STUDIO_CTA, STUDIO_HOME } from "@/lib/productIa";
-import { LandingAgentSection } from "./LandingAgentSection";
 import { LandingDocsSection } from "./LandingDocsSection";
 import { LandingFooter } from "./LandingFooter";
 import { LandingGallerySection } from "./LandingGallerySection";
@@ -20,23 +19,22 @@ export function LandingPage() {
       <main>
         <LandingHero />
         <LandingStatsSection />
+        <LandingGallerySection />
         <LandingWorkflowSection />
         <LandingAiLayerSection />
         <LandingInfraSection />
-        <LandingAgentSection />
         <LandingBrainSection />
-        <LandingGallerySection />
-        <LandingDocsSection />
         <LandingProductMatrixSection />
+        <LandingDocsSection />
 
         <section className="landing-section border-t border-white/[0.05] py-20 sm:py-28">
           <div className="mx-auto w-full max-w-[104rem] px-5 text-center sm:px-8 lg:px-12">
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/28">试用</p>
             <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">
-              进系统看推理和 Agent 怎么跑。
+              先看交付结果，再打开作业控制面。
             </h2>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/38">
-              Studio 看场次和 pipeline；Infra 看队列和 Agent step；Gallery 里可以用 ChatDock。
+              Studio 提交场次，Infra 查看作业与模型调用，Gallery 确认选片。
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Link

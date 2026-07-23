@@ -36,7 +36,7 @@ export function LandingAgentSection() {
     >
       <div className="landing-agent-glow pointer-events-none absolute inset-0" aria-hidden />
 
-      <div className="relative mx-auto w-full max-w-[104rem] px-5 py-24 sm:px-8 sm:py-32 lg:px-12">
+      <div className="relative mx-auto w-full max-w-[104rem] px-5 pb-8 pt-10 sm:px-8 sm:pb-12 sm:pt-12 lg:px-12">
         <header className="max-w-3xl">
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">{eyebrow}</p>
           <h2

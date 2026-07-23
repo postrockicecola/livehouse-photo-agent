@@ -17,6 +17,7 @@ import { CostAttributionPanel, type CostData } from "@/components/infra/CostAttr
 import { ServingThroughputPanel, type InferenceQueueSnapshot } from "@/components/infra/ServingThroughputPanel";
 import { RLHFVotePanel } from "@/components/infra/RLHFVotePanel";
 import { PromptExperimentPanel } from "@/components/infra/PromptExperimentPanel";
+import { InfraExperimentsSection } from "@/components/infra/InfraExperimentsSection";
 import type { DeadLetterJobRow } from "@/components/DeadLetterPanel";
 import {
   aggregateFailureBuckets,
@@ -368,9 +369,6 @@ export default function InfraPage() {
           loading={loading}
         />
 
-        {/* Agentic curation: the LLM-agent layer on top of the inference infra */}
-        <AgentCurationPanel apiBase={API_BASE} />
-
         {/* Scheduler gate detail */}
         <CapacityAdmissionPanel
           workerTotal={workerTotal}
@@ -411,12 +409,6 @@ export default function InfraPage() {
 
         <CostAttributionPanel data={costData} loading={loading} />
 
-        {/* RLHF pairwise voting + Bradley-Terry ranking */}
-        <RLHFVotePanel sessionKey={null} apiBase={API_BASE} />
-
-        {/* Prompt A/B experiment results */}
-        <PromptExperimentPanel experimentName="prompt_ab_demo" apiBase={API_BASE} />
-
         {/* Demoted: activity stream is a detail feed, not a headline */}
         <LivePipelineTimeline events={runtimeStream?.events ?? []} loading={loading} limit={20} />
 
@@ -426,6 +418,13 @@ export default function InfraPage() {
           workers={workers as InfraWorkerRow[]}
           loading={loading}
         />
+
+        {/* Extensions: Agent / RLHF / Prompt — not the production main path */}
+        <InfraExperimentsSection>
+          <AgentCurationPanel apiBase={API_BASE} />
+          <RLHFVotePanel sessionKey={null} apiBase={API_BASE} />
+          <PromptExperimentPanel experimentName="prompt_ab_demo" apiBase={API_BASE} />
+        </InfraExperimentsSection>
       </div>
     </main>
   );
