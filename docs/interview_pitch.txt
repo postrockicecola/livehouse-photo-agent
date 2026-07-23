@@ -31,3 +31,4 @@ Do not invent latency/cost percentages.
 - Evaluation UI: /eval
 - Infra tour: /infra?tour=1
 - Report index: reports/eval/meta.json
+- Deep-dive Q&A cards: docs/interview_qa.txt

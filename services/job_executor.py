@@ -36,6 +36,7 @@ from services.processor.pipeline_stage_runner import (
 )
 from utils.logging_context import make_log_extra, new_trace_id
 from utils.luma_brain import (
+    ClaimFenceError,
     brain_connect,
     count_active_jobs_for_worker,
     get_job,
@@ -277,6 +278,7 @@ class JobExecutor:
                 job_id,
                 total_latency_ms=total_latency_ms,
                 payload=succeed_payload,
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             prewarm_task_id = enqueue_gallery_cinestill_prewarm(
                 force=True,
@@ -313,6 +315,24 @@ class JobExecutor:
                 "artifacts": succeed_payload.get("artifacts"),
                 "gallery_film_prewarm_task_id": prewarm_task_id,
             }
+        except ClaimFenceError as fence_exc:
+            logger.warning(
+                "job terminal write fenced (stale claim)",
+                extra=make_log_extra(
+                    job_id=job_id,
+                    worker_id=worker_id,
+                    trace_id=trace_id,
+                    error=str(fence_exc),
+                ),
+            )
+            return {
+                "ok": False,
+                "claimed": True,
+                "fenced": True,
+                "job_id": job_id,
+                "worker_id": worker_id,
+                "message": str(fence_exc),
+            }
         except Exception as exc:
             self._record_pipeline_failure(
                 wm=wm,
@@ -329,6 +349,7 @@ class JobExecutor:
                 exc=exc,
                 namespace=scope_ns,
                 project_key=scope_pk,
+                claimed=claimed,
             )
             raise
 
@@ -412,6 +433,7 @@ class JobExecutor:
             elif stage_name == "STAGE2_FAST_SCORE":
                 stage_result = runner.run_stage2_fast_score(max_workers=max_workers)
                 inference_wall = int(stage_result.get("inference_wall_ms") or 0)
+            elif stage_name == "STAGE3_VLM":
                 stage_result = runner.run_stage3_vlm(max_workers=max_workers, conn=conn)
                 inference_wall = int(stage_result.get("inference_wall_ms") or 0)
             elif stage_name == "WRITE_ARTIFACT":
@@ -477,6 +499,7 @@ class JobExecutor:
                 inference_ms=inference_ms,
                 postprocess_ms=postprocess_ms,
                 payload=succeed_payload,
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             prewarm_task_id = None
             if stage_name == "WRITE_ARTIFACT" and ap:
@@ -516,6 +539,24 @@ class JobExecutor:
                 "gallery_film_prewarm_task_id": prewarm_task_id,
                 "stage_output_summary": stage_result,
             }
+        except ClaimFenceError as fence_exc:
+            logger.warning(
+                "pipeline stage terminal write fenced (stale claim)",
+                extra=make_log_extra(
+                    job_id=job_id,
+                    worker_id=worker_id,
+                    trace_id=trace_id,
+                    error=str(fence_exc),
+                ),
+            )
+            return {
+                "ok": False,
+                "claimed": True,
+                "fenced": True,
+                "job_id": job_id,
+                "worker_id": worker_id,
+                "message": str(fence_exc),
+            }
         except Exception as exc:
             self._record_pipeline_failure(
                 wm=wm,
@@ -532,6 +573,7 @@ class JobExecutor:
                 exc=exc,
                 namespace=claimed.get("namespace"),
                 project_key=claimed.get("project_key"),
+                claimed=claimed,
             )
             raise
 
@@ -625,7 +667,12 @@ class JobExecutor:
                 "job_type": job_type,
                 "curation": summary,
             }
-            lifecycle.succeed(job_id, total_latency_ms=total_latency_ms, payload=succeed_payload)
+            lifecycle.succeed(
+                job_id,
+                total_latency_ms=total_latency_ms,
+                payload=succeed_payload,
+                **JobLifecycle.claim_fence_kwargs(claimed),
+            )
             wm.heartbeat(inflight=count_active_jobs_for_worker(conn, worker_id), status="ONLINE")
             logger.info(
                 "curation job succeeded",
@@ -654,6 +701,24 @@ class JobExecutor:
                 "selected": summary.get("selected"),
                 "curation_artifact": summary.get("curation_artifact"),
             }
+        except ClaimFenceError as fence_exc:
+            logger.warning(
+                "curation terminal write fenced (stale claim)",
+                extra=make_log_extra(
+                    job_id=job_id,
+                    worker_id=worker_id,
+                    trace_id=trace_id,
+                    error=str(fence_exc),
+                ),
+            )
+            return {
+                "ok": False,
+                "claimed": True,
+                "fenced": True,
+                "job_id": job_id,
+                "worker_id": worker_id,
+                "message": str(fence_exc),
+            }
         except Exception as exc:
             self._record_pipeline_failure(
                 wm=wm,
@@ -670,6 +735,7 @@ class JobExecutor:
                 exc=exc,
                 namespace=claimed.get("namespace"),
                 project_key=claimed.get("project_key"),
+                claimed=claimed,
             )
             raise
 
@@ -690,21 +756,23 @@ class JobExecutor:
             return
         next_id = int(row["id"])
         try:
-            from celery_app import celery_app
+            from services.job_dispatch import send_run_jobs_for_ids
             from utils.luma_brain import cluster_headroom_for_dispatch
 
             h = cluster_headroom_for_dispatch(conn)
+            out = send_run_jobs_for_ids(conn, [next_id])
             logger.info(
                 "pipeline stage: dispatch next run_job",
                 extra=make_log_extra(
                     event="chained_run_job_dispatch",
                     next_job_id=next_id,
                     completed_job_id=completed_job_id,
-                    chain_policy="always_enqueue_one",
+                    chain_policy="plan_dispatch",
                     cluster_headroom=h,
+                    dispatched=out.get("dispatched"),
+                    plan=out.get("plan"),
                 ),
             )
-            celery_app.send_task("tasks.run_job", args=[next_id])
         except Exception as exc:
             logger.warning(
                 "failed to enqueue next PIPELINE_STAGE",
@@ -778,6 +846,7 @@ class JobExecutor:
         namespace: Any = None,
         project_key: Any = None,
         conn: Any | None = None,
+        claimed: dict[str, Any] | None = None,
     ) -> None:
         error_name = type(exc).__name__
         error_message = str(exc)[:500]
@@ -787,21 +856,36 @@ class JobExecutor:
             "job_type": job_type,
             "error_class": bucket,
         }
-        if bucket == "permanent":
-            lifecycle.fail_permanent(
-                job_id,
-                error_code=error_name,
-                error_message=error_message,
-                payload=fail_payload,
+        fence = JobLifecycle.claim_fence_kwargs(claimed) if claimed else {}
+        try:
+            if bucket == "permanent":
+                lifecycle.fail_permanent(
+                    job_id,
+                    error_code=error_name,
+                    error_message=error_message,
+                    payload=fail_payload,
+                    **fence,
+                )
+                log_status = "FAILED_PERMANENT"
+            else:
+                log_status = lifecycle.fail_retryable(
+                    job_id,
+                    error_code=error_name,
+                    error_message=error_message,
+                    payload=fail_payload,
+                    **fence,
+                )
+        except ClaimFenceError as fence_exc:
+            logger.warning(
+                "job failure write fenced (stale claim)",
+                extra=make_log_extra(
+                    job_id=job_id,
+                    worker_id=worker_id,
+                    trace_id=trace_id,
+                    error=str(fence_exc),
+                ),
             )
-            log_status = "FAILED_PERMANENT"
-        else:
-            log_status = lifecycle.fail_retryable(
-                job_id,
-                error_code=error_name,
-                error_message=error_message,
-                payload=fail_payload,
-            )
+            return
         if conn is not None:
             live = count_active_jobs_for_worker(conn, worker_id)
         else:

@@ -337,9 +337,41 @@ class PrioritizedInferenceQueue:
         snap.update(inference_queue_runtime_snapshot())
         return snap
 
-    def shutdown(self) -> None:
+    def shutdown(self, *, cancel_queued: bool = True) -> None:
+        """Stop admitting work; optionally fail futures still waiting in lane queues.
+
+        In-flight inference (already claimed by a worker thread) is not aborted — HTTP calls
+        run to completion or until the provider client timeout. Callers with a cancelled SSOT
+        job should treat late results as best-effort.
+        """
         self._stop.set()
         self._periodic_stop.set()
+        if cancel_queued:
+            self._reject_queued_jobs(reason="inference queue shutdown")
+
+    def _reject_queued_jobs(self, *, reason: str) -> None:
+        err: dict[str, Any] = {
+            "status": "error",
+            "error": reason,
+            "text": "",
+            "model": "",
+        }
+        for lane in self._lanes_ordered:
+            while True:
+                try:
+                    _prio, _seq, job = lane.pq.get_nowait()
+                except queue.Empty:
+                    break
+                job.result = err
+                cfut = job.client_future
+                if cfut is not None and not cfut.done():
+                    cfut.set_result(err)
+                job.done.set()
+                try:
+                    lane.admission.release()
+                except Exception:
+                    pass
+        self._publish_metrics()
 
     def _periodic_metrics_loop(self) -> None:
         while not self._periodic_stop.is_set():
@@ -444,6 +476,17 @@ class PrioritizedInferenceQueue:
         metadata_extra: dict[str, Any] | None = None,
     ) -> concurrent_futures.Future[dict[str, Any]]:
         """Enqueue one job and return immediately; await ``.result()`` for the payload dict."""
+        if self._stop.is_set():
+            fut: concurrent_futures.Future[dict[str, Any]] = concurrent_futures.Future()
+            fut.set_result(
+                {
+                    "status": "error",
+                    "error": "inference queue shutting down",
+                    "text": "",
+                    "model": "",
+                }
+            )
+            return fut
         md = {
             "trace_id": trace_id,
             "job_id": job_id,
@@ -464,6 +507,18 @@ class PrioritizedInferenceQueue:
         lane = self._lane_for_request(req)
         t_adm0 = time.monotonic()
         lane.admission.acquire()
+        if self._stop.is_set():
+            lane.admission.release()
+            fut = concurrent_futures.Future()
+            fut.set_result(
+                {
+                    "status": "error",
+                    "error": "inference queue shutting down",
+                    "text": "",
+                    "model": "",
+                }
+            )
+            return fut
         bp_wait = time.monotonic() - t_adm0
         if bp_wait >= self._backpressure_log_seconds:
             logger.info(

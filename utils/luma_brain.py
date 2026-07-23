@@ -32,6 +32,10 @@ _DEFAULT_DB = _REPO_ROOT / "luma_brain.db"
 _SCHEMA_SQL = _REPO_ROOT / "luma_brain_schema.sql"
 
 
+class ClaimFenceError(ValueError):
+    """Terminal write rejected: claim_generation / worker_id no longer owns the job row."""
+
+
 def brain_db_path() -> Path:
     raw = os.environ.get("LUMA_BRAIN_DB", str(_DEFAULT_DB))
     return Path(raw).expanduser().resolve()
@@ -52,6 +56,8 @@ def _migrate_brain_schema(conn: sqlite3.Connection) -> None:
         ("is_stage", "INTEGER DEFAULT 0"),
         ("namespace", "TEXT NOT NULL DEFAULT 'default'"),
         ("project_key", "TEXT NOT NULL DEFAULT 'default'"),
+        # Bumped on claim and stuck-requeue so a zombie writer cannot win after requeue.
+        ("claim_generation", "INTEGER NOT NULL DEFAULT 0"),
     ):
         if name not in cols:
             conn.execute(f"ALTER TABLE jobs ADD COLUMN {name} {decl}")
@@ -2007,6 +2013,7 @@ def claim_jobs(
                 SET status = 'CLAIMED',
                     worker_id = ?,
                     attempt = attempt + 1,
+                    claim_generation = COALESCE(claim_generation, 0) + 1,
                     claimed_at = ?,
                     queue_wait_ms = ?,
                     updated_at = ?
@@ -2053,6 +2060,8 @@ def update_job_status(
     inference_ms: int | None = None,
     postprocess_ms: int | None = None,
     total_latency_ms: int | None = None,
+    fence_claim_generation: int | None = None,
+    fence_worker_id: int | None = None,
 ) -> None:
     """
     Update ``jobs.status`` (+ optional metrics / error columns) and append ``job_events``.
@@ -2065,14 +2074,38 @@ def update_job_status(
     Note: ``started_at`` is seeded when entering ``PREPROCESSING|INFERENCING|POSTPROCESSING`` from
     ``QUEUED`` or ``CLAIMED``; production executors should **claim** before pipeline stages, but the SQL
     allows ``QUEUED → PREPROCESSING`` if a caller bypasses claim.
+
+    When ``fence_claim_generation`` is set, the write is rejected with :class:`ClaimFenceError` unless the
+    row is still an active pipeline status owned by that generation (and optional ``fence_worker_id``).
     """
     now = int(time.time())
     conn.execute("BEGIN IMMEDIATE")
     try:
-        row = conn.execute("SELECT status FROM jobs WHERE id = ?", (job_id,)).fetchone()
+        row = conn.execute(
+            "SELECT status, claim_generation, worker_id FROM jobs WHERE id = ?",
+            (job_id,),
+        ).fetchone()
         if row is None:
             raise ValueError(f"job id not found: {job_id}")
         from_status = str(row["status"])
+        if fence_claim_generation is not None:
+            cur_gen = int(row["claim_generation"] or 0)
+            if cur_gen != int(fence_claim_generation):
+                raise ClaimFenceError(
+                    f"job {job_id}: stale claim_generation "
+                    f"(have={cur_gen}, fence={fence_claim_generation})"
+                )
+            if fence_worker_id is not None:
+                cur_wid = row["worker_id"]
+                if cur_wid is None or int(cur_wid) != int(fence_worker_id):
+                    raise ClaimFenceError(
+                        f"job {job_id}: stale worker_id fence "
+                        f"(have={cur_wid}, fence={fence_worker_id})"
+                    )
+            if from_status not in JOB_STATUSES_ACTIVE_PIPELINE:
+                raise ClaimFenceError(
+                    f"job {job_id}: fenced write while status={from_status!r} (not active)"
+                )
 
         sets = ["status = ?", "updated_at = ?"]
         vals: list[Any] = [to_status, now]
@@ -2127,6 +2160,8 @@ def fail_job_retryable(
     error_code: str | None = None,
     error_message: str | None = None,
     payload: dict[str, Any] | None = None,
+    fence_claim_generation: int | None = None,
+    fence_worker_id: int | None = None,
 ) -> str:
     """
     After a failing **execution**, move the row to ``FAILED_RETRYABLE`` so dispatch can reclaim it,
@@ -2178,6 +2213,8 @@ def fail_job_retryable(
             error_message=error_message,
             payload=merged,
             message=dl_message,
+            fence_claim_generation=fence_claim_generation,
+            fence_worker_id=fence_worker_id,
         )
         return "DEAD_LETTERED"
     update_job_status(
@@ -2188,6 +2225,8 @@ def fail_job_retryable(
         payload=payload,
         error_code=error_code,
         error_message=error_message,
+        fence_claim_generation=fence_claim_generation,
+        fence_worker_id=fence_worker_id,
     )
     return "FAILED_RETRYABLE"
 
@@ -2200,6 +2239,8 @@ def fail_job_dead_lettered(
     error_message: str | None = None,
     payload: dict[str, Any] | None = None,
     message: str | None = None,
+    fence_claim_generation: int | None = None,
+    fence_worker_id: int | None = None,
 ) -> None:
     """Terminal state: no automatic retries; requires human retry or new job."""
     update_job_status(
@@ -2210,6 +2251,8 @@ def fail_job_dead_lettered(
         payload=payload,
         error_code=error_code,
         error_message=error_message,
+        fence_claim_generation=fence_claim_generation,
+        fence_worker_id=fence_worker_id,
     )
 
 
@@ -2220,6 +2263,8 @@ def fail_job_permanent(
     error_code: str | None = None,
     error_message: str | None = None,
     payload: dict[str, Any] | None = None,
+    fence_claim_generation: int | None = None,
+    fence_worker_id: int | None = None,
 ) -> None:
     """Mark job failed permanently."""
     update_job_status(
@@ -2230,6 +2275,8 @@ def fail_job_permanent(
         payload=payload,
         error_code=error_code,
         error_message=error_message,
+        fence_claim_generation=fence_claim_generation,
+        fence_worker_id=fence_worker_id,
     )
 
 
@@ -2242,6 +2289,8 @@ def mark_job_succeeded(
     postprocess_ms: int | None = None,
     total_latency_ms: int | None = None,
     payload: dict[str, Any] | None = None,
+    fence_claim_generation: int | None = None,
+    fence_worker_id: int | None = None,
 ) -> None:
     """Mark job succeeded with optional latency metrics."""
     update_job_status(
@@ -2254,6 +2303,8 @@ def mark_job_succeeded(
         inference_ms=inference_ms,
         postprocess_ms=postprocess_ms,
         total_latency_ms=total_latency_ms,
+        fence_claim_generation=fence_claim_generation,
+        fence_worker_id=fence_worker_id,
     )
 
 
@@ -2901,6 +2952,9 @@ def requeue_stuck_jobs(
     **Does not** increment ``attempt`` — this path recovers a **lost / abandoned claim**, not a failed
     execution retry (see module comment on ``attempt`` above).
 
+    **Does** increment ``claim_generation`` so a zombie writer from the abandoned claim cannot
+    terminate the row after requeue (see :class:`ClaimFenceError` / fenced ``mark_job_*``).
+
     Safety rule (minimal anti-false-positive):
     - Job must be in :data:`JOB_STATUSES_ACTIVE_PIPELINE`, with ``claimed_at`` older than
       ``stale_after_seconds``, **and**
@@ -2909,7 +2963,7 @@ def requeue_stuck_jobs(
 
     **Misclassification risk:** if heartbeats lag real liveness (long interval, network partition) or
     wall clocks skew, a still-running worker could be treated as dead — the row returns to ``QUEUED``
-    while the old process might still finish and call :func:`mark_job_succeeded` / ``fail_*``. Tune
+    while the old process might still finish. Fenced terminal writes reject that zombie; tune
     timeouts vs expected job duration and heartbeat frequency accordingly.
     """
     if stale_after_seconds <= 0 or limit <= 0:
@@ -2955,6 +3009,7 @@ def requeue_stuck_jobs(
                 claimed_at = NULL,
                 started_at = NULL,
                 finished_at = NULL,
+                claim_generation = COALESCE(claim_generation, 0) + 1,
                 updated_at = ?
             WHERE id IN ({qm})
             """,

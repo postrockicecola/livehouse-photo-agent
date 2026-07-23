@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   priority INTEGER NOT NULL DEFAULT 0,
   attempt INTEGER NOT NULL DEFAULT 0,
   max_attempts INTEGER NOT NULL DEFAULT 3,
+  -- Incremented on claim and stuck-requeue; terminal writers must match (fencing).
+  claim_generation INTEGER NOT NULL DEFAULT 0,
   worker_id INTEGER REFERENCES workers(id) ON DELETE SET NULL,
   provider TEXT,
   model_name TEXT,

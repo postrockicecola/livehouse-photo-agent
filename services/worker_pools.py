@@ -62,10 +62,18 @@ _LEGACY_WORKER_POOL_TAGS: frozenset[str] = frozenset({"celery", "generic", ""})
 # Explicit pools that accept any required executor (operators pin one fleet for demos).
 _UNIVERSAL_WORKER_POOLS: frozenset[str] = frozenset({EXECUTOR_GENERAL, "*"})
 
+# Deploy / K8s historically used ``vlm``; SSOT routing uses ``inference``.
+_EXECUTOR_ALIASES: dict[str, str] = {
+    "vlm": EXECUTOR_INFERENCE,
+    "gpu": EXECUTOR_INFERENCE,
+}
+
 
 def normalize_executor_class(raw: str | None) -> str:
     s = str(raw or "").strip().lower()
-    return s if s else EXECUTOR_GENERAL
+    if not s:
+        return EXECUTOR_GENERAL
+    return _EXECUTOR_ALIASES.get(s, s)
 
 
 def _payload_executor_override(payload_json: Any) -> str | None:

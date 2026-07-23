@@ -1,0 +1,112 @@
+Interview Q&A cards — private notes (not on public pages).
+Pair with docs/interview_pitch.txt, /eval, /infra?tour=1, showcase jobs #61/#62.
+
+==============================================================================
+产品与架构
+==============================================================================
+
+Q: 这个项目解决了什么真实问题？
+A: Livehouse 一场会留下大量相似照片。脚本能跑通处理，但很难回答：任务到哪一步、
+   失败如何恢复、模型为什么变慢、成本花在哪。把流水线挂在持久作业系统上后，
+   SQL 是执行事实，Gallery/Infra 才能闭环。
+Demo: Landing → Gallery 入选 vs 原图密度；Studio 提交或 showcase #61。
+
+Q: 为什么需要作业系统，普通后台任务不够吗？
+A: Celery 状态不是权威。作业需要可恢复的 claim/retry/dead-letter、分阶段 DAG、
+   模型账本与控制台时间线。Celery 只传 job_id；SSOT 在 SQLite jobs + job_events。
+Demo: Infra job timeline QUEUED→…→SUCCEEDED；对比 Celery 只是触发器。
+
+Q: 为什么先做传统视觉门控，再调用 VLM？
+A: VLM 贵且不稳定。Stage1/2 用低成本信号砍候选，Stage3 才进有界推理队列。
+   没有两阶段 vs 全量 VLM 的 head-to-head 报告时不强行编数字（见 /eval 空行）。
+Demo: /eval Stage3 指标；pipeline stage 名 STAGE1→STAGE2→STAGE3。
+
+Q: 为什么选择 SQLite 作为事实源？
+A: 单节点 AI runtime：运维简单、事务够用（BEGIN IMMEDIATE claim）、便于本地复现。
+   边界诚实：不是多写集群 SSOT；扩到多副本优先 Postgres（Batch E）。
+Demo: 说出三项边界——SQLite SSOT / 进程内推理准入 / 单节点共享卷。
+
+Q: 为什么保留 Celery，而不是让 worker 直接轮询数据库？
+A: 解耦通知与执行；beat 可做 stuck requeue / dispatch round；KEDA 可按队列积压扩缩。
+   Worker 仍必须 claim SSOT，重复投递靠 claim 条件更新消化。
+
+==============================================================================
+可靠性与基础设施
+==============================================================================
+
+Q: Celery 重复投递时如何保证任务不重复执行？
+A: run_job 先 JobLifecycle.claim：仅 QUEUED|FAILED_RETRYABLE 且 attempt<max 且依赖满足
+   才 CAS 成 CLAIMED 并 attempt+1 / claim_generation+1。第二次投递 claim 失败直接 skip。
+
+Q: worker 在推理过程中崩溃会发生什么？
+A: 心跳过期 + claimed_at 过期 → requeue_stuck_jobs 回 QUEUED，并 bump claim_generation。
+   若僵尸进程晚到 mark_job_succeeded，带旧 generation 会 ClaimFenceError，不能盖掉新 claim。
+Demo: chaos scenario claim-fence-zombie；reliability_scenarios.py。
+
+Q: 主模型超时或返回错误结构时如何处理？
+A: Router 主备降级；失败写入 model_runs；作业可 FAILED_RETRYABLE / fallback degraded。
+Demo: showcase job #62；Infra model_runs + fallback 标签。
+
+Q: 背压是进程级还是集群级？
+A: 当前是进程内 PrioritizedInferenceQueue（max_inflight / admission）+ worker capacity
+   headroom。不是集群级 GPU 配额——面试主动说清边界。
+
+Q: 当前系统可以支撑什么规模？ / 流量扩大 100 倍优先改什么？
+A: 适合单节点/小集群演示与真实场次负载。100x：Postgres SSOT、对象存储、集群推理准入、
+   队列分池（已有 inference/reporting/orchestrator 路由雏形）与可观测性（OTel）。
+
+Q: Cancel 会立刻停掉推理吗？
+A: 不会。Cancel 先改 SSOT 状态；推理队列 shutdown 会拒绝排队中的 future，但已在飞的
+   HTTP 调用跑完或等 provider timeout。这是已知边界，不假装有分布式 cancel。
+
+==============================================================================
+模型与评估
+==============================================================================
+
+Q: 如何衡量照片筛选质量？
+A: 250 张人工标注固定集；Stage3 vs 人工分 Spearman≈0.36、MAE≈6.09（真实报告）。
+Demo: /eval + reports/eval/meta.json；勿把 Simulated 行当生产结论。
+
+Q: 为什么同时用 Spearman、MAE 和 Precision@K？
+A: Spearman/MAE 看分数一致性；Precision@K 更贴近「入选 Top-K」产品决策。
+   有数才写；缺的对照留空。
+
+Q: Ground truth 如何生成？
+A: 人工标注固定集；面试说明规模与局限，不夸大标注者一致性（若无无无 ICC 就不编）。
+
+Q: Agent 为什么比启发式更合适？如何证明收益 > 成本？
+A: 预算约束选片是 Agent 切入点；当前评估显示尚未稳定超过 heuristic 基线——
+   诚实讲，并把 Agent 放在 Infra Experiments / 扩展，不抢主链。
+
+==============================================================================
+可观测性与运维
+==============================================================================
+
+Q: Infra Console 最重要的三个指标？
+A: (1) 作业时间线/成功率 (2) 排队 vs 推理延迟 (3) fallback/error 率与 model_runs。
+Demo: Golden Signals + Cost；tour=#61/#62。
+
+Q: 如何区分排队延迟、模型延迟和端到端延迟？
+A: jobs.queue_wait_ms / inference_ms / total_latency_ms；推理队列另有 queue wait 与
+   infer wall。Ledger 按 attempt 记。
+
+Q: 如何判断 fallback 是否掩盖主模型故障？
+A: 看 fallback_used、primary vs final model、失败码时间序列；#62 是 degraded 样例。
+
+Q: 线上质量下降但延迟正常时如何排查？
+A: 先看入选分布与 Stage3 分 vs 历史；再看 model_runs 是否静默降级到弱模型；
+   最后对照 /eval 固定集是否漂移。
+
+Q: 哪些是进程数据，哪些是跨 worker 权威数据？
+A: 权威：SQLite jobs/events/model_runs/workers。进程内：推理队列 inflight 快照。
+   Console 混展示时看 provenance 标签（Live / Showcase Fixture）。
+
+==============================================================================
+已知边界（深挖时主动讲）
+==============================================================================
+
+1. SQLite 单节点 SSOT，不是多活数据库。
+2. 推理准入与背压主要在进程内；集群配额未做。
+3. Cancel ≠ 中止 in-flight HTTP；shutdown 只清排队。
+4. 中间状态（PREPROCESSING 等）仍可能被僵尸短暂改写；fencing 守住终端写入。
+5. KEDA / Operator / RLHF / Agent 是扩展实验，不是主链卖点。

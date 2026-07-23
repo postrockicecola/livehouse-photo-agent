@@ -24,11 +24,13 @@ from inference.types import InferenceRequest, InferenceResponse, inference_statu
 from services.job_errors import classify_exception
 from services.scheduler import DispatchPolicy, plan_dispatch
 from utils.luma_brain import (
+    ClaimFenceError,
     brain_connect,
     claim_jobs,
     create_job,
     fail_job_retryable,
     get_job,
+    mark_job_succeeded,
     register_or_update_worker,
     requeue_stuck_jobs,
     set_worker_control_status,
@@ -267,6 +269,104 @@ def scenario_stale_worker_heartbeat_requeues_job() -> ChaosScenarioResult:
                     "requeued_count": len(requeued),
                     "stale_after_seconds": 60,
                     "worker_stale_after_seconds": 30,
+                },
+            )
+        finally:
+            conn.close()
+
+
+def scenario_claim_fence_blocks_zombie_succeed() -> ChaosScenarioResult:
+    """After stuck-requeue bumps ``claim_generation``, old claim cannot mark SUCCEEDED."""
+    sid = "claim-fence-zombie"
+    design = (
+        "Fencing: ``claim_generation`` increments on claim and stuck-requeue. Terminal writers "
+        "pass the generation they claimed; a zombie after requeue raises ClaimFenceError."
+    )
+    with isolated_brain_db():
+        conn = brain_connect()
+        try:
+            wid = register_or_update_worker(
+                conn,
+                worker_name=f"chaos-{sid}-{int(time.time())}",
+                worker_type="general",
+                status="ONLINE",
+                capacity=1,
+            )
+            jid = create_job(conn, job_type="CHAOS_BENCH", max_attempts=3, trace_id=f"{sid}")
+            claimed = claim_jobs(conn, worker_id=wid, job_type="CHAOS_BENCH", limit=1)
+            if not claimed:
+                return ChaosScenarioResult(
+                    id=sid,
+                    ok=False,
+                    design=design,
+                    evidence={"error": "claim failed"},
+                    assertions=["Initial claim succeeds"],
+                    metrics={},
+                )
+            gen_at_claim = int(claimed[0].get("claim_generation") or 0)
+            now = int(time.time())
+            conn.execute(
+                "UPDATE workers SET last_heartbeat = ? WHERE id = ?",
+                (now - 120, wid),
+            )
+            conn.execute(
+                "UPDATE jobs SET claimed_at = ? WHERE id = ?",
+                (now - 300, jid),
+            )
+            conn.commit()
+            requeued = requeue_stuck_jobs(
+                conn,
+                stale_after_seconds=60,
+                worker_stale_after_seconds=30,
+                limit=20,
+                reason="chaos: fence requeue",
+            )
+            row = get_job(conn, job_id=jid)
+            gen_after = int((row or {}).get("claim_generation") or 0)
+            fenced = False
+            fence_msg = ""
+            try:
+                mark_job_succeeded(
+                    conn,
+                    job_id=jid,
+                    fence_claim_generation=gen_at_claim,
+                    fence_worker_id=wid,
+                )
+            except ClaimFenceError as exc:
+                fenced = True
+                fence_msg = str(exc)
+            final = get_job(conn, job_id=jid)
+            final_status = str((final or {}).get("status") or "")
+            ok = (
+                jid in requeued
+                and gen_after > gen_at_claim
+                and fenced
+                and final_status == "QUEUED"
+            )
+            return ChaosScenarioResult(
+                id=sid,
+                ok=ok,
+                design=design,
+                evidence={
+                    "job_id": jid,
+                    "claim_generation_at_claim": gen_at_claim,
+                    "claim_generation_after_requeue": gen_after,
+                    "zombie_succeed_fenced": fenced,
+                    "fence_message": fence_msg,
+                    "job_status_after": final_status,
+                },
+                interview_line=(
+                    "Stuck-requeue is not just status flip: claim_generation fences out the "
+                    "abandoned writer so a late SUCCEEDED cannot clobber a reclaimed job."
+                ),
+                assertions=[
+                    "requeue bumps claim_generation",
+                    "mark_job_succeeded with stale generation raises ClaimFenceError",
+                    "job remains QUEUED after fenced zombie succeed",
+                ],
+                metrics={
+                    "claim_generation_at_claim": gen_at_claim,
+                    "claim_generation_after_requeue": gen_after,
                 },
             )
         finally:
@@ -531,6 +631,7 @@ ALL_SCENARIOS: tuple[Callable[[], ChaosScenarioResult], ...] = (
     scenario_dead_letter_after_retries,
     scenario_worker_pause_and_drain_block_new_claims,
     scenario_stale_worker_heartbeat_requeues_job,
+    scenario_claim_fence_blocks_zombie_succeed,
     scenario_inference_fallback_provider,
     scenario_malformed_model_json_parse_safe,
     scenario_missing_source_dir_permanent_class,
@@ -542,6 +643,7 @@ SCENARIO_BY_ID: dict[str, Callable[[], ChaosScenarioResult]] = {
     "dead-letter-retries": scenario_dead_letter_after_retries,
     "worker-pause-drain": scenario_worker_pause_and_drain_block_new_claims,
     "stale-heartbeat-requeue": scenario_stale_worker_heartbeat_requeues_job,
+    "claim-fence-zombie": scenario_claim_fence_blocks_zombie_succeed,
     "inference-fallback": scenario_inference_fallback_provider,
     "malformed-json": scenario_malformed_model_json_parse_safe,
     "missing-source-dir": scenario_missing_source_dir_permanent_class,

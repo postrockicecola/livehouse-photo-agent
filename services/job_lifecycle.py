@@ -54,7 +54,7 @@ class JobLifecycle:
         from utils.luma_brain import append_job_event, worker_executor_claim_gate_for_job, worker_runtime_admission
 
         now = int(time.time())
-        self._conn.execute("BEGIN")
+        self._conn.execute("BEGIN IMMEDIATE")
         try:
             probe = self._conn.execute(
                 """
@@ -115,6 +115,7 @@ class JobLifecycle:
                 SET status = 'CLAIMED',
                     worker_id = ?,
                     attempt = attempt + 1,
+                    claim_generation = COALESCE(jobs.claim_generation, 0) + 1,
                     claimed_at = ?,
                     queue_wait_ms = MAX(0, (? - COALESCE(jobs.enqueued_at, ?)) * 1000),
                     updated_at = ?
@@ -223,6 +224,8 @@ class JobLifecycle:
         error_code: str,
         error_message: str,
         payload: dict[str, Any] | None = None,
+        fence_claim_generation: int | None = None,
+        fence_worker_id: int | None = None,
     ) -> None:
         from utils.luma_brain import fail_job_permanent
 
@@ -232,6 +235,8 @@ class JobLifecycle:
             error_code=error_code,
             error_message=error_message,
             payload=payload,
+            fence_claim_generation=fence_claim_generation,
+            fence_worker_id=fence_worker_id,
         )
 
     def fail_retryable(
@@ -241,6 +246,8 @@ class JobLifecycle:
         error_code: str,
         error_message: str,
         payload: dict[str, Any] | None = None,
+        fence_claim_generation: int | None = None,
+        fence_worker_id: int | None = None,
     ) -> str:
         """Returns ``FAILED_RETRYABLE`` or ``DEAD_LETTERED`` (when attempts are exhausted)."""
         from utils.luma_brain import fail_job_retryable
@@ -251,4 +258,17 @@ class JobLifecycle:
             error_code=error_code,
             error_message=error_message,
             payload=payload,
+            fence_claim_generation=fence_claim_generation,
+            fence_worker_id=fence_worker_id,
         )
+
+    @staticmethod
+    def claim_fence_kwargs(claimed: dict[str, Any]) -> dict[str, int]:
+        """Fence token from a successful claim row (``claim_generation`` + ``worker_id``)."""
+        out: dict[str, int] = {
+            "fence_claim_generation": int(claimed.get("claim_generation") or 0),
+        }
+        wid = claimed.get("worker_id")
+        if wid is not None:
+            out["fence_worker_id"] = int(wid)
+        return out

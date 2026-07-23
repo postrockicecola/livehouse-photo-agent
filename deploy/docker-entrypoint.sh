@@ -35,7 +35,13 @@ case "${1:-}" in
   celery-worker)
     wait_redis
     pool="${LIVEHOUSE_EXECUTOR_CLASS:-general}"
-    exec celery -A celery_app.celery_app worker -l info -n "${pool}@%h"
+    queues="${LIVEHOUSE_WORKER_QUEUES:-celery}"
+    conc="${LIVEHOUSE_WORKER_CONCURRENCY:-}"
+    set -- celery -A celery_app.celery_app worker -l info -n "${pool}@%h" -Q "${queues}"
+    if [ -n "$conc" ]; then
+      set -- "$@" --concurrency="$conc"
+    fi
+    exec "$@"
     ;;
   celery-beat)
     wait_redis
