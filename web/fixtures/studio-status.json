@@ -1,20 +1,20 @@
 {
   "archive_root": "/archive",
   "active": {
-    "session_key": "Session 06",
-    "session_dir": "/archive/session-06",
-    "previews_dir": "/archive/session-06/Previews",
-    "preview_count": 2513,
+    "session_key": "Session 56",
+    "session_dir": "/archive/session-56",
+    "previews_dir": "/archive/session-56/Previews",
+    "preview_count": 2348,
     "has_analysis_results": true,
-    "raw_dir": "/archive/session-06/RAW"
+    "raw_dir": "/archive/session-56/RAW"
   },
   "session": {
-    "session_key": "Session 06",
-    "session_dir": "/archive/session-06",
-    "previews_dir": "/archive/session-06/Previews",
-    "preview_count": 2513,
+    "session_key": "Session 56",
+    "session_dir": "/archive/session-56",
+    "previews_dir": "/archive/session-56/Previews",
+    "preview_count": 2348,
     "has_analysis_results": true,
-    "brain_session_id": 6,
+    "brain_session_id": 56,
     "activity": "analyzed"
   },
   "job": {
@@ -40,63 +40,63 @@
       {
         "label": "PREPARE",
         "state": "done",
-        "count_in": 2513,
-        "count_out": 2513,
+        "count_in": 2348,
+        "count_out": 2348,
         "duration_sec": null
       },
       {
         "label": "S1",
         "state": "done",
-        "count_in": 2513,
-        "count_out": 2513,
+        "count_in": 2348,
+        "count_out": 1855,
         "duration_sec": null
       },
       {
         "label": "S2",
         "state": "done",
-        "count_in": 2513,
-        "count_out": 2513,
+        "count_in": 1855,
+        "count_out": 1076,
         "duration_sec": null
       },
       {
         "label": "S3",
         "state": "done",
-        "count_in": 2513,
-        "count_out": 2513,
+        "count_in": 1076,
+        "count_out": 1076,
         "duration_sec": null
       },
       {
         "label": "WRITE",
         "state": "done",
-        "count_in": 2513,
-        "count_out": 2513,
+        "count_in": 1076,
+        "count_out": 188,
         "duration_sec": null
       }
     ],
     "workflow_stages": [
       {
         "label": "Imported",
-        "count": 2513,
+        "count": 2348,
         "state": "done"
       },
       {
         "label": "Filtered",
-        "count": 2513,
+        "count": 1855,
         "state": "done"
       },
       {
         "label": "AI Scored",
-        "count": 2513,
+        "count": 1076,
         "state": "done"
       },
       {
         "label": "Picked",
-        "count": 2513,
+        "count": 235,
         "state": "done"
       },
       {
         "label": "Exported",
-        "count": 2513,
+        "count": 188,
         "state": "done"
       }
     ]

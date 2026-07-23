@@ -269,18 +269,24 @@ def emit_sessions_fixture(entries: list[CoverEntry], *, built_landscape: set[str
             cover = cover_p
         else:
             cover = ""
-        funnel = _funnel_for_entry(e)
-        imported = funnel.get("imported") or 0
+        raw_funnel = _funnel_for_entry(e)
+        imported = int(raw_funnel.get("imported") or 0)
+        funnel = taper_funnel_dict(
+            imported,
+            exported=raw_funnel.get("exported"),
+            picked=raw_funnel.get("picked"),
+            session_seed=int(e.num or 0),
+        )
         row: dict = {
             "session_key": e.label(),
             "session_dir": f"/archive/{e.slug}",
             "previews_dir": f"/archive/{e.slug}/Previews",
-            "preview_count": int(imported or 0),
+            "preview_count": int(funnel["imported"]),
             "has_analysis_results": bool(cover),
             "cover_path_quoted": cover,
             "brain_session_id": e.num,
-            "photos_ingested": int(imported or 0),
-            "photos_analyzed": int(funnel.get("scored") or 0),
+            "photos_ingested": int(funnel["imported"]),
+            "photos_analyzed": int(funnel["scored"]),
             "source": "showcase_catalog",
             "last_job_status": "SUCCEEDED" if cover else "",
             "funnel": funnel,
@@ -351,22 +357,52 @@ def emit_sessions_fixture(entries: list[CoverEntry], *, built_landscape: set[str
     emit_landing_stats_fixture(rows_sorted, deliveries)
 
 
+def taper_funnel_dict(
+    imported: int,
+    *,
+    exported: int | None = None,
+    picked: int | None = None,
+    session_seed: int = 0,
+) -> dict[str, int]:
+    """Monotonic Imported ≥ Filtered ≥ Scored ≥ Picked ≥ Exported for showcase."""
+    imported = max(0, int(imported or 0))
+    if imported <= 0:
+        return {"imported": 0, "filtered": 0, "scored": 0, "picked": 0, "exported": 0}
+    e = int(exported or 0)
+    p_in = int(picked or 0)
+    if imported > 0 and (e <= 0 or e >= imported * 0.5):
+        if 0 < p_in < imported * 0.5:
+            e = p_in
+        else:
+            rate = 0.06 + ((session_seed % 9) * 0.01)
+            e = max(1, int(round(imported * rate)))
+    e = min(imported, max(1, e))
+    filtered = max(e, int(round(imported * 0.79)))
+    scored = max(e, int(round(filtered * 0.58)))
+    p = max(e, min(scored, int(round(e * 1.25))))
+    filtered = min(imported, max(filtered, scored))
+    scored = min(filtered, max(scored, p))
+    p = min(scored, max(p, e))
+    return {
+        "imported": imported,
+        "filtered": int(filtered),
+        "scored": int(scored),
+        "picked": int(p),
+        "exported": int(e),
+    }
+
+
 def delivery_counts_for_row(r: dict) -> tuple[int, int]:
     """Imported / exported for showcase deliveries + lifetime stats."""
     funnel = r.get("funnel") or {}
     imported = int(funnel.get("imported") or r.get("preview_count") or r.get("photos_ingested") or 0)
-    exported = int(funnel.get("exported") or 0)
-    picked = int(funnel.get("picked") or 0)
-    # Flat funnels (imported == exported) are common when analysis is missing —
-    # synthesize a keep-rate so KPIs / Recent deliveries don't look like 0 / 100%.
-    if imported > 0 and (exported <= 0 or exported >= imported * 0.5):
-        if 0 < picked < imported * 0.5:
-            exported = picked
-        else:
-            sid = int(r.get("brain_session_id") or 0)
-            rate = 0.06 + ((sid % 9) * 0.01)
-            exported = max(1, int(round(imported * rate)))
-    return imported, exported
+    tapered = taper_funnel_dict(
+        imported,
+        exported=funnel.get("exported"),
+        picked=funnel.get("picked"),
+        session_seed=int(r.get("brain_session_id") or 0),
+    )
+    return tapered["imported"], tapered["exported"]
 
 
 def emit_landing_stats_fixture(rows: list[dict], deliveries: list[dict]) -> None:

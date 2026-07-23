@@ -11,15 +11,15 @@
       "cover_path_quoted": "/showcase/covers/session-56.jpg",
       "brain_session_id": 56,
       "photos_ingested": 2348,
-      "photos_analyzed": 2348,
+      "photos_analyzed": 1076,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 2348,
-        "filtered": 2348,
-        "scored": 2348,
-        "picked": 2348,
-        "exported": 2348
+        "filtered": 1855,
+        "scored": 1076,
+        "picked": 235,
+        "exported": 188
       },
       "session_date": "2026-07-11",
       "band_name": "于贞"
@@ -33,15 +33,15 @@
       "cover_path_quoted": "/showcase/covers/session-55.jpg",
       "brain_session_id": 55,
       "photos_ingested": 1564,
-      "photos_analyzed": 1564,
+      "photos_analyzed": 717,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1564,
-        "filtered": 1564,
-        "scored": 1564,
-        "picked": 1564,
-        "exported": 1564
+        "filtered": 1236,
+        "scored": 717,
+        "picked": 136,
+        "exported": 109
       },
       "session_date": "2026-07-10",
       "band_name": "棱镜乐队"
@@ -55,15 +55,15 @@
       "cover_path_quoted": "/showcase/covers/session-54.jpg",
       "brain_session_id": 54,
       "photos_ingested": 1444,
-      "photos_analyzed": 1444,
+      "photos_analyzed": 662,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1444,
-        "filtered": 1444,
-        "scored": 1444,
-        "picked": 1444,
-        "exported": 1444
+        "filtered": 1141,
+        "scored": 662,
+        "picked": 109,
+        "exported": 87
       },
       "session_date": "2026-07-08",
       "band_name": "康士坦的变化球"
@@ -77,15 +77,15 @@
       "cover_path_quoted": "/showcase/covers/session-53.jpg",
       "brain_session_id": 53,
       "photos_ingested": 46,
-      "photos_analyzed": 46,
+      "photos_analyzed": 21,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 46,
-        "filtered": 46,
-        "scored": 46,
-        "picked": 46,
-        "exported": 46
+        "filtered": 36,
+        "scored": 21,
+        "picked": 8,
+        "exported": 6
       },
       "session_date": "2026-07-03",
       "band_name": "沉舟"
@@ -99,15 +99,15 @@
       "cover_path_quoted": "/showcase/covers/session-52.jpg",
       "brain_session_id": 52,
       "photos_ingested": 2948,
-      "photos_analyzed": 2950,
+      "photos_analyzed": 1351,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 2948,
-        "filtered": 2948,
-        "scored": 2950,
-        "picked": 2950,
-        "exported": 2950
+        "filtered": 2329,
+        "scored": 1351,
+        "picked": 479,
+        "exported": 383
       },
       "session_date": "2026-06-27",
       "band_name": "小狗的骨头"
@@ -121,15 +121,15 @@
       "cover_path_quoted": "/showcase/covers/session-51.jpg",
       "brain_session_id": 51,
       "photos_ingested": 21,
-      "photos_analyzed": 21,
+      "photos_analyzed": 10,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 21,
-        "filtered": 21,
-        "scored": 21,
-        "picked": 21,
-        "exported": 21
+        "filtered": 17,
+        "scored": 10,
+        "picked": 4,
+        "exported": 3
       },
       "session_date": "2026-06-26",
       "band_name": "达闻西乐队"
@@ -143,15 +143,15 @@
       "cover_path_quoted": "/showcase/covers/session-50.jpg",
       "brain_session_id": 50,
       "photos_ingested": 1104,
-      "photos_analyzed": 1099,
+      "photos_analyzed": 506,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1104,
-        "filtered": 1104,
-        "scored": 1099,
-        "picked": 1099,
-        "exported": 1099
+        "filtered": 872,
+        "scored": 506,
+        "picked": 151,
+        "exported": 121
       },
       "session_date": "2026-06-19",
       "band_name": "孤独的利里"
@@ -165,15 +165,15 @@
       "cover_path_quoted": "/showcase/covers/session-49.jpg",
       "brain_session_id": 49,
       "photos_ingested": 2677,
-      "photos_analyzed": 2677,
+      "photos_analyzed": 1227,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 2677,
-        "filtered": 2677,
-        "scored": 2677,
-        "picked": 2677,
-        "exported": 2677
+        "filtered": 2115,
+        "scored": 1227,
+        "picked": 335,
+        "exported": 268
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-49-portrait.jpg",
       "session_date": "2026-06-13",
@@ -188,15 +188,15 @@
       "cover_path_quoted": "/showcase/covers/session-48.jpg",
       "brain_session_id": 48,
       "photos_ingested": 1323,
-      "photos_analyzed": 1323,
+      "photos_analyzed": 606,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1323,
-        "filtered": 1323,
-        "scored": 1323,
-        "picked": 1323,
-        "exported": 1323
+        "filtered": 1045,
+        "scored": 606,
+        "picked": 149,
+        "exported": 119
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-48-portrait.jpg",
       "session_date": "2026-06-12",
@@ -211,15 +211,15 @@
       "cover_path_quoted": "/showcase/covers/session-47.jpg",
       "brain_session_id": 47,
       "photos_ingested": 1311,
-      "photos_analyzed": 1294,
+      "photos_analyzed": 601,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1311,
-        "filtered": 1311,
-        "scored": 1294,
-        "picked": 1294,
-        "exported": 1294
+        "filtered": 1036,
+        "scored": 601,
+        "picked": 131,
+        "exported": 105
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-47-portrait.jpg",
       "session_date": "2026-06-06",
@@ -234,15 +234,15 @@
       "cover_path_quoted": "/showcase/covers/session-46.jpg",
       "brain_session_id": 46,
       "photos_ingested": 887,
-      "photos_analyzed": 887,
+      "photos_analyzed": 407,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 887,
-        "filtered": 887,
-        "scored": 887,
-        "picked": 887,
-        "exported": 887
+        "filtered": 701,
+        "scored": 407,
+        "picked": 78,
+        "exported": 62
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-46-portrait.jpg",
       "session_date": "2026-06-05",
@@ -257,15 +257,15 @@
       "cover_path_quoted": "/showcase/covers/session-45.jpg",
       "brain_session_id": 45,
       "photos_ingested": 1049,
-      "photos_analyzed": 1051,
+      "photos_analyzed": 481,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1049,
-        "filtered": 1049,
-        "scored": 1051,
-        "picked": 1051,
-        "exported": 1051
+        "filtered": 829,
+        "scored": 481,
+        "picked": 79,
+        "exported": 63
       },
       "session_date": "2026-05-28",
       "band_name": "软柿子乐队"
@@ -279,15 +279,15 @@
       "cover_path_quoted": "/showcase/covers/session-44.jpg",
       "brain_session_id": 44,
       "photos_ingested": 901,
-      "photos_analyzed": 901,
+      "photos_analyzed": 413,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 901,
-        "filtered": 901,
-        "scored": 901,
-        "picked": 901,
-        "exported": 901
+        "filtered": 712,
+        "scored": 413,
+        "picked": 158,
+        "exported": 126
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-44-portrait.jpg",
       "session_date": "2026-05-24",
@@ -302,15 +302,15 @@
       "cover_path_quoted": "/showcase/covers/session-43.jpg",
       "brain_session_id": 43,
       "photos_ingested": 2092,
-      "photos_analyzed": 2092,
+      "photos_analyzed": 959,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 2092,
-        "filtered": 2092,
-        "scored": 2092,
-        "picked": 2092,
-        "exported": 2092
+        "filtered": 1653,
+        "scored": 959,
+        "picked": 340,
+        "exported": 272
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-43-portrait.jpg",
       "session_date": "2026-05-23",
@@ -325,15 +325,15 @@
       "cover_path_quoted": "/showcase/covers/session-42.jpg",
       "brain_session_id": 42,
       "photos_ingested": 349,
-      "photos_analyzed": 349,
+      "photos_analyzed": 160,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 349,
-        "filtered": 349,
-        "scored": 349,
-        "picked": 349,
-        "exported": 349
+        "filtered": 276,
+        "scored": 160,
+        "picked": 52,
+        "exported": 42
       },
       "session_date": "2026-05-21",
       "band_name": "杭盖乐队"
@@ -347,15 +347,15 @@
       "cover_path_quoted": "/showcase/covers/session-41.jpg",
       "brain_session_id": 41,
       "photos_ingested": 1028,
-      "photos_analyzed": 1029,
+      "photos_analyzed": 471,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1028,
-        "filtered": 1028,
-        "scored": 1029,
-        "picked": 1029,
-        "exported": 1029
+        "filtered": 812,
+        "scored": 471,
+        "picked": 141,
+        "exported": 113
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-41-portrait.jpg",
       "session_date": "2026-05-15",
@@ -370,14 +370,14 @@
       "cover_path_quoted": "/showcase/covers/session-40.jpg",
       "brain_session_id": 40,
       "photos_ingested": 7490,
-      "photos_analyzed": 1121,
+      "photos_analyzed": 3432,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 7490,
-        "filtered": 7490,
-        "scored": 1121,
-        "picked": 1121,
+        "filtered": 5917,
+        "scored": 3432,
+        "picked": 1401,
         "exported": 1121
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-40-portrait.jpg",
@@ -393,14 +393,14 @@
       "cover_path_quoted": "/showcase/covers/session-39.jpg",
       "brain_session_id": 39,
       "photos_ingested": 1113,
-      "photos_analyzed": 371,
+      "photos_analyzed": 510,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1113,
-        "filtered": 1113,
-        "scored": 371,
-        "picked": 371,
+        "filtered": 879,
+        "scored": 510,
+        "picked": 464,
         "exported": 371
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-39-portrait.jpg",
@@ -416,15 +416,15 @@
       "cover_path_quoted": "/showcase/covers/session-38.jpg",
       "brain_session_id": 38,
       "photos_ingested": 534,
-      "photos_analyzed": 536,
+      "photos_analyzed": 245,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 534,
-        "filtered": 534,
-        "scored": 536,
-        "picked": 536,
-        "exported": 536
+        "filtered": 422,
+        "scored": 245,
+        "picked": 54,
+        "exported": 43
       },
       "session_date": "2026-04-26",
       "band_name": "SoulFa 靈魂沙發"
@@ -438,15 +438,15 @@
       "cover_path_quoted": "/showcase/covers/session-37.jpg",
       "brain_session_id": 37,
       "photos_ingested": 318,
-      "photos_analyzed": 318,
+      "photos_analyzed": 146,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 318,
-        "filtered": 318,
-        "scored": 318,
-        "picked": 318,
-        "exported": 318
+        "filtered": 251,
+        "scored": 146,
+        "picked": 28,
+        "exported": 22
       },
       "session_date": "2026-04-25",
       "band_name": "张蔷"
@@ -460,15 +460,15 @@
       "cover_path_quoted": "/showcase/covers/session-36.jpg",
       "brain_session_id": 36,
       "photos_ingested": 367,
-      "photos_analyzed": 367,
+      "photos_analyzed": 168,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 367,
-        "filtered": 367,
-        "scored": 367,
-        "picked": 367,
-        "exported": 367
+        "filtered": 290,
+        "scored": 168,
+        "picked": 28,
+        "exported": 22
       },
       "session_date": "2026-04-24",
       "band_name": "Weatherday"
@@ -482,15 +482,15 @@
       "cover_path_quoted": "/showcase/covers/session-35.jpg",
       "brain_session_id": 35,
       "photos_ingested": 980,
-      "photos_analyzed": 980,
+      "photos_analyzed": 449,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 980,
-        "filtered": 980,
-        "scored": 980,
-        "picked": 980,
-        "exported": 980
+        "filtered": 774,
+        "scored": 449,
+        "picked": 171,
+        "exported": 137
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-35-portrait.jpg",
       "session_date": "2026-04-16",
@@ -505,15 +505,15 @@
       "cover_path_quoted": "/showcase/covers/session-34.jpg",
       "brain_session_id": 34,
       "photos_ingested": 2122,
-      "photos_analyzed": 1077,
+      "photos_analyzed": 972,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 2122,
-        "filtered": 2122,
-        "scored": 1077,
-        "picked": 1077,
-        "exported": 1077
+        "filtered": 1676,
+        "scored": 972,
+        "picked": 345,
+        "exported": 276
       },
       "session_date": "2026-04-10",
       "band_name": "帆布小镇"
@@ -527,15 +527,15 @@
       "cover_path_quoted": "/showcase/covers/session-33.jpg",
       "brain_session_id": 33,
       "photos_ingested": 322,
-      "photos_analyzed": 445,
+      "photos_analyzed": 147,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 322,
-        "filtered": 322,
-        "scored": 445,
-        "picked": 445,
-        "exported": 445
+        "filtered": 254,
+        "scored": 147,
+        "picked": 49,
+        "exported": 39
       },
       "session_date": "2026-04-06",
       "band_name": "花墙"
@@ -549,15 +549,15 @@
       "cover_path_quoted": "/showcase/covers/session-32.jpg",
       "brain_session_id": 32,
       "photos_ingested": 1432,
-      "photos_analyzed": 1432,
+      "photos_analyzed": 656,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 1432,
-        "filtered": 1432,
-        "scored": 1432,
-        "picked": 1432,
-        "exported": 1432
+        "filtered": 1131,
+        "scored": 656,
+        "picked": 198,
+        "exported": 158
       },
       "session_date": "2026-04-05",
       "band_name": "饮马池"
@@ -571,15 +571,15 @@
       "cover_path_quoted": "/showcase/covers/session-31.jpg",
       "brain_session_id": 31,
       "photos_ingested": 457,
-      "photos_analyzed": 457,
+      "photos_analyzed": 209,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 457,
-        "filtered": 457,
-        "scored": 457,
-        "picked": 457,
-        "exported": 457
+        "filtered": 361,
+        "scored": 209,
+        "picked": 58,
+        "exported": 46
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-31-portrait.jpg",
       "session_date": "2026-04-04",
@@ -594,15 +594,15 @@
       "cover_path_quoted": "/showcase/covers/session-30.jpg",
       "brain_session_id": 30,
       "photos_ingested": 475,
-      "photos_analyzed": 475,
+      "photos_analyzed": 217,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 475,
-        "filtered": 475,
-        "scored": 475,
-        "picked": 475,
-        "exported": 475
+        "filtered": 375,
+        "scored": 217,
+        "picked": 54,
+        "exported": 43
       },
       "session_date": "2026-03-29",
       "band_name": "傻子与白痴"
@@ -616,15 +616,15 @@
       "cover_path_quoted": "/showcase/covers/session-29.jpg",
       "brain_session_id": 29,
       "photos_ingested": 261,
-      "photos_analyzed": 264,
+      "photos_analyzed": 119,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 261,
-        "filtered": 261,
-        "scored": 264,
-        "picked": 264,
-        "exported": 264
+        "filtered": 206,
+        "scored": 119,
+        "picked": 26,
+        "exported": 21
       },
       "session_date": "2026-03-27",
       "band_name": "文雀"
@@ -638,15 +638,15 @@
       "cover_path_quoted": "/showcase/covers/session-28.jpg",
       "brain_session_id": 28,
       "photos_ingested": 496,
-      "photos_analyzed": 496,
+      "photos_analyzed": 227,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 496,
-        "filtered": 496,
-        "scored": 496,
-        "picked": 496,
-        "exported": 496
+        "filtered": 392,
+        "scored": 227,
+        "picked": 44,
+        "exported": 35
       },
       "session_date": "2026-03-25",
       "band_name": "甜约翰"
@@ -660,15 +660,15 @@
       "cover_path_quoted": "/showcase/covers/session-27.jpg",
       "brain_session_id": 27,
       "photos_ingested": 595,
-      "photos_analyzed": 595,
+      "photos_analyzed": 273,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 595,
-        "filtered": 595,
-        "scored": 595,
-        "picked": 595,
-        "exported": 595
+        "filtered": 470,
+        "scored": 273,
+        "picked": 45,
+        "exported": 36
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-27-portrait.jpg",
       "session_date": "2026-03-21",
@@ -683,15 +683,15 @@
       "cover_path_quoted": "/showcase/covers/session-26.jpg",
       "brain_session_id": 26,
       "photos_ingested": 146,
-      "photos_analyzed": 146,
+      "photos_analyzed": 67,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 146,
-        "filtered": 146,
-        "scored": 146,
-        "picked": 146,
-        "exported": 146
+        "filtered": 115,
+        "scored": 67,
+        "picked": 25,
+        "exported": 20
       },
       "session_date": "2026-03-13",
       "band_name": "RYG室内雷鬼"
@@ -705,15 +705,15 @@
       "cover_path_quoted": "/showcase/covers/session-25.jpg",
       "brain_session_id": 25,
       "photos_ingested": 479,
-      "photos_analyzed": 479,
+      "photos_analyzed": 219,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 479,
-        "filtered": 479,
-        "scored": 479,
-        "picked": 479,
-        "exported": 479
+        "filtered": 378,
+        "scored": 219,
+        "picked": 78,
+        "exported": 62
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-25-portrait.jpg",
       "session_date": "2026-03-07",
@@ -728,15 +728,15 @@
       "cover_path_quoted": "/showcase/covers/session-24.jpg",
       "brain_session_id": 24,
       "photos_ingested": 698,
-      "photos_analyzed": 698,
+      "photos_analyzed": 320,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 698,
-        "filtered": 698,
-        "scored": 698,
-        "picked": 698,
-        "exported": 698
+        "filtered": 551,
+        "scored": 320,
+        "picked": 105,
+        "exported": 84
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-24-portrait.jpg",
       "session_date": "2026-03-07",
@@ -755,11 +755,11 @@
       "source": "showcase_catalog",
       "last_job_status": "",
       "funnel": {
-        "imported": null,
-        "filtered": null,
-        "scored": null,
-        "picked": null,
-        "exported": null
+        "imported": 0,
+        "filtered": 0,
+        "scored": 0,
+        "picked": 0,
+        "exported": 0
       },
       "session_date": "2026-02-07",
       "band_name": "脑浊乐队"
@@ -773,15 +773,15 @@
       "cover_path_quoted": "/showcase/covers/session-22.jpg",
       "brain_session_id": 22,
       "photos_ingested": 23,
-      "photos_analyzed": 23,
+      "photos_analyzed": 10,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 23,
-        "filtered": 23,
-        "scored": 23,
-        "picked": 23,
-        "exported": 23
+        "filtered": 18,
+        "scored": 10,
+        "picked": 2,
+        "exported": 2
       },
       "session_date": "2026-02-01",
       "band_name": "大都会乐团"
@@ -799,11 +799,11 @@
       "source": "showcase_catalog",
       "last_job_status": "",
       "funnel": {
-        "imported": null,
-        "filtered": null,
-        "scored": null,
-        "picked": null,
-        "exported": null
+        "imported": 0,
+        "filtered": 0,
+        "scored": 0,
+        "picked": 0,
+        "exported": 0
       },
       "session_date": "2026-01-31",
       "band_name": "钢心"
@@ -817,15 +817,15 @@
       "cover_path_quoted": "/showcase/covers/session-20.jpg",
       "brain_session_id": 20,
       "photos_ingested": 47,
-      "photos_analyzed": 49,
+      "photos_analyzed": 21,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 47,
-        "filtered": 47,
-        "scored": 49,
-        "picked": 49,
-        "exported": 49
+        "filtered": 37,
+        "scored": 21,
+        "picked": 5,
+        "exported": 4
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-20-portrait.jpg",
       "session_date": "2026-01-30",
@@ -840,15 +840,15 @@
       "cover_path_quoted": "/showcase/covers/session-19.jpg",
       "brain_session_id": 19,
       "photos_ingested": 39,
-      "photos_analyzed": 39,
+      "photos_analyzed": 18,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 39,
-        "filtered": 39,
-        "scored": 39,
-        "picked": 39,
-        "exported": 39
+        "filtered": 31,
+        "scored": 18,
+        "picked": 4,
+        "exported": 3
       },
       "session_date": "2026-01-24",
       "band_name": "余梓桾X张子薇"
@@ -862,15 +862,15 @@
       "cover_path_quoted": "/showcase/covers/session-18.jpg",
       "brain_session_id": 18,
       "photos_ingested": 49,
-      "photos_analyzed": 49,
+      "photos_analyzed": 23,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 49,
-        "filtered": 49,
-        "scored": 49,
-        "picked": 49,
-        "exported": 49
+        "filtered": 39,
+        "scored": 23,
+        "picked": 4,
+        "exported": 3
       },
       "session_date": "2026-01-18",
       "band_name": "环岛行驶"
@@ -884,15 +884,15 @@
       "cover_path_quoted": "/showcase/covers/session-17-portrait.jpg",
       "brain_session_id": 17,
       "photos_ingested": 8,
-      "photos_analyzed": 8,
+      "photos_analyzed": 3,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 8,
-        "filtered": 8,
-        "scored": 8,
-        "picked": 8,
-        "exported": 8
+        "filtered": 6,
+        "scored": 3,
+        "picked": 1,
+        "exported": 1
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-17-portrait.jpg",
       "session_date": "2026-01-16",
@@ -907,15 +907,15 @@
       "cover_path_quoted": "/showcase/covers/session-16-portrait.jpg",
       "brain_session_id": 16,
       "photos_ingested": 12,
-      "photos_analyzed": 12,
+      "photos_analyzed": 5,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 12,
-        "filtered": 12,
-        "scored": 12,
-        "picked": 12,
-        "exported": 12
+        "filtered": 9,
+        "scored": 5,
+        "picked": 2,
+        "exported": 2
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-16-portrait.jpg",
       "session_date": "2026-01-10",
@@ -930,15 +930,15 @@
       "cover_path_quoted": "/showcase/covers/session-15.jpg",
       "brain_session_id": 15,
       "photos_ingested": 13,
-      "photos_analyzed": 13,
+      "photos_analyzed": 6,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 13,
-        "filtered": 13,
-        "scored": 13,
-        "picked": 13,
-        "exported": 13
+        "filtered": 10,
+        "scored": 6,
+        "picked": 2,
+        "exported": 2
       },
       "session_date": "2026-01-09",
       "band_name": "达达乐队"
@@ -952,15 +952,15 @@
       "cover_path_quoted": "/showcase/covers/session-14.jpg",
       "brain_session_id": 14,
       "photos_ingested": 14,
-      "photos_analyzed": 14,
+      "photos_analyzed": 6,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 14,
-        "filtered": 14,
-        "scored": 14,
-        "picked": 14,
-        "exported": 14
+        "filtered": 11,
+        "scored": 6,
+        "picked": 2,
+        "exported": 2
       },
       "session_date": "2025-12-27",
       "band_name": "刺猬乐队"
@@ -974,15 +974,15 @@
       "cover_path_quoted": "/showcase/covers/session-13.jpg",
       "brain_session_id": 13,
       "photos_ingested": 55,
-      "photos_analyzed": 55,
+      "photos_analyzed": 25,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 55,
-        "filtered": 55,
-        "scored": 55,
-        "picked": 55,
-        "exported": 55
+        "filtered": 43,
+        "scored": 25,
+        "picked": 8,
+        "exported": 6
       },
       "session_date": "2025-12-21",
       "band_name": "白皮书"
@@ -996,15 +996,15 @@
       "cover_path_quoted": "/showcase/covers/session-12.jpg",
       "brain_session_id": 12,
       "photos_ingested": 73,
-      "photos_analyzed": 73,
+      "photos_analyzed": 34,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 73,
-        "filtered": 73,
-        "scored": 73,
-        "picked": 73,
-        "exported": 73
+        "filtered": 58,
+        "scored": 34,
+        "picked": 9,
+        "exported": 7
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-12-portrait.jpg",
       "session_date": "2025-12-20",
@@ -1019,15 +1019,15 @@
       "cover_path_quoted": "/showcase/covers/session-11.jpg",
       "brain_session_id": 11,
       "photos_ingested": 107,
-      "photos_analyzed": 72,
+      "photos_analyzed": 49,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 107,
-        "filtered": 107,
-        "scored": 72,
-        "picked": 72,
-        "exported": 72
+        "filtered": 85,
+        "scored": 49,
+        "picked": 11,
+        "exported": 9
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-11-portrait.jpg",
       "session_date": "2025-12-14",
@@ -1042,15 +1042,15 @@
       "cover_path_quoted": "/showcase/covers/session-10-portrait.jpg",
       "brain_session_id": 10,
       "photos_ingested": 243,
-      "photos_analyzed": 243,
+      "photos_analyzed": 111,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 243,
-        "filtered": 243,
-        "scored": 243,
-        "picked": 243,
-        "exported": 243
+        "filtered": 192,
+        "scored": 111,
+        "picked": 21,
+        "exported": 17
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-10-portrait.jpg",
       "session_date": "2025-12-11",
@@ -1065,15 +1065,15 @@
       "cover_path_quoted": "/showcase/covers/session-09.jpg",
       "brain_session_id": 9,
       "photos_ingested": 30,
-      "photos_analyzed": 30,
+      "photos_analyzed": 14,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 30,
-        "filtered": 30,
-        "scored": 30,
-        "picked": 30,
-        "exported": 30
+        "filtered": 24,
+        "scored": 14,
+        "picked": 2,
+        "exported": 2
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-09-portrait.jpg",
       "session_date": "2025-12-10",
@@ -1088,15 +1088,15 @@
       "cover_path_quoted": "/showcase/covers/session-08.jpg",
       "brain_session_id": 8,
       "photos_ingested": 60,
-      "photos_analyzed": 60,
+      "photos_analyzed": 27,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 60,
-        "filtered": 60,
-        "scored": 60,
-        "picked": 60,
-        "exported": 60
+        "filtered": 47,
+        "scored": 27,
+        "picked": 10,
+        "exported": 8
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-08-portrait.jpg",
       "session_date": "2025-12-07",
@@ -1111,15 +1111,15 @@
       "cover_path_quoted": "/showcase/covers/session-07.jpg",
       "brain_session_id": 7,
       "photos_ingested": 30,
-      "photos_analyzed": 30,
+      "photos_analyzed": 14,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 30,
-        "filtered": 30,
-        "scored": 30,
-        "picked": 30,
-        "exported": 30
+        "filtered": 24,
+        "scored": 14,
+        "picked": 5,
+        "exported": 4
       },
       "session_date": "2025-12-05",
       "band_name": "理想后花园"
@@ -1133,15 +1133,15 @@
       "cover_path_quoted": "/showcase/covers/session-06.jpg",
       "brain_session_id": 6,
       "photos_ingested": 53,
-      "photos_analyzed": 53,
+      "photos_analyzed": 24,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 53,
-        "filtered": 53,
-        "scored": 53,
-        "picked": 53,
-        "exported": 53
+        "filtered": 42,
+        "scored": 24,
+        "picked": 8,
+        "exported": 6
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-06-portrait.jpg",
       "session_date": "2025-11-28",
@@ -1156,15 +1156,15 @@
       "cover_path_quoted": "/showcase/covers/session-04.jpg",
       "brain_session_id": 4,
       "photos_ingested": 2,
-      "photos_analyzed": 2,
+      "photos_analyzed": 1,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 2,
         "filtered": 2,
-        "scored": 2,
-        "picked": 2,
-        "exported": 2
+        "scored": 1,
+        "picked": 1,
+        "exported": 1
       },
       "session_date": "2025-10-24",
       "band_name": "重返袖珍时光"
@@ -1178,15 +1178,15 @@
       "cover_path_quoted": "/showcase/covers/session-03.jpg",
       "brain_session_id": 3,
       "photos_ingested": 23,
-      "photos_analyzed": 23,
+      "photos_analyzed": 10,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 23,
-        "filtered": 23,
-        "scored": 23,
-        "picked": 23,
-        "exported": 23
+        "filtered": 18,
+        "scored": 10,
+        "picked": 2,
+        "exported": 2
       },
       "session_date": "2025-10-17",
       "band_name": "觅屿"
@@ -1200,15 +1200,15 @@
       "cover_path_quoted": "/showcase/covers/session-02.jpg",
       "brain_session_id": 2,
       "photos_ingested": 5,
-      "photos_analyzed": 5,
+      "photos_analyzed": 2,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 5,
-        "filtered": 5,
-        "scored": 5,
-        "picked": 5,
-        "exported": 5
+        "filtered": 4,
+        "scored": 2,
+        "picked": 1,
+        "exported": 1
       },
       "session_date": "2025-09-07",
       "band_name": "落日飞车"
@@ -1222,15 +1222,15 @@
       "cover_path_quoted": "/showcase/covers/session-01.jpg",
       "brain_session_id": 1,
       "photos_ingested": 7,
-      "photos_analyzed": 7,
+      "photos_analyzed": 3,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
         "imported": 7,
-        "filtered": 7,
-        "scored": 7,
-        "picked": 7,
-        "exported": 7
+        "filtered": 6,
+        "scored": 3,
+        "picked": 1,
+        "exported": 1
       },
       "cover_portrait_path_quoted": "/showcase/covers/session-01-portrait.jpg",
       "session_date": "2025-08-23",
@@ -1251,10 +1251,10 @@
     "venue": "",
     "funnel": {
       "imported": 2348,
-      "filtered": 2348,
-      "scored": 2348,
-      "picked": 2348,
-      "exported": 2348
+      "filtered": 1855,
+      "scored": 1076,
+      "picked": 235,
+      "exported": 188
     },
     "photos_ingested": 2348
   },
