@@ -73,6 +73,8 @@ web/public/showcase/**/*.jpg
 # Per-session heroes for Vercel /studio (EXIF-stripped; built by build_session_covers.py)
 !web/public/showcase/covers/
 !web/public/showcase/covers/**
+# Fixed landing first-screen background (EXIF-stripped); referenced by LANDING_HERO.backgroundSrc
+!web/public/showcase/landing-hero.jpg
 # Local cover catalog with absolute paths — commit only the .example.json
 data/bench/session_covers_sources.json
 
