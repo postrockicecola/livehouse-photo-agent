@@ -54,29 +54,42 @@ def _archive_root(explicit: str | None = None) -> Path:
 
 
 def cmd_landing_gallery(export_dir: str, count: int) -> dict:
-    import random
+    """Landing hero / marquee images = Studio session covers (same as /studio list).
 
-    root = Path(export_dir).expanduser().resolve()
-    if not root.is_dir():
-        return {"export_dir": str(root), "images": [], "error": "export_dir not found"}
+    ``export_dir`` is kept for CLI compatibility but is no longer sampled randomly;
+    covers come from ``list_studio_sessions`` (analysis best-score / first preview).
+    """
+    from utils.luma_brain import brain_connect
+    from utils.studio_sessions import list_studio_sessions
 
-    exts = {".jpg", ".jpeg", ".png", ".webp"}
-    candidates: list[str] = []
+    n = max(1, int(count))
+    ar = _archive_root()
+    conn = None
     try:
-        for ent in root.rglob("*"):
-            if ent.is_file() and ent.suffix.lower() in exts:
-                candidates.append(str(ent.resolve()))
-    except OSError:
-        candidates = []
+        conn = brain_connect()
+    except Exception:
+        conn = None
+    try:
+        sessions = list_studio_sessions(conn, ar, limit=max(n * 4, 48))
+    finally:
+        if conn is not None:
+            conn.close()
 
-    if not candidates:
-        return {"export_dir": str(root), "images": []}
+    images: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for row in sessions:
+        cover = str(row.get("cover_path_quoted") or "").strip()
+        if not cover or cover in seen:
+            continue
+        seen.add(cover)
+        images.append({"path": cover})
+        if len(images) >= n:
+            break
 
-    n = max(1, min(int(count), len(candidates)))
-    picked = random.sample(candidates, n)
     return {
-        "export_dir": str(root),
-        "images": [{"path": p} for p in picked],
+        "export_dir": str(ar),
+        "source": "session_covers",
+        "images": images,
     }
 
 

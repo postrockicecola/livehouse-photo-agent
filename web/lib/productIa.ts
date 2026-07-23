@@ -59,6 +59,11 @@ export const LANDING_HERO = {
   subtitle:
     "低成本视觉门控 → 持久作业 → 有界 VLM → Gallery / Infra Console。摄影是真实业务负载，用来验证可恢复、可观察的推理作业系统。",
   description: PROJECT_POSITIONING.oneLinerZh,
+  /**
+   * Fixed first-viewport background (from ``data/eval/images/20260424__DSC04199.jpg``).
+   * Bundled EXIF-stripped copy under ``web/public/showcase/`` so Vercel showcase stays stable.
+   */
+  backgroundSrc: "/showcase/landing-hero.jpg",
   ctaPrimary: LANDING_STUDIO_CTA,
   ctaSecondary: { label: "看主链路", href: "#workflow" },
   promptIdle: "试试：找出吉他手特写…",

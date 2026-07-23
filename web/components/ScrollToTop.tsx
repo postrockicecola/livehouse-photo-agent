@@ -20,7 +20,7 @@ export function ScrollToTop() {
     <button
       type="button"
       aria-label="回到顶部"
-      className="glass fixed bottom-5 right-5 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-[rgba(255,255,255,0.75)] transition-colors duration-200 ease-out hover:border-white/20 hover:bg-white/[0.06] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+      className="glass fixed bottom-4 right-20 z-50 flex h-12 w-12 items-center justify-center rounded-[14px] border border-white/10 text-[rgba(255,255,255,0.75)] transition-colors duration-200 ease-out hover:border-white/20 hover:bg-white/[0.06] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
     >
       <svg

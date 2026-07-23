@@ -115,8 +115,10 @@ def _system_prompt(registry) -> str:
         "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
         "- 技术高构图一般 → mark_score_gap\n"
         "- 记住我的偏好 / 以后少选剪影 → remember_preference(key, value)\n"
-        "- 复古胶片 / Cinestill / 黑白纪实 → "
-        '{"tool":"apply_film_vibe","args":{"prompt":"<paste the user message>"}}\n'
+        "- 复古胶片 / Cinestill / 黑白纪实 / 修成…风格看看 → "
+        '{"tool":"apply_film_vibe","args":{"prompt":"<paste the user message>"}} '
+        "(persists session vibe; Gallery auto-opens graded style preview — "
+        "say 已打开风格预览, do not claim a preview unless the tool succeeded)\n"
         "- 导出预览+RAW → export_selected (after selection exists)\n\n"
         "When answering search results, cite real file names from tool metadata.citations "
         "or rows — never invent photos.\n\n"

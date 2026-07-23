@@ -115,8 +115,9 @@ export default function HomePage() {
 
   const [modal, setModal] = useState<GalleryItem | null>(null);
   const [selectionPreviewOpen, setSelectionPreviewOpen] = useState(false);
-  /** Copilot ``gallery_search`` hits — preview without mutating liked selection. */
+  /** Copilot ``gallery_search`` / vibe hits — preview without mutating liked selection. */
   const [agentPreviewItems, setAgentPreviewItems] = useState<GalleryItem[] | null>(null);
+  const [agentPreviewVariant, setAgentPreviewVariant] = useState<"agent" | "vibe">("agent");
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [feedbackByKey, setFeedbackByKey] = useState<Record<string, CurationFeedbackEntry>>({});
   /** ``undefined`` = not loaded; ``null`` = no file; object = apply when ``items`` ready. */
@@ -199,6 +200,7 @@ export default function HomePage() {
   const decodePumpingRef = useRef(false);
   const curationHydratedRef = useRef(false);
   const curationSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingVibePreviewRef = useRef(false);
   const [curationSaveState, setCurationSaveState] = useState<"idle" | "saving" | "saved" | "err">("idle");
 
   const paginated = loadSource === "results_api";
@@ -469,6 +471,28 @@ export default function HomePage() {
     };
   }, [API_BASE, reloadNonce]);
 
+  const openVibeStylePreview = useCallback(
+    (sv: SessionVibeState, pool: GalleryItem[]) => {
+      if (!sessionVibeMatched(sv)) {
+        setActionMsg(
+          `助手写入了风格「${sv.label_zh || sv.prompt}」，但未匹配到胶片型号；请换关键词或在 Lab 手动选胶片。`,
+        );
+        return;
+      }
+      if (pool.length === 0) {
+        pendingVibePreviewRef.current = true;
+        setActionMsg(`助手已应用「${sv.label_zh}」，照片加载后将打开风格预览…`);
+        return;
+      }
+      pendingVibePreviewRef.current = false;
+      setAgentPreviewVariant("vibe");
+      setAgentPreviewItems(pool.slice(0, 12));
+      setSelectionPreviewOpen(false);
+      setActionMsg(`助手已应用「${sv.label_zh}」，已打开风格预览`);
+    },
+    [],
+  );
+
   // ChatDock skills (search preview / select / vibe / export) → Gallery UI.
   useEffect(() => {
     const onAgentAction = (ev: Event) => {
@@ -506,21 +530,67 @@ export default function HomePage() {
             path_quoted: encodeURIComponent(abs),
           });
         }
+        setAgentPreviewVariant("agent");
         setAgentPreviewItems(resolved);
         setSelectionPreviewOpen(false);
         setActionMsg(`助手筛选 ${resolved.length} 张，已打开预览`);
         return;
       }
-      if (action === "reload_curation" || action === "reload_vibe" || action === "export_done") {
+      if (action === "reload_vibe") {
+        const raw = meta.session_vibe;
+        const sv =
+          raw && typeof raw === "object" ? (raw as SessionVibeState) : null;
+        setReloadNonce((n) => n + 1);
+        if (!sv?.film_variant) {
+          setSessionVibe(null);
+          setUseSessionVibeForExport(false);
+          pendingVibePreviewRef.current = false;
+          setActionMsg("助手已清除胶片风格");
+          return;
+        }
+        setSessionVibe(sv);
+        setVibePrompt(sv.prompt ?? "");
+        setUseSessionVibeForExport(sessionVibeMatched(sv));
+        const liked = items.filter((it, idx) =>
+          selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
+        );
+        openVibeStylePreview(sv, liked.length > 0 ? liked : items);
+        return;
+      }
+      if (action === "reload_curation" || action === "export_done") {
         setReloadNonce((n) => n + 1);
         if (action === "reload_curation") setActionMsg("助手已更新选片，正在刷新…");
-        if (action === "reload_vibe") setActionMsg("助手已应用胶片风格，正在刷新…");
         if (action === "export_done") setActionMsg("助手已触发导出（预览 + RAW）");
       }
     };
     window.addEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
     return () => window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
-  }, [items, galleryBasePath]);
+  }, [items, galleryBasePath, selectedKeys, openVibeStylePreview]);
+
+  // Off-gallery ChatDock → /gallery? open graded vibe preview once items + vibe are ready.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("luma.open_vibe_preview") !== "1") return;
+    } catch {
+      return;
+    }
+    if (!sessionVibeMatched(sessionVibe) || !sessionVibe || items.length === 0) {
+      pendingVibePreviewRef.current = true;
+      return;
+    }
+    try {
+      sessionStorage.removeItem("luma.open_vibe_preview");
+    } catch {
+      /* ignore */
+    }
+    openVibeStylePreview(sessionVibe, items);
+  }, [sessionVibe, items, openVibeStylePreview]);
+
+  useEffect(() => {
+    if (!pendingVibePreviewRef.current) return;
+    if (!sessionVibeMatched(sessionVibe) || !sessionVibe || items.length === 0) return;
+    openVibeStylePreview(sessionVibe, items);
+  }, [sessionVibe, items, openVibeStylePreview]);
 
   const onApplySessionVibe = async () => {
     const text = vibePrompt.trim();
@@ -1161,12 +1231,16 @@ export default function HomePage() {
           items={agentPreviewItems}
           exportByFile={exportByFile}
           apiBase={API_BASE}
-          variant="agent"
+          variant={agentPreviewVariant}
           onClose={() => setAgentPreviewItems(null)}
           sessionFilmVariant={
             sessionVibeMatched(sessionVibe) ? sessionVibe?.film_variant ?? null : null
           }
-          useSessionVibe={useSessionVibeForExport && sessionVibeMatched(sessionVibe)}
+          useSessionVibe={
+            agentPreviewVariant === "vibe"
+              ? sessionVibeMatched(sessionVibe)
+              : useSessionVibeForExport && sessionVibeMatched(sessionVibe)
+          }
         />
       ) : null}
 

@@ -1017,7 +1017,10 @@ class ApplyFilmVibeSkill:
         vibe = read_session_vibe(self._base_dir)
         label = (vibe or {}).get("label_zh") or decision.label_zh
         variant = (vibe or {}).get("film_variant") or decision.film_variant
-        summary = f"已应用风格「{label}」（{variant}）。Gallery Lab 可预览。"
+        summary = (
+            f"已应用风格「{label}」（{variant}）。"
+            "Gallery 会自动打开套用该胶片的风格预览（ui_action=reload_vibe）。"
+        )
         return SkillResult(
             ok=True,
             output=summary,

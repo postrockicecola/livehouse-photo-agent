@@ -19,8 +19,8 @@ type Props = {
   onClose: () => void;
   sessionFilmVariant?: string | null;
   useSessionVibe?: boolean;
-  /** ``agent`` = copilot search hits; default = liked selection review. */
-  variant?: "selection" | "agent";
+  /** ``agent`` = search hits; ``vibe`` = film-grade preview; default = liked selection. */
+  variant?: "selection" | "agent" | "vibe";
 };
 
 type Row = {
@@ -104,15 +104,24 @@ function PreviewModalShell({
 }: {
   onClose: () => void;
   children: ReactNode;
-  variant?: "selection" | "agent";
+  variant?: "selection" | "agent" | "vibe";
 }) {
-  const isAgent = variant === "agent";
+  const title =
+    variant === "agent" ? "助手筛选预览" : variant === "vibe" ? "胶片风格预览" : "选中图片预览";
+  const eyebrow =
+    variant === "agent" ? "Agent results" : variant === "vibe" ? "Film vibe" : "Selection review";
+  const subtitle =
+    variant === "agent"
+      ? "助手筛选结果预览"
+      : variant === "vibe"
+        ? "会话风格成片效果"
+        : "导出前效果确认";
   return (
     <div
       className="fixed inset-0 z-[55] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden font-[system-ui,-apple-system,sans-serif] text-white"
       role="dialog"
       aria-modal="true"
-      aria-label={isAgent ? "助手筛选预览" : "选中图片预览"}
+      aria-label={title}
     >
       <div className="pointer-events-none absolute inset-0 bg-[#0a0a0a]" aria-hidden />
       <div
@@ -123,11 +132,9 @@ function PreviewModalShell({
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-[clamp(14px,3.5vw,44px)] py-4 md:py-5">
           <div className="min-w-0">
             <p className="text-[10px] font-light uppercase tracking-[0.22em] text-white/32">
-              {isAgent ? "Agent results" : "Selection review"}
+              {eyebrow}
             </p>
-            <p className="mt-1 text-[12px] font-light text-white/45">
-              {isAgent ? "助手筛选结果预览" : "导出前效果确认"}
-            </p>
+            <p className="mt-1 text-[12px] font-light text-white/45">{subtitle}</p>
           </div>
           <button
             type="button"
@@ -152,20 +159,25 @@ function PreviewIntro({
   variant = "selection",
 }: {
   count: number;
-  variant?: "selection" | "agent";
+  variant?: "selection" | "agent" | "vibe";
 }) {
-  const isAgent = variant === "agent";
+  const heading =
+    variant === "agent" ? "助手筛选" : variant === "vibe" ? "风格预览" : "预览已选";
+  const blurb =
+    variant === "agent"
+      ? "按检索排序展示命中照片；关闭后可在对话里继续筛选或初选。"
+      : variant === "vibe"
+        ? "已套用会话胶片风格；关闭后可在 Lab 微调，或继续对话改风格。"
+        : "双列瀑布无框密铺，完整显示成片效果。";
   return (
     <header className="border-b border-white/[0.06] pb-6 md:pb-8">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.5rem,4.5vw,2.25rem)] font-extralight leading-[1.1] tracking-tight text-white">
-            {isAgent ? "助手筛选" : "预览已选"}
+            {heading}
           </h1>
           <p className="mt-3 max-w-md text-[13px] font-light leading-relaxed text-white/38">
-            {isAgent
-              ? "按检索排序展示命中照片；关闭后可在对话里继续筛选或初选。"
-              : "双列瀑布无框密铺，完整显示成片效果。"}
+            {blurb}
           </p>
         </div>
         <div className="flex items-baseline gap-2 tabular-nums">
@@ -184,14 +196,17 @@ function PreviewFooter({
   variant = "selection",
 }: {
   onClose: () => void;
-  variant?: "selection" | "agent";
+  variant?: "selection" | "agent" | "vibe";
 }) {
-  const isAgent = variant === "agent";
+  const done =
+    variant === "agent"
+      ? "已浏览全部筛选结果"
+      : variant === "vibe"
+        ? "已浏览风格预览"
+        : "已浏览全部选中项";
   return (
     <footer className="mt-14 flex flex-col items-center gap-4 border-t border-white/[0.06] pt-10 text-center md:mt-16">
-      <p className="text-[11px] font-light tracking-wide text-white/28">
-        {isAgent ? "已浏览全部筛选结果" : "已浏览全部选中项"}
-      </p>
+      <p className="text-[11px] font-light tracking-wide text-white/28">{done}</p>
       <button
         type="button"
         onClick={onClose}

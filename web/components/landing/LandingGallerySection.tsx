@@ -7,18 +7,15 @@ import { resolveClientProvenance } from "@/lib/provenance";
 import { LANDING_GALLERY_SECTION } from "./landingConfig";
 import { LandingGalleryMarquee } from "./LandingGalleryMarquee";
 import { LandingGalleryProductMock } from "./LandingGalleryProductMock";
-import { getApiBase } from "@/lib/apiBase";
+import { buildStudioCoverUrl } from "@/lib/studioUi";
 
 type GalleryImage = {
   path: string;
 };
 
+/** Same cover URL rules as Studio session cards (``/showcase/…`` or ``/image?path=``). */
 function buildImageUrl(path: string): string {
-  // Bundled demo assets (web/public/demo/*) are served statically by Next.
-  if (path.startsWith("/demo/")) return path;
-  const apiBase = getApiBase();
-  const q = encodeURIComponent(path);
-  return `${apiBase}/image?path=${q}&max_side=1200`;
+  return buildStudioCoverUrl(path, 1200) ?? path;
 }
 
 export function LandingGallerySection() {
