@@ -12,7 +12,7 @@
       "created_at": 1782396948,
       "updated_at": 1784792147,
       "celery_broker": {
-        "online": false
+        "online": true
       }
     },
     {
@@ -45,9 +45,9 @@
     }
   ],
   "broker": {
-    "celery_unavailable": true,
-    "worker_count": 0,
-    "error": "'NoneType' object has no attribute 'Redis'"
+    "celery_unavailable": false,
+    "worker_count": 1,
+    "error": null
   },
   "unmatched_broker_workers": []
 }

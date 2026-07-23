@@ -34,7 +34,7 @@ export const LANDING_STUDIO_CTA = "打开 Studio";
 
 /** Hero chat-box rotating prompts — concrete things the system can do. */
 export const LANDING_HERO_PROMPTS = [
-  "帮我从这场里选出 40 张能交片的",
+  "帮我从这场里选出 20 张能交片的",
   "把糊的、过曝的先剔掉",
   "连拍里每组只留一张最好的",
   "按分数从高到低给我一份初选",
@@ -234,6 +234,9 @@ export type LandingInfraMetrics = {
   pipeline_active: number;
   monitoring_snapshots: number;
   dead_letter: number;
+  /** Cumulative ledger totals — preferred for idle showcase snapshots. */
+  jobs_total?: number;
+  model_runs_total?: number;
 };
 
 export const LANDING_INFRA_FALLBACK_METRICS: LandingInfraMetrics = {
@@ -245,6 +248,8 @@ export const LANDING_INFRA_FALLBACK_METRICS: LandingInfraMetrics = {
   pipeline_active: 0,
   monitoring_snapshots: 0,
   dead_letter: 0,
+  jobs_total: 0,
+  model_runs_total: 0,
 };
 
 export type InfraPillar = {
@@ -282,9 +287,9 @@ export const LANDING_INFRA = {
     },
   ],
   pillars: [
-    { id: "queue", label: "Queue", caption: "排队中的作业", metricKey: "queue_depth" },
+    { id: "jobs", label: "Jobs", caption: "账本作业总数", metricKey: "jobs_total" },
     { id: "workers", label: "Workers", caption: "在线 / 总数", metricKey: "workers_online" },
-    { id: "retry", label: "Retry", caption: "待重试", metricKey: "retry_pending" },
+    { id: "vlm", label: "Model runs", caption: "推理调用账本", metricKey: "model_runs_total" },
     { id: "recovery", label: "Recovery", caption: "重新入队", metricKey: "recovery_requeues" },
     { id: "monitoring", label: "Monitoring", caption: "运行快照", metricKey: "monitoring_snapshots" },
   ] satisfies InfraPillar[],

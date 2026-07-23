@@ -39,6 +39,14 @@ export function isShowcase(): boolean {
   return process.env.SHOWCASE_MODE === "1" || process.env.SHOWCASE_MODE === "true";
 }
 
+/**
+ * True when the Next deploy intentionally has no FastAPI proxy target
+ * (`LANDING_ONLY=1` in `web/vercel.json`). Infra/studio reads must use fixtures.
+ */
+export function isLandingOnly(): boolean {
+  return process.env.LANDING_ONLY === "1" || process.env.LANDING_ONLY === "true";
+}
+
 const FIXTURES = {
   "landing-gallery": landingGallery,
   "landing-infra": landingInfra,

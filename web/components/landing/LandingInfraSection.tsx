@@ -192,7 +192,7 @@ export function LandingInfraSection() {
                 id={pillar.id}
                 label={pillar.label}
                 caption={pillar.caption}
-                metric={metrics[pillar.metricKey]}
+                metric={Number(metrics[pillar.metricKey] ?? 0)}
                 metrics={metrics}
                 active={visible}
                 delayMs={index * 60}

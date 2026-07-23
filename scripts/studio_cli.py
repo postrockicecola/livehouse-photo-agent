@@ -158,6 +158,8 @@ def cmd_landing_infra() -> dict:
         "pipeline_active": 0,
         "monitoring_snapshots": 0,
         "dead_letter": 0,
+        "jobs_total": 0,
+        "model_runs_total": 0,
     }
     flow: list[dict] = []
 
@@ -211,6 +213,18 @@ def cmd_landing_infra() -> dict:
             try:
                 row = conn.execute("SELECT COUNT(*) FROM infra_runtime_snapshots").fetchone()
                 metrics["monitoring_snapshots"] = int(row[0]) if row else 0
+            except Exception:
+                pass
+
+            try:
+                row = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()
+                metrics["jobs_total"] = int(row[0]) if row else 0
+            except Exception:
+                pass
+
+            try:
+                row = conn.execute("SELECT COUNT(*) FROM model_runs").fetchone()
+                metrics["model_runs_total"] = int(row[0]) if row else 0
             except Exception:
                 pass
 

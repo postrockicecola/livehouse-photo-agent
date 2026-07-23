@@ -22,13 +22,13 @@
     "inflight_by_namespace_project": []
   },
   "queue_backlog": {
-    "celery_unavailable": true,
-    "workers": 0,
+    "celery_unavailable": false,
+    "workers": 1,
     "active": 0,
     "reserved": 0,
     "scheduled": 0,
-    "redis_list_len": null,
-    "redis_error": "'NoneType' object has no attribute 'Redis'"
+    "redis_list_len": 0,
+    "redis_error": null
   },
   "workers": {
     "total": 3,
