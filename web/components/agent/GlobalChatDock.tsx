@@ -9,10 +9,17 @@ import {
   STUDIO_SELECT_PROMPTS,
   STUDIO_STYLE_PROMPTS,
 } from "@/lib/productIa";
+import { isShowcaseClient } from "@/lib/showcase";
 
 const API_BASE = getApiBase();
 
 const OPEN_VIBE_PREVIEW_KEY = "luma.open_vibe_preview";
+
+const SHOWCASE_PROMPT_STAGES = {
+  select: STUDIO_SELECT_PROMPTS,
+  style: STUDIO_STYLE_PROMPTS,
+  find: STUDIO_FIND_PROMPTS,
+} as const;
 
 /** Surfaces where the curation assistant is in-context. */
 function showChatOnPath(pathname: string | null): boolean {
@@ -24,7 +31,7 @@ function showChatOnPath(pathname: string | null): boolean {
 /**
  * Site-wide curation assistant FAB.
  * Reads landing hero `?q=` once to open + auto-send.
- * On Studio: open by default and scroll the same preset prompts as the landing hero.
+ * Showcase Studio/Gallery: three-step ladder only (select → style → guitar).
  * Film-vibe tools applied off-/gallery navigate to Gallery for graded preview.
  */
 export function GlobalChatDock() {
@@ -32,6 +39,10 @@ export function GlobalChatDock() {
   const pathname = usePathname();
   const router = useRouter();
   const onStudio = Boolean(pathname?.startsWith("/studio"));
+  const onGallery = Boolean(pathname?.startsWith("/gallery"));
+  const showcase = isShowcaseClient();
+  /** Studio always; Gallery only in read-only Showcase (local Gallery keeps freeform). */
+  const useLadder = onStudio || (showcase && onGallery);
 
   useEffect(() => {
     try {
@@ -68,20 +79,12 @@ export function GlobalChatDock() {
 
   return (
     <ChatDock
-      key={onStudio ? "studio" : "gallery"}
+      key={onStudio ? "studio" : onGallery ? "gallery" : "landing"}
       apiBase={API_BASE}
       context={onStudio ? "studio" : "gallery"}
       initialPrompt={initialPrompt}
       defaultOpen={onStudio || Boolean(initialPrompt?.trim())}
-      promptStages={
-        onStudio
-          ? {
-              select: STUDIO_SELECT_PROMPTS,
-              style: STUDIO_STYLE_PROMPTS,
-              find: STUDIO_FIND_PROMPTS,
-            }
-          : undefined
-      }
+      promptStages={useLadder ? SHOWCASE_PROMPT_STAGES : undefined}
     />
   );
 }
