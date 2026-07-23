@@ -75,3 +75,9 @@ if _beat_schedule:
     celery_app.conf.beat_schedule = _beat_schedule
 
 configure_logging()
+try:
+    from infra.otel_bootstrap import configure_otel_from_env
+
+    configure_otel_from_env()
+except Exception:
+    pass

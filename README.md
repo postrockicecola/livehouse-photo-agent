@@ -192,6 +192,8 @@ This is a **single-node AI runtime**, not a production multi-tenant distributed 
 2. **In-process inference admission** / bounded queue (not cluster-wide quotas).
 3. **Single-node shared volume** / local archive paths for artifacts.
 
+**Batch E scaffolding** (hooks only — do not claim full platform cutover): portable brain backend selector (`LIVEHOUSE_BRAIN_BACKEND`), artifact `content_digest`, optional per-scope VLM hour quota, optional OTEL bootstrap, and `docs/PLATFORM_SCOPE.txt`. Details: `docs/PLATFORM_SCOPE.txt`.
+
 ---
 
 ## Infra Experiments (extensions)

@@ -1,0 +1,52 @@
+Platform scope (Batch E) — namespace / project_key labeling
+
+This file is the SSOT note referenced by schema comments and brain helpers.
+(Markdown docs are gitignored in this repo; use this .txt.)
+
+==============================================================================
+What exists today
+==============================================================================
+
+- jobs.namespace / jobs.project_key (default "default") — soft labels for
+  multi-product *filtering* on one deployment.
+- LIVEHOUSE_DISPATCH_NAMESPACE / LIVEHOUSE_DISPATCH_PROJECT_KEY — optional
+  Celery dispatch filters (list runnable / enqueue scoped work).
+- Infra metrics/jobs APIs accept namespace & project_key query filters.
+- Agent auth (api/auth_routes.py) scopes *conversations*, not the job ledger.
+
+==============================================================================
+What this is NOT
+==============================================================================
+
+- Not RBAC / OIDC for Infra Console.
+- Not hard tenant isolation (unscoped callers can still see other rows unless
+  operators apply filters).
+- Not a multi-writer cluster database (SQLite SSOT remains single-node).
+
+==============================================================================
+Batch E hooks (scaffolding, not full platform)
+==============================================================================
+
+1. LIVEHOUSE_BRAIN_BACKEND=sqlite|postgres
+   postgres → NotImplementedError (honest stub). sqlite → current path.
+
+2. artifacts.content_digest
+   SHA-256 of local primary / analysis_results files when present.
+   Paths remain source of truth; digest is CAS-*ready metadata* for a future
+   object store — not an S3/MinIO backend.
+
+3. LIVEHOUSE_SCOPE_VLM_QUOTA_PER_HOUR
+   When >0, PrioritizedInferenceQueue admits are counted per
+   (namespace, project_key) hour window in SQLite table scope_quota_windows.
+   Default 0 = disabled. Not cluster Redis fair-share.
+
+4. LIVEHOUSE_OTEL=1 (+ optional OTEL_EXPORTER_OTLP_ENDPOINT)
+   Optional TracerProvider bootstrap (infra/otel_bootstrap.py).
+   No Alertmanager / Grafana shipped.
+
+==============================================================================
+Interview one-liner
+==============================================================================
+
+"Scope labels and quota/CAS/OTel hooks prepare a multi-tenant platform path;
+ today the product is a single-node job-centric AI runtime with honest boundaries."

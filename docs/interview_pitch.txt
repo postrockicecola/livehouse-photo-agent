@@ -32,3 +32,4 @@ Do not invent latency/cost percentages.
 - Infra tour: /infra?tour=1
 - Report index: reports/eval/meta.json
 - Deep-dive Q&A cards: docs/interview_qa.txt
+- Platform scope / Batch E hooks: docs/PLATFORM_SCOPE.txt

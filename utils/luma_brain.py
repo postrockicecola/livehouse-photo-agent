@@ -13,7 +13,7 @@ not a second state machine for running jobs.
 Platform scope: ``jobs.namespace`` and ``jobs.project_key`` (default ``default``) partition work for
 multi-product *labeling* without auth. Filter via :func:`list_jobs`, Celery dispatch env
 (see :func:`dispatch_scope_from_env`), and ``GET /api/infra/metrics`` /
-``GET /api/infra/jobs`` query params; see ``docs/PLATFORM_SCOPE.md`` and ``luma_brain_schema.sql``.
+``GET /api/infra/jobs`` query params; see ``docs/PLATFORM_SCOPE.txt`` and ``luma_brain_schema.sql``.
 """
 from __future__ import annotations
 
@@ -137,33 +137,38 @@ def _migrate_artifacts_schema(conn: sqlite3.Connection) -> None:
     t = conn.execute(
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name='artifacts' LIMIT 1"
     ).fetchone()
-    if t is not None:
-        return
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS artifacts (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          job_id INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
-          kind TEXT NOT NULL,
-          path TEXT NOT NULL,
-          generated_at INTEGER NOT NULL,
-          metadata_json TEXT,
-          is_primary INTEGER NOT NULL DEFAULT 0 CHECK (is_primary IN (0, 1)),
-          stage TEXT,
-          source TEXT,
-          job_event_id INTEGER REFERENCES job_events(id) ON DELETE SET NULL,
-          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    if t is None:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS artifacts (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              job_id INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+              kind TEXT NOT NULL,
+              path TEXT NOT NULL,
+              generated_at INTEGER NOT NULL,
+              metadata_json TEXT,
+              is_primary INTEGER NOT NULL DEFAULT 0 CHECK (is_primary IN (0, 1)),
+              stage TEXT,
+              source TEXT,
+              job_event_id INTEGER REFERENCES job_events(id) ON DELETE SET NULL,
+              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+              content_digest TEXT
+            )
+            """
         )
-        """
-    )
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_artifacts_job_kind ON artifacts(job_id, kind)"
-    )
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_artifacts_job_generated ON artifacts(job_id, generated_at ASC)"
-    )
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_artifacts_kind ON artifacts(kind)")
-    conn.commit()
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_artifacts_job_kind ON artifacts(job_id, kind)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_artifacts_job_generated ON artifacts(job_id, generated_at ASC)"
+        )
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_artifacts_kind ON artifacts(kind)")
+        conn.commit()
+        return
+    cols = {str(r[1]) for r in conn.execute("PRAGMA table_info(artifacts)").fetchall()}
+    if "content_digest" not in cols:
+        conn.execute("ALTER TABLE artifacts ADD COLUMN content_digest TEXT")
+        conn.commit()
 
 
 def _migrate_infra_runtime_snapshots_table(conn: sqlite3.Connection) -> None:
@@ -1565,6 +1570,27 @@ def gather_provider_dispatch_signals(
     return out
 
 
+def _sha256_file(path: str, *, max_bytes: int = 64 * 1024 * 1024) -> str | None:
+    """Best-effort content digest for local artifact files (skip missing/huge)."""
+    try:
+        p = Path(path)
+        if not p.is_file():
+            return None
+        size = int(p.stat().st_size)
+        if size <= 0 or size > max_bytes:
+            return None
+        h = hashlib.sha256()
+        with p.open("rb") as f:
+            while True:
+                chunk = f.read(1024 * 1024)
+                if not chunk:
+                    break
+                h.update(chunk)
+        return h.hexdigest()
+    except OSError:
+        return None
+
+
 def _artifact_row_to_public(row: sqlite3.Row) -> dict[str, Any]:
     """Normalize a registry row for API / executor consumers."""
     meta: dict[str, Any] = {}
@@ -1577,6 +1603,10 @@ def _artifact_row_to_public(row: sqlite3.Row) -> dict[str, Any]:
         except json.JSONDecodeError:
             meta = {}
     jid = row["job_event_id"]
+    keys = set(row.keys()) if hasattr(row, "keys") else set()
+    digest = None
+    if "content_digest" in keys:
+        digest = row["content_digest"]
     out: dict[str, Any] = {
         "artifact_id": int(row["id"]),
         "job_id": int(row["job_id"]),
@@ -1589,6 +1619,7 @@ def _artifact_row_to_public(row: sqlite3.Row) -> dict[str, Any]:
         "source": row["source"],
         "job_event_id": int(jid) if jid is not None else None,
         "created_at": int(row["created_at"]) if row["created_at"] is not None else None,
+        "content_digest": str(digest) if digest else None,
     }
     cat = meta.get("category")
     if cat is not None:
@@ -1612,7 +1643,7 @@ def list_artifacts_for_job(conn: sqlite3.Connection, *, job_id: int) -> list[dic
     rows = conn.execute(
         """
         SELECT id, job_id, kind, path, generated_at, metadata_json, is_primary,
-               stage, source, job_event_id, created_at
+               stage, source, job_event_id, created_at, content_digest
         FROM artifacts
         WHERE job_id = ?
         ORDER BY is_primary DESC, id ASC
@@ -1672,7 +1703,7 @@ def sync_job_artifacts_from_success_event(
     pp = str(primary_ref.get("path") or "") if primary_ref else ""
     now = int(time.time())
     # Indexed columns + JSON snapshot split: anything else (taxonomy, role, category, …) → metadata_json
-    core_keys = frozenset({"kind", "path", "generated_at", "stage", "source"})
+    core_keys = frozenset({"kind", "path", "generated_at", "stage", "source", "content_digest"})
     for a in arts:
         if not isinstance(a, dict):
             continue
@@ -1691,14 +1722,30 @@ def sync_job_artifacts_from_success_event(
         meta = {k: v for k, v in a.items() if k not in core_keys}
         meta_json = json.dumps(meta, ensure_ascii=False) if meta else None
         is_primary = 1 if (pk and pp and kind == pk and path == pp) else 0
+        digest = a.get("content_digest")
+        digest_s = str(digest).strip() if digest not in (None, "") else None
+        if digest_s is None and (is_primary or kind == KIND_ANALYSIS_RESULTS):
+            digest_s = _sha256_file(path)
         conn.execute(
             """
             INSERT INTO artifacts (
               job_id, kind, path, generated_at, metadata_json, is_primary,
-              stage, source, job_event_id, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              stage, source, job_event_id, created_at, content_digest
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (jid, kind, path, gen, meta_json, is_primary, stage_s, src_s, int(job_event_id), now),
+            (
+                jid,
+                kind,
+                path,
+                gen,
+                meta_json,
+                is_primary,
+                stage_s,
+                src_s,
+                int(job_event_id),
+                now,
+                digest_s,
+            ),
         )
     if pk and pp:
         hit = conn.execute(

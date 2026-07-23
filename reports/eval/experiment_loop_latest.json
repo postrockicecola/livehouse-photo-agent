@@ -1,0 +1,115 @@
+{
+  "schema_version": "1",
+  "purpose": "Batch E experiment-loop snapshot (prompt runs + eval set digests)",
+  "provenance": "recorded",
+  "real_run": true,
+  "generated_at": 1784810040,
+  "brain_db": "luma_brain.db",
+  "eval_set": {
+    "manifest_path": "data/eval/manifest.json",
+    "manifest_sha256": "a330299856519af3d179dd05a60414ee566b73b76fa2ab85ff57c1ce40265d10",
+    "labels_path": "data/eval/labels.jsonl",
+    "labels_sha256": "225568bc7b31a490cf94785d9f6f23252db493b9e8cc96953d2e87104c2b077d"
+  },
+  "prompt_variants": [
+    {
+      "id": 2,
+      "name": "fast_v2_detailed",
+      "variant_tag": "treatment_detailed",
+      "active": 1,
+      "created_at": 1782314534
+    },
+    {
+      "id": 1,
+      "name": "fast_v1_baseline",
+      "variant_tag": "control",
+      "active": 1,
+      "created_at": 1782314534
+    }
+  ],
+  "prompt_experiment_runs": [
+    {
+      "id": 6,
+      "model_run_id": null,
+      "variant_id": 2,
+      "experiment_name": "prompt_ab_demo",
+      "image_path": "/archive/redacted/DSC08742.jpg",
+      "vlm_score": 64.0,
+      "outcome": "success",
+      "prompt_tokens": 866,
+      "completion_tokens": 94,
+      "latency_ms": 18928,
+      "created_at": 1782314534
+    },
+    {
+      "id": 5,
+      "model_run_id": null,
+      "variant_id": 2,
+      "experiment_name": "prompt_ab_demo",
+      "image_path": "/archive/redacted/DSC08741.jpg",
+      "vlm_score": 64.7,
+      "outcome": "success",
+      "prompt_tokens": 854,
+      "completion_tokens": 51,
+      "latency_ms": 19195,
+      "created_at": 1782314534
+    },
+    {
+      "id": 4,
+      "model_run_id": null,
+      "variant_id": 2,
+      "experiment_name": "prompt_ab_demo",
+      "image_path": "/archive/redacted/DSC08744.jpg",
+      "vlm_score": 68.4,
+      "outcome": "success",
+      "prompt_tokens": 707,
+      "completion_tokens": 55,
+      "latency_ms": 13582,
+      "created_at": 1782314534
+    },
+    {
+      "id": 3,
+      "model_run_id": null,
+      "variant_id": 1,
+      "experiment_name": "prompt_ab_demo",
+      "image_path": "/archive/redacted/DSC08743.jpg",
+      "vlm_score": 68.5,
+      "outcome": "success",
+      "prompt_tokens": 839,
+      "completion_tokens": 55,
+      "latency_ms": 19674,
+      "created_at": 1782314534
+    },
+    {
+      "id": 2,
+      "model_run_id": null,
+      "variant_id": 1,
+      "experiment_name": "prompt_ab_demo",
+      "image_path": "/archive/redacted/DSC08742.jpg",
+      "vlm_score": 59.9,
+      "outcome": "success",
+      "prompt_tokens": 735,
+      "completion_tokens": 97,
+      "latency_ms": 11679,
+      "created_at": 1782314534
+    },
+    {
+      "id": 1,
+      "model_run_id": null,
+      "variant_id": 1,
+      "experiment_name": "prompt_ab_demo",
+      "image_path": "/archive/redacted/DSC08741.jpg",
+      "vlm_score": 67.8,
+      "outcome": "success",
+      "prompt_tokens": 706,
+      "completion_tokens": 97,
+      "latency_ms": 14506,
+      "created_at": 1782314534
+    }
+  ],
+  "notes": [
+    "Empty arrays mean no experiment rows in the local SSOT — not simulated metrics.",
+    "Promote/release gates for prompts/models are still out of scope.",
+    "Absolute host paths in image_path / brain_db are redacted for safe commits."
+  ]
+}

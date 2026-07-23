@@ -892,6 +892,29 @@ def collect_infra_metrics(
     queue = queue_backlog_snapshot()
     providers = provider_runtime_metrics()
     inference_queue = inference_queue_runtime_snapshot()
+    try:
+        from infra.scope_quota import scope_quota_snapshot
+
+        scope_quota = scope_quota_snapshot(namespace=namespace, project_key=project_key)
+    except Exception as exc:
+        scope_quota = {"enforced": False, "error": str(exc)[:200]}
+    try:
+        from infra.otel_bootstrap import last_otel_bootstrap_status
+
+        otel_status = last_otel_bootstrap_status()
+    except Exception as exc:
+        otel_status = {"configured": False, "error": str(exc)[:200]}
+    try:
+        from utils.brain_backend import get_brain_backend, normalize_brain_backend_name
+        import os as _os
+
+        brain_backend = {
+            "selected": normalize_brain_backend_name(_os.environ.get("LIVEHOUSE_BRAIN_BACKEND")),
+            "dialect": get_brain_backend().dialect(),
+            "authority": "env_LIVEHOUSE_BRAIN_BACKEND",
+        }
+    except Exception as exc:
+        brain_backend = {"selected": "sqlite", "error": str(exc)[:200]}
     if _PROM_AVAILABLE:
         if not filtered:
             for s, c in jobs_by_status.items():
@@ -957,6 +980,9 @@ def collect_infra_metrics(
         "latency": latency_pct,
         "slo": slo_window,
         "inference_queue": inference_queue,
+        "scope_vlm_quota": scope_quota,
+        "otel": otel_status,
+        "brain_backend": brain_backend,
         "metrics_authority": _metrics_authority_documentation(),
         "inference_from_database": inference_db,
         "runtime_snapshots": rt_snap,

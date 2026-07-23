@@ -47,7 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_photos_device ON photos(device_id);
 -- AI Infra extension tables (compatible add-on; do not replace sessions/photos)
 -- Platform scope (single deployment, many logical projects): ``namespace`` + ``project_key`` default to ``'default'``.
 -- Jobs are the SSOT for scope; sessions/photos are not namespaced in v1. Operators filter APIs and optional
--- Celery dispatch via env (see ``docs/PLATFORM_SCOPE.md``). This is labeling / tenancy prep, not RBAC.
+-- Celery dispatch via env (see ``docs/PLATFORM_SCOPE.txt``). This is labeling / tenancy prep, not RBAC.
 -- ---------------------------------------------------------------------------
 -- Canonical job lifecycle statuses for queue/worker orchestration.
 -- NOTE: keep in sync with app-side enums.
@@ -184,7 +184,9 @@ CREATE TABLE IF NOT EXISTS artifacts (
   stage TEXT,
   source TEXT,
   job_event_id INTEGER REFERENCES job_events(id) ON DELETE SET NULL,
-  created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+  -- Optional SHA-256 of local file bytes (CAS-ready metadata; path remains source of truth).
+  content_digest TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_artifacts_job_kind ON artifacts(job_id, kind);

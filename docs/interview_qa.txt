@@ -110,3 +110,18 @@ A: 权威：SQLite jobs/events/model_runs/workers。进程内：推理队列 inf
 3. Cancel ≠ 中止 in-flight HTTP；shutdown 只清排队。
 4. 中间状态（PREPROCESSING 等）仍可能被僵尸短暂改写；fencing 守住终端写入。
 5. KEDA / Operator / RLHF / Agent 是扩展实验，不是主链卖点。
+
+==============================================================================
+Batch E（长期平台 — 已落地的是 hooks，不是 cutover）
+==============================================================================
+
+Q: 下一步平台化你会怎么做？
+A: 已留可演示脚手架，面试说清「钩子 vs 完成」：
+   - LIVEHOUSE_BRAIN_BACKEND=postgres → 明确 NotImplemented（防假 Postgres）
+   - artifacts.content_digest：本地文件 SHA-256，路径仍是真相；为对象存储 CAS 准备
+   - LIVEHOUSE_SCOPE_VLM_QUOTA_PER_HOUR：按 namespace/project_key 小时配额（默认关）
+   - LIVEHOUSE_OTEL=1：可选 TracerProvider/OTLP；无 Alertmanager
+   - docs/PLATFORM_SCOPE.txt：scope 标签 ≠ RBAC
+   真正 cutover：Postgres + 对象存储 + 集群配额 + 鉴权隔离，仍是后续阶段。
+Demo: GET /api/infra/metrics 的 brain_backend / scope_vlm_quota / otel；
+      scripts/eval/export_experiment_report.py → reports/eval/experiment_loop_latest.json。

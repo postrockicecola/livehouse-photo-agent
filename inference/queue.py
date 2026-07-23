@@ -497,6 +497,46 @@ class PrioritizedInferenceQueue:
         }
         if metadata_extra:
             md.update(metadata_extra)
+        try:
+            from infra.scope_quota import admit_vlm_for_scope
+            from utils.luma_brain import dispatch_scope_from_env, get_job
+
+            ns = md.get("namespace")
+            pk = md.get("project_key")
+            if (ns is None or pk is None) and job_id is not None:
+                try:
+                    jid = int(job_id)
+                except (TypeError, ValueError):
+                    jid = None
+                if jid is not None:
+                    conn = brain_connect()
+                    try:
+                        row = get_job(conn, job_id=jid)
+                    finally:
+                        conn.close()
+                    if row:
+                        ns = ns if ns is not None else row.get("namespace")
+                        pk = pk if pk is not None else row.get("project_key")
+            if ns is None and pk is None:
+                ns, pk = dispatch_scope_from_env()
+            gate = admit_vlm_for_scope(
+                namespace=str(ns) if ns is not None else None,
+                project_key=str(pk) if pk is not None else None,
+            )
+            if not gate.get("ok"):
+                fut = concurrent_futures.Future()
+                fut.set_result(
+                    {
+                        "status": "error",
+                        "error": str(gate.get("error") or "scope_vlm_quota_exceeded"),
+                        "text": "",
+                        "model": "",
+                        "scope_quota": gate,
+                    }
+                )
+                return fut
+        except Exception:
+            logger.exception("scope quota check failed; allowing admit (fail-open)")
         req = InferenceRequest(
             image_path=image_path,
             prompt=prompt,

@@ -87,6 +87,13 @@ BASE_DIR, GALLERY_PORT = _parse_gallery_cli()
 RESULTS_JSON = os.path.join(BASE_DIR, "analysis_results.json")
 configure_gallery_routes(BASE_DIR)
 
+try:
+    from infra.otel_bootstrap import configure_otel_from_env
+
+    configure_otel_from_env()
+except Exception:
+    pass
+
 app = FastAPI(title="Livehouse Gallery API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,

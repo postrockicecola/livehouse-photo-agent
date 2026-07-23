@@ -305,6 +305,8 @@ observability:
     debug: false
     debug_image: ""
   opentelemetry:
+    # Process spans when enabled here *and/or* LIVEHOUSE_OTEL=1 (infra/otel_bootstrap.py).
+    # Optional OTEL_EXPORTER_OTLP_ENDPOINT; otherwise console exporter. No Alertmanager shipped.
     enabled: false
     tracer_name: "livehouse.pipeline"
 

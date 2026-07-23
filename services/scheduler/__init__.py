@@ -16,7 +16,7 @@ job ids to hand to ``send_task`` in a given round (ingest, sweeps, etc.) using:
   from failure rate, inflight/base, and latency (with EMA smoothing) yields
   ``effective_slots ≈ base * (1 - throttle_strength * pressure)``
 - optional **dispatch scope** via ``LIVEHOUSE_DISPATCH_*`` env vars so one worker fleet can
-  prioritize jobs for one ``namespace`` / ``project_key`` without separate brokers (see ``docs/PLATFORM_SCOPE.md``)
+  prioritize jobs for one ``namespace`` / ``project_key`` without separate brokers (see ``docs/PLATFORM_SCOPE.txt``)
 """
 from __future__ import annotations
 

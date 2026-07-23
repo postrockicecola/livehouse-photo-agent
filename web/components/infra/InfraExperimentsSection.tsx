@@ -33,6 +33,10 @@ export function InfraExperimentsSection({ children }: Props) {
           <p className="mt-1 max-w-2xl text-[11px] leading-snug text-zinc-600">
             Agent curation, RLHF voting, and prompt A/B — not required for the durable job →
             bounded VLM → ledger main path. Expand only when you want the experimental layer.
+            Snapshot export:{" "}
+            <code className="text-zinc-500">reports/eval/experiment_loop_latest.json</code>
+            {" "}via{" "}
+            <code className="text-zinc-500">scripts/eval/export_experiment_report.py</code>.
           </p>
         </div>
         <button
