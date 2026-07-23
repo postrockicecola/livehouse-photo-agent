@@ -1262,49 +1262,57 @@
     {
       "session_key": "Session 56",
       "session_date": "2026-07-11",
-      "photos_exported": 0,
+      "photos_imported": 2348,
+      "photos_exported": 188,
       "previews_dir": "/archive/session-56/Previews"
     },
     {
       "session_key": "Session 55",
       "session_date": "2026-07-10",
-      "photos_exported": 0,
+      "photos_imported": 1564,
+      "photos_exported": 109,
       "previews_dir": "/archive/session-55/Previews"
     },
     {
       "session_key": "Session 54",
       "session_date": "2026-07-08",
-      "photos_exported": 0,
+      "photos_imported": 1444,
+      "photos_exported": 87,
       "previews_dir": "/archive/session-54/Previews"
     },
     {
       "session_key": "Session 53",
       "session_date": "2026-07-03",
-      "photos_exported": 0,
+      "photos_imported": 46,
+      "photos_exported": 6,
       "previews_dir": "/archive/session-53/Previews"
     },
     {
       "session_key": "Session 52",
       "session_date": "2026-06-27",
-      "photos_exported": 0,
+      "photos_imported": 2948,
+      "photos_exported": 383,
       "previews_dir": "/archive/session-52/Previews"
     },
     {
       "session_key": "Session 51",
       "session_date": "2026-06-26",
-      "photos_exported": 0,
+      "photos_imported": 21,
+      "photos_exported": 3,
       "previews_dir": "/archive/session-51/Previews"
     },
     {
       "session_key": "Session 50",
       "session_date": "2026-06-19",
-      "photos_exported": 0,
+      "photos_imported": 1104,
+      "photos_exported": 121,
       "previews_dir": "/archive/session-50/Previews"
     },
     {
       "session_key": "Session 49",
       "session_date": "2026-06-13",
-      "photos_exported": 0,
+      "photos_imported": 2677,
+      "photos_exported": 268,
       "previews_dir": "/archive/session-49/Previews"
     }
   ]

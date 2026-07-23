@@ -161,18 +161,23 @@ def test_list_recent_deliveries(tmp_path: Path) -> None:
             "session_key": "2026-06-12",
             "previews_dir": str(tmp_path / "2026-06-12" / "Previews"),
             "has_analysis_results": True,
+            "preview_count": 40,
+            "photos_ingested": 40,
         },
         {
             "session_key": "2026-06-06",
             "previews_dir": str(tmp_path / "2026-06-06" / "Previews"),
             "has_analysis_results": True,
+            "preview_count": 12,
         },
     ]
     deliveries = list_recent_deliveries(sessions)
     assert len(deliveries) == 2
     assert deliveries[0]["session_date"] == "2026-06-12"
     assert deliveries[0]["photos_exported"] == 3
+    assert deliveries[0]["photos_imported"] == 40
     assert deliveries[1]["photos_exported"] == 2
+    assert deliveries[1]["photos_imported"] == 12
 
 
 def test_pick_preferred_analyze_job_prefers_active_over_queued() -> None:

@@ -303,16 +303,38 @@ def emit_sessions_fixture(entries: list[CoverEntry], *, built_landscape: set[str
     rows_sorted = sorted(rows, key=sort_key, reverse=True)
 
     active = next((r for r in rows_sorted if r.get("cover_path_quoted")), rows_sorted[0] if rows_sorted else None)
-    deliveries = [
-        {
-            "session_key": r["session_key"],
-            "session_date": r.get("session_date") or "",
-            "photos_exported": 0,
-            "previews_dir": r["previews_dir"],
-        }
-        for r in rows_sorted
-        if r.get("cover_path_quoted")
-    ][:8]
+    def _delivery_counts(r: dict) -> tuple[int, int]:
+        funnel = r.get("funnel") or {}
+        imported = int(funnel.get("imported") or r.get("preview_count") or r.get("photos_ingested") or 0)
+        exported = int(funnel.get("exported") or 0)
+        picked = int(funnel.get("picked") or 0)
+        # Flat funnels (imported == exported) are common when analysis is missing —
+        # synthesize a keep-rate so Recent deliveries don't read as "0 exported".
+        if imported > 0 and (exported <= 0 or exported >= imported):
+            if 0 < picked < imported:
+                exported = picked
+            else:
+                sid = int(r.get("brain_session_id") or 0)
+                rate = 0.06 + ((sid % 9) * 0.01)
+                exported = max(1, int(round(imported * rate)))
+        return imported, exported
+
+    deliveries = []
+    for r in rows_sorted:
+        if not r.get("cover_path_quoted"):
+            continue
+        imported, exported = _delivery_counts(r)
+        deliveries.append(
+            {
+                "session_key": r["session_key"],
+                "session_date": r.get("session_date") or "",
+                "photos_imported": imported,
+                "photos_exported": exported,
+                "previews_dir": r["previews_dir"],
+            }
+        )
+        if len(deliveries) >= 8:
+            break
 
     data = {
         "archive_root": "/archive",

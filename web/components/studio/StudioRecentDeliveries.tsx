@@ -80,7 +80,7 @@ export function StudioRecentDeliveries({
                     {row.session_date}
                   </p>
                   <p className="mt-0.5 text-[10px] tabular-nums text-white/35">
-                    {formatDeliveryPhotos(row.photos_exported)}
+                    {formatDeliveryPhotos(row)}
                   </p>
                 </div>
               </>

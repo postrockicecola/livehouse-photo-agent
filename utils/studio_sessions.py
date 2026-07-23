@@ -631,10 +631,23 @@ def list_recent_deliveries(
         if n is None or n <= 0:
             continue
         key = str(s.get("session_key") or "")
+        funnel = s.get("funnel") if isinstance(s.get("funnel"), dict) else {}
+        imported = (
+            funnel.get("imported")
+            if isinstance(funnel, dict)
+            else None
+        )
+        if imported is None:
+            imported = s.get("photos_ingested") or s.get("preview_count")
+        try:
+            imported_n = int(imported) if imported is not None else 0
+        except (TypeError, ValueError):
+            imported_n = 0
         rows.append(
             {
                 "session_key": key,
                 "session_date": _session_display_date(key),
+                "photos_imported": max(0, imported_n),
                 "photos_exported": int(n),
                 "previews_dir": pd,
                 "sort_time": _session_sort_time(s),
@@ -647,6 +660,7 @@ def list_recent_deliveries(
             {
                 "session_key": r["session_key"],
                 "session_date": r["session_date"],
+                "photos_imported": int(r.get("photos_imported") or 0),
                 "photos_exported": r["photos_exported"],
                 "previews_dir": r["previews_dir"],
             }

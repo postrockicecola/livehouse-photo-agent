@@ -37,6 +37,8 @@ export type StudioSessionRow = {
 export type StudioRecentDelivery = {
   session_key: string;
   session_date: string;
+  /** Session intake (previews / ingested). Optional for older API payloads. */
+  photos_imported?: number;
   photos_exported: number;
   previews_dir: string;
 };

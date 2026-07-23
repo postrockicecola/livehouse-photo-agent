@@ -79,9 +79,31 @@ export function pipelineDisplayLabel(apiLabel: string, index: number): string {
   return API_LABEL_TO_DISPLAY[apiLabel] ?? PIPELINE_DISPLAY_LABELS[index] ?? apiLabel;
 }
 
-export function formatDeliveryPhotos(n: number): string {
-  if (n < 0) return "—";
-  return `${n.toLocaleString("en-US")} photos exported`;
+/** Recent-delivery subline: prefer imported → exported funnel, not a lone zero. */
+export function formatDeliveryPhotos(
+  exportedOrRow: number | { photos_exported?: number | null; photos_imported?: number | null },
+): string {
+  const row =
+    typeof exportedOrRow === "number"
+      ? { photos_exported: exportedOrRow, photos_imported: undefined }
+      : exportedOrRow;
+  const exported = Number(row.photos_exported ?? 0);
+  const importedRaw = row.photos_imported;
+  const imported =
+    importedRaw != null && Number.isFinite(Number(importedRaw)) ? Number(importedRaw) : null;
+
+  if (imported != null && imported > 0) {
+    if (exported > 0 && exported !== imported) {
+      return `${imported.toLocaleString("en-US")} imported · ${exported.toLocaleString("en-US")} exported`;
+    }
+    if (exported > 0) {
+      return `${imported.toLocaleString("en-US")} photos`;
+    }
+    return `${imported.toLocaleString("en-US")} imported`;
+  }
+  if (exported > 0) return `${exported.toLocaleString("en-US")} exported`;
+  if (exported === 0 && (imported == null || imported <= 0)) return "—";
+  return "—";
 }
 
 export function sessionDateFromKey(sessionKey: string): string {
