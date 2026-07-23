@@ -7,9 +7,9 @@ export function LandingDocsSection() {
       <div className="mx-auto w-full max-w-[104rem] px-5 sm:px-8 lg:px-12">
         <header className="max-w-2xl">
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/32">Docs</p>
-          <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">链路与 Agent 说明</h2>
+          <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">链路与评估入口</h2>
           <p className="mt-4 text-sm leading-relaxed text-white/38 sm:text-base">
-            链路和 Infra 要点集中在这里。想直接看，进 Studio 或 Infra。
+            主链路、Evaluation 与 Infra 入口集中在这里。
           </p>
         </header>
 

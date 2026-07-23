@@ -26,6 +26,13 @@ type Props = {
   byStatus: Record<string, number>;
   workers: InfraWorkerRow[];
   loading?: boolean;
+  /** Controlled expand (Guided Tour / walkthrough). */
+  expandedId?: number | null;
+  onExpandedIdChange?: (id: number | null) => void;
+  /** Soft-highlight walkthrough rows. */
+  highlightJobIds?: number[];
+  /** Expand this job once when it first appears in the list. */
+  defaultExpandedId?: number | null;
 };
 
 function formatTs(ts?: number | null): string {
@@ -76,7 +83,16 @@ function StatusBadge({ status }: { status?: string | null }) {
   );
 }
 
-export function JobsTable({ apiBase, byStatus, workers, loading: parentLoading }: Props) {
+export function JobsTable({
+  apiBase,
+  byStatus,
+  workers,
+  loading: parentLoading,
+  expandedId: expandedIdProp,
+  onExpandedIdChange,
+  highlightJobIds = [],
+  defaultExpandedId = null,
+}: Props) {
   const [statusFilter, setStatusFilter] = useState<StatusFilterKey>("ALL");
   const [agentOnly, setAgentOnly] = useState(false);
   const [search, setSearch] = useState("");
@@ -85,10 +101,24 @@ export function JobsTable({ apiBase, byStatus, workers, loading: parentLoading }
   const [jobs, setJobs] = useState<InfraJobRow[]>([]);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [expandedIdLocal, setExpandedIdLocal] = useState<number | null>(defaultExpandedId ?? null);
+  const [didAutoExpand, setDidAutoExpand] = useState(false);
   const [stageLabelByRoot, setStageLabelByRoot] = useState<Record<number, string>>({});
   const [actionBusyId, setActionBusyId] = useState<number | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
+
+  const expandedId = expandedIdProp !== undefined ? expandedIdProp : expandedIdLocal;
+  const setExpandedId = useCallback(
+    (id: number | null) => {
+      if (onExpandedIdChange) onExpandedIdChange(id);
+      else setExpandedIdLocal(id);
+    },
+    [onExpandedIdChange],
+  );
+
+  useEffect(() => {
+    if (expandedIdProp !== undefined) setExpandedIdLocal(expandedIdProp);
+  }, [expandedIdProp]);
 
   const workerNameById = useMemo(() => {
     const m: Record<number, string> = {};
@@ -189,11 +219,19 @@ export function JobsTable({ apiBase, byStatus, workers, loading: parentLoading }
     [jobs, search, workerNameById, agentOnly],
   );
 
+  useEffect(() => {
+    if (didAutoExpand || defaultExpandedId == null) return;
+    if (!filteredJobs.some((j) => j.id === defaultExpandedId)) return;
+    setExpandedId(defaultExpandedId);
+    setDidAutoExpand(true);
+  }, [filteredJobs, defaultExpandedId, didAutoExpand, setExpandedId]);
+
+  const highlightSet = useMemo(() => new Set(highlightJobIds), [highlightJobIds]);
   const statusEntries = Object.entries(byStatus).sort((a, b) => b[1] - a[1]);
   const loading = parentLoading || fetching;
 
   return (
-    <section className="glass rounded-xl border border-stroke p-4">
+    <section id="tour-jobs" className="glass scroll-mt-24 rounded-xl border border-stroke p-4">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Job Explorer</h2>
@@ -294,12 +332,15 @@ export function JobsTable({ apiBase, byStatus, workers, loading: parentLoading }
               {filteredJobs.map((job, idx) => {
                 const jid = job.id;
                 const open = jid != null && expandedId === jid;
+                const walkthrough = jid != null && highlightSet.has(jid);
                 const wLabel =
                   job.worker_id != null ? workerNameById[job.worker_id] ?? `#${job.worker_id}` : "—";
                 return (
                   <Fragment key={`${jid ?? "job"}-${idx}`}>
                     <tr
-                      className={`cursor-pointer border-b border-stroke/60 text-zinc-300 transition-colors hover:bg-zinc-900/40 ${rowVisualClass(job)}`}
+                      className={`cursor-pointer border-b border-stroke/60 text-zinc-300 transition-colors hover:bg-zinc-900/40 ${rowVisualClass(job)} ${
+                        walkthrough ? "ring-1 ring-inset ring-sky-500/35" : ""
+                      }`}
                       onClick={() => {
                         if (jid == null) return;
                         setExpandedId(open ? null : jid);
@@ -318,11 +359,21 @@ export function JobsTable({ apiBase, byStatus, workers, loading: parentLoading }
                         ) : (
                           "—"
                         )}
-                        <div className="flex items-center gap-1 text-[10px] text-zinc-600">
+                        <div className="flex flex-wrap items-center gap-1 text-[10px] text-zinc-600">
                           {job.job_type ?? ""}
                           {isAgentJob(job) ? (
                             <span className="rounded border border-violet-500/40 bg-violet-950/30 px-1 py-px text-[9px] font-medium text-violet-200">
                               🤖 agent
+                            </span>
+                          ) : null}
+                          {Number(job.fallback_used) > 0 ? (
+                            <span className="rounded border border-amber-500/40 bg-amber-950/30 px-1 py-px text-[9px] font-medium text-amber-200">
+                              fallback
+                            </span>
+                          ) : null}
+                          {walkthrough ? (
+                            <span className="rounded border border-sky-500/40 bg-sky-950/30 px-1 py-px text-[9px] font-medium text-sky-200">
+                              demo
                             </span>
                           ) : null}
                         </div>

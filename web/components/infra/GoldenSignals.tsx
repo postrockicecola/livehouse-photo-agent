@@ -94,6 +94,7 @@ export function GoldenSignals({
 
   return (
     <ControlPlaneSection
+      id="tour-signals"
       eyebrow="Overview"
       title="Golden Signals"
       subtitle="Traffic · Latency · Errors · Saturation — sparklines reflect samples since page open"

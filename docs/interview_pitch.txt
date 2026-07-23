@@ -1,0 +1,33 @@
+Interview pitch (sourced) — private notes, not shown on the public site.
+Numbers match web/lib/evalShowcase.ts, reports/eval/meta.json, and /eval.
+Do not invent latency/cost percentages.
+
+## Resume bullets
+
+- 设计并实现基于持久状态机的视觉 AI 作业系统：SQLite 保存执行事实，Celery 仅传递 job id；支持原子认领、重试、死信与作业时间线。
+- 构建有界 VLM 推理层（优先级队列、背压、主备降级），并将每次尝试写入 model_runs 账本，供 Infra Console 做延迟与失败归因。
+- 建立 250 张人工标注固定评估集；Stage3 相对人工分 Spearman≈0.36、MAE≈6.1（reports/eval/stage3_v6_qwen2vl_temp0.json）。
+- 实现预算约束的选片 Agent 与 planner 基线对比（random / heuristic / oracle / LLM）；当前质量尚未稳定超过启发式基线，评估结论如实展示。
+
+## 3-minute pitch
+
+1. 问题：Livehouse 一场会留下大量相似照片。脚本能跑通处理，但很难回答：任务到哪一步、失败如何恢复、模型为什么变慢、成本花在哪。
+2. 方案：把流水线挂在持久作业系统上：SQL 是执行事实，Celery 只通知 job id；低成本门控后再进有界 VLM；主备路由与每次 attempt 进账本。
+3. 产品：Studio 提交 → Infra 看时间线/模型调用/降级 → Gallery 确认导出。
+4. 边界：单节点 AI runtime——SQLite、进程内推理准入、单节点共享卷。KEDA / Operator / 训练闭环是扩展实验。
+
+## 10-minute demo order
+
+1. Gallery：原始场次密度 vs 入选结果
+2. Studio / 作业：提交或打开 showcase job #61
+3. Infra：展开成功时间线 QUEUED → … → SUCCEEDED
+4. 展开 model_runs；再看 job #62 超时 → fallback → degraded
+5. Golden Signals / Cost
+6. /eval：Stage3 与 Agent 基线表（含诚实结论）
+7. 三项边界 + 下一步（补齐两阶段门控 vs 全量 VLM 的 head-to-head）
+
+## Links
+
+- Evaluation UI: /eval
+- Infra tour: /infra?tour=1
+- Report index: reports/eval/meta.json

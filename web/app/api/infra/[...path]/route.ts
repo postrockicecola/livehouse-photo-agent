@@ -11,6 +11,11 @@ export const dynamic = "force-dynamic";
  * backend, so we serve committed snapshots. Parameterized drill-downs
  * (jobs/{id}, traces/{id}) collapse to one representative snapshot.
  */
+/** Showcase job drill-downs: #62 = fallback recovery; others → success #61 snapshot. */
+function jobDetailFixture(jobId: string): FixtureName {
+  return jobId === "62" ? "infra-job-detail-fallback" : "infra-job-detail";
+}
+
 function fixtureForPath(segments: string[]): FixtureName | null {
   const p = segments.join("/");
   const exact: Record<string, FixtureName> = {
@@ -26,9 +31,14 @@ function fixtureForPath(segments: string[]): FixtureName | null {
     jobs: "infra-jobs",
   };
   if (p in exact) return exact[p];
-  if (/^jobs\/[^/]+\/timeline$/.test(p)) return "infra-job-timeline";
+  const timeline = /^jobs\/([^/]+)\/timeline$/.exec(p);
+  if (timeline) {
+    // Fallback case ships events inside the detail fixture; success keeps timeline snapshot.
+    return timeline[1] === "62" ? "infra-job-detail-fallback" : "infra-job-timeline";
+  }
   if (/^jobs\/[^/]+\/stages$/.test(p)) return "infra-job-stages";
-  if (/^jobs\/[^/]+$/.test(p)) return "infra-job-detail";
+  const job = /^jobs\/([^/]+)$/.exec(p);
+  if (job) return jobDetailFixture(job[1]);
   if (/^traces\/[^/]+$/.test(p)) return "infra-trace";
   return null;
 }

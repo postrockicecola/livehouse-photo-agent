@@ -26,6 +26,7 @@ export type InfraJobRow = {
   root_job_id?: number | null;
   stage_order?: number | null;
   is_stage?: number | boolean | null;
+  fallback_used?: number | boolean | null;
 };
 
 export const RUNNING_STATUSES = ["CLAIMED", "PREPROCESSING", "INFERENCING", "POSTPROCESSING"] as const;

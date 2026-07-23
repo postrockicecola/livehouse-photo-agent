@@ -29,6 +29,7 @@ import infraBrain from "@/fixtures/infra-brain.json";
 import infraAgentRuns from "@/fixtures/infra-agent-runs.json";
 import infraJobs from "@/fixtures/infra-jobs.json";
 import infraJobDetail from "@/fixtures/infra-job-detail.json";
+import infraJobDetailFallback from "@/fixtures/infra-job-detail-fallback.json";
 import infraJobStages from "@/fixtures/infra-job-stages.json";
 import infraJobTimeline from "@/fixtures/infra-job-timeline.json";
 import infraTrace from "@/fixtures/infra-trace.json";
@@ -58,6 +59,7 @@ const FIXTURES = {
   "infra-agent-runs": infraAgentRuns,
   "infra-jobs": infraJobs,
   "infra-job-detail": infraJobDetail,
+  "infra-job-detail-fallback": infraJobDetailFallback,
   "infra-job-stages": infraJobStages,
   "infra-job-timeline": infraJobTimeline,
   "infra-trace": infraTrace,

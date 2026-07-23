@@ -125,9 +125,9 @@ export function RLHFVotePanel({
 
   return (
     <ControlPlaneSection
-      eyebrow="RLHF"
+      eyebrow="RLHF · Infra Experiment"
       title="Pairwise Preference Voting"
-      subtitle={`Bradley-Terry reward model · ${rankVotes} vote${rankVotes !== 1 ? "s" : ""} collected · ${rankings.length} photos ranked`}
+      subtitle={`Bradley-Terry reward model · ${rankVotes} vote${rankVotes !== 1 ? "s" : ""} collected · ${rankings.length} photos ranked · not on the production analyze path`}
     >
       {/* Vote widget */}
       <div className="mb-5 rounded-xl border border-zinc-700/60 bg-zinc-900/60 p-4">

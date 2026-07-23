@@ -113,9 +113,9 @@ export function PromptExperimentPanel({
 
   return (
     <ControlPlaneSection
-      eyebrow="Prompt A/B"
+      eyebrow="Prompt A/B · Infra Experiment"
       title="Experiment Results"
-      subtitle={`Comparing prompt variants · ${results?.variants.length ?? 0} variants · last ${windowLabel}`}
+      subtitle={`Comparing prompt variants · ${results?.variants.length ?? 0} variants · last ${windowLabel} · experimental surface`}
       right={
         <select
           value={windowHours}

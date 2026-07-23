@@ -90,10 +90,10 @@ export type LandingScaleStat = {
 };
 
 export const LANDING_SCALE_INTRO = {
-  eyebrow: "数据规模",
-  title: "真实场次上的处理规模。",
+  eyebrow: "规模（次级）",
+  title: "归档场次上的累计规模。",
   subtitle:
-    "优先显示当前系统统计；不可达时回退到历史归档数量级。每项数字都带 Live / Recorded / Showcase 标签。",
+    "补充上下文，不是第一印象。优先 Live；不可达时为 Recorded 数量级，均带 provenance 标签。",
 } as const;
 
 export const LANDING_SCALE_STATS: LandingScaleStat[] = [
@@ -144,8 +144,10 @@ export type NavLink = {
 
 /** Landing top nav — product surfaces only. */
 export const LANDING_NAV: NavLink[] = [
-  { label: "结果", href: "#gallery", description: "筛选与画廊交付" },
+  { label: "结果", href: "#outcome", description: "一次运行的交付指标" },
+  { label: "画廊", href: "#gallery", description: "筛选与确认" },
   { label: "主链路", href: "#workflow", description: "门控 → 作业 → VLM" },
+  { label: "评估", href: "#evaluation", description: "固定评估集对比" },
   { label: "Infra", href: "#infra", description: "队列、Worker、账本" },
   { label: "工作台", href: "#products", description: "Studio / Gallery / Console" },
 ];
@@ -453,6 +455,7 @@ export const LANDING_AGENT = {
 export const LANDING_DOC_LINKS: NavLink[] = [
   { label: "上手", href: "#", description: "从入库到第一次 Gallery 选片" },
   { label: "主链路", href: "#workflow", description: "门控 → 作业 → 有界 VLM" },
+  { label: "Evaluation", href: "/eval", description: "Stage3 / Agent 基线与出处" },
   { label: "Infra", href: "#infra", description: "队列、Worker、重试、死信" },
   { label: "Gallery", href: "#gallery", description: "读结果并确认选片" },
 ];
@@ -505,5 +508,6 @@ export const STUDIO_PRIMARY_NAV: NavLink[] = [
 /** Studio app shell — secondary / operator routes. */
 export const STUDIO_SECONDARY_NAV: NavLink[] = [
   { label: "Site", href: "/" },
+  { label: "Eval", href: "/eval" },
   { label: "Infra", href: "/infra" },
 ];

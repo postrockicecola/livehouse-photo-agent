@@ -251,7 +251,34 @@
       "payload_json": "{\"worker_id\": 2, \"session_id\": 6, \"source_dir\": \"/archive/redacted\", \"trace_id\": \"studio_analyze_c1c8452b9f75\", \"job_type\": \"ANALYZE_SESSION\", \"artifacts\": [{\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"preview_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"preview\", \"role\": \"session_index_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"best\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"keep\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"folder_gallery_html\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"category\": \"trash\", \"taxonomy\": \"gallery_html\", \"role\": \"folder_gallery_html\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}, {\"kind\": \"gallery_launch_script\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"gallery_html\", \"role\": \"gallery_launch_shell\", \"source\": \"aesthetic_pipeline\"}], \"artifact_registry_version\": 1, \"primary_artifact\": {\"kind\": \"analysis_results_json\", \"path\": \"/archive/redacted\", \"generated_at\": 1782707714, \"taxonomy\": \"analysis_results\", \"role\": \"structured_output\", \"source\": \"aesthetic_pipeline\"}}"
     }
   ],
-  "model_runs": [],
+  "model_runs": [
+    {
+      "id": 6101,
+      "job_id": 61,
+      "provider": "ollama-primary",
+      "model_name": "qwen2-vl",
+      "status": "SUCCEEDED",
+      "latency_ms": 18400,
+      "error_type": null,
+      "fallback_provider": null,
+      "prompt_tokens": 980,
+      "completion_tokens": 260,
+      "attempt": 1
+    },
+    {
+      "id": 6102,
+      "job_id": 61,
+      "provider": "ollama-primary",
+      "model_name": "qwen2-vl",
+      "status": "SUCCEEDED",
+      "latency_ms": 15200,
+      "error_type": null,
+      "fallback_provider": null,
+      "prompt_tokens": 1020,
+      "completion_tokens": 240,
+      "attempt": 1
+    }
+  ],
   "artifacts": [
     {
       "artifact_id": 334,

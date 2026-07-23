@@ -134,10 +134,10 @@ export function LandingStatsSection() {
     <section
       ref={sectionRef}
       id="proof"
-      className={`landing-scale scroll-mt-24 ${active ? "landing-scale--active" : ""}`}
+      className={`landing-scale scroll-mt-24 border-t border-white/[0.04] opacity-90 ${active ? "landing-scale--active" : ""}`}
       aria-labelledby="landing-scale-intro"
     >
-      <div className="landing-scale-inner mx-auto w-full max-w-[104rem] px-5 py-24 sm:px-8 sm:py-32 lg:px-12">
+      <div className="landing-scale-inner mx-auto w-full max-w-[104rem] px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
         <header className="landing-scale-intro max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/32">

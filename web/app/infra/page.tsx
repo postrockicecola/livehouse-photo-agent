@@ -18,6 +18,7 @@ import { ServingThroughputPanel, type InferenceQueueSnapshot } from "@/component
 import { RLHFVotePanel } from "@/components/infra/RLHFVotePanel";
 import { PromptExperimentPanel } from "@/components/infra/PromptExperimentPanel";
 import { InfraExperimentsSection } from "@/components/infra/InfraExperimentsSection";
+import { InfraGuidedTour } from "@/components/infra/InfraGuidedTour";
 import type { DeadLetterJobRow } from "@/components/DeadLetterPanel";
 import {
   aggregateFailureBuckets,
@@ -30,6 +31,11 @@ import {
 } from "@/lib/infraControlPlane";
 import { getApiBase } from "@/lib/apiBase";
 import { ShowcaseBanner } from "@/components/ShowcaseBanner";
+import { isShowcaseClient } from "@/lib/showcase";
+import {
+  SHOWCASE_FALLBACK_JOB_ID,
+  SHOWCASE_SUCCESS_JOB_ID,
+} from "@/lib/showcaseWalkthrough";
 
 const API_BASE = getApiBase();
 
@@ -130,6 +136,7 @@ async function readJson<T>(res: PromiseSettledResult<Response>): Promise<{ ok: b
 }
 
 export default function InfraPage() {
+  const [tourAutoStart, setTourAutoStart] = useState(false);
   const [metrics, setMetrics] = useState<InfraMetrics | null>(null);
   const [runtimeStream, setRuntimeStream] = useState<InfraRuntimeStream | null>(null);
   const [deadLetter, setDeadLetter] = useState<Array<Record<string, unknown>>>([]);
@@ -147,6 +154,20 @@ export default function InfraPage() {
   const [history, setHistory] = useState<InfraHistoryPoint[]>([]);
   const lastPointRef = useRef<InfraHistoryPoint | undefined>(undefined);
   const [costData, setCostData] = useState<CostData | null>(null);
+  const showcase = isShowcaseClient();
+  const [expandedJobId, setExpandedJobId] = useState<number | null>(
+    showcase ? SHOWCASE_SUCCESS_JOB_ID : null,
+  );
+
+  useEffect(() => {
+    // Client-only query read — avoids Next Suspense/SSG bailout from useSearchParams.
+    try {
+      const q = new URLSearchParams(window.location.search).get("tour");
+      if (q === "1" || q === "true") setTourAutoStart(true);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -350,6 +371,14 @@ export default function InfraPage() {
       />
 
       <div className="space-y-5">
+        <InfraGuidedTour
+          autoStart={tourAutoStart}
+          onExpandJob={(jobId) => {
+            setExpandedJobId(jobId);
+            document.getElementById("tour-jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        />
+
         {/* SLO + error budget (SRE framing) */}
         <SLOStrip slo={slo} loading={loading} />
 
@@ -417,6 +446,12 @@ export default function InfraPage() {
           byStatus={jobsByStatus}
           workers={workers as InfraWorkerRow[]}
           loading={loading}
+          expandedId={expandedJobId}
+          onExpandedIdChange={setExpandedJobId}
+          defaultExpandedId={showcase ? SHOWCASE_SUCCESS_JOB_ID : null}
+          highlightJobIds={
+            showcase ? [SHOWCASE_SUCCESS_JOB_ID, SHOWCASE_FALLBACK_JOB_ID] : []
+          }
         />
 
         {/* Extensions: Agent / RLHF / Prompt — not the production main path */}

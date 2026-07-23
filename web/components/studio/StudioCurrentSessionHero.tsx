@@ -182,12 +182,20 @@ export function StudioCurrentSessionHero({
           <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-6 pt-2">
             <button
               type="button"
-              disabled={busy !== null || analyzeLocked}
+              disabled={busy !== null}
               onClick={onAnalyze}
-              title="清空本场分析结果并全量重跑 Stage1–3"
-              className="h-[30px] rounded-[5px] border border-white/15 bg-white/[0.06] px-3.5 text-xs tracking-[0.03em] text-[#e8e8e8] transition-colors hover:bg-white/[0.1] disabled:opacity-35"
+              title={
+                analyzeLocked
+                  ? "当前场次已有分析任务在跑，完成后可再点全量分析"
+                  : "清空本场分析结果并全量重跑 Stage1–3"
+              }
+              className={`h-[30px] rounded-[5px] border px-3.5 text-xs tracking-[0.03em] transition-colors disabled:cursor-not-allowed disabled:opacity-35 ${
+                analyzeLocked
+                  ? "border-amber-400/30 bg-amber-400/[0.08] text-amber-100/85"
+                  : "border-white/15 bg-white/[0.06] text-[#e8e8e8] hover:bg-white/[0.1]"
+              }`}
             >
-              {busy === "analyze" ? "…" : "全量分析"}
+              {busy === "analyze" ? "…" : analyzeLocked ? "分析中…" : "全量分析"}
             </button>
             <Link
               href="/gallery"

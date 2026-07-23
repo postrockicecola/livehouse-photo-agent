@@ -1,0 +1,71 @@
+{
+  "schema_version": "1",
+  "purpose": "Unified provenance headers for portfolio Evaluation (Batch C). Numbers on /eval are copied from these reports — do not invent latency/cost.",
+  "dataset": {
+    "path": "data/eval",
+    "n_labeled": 250,
+    "labels": "data/eval/labels.jsonl",
+    "manifest": "data/eval/manifest.json",
+    "human_keepers_approx": 83
+  },
+  "reports": [
+    {
+      "id": "stage3_v6_qwen2vl_temp0",
+      "path": "reports/eval/stage3_v6_qwen2vl_temp0.json",
+      "provenance": "recorded",
+      "real_run": true,
+      "n": 250,
+      "model": "qwen2-vl temp0",
+      "config": "configs/eval_stage3.yaml",
+      "hardware": null,
+      "metrics": ["spearman", "pearson", "mae", "precision_at_k"],
+      "headline": { "spearman": 0.362, "mae": 6.09, "precision_at_20": 0.55 }
+    },
+    {
+      "id": "agent_selection_250",
+      "path": "reports/eval/agent_selection.json",
+      "provenance": "recorded",
+      "real_run": true,
+      "n": 250,
+      "budget": 40,
+      "selection_size": 30,
+      "model": null,
+      "config": "scripts/eval/eval_agent_selection.py",
+      "hardware": null,
+      "metrics": ["selection_precision", "analyzed_keeper_recall", "precision_at_k"],
+      "arms": ["random", "heuristic", "oracle"],
+      "note": "No LLM arm in this file."
+    },
+    {
+      "id": "agent_selection_llm_60",
+      "path": "reports/eval/agent_selection_llm.json",
+      "provenance": "recorded",
+      "real_run": true,
+      "n": 60,
+      "budget": 15,
+      "arms": ["random", "heuristic", "oracle", "llm"],
+      "honesty": "LLM planner ≈ heuristic; llm_decision_rate≈0.06 with heavy heuristic fallback."
+    },
+    {
+      "id": "agent_trajectory",
+      "path": "reports/eval/agent_trajectory.json",
+      "provenance": "recorded",
+      "real_run": true,
+      "note": "Behavior / budget utilization on synthetic or feature candidates — label-free."
+    },
+    {
+      "id": "quant_compare_example",
+      "path": "reports/eval/quant_compare_example.json",
+      "provenance": "simulated",
+      "real_run": false,
+      "note": "Illustrative quant_compare payload only — not a production SLO."
+    }
+  ],
+  "gaps": [
+    {
+      "id": "two_stage_vs_full_vlm",
+      "status": "missing",
+      "note": "No committed head-to-head of production Stage1/2 gates vs full-VLM on the same 250 labels (quality · VLM call share · latency · cost)."
+    }
+  ]
+}

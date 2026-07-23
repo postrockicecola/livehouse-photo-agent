@@ -1,0 +1,174 @@
+{
+  "job": {
+    "id": 62,
+    "job_type": "ANALYZE_PATH",
+    "session_id": null,
+    "photo_id": null,
+    "status": "SUCCEEDED",
+    "priority": 0,
+    "attempt": 1,
+    "max_attempts": 3,
+    "worker_id": 2,
+    "provider": "ollama-fallback",
+    "model_name": "qwen2-vl-fallback",
+    "fallback_used": 1,
+    "enqueued_at": 1782708000,
+    "claimed_at": 1782708001,
+    "started_at": 1782708001,
+    "finished_at": 1782708120,
+    "queue_wait_ms": 1000,
+    "preprocess_ms": 4200,
+    "inference_ms": 98000,
+    "postprocess_ms": 1800,
+    "total_latency_ms": 120000,
+    "error_code": null,
+    "error_message": null,
+    "trace_id": "showcase_fallback_degraded_62",
+    "payload_json": "{\"source_dir\": \"/archive/redacted\", \"config_path\": \"configs/livehouse.yaml\", \"showcase\": \"fallback_recovery\"}",
+    "root_job_id": null,
+    "parent_job_id": null,
+    "stage_name": null,
+    "stage_order": null,
+    "depends_on_job_id": null,
+    "is_stage": 0,
+    "namespace": "default",
+    "project_key": "default",
+    "created_at": 1782708000,
+    "updated_at": 1782708120,
+    "degraded": true,
+    "output_artifacts": [
+      {
+        "artifact_id": 901,
+        "job_id": 62,
+        "kind": "analysis_results_json",
+        "path": "/archive/redacted",
+        "generated_at": 1782708120,
+        "metadata": {
+          "taxonomy": "analysis_results",
+          "role": "structured_output",
+          "degraded": true
+        },
+        "is_primary": true,
+        "stage": null,
+        "source": "aesthetic_pipeline",
+        "job_event_id": 905,
+        "created_at": 1782708120,
+        "taxonomy": "analysis_results",
+        "role": "structured_output"
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 901,
+      "job_id": 62,
+      "from_status": null,
+      "to_status": "QUEUED",
+      "created_at": 1782708000,
+      "message": "job enqueued",
+      "payload_json": "{\"priority\": 0, \"max_attempts\": 3, \"showcase\": \"fallback\"}"
+    },
+    {
+      "id": 902,
+      "job_id": 62,
+      "from_status": "QUEUED",
+      "to_status": "CLAIMED",
+      "created_at": 1782708001,
+      "message": "job claimed by run_job",
+      "payload_json": "{\"worker_id\": 2}"
+    },
+    {
+      "id": 903,
+      "job_id": 62,
+      "from_status": "CLAIMED",
+      "to_status": "PREPROCESSING",
+      "created_at": 1782708002,
+      "message": "job preprocessing",
+      "payload_json": "{\"worker_id\": 2}"
+    },
+    {
+      "id": 904,
+      "job_id": 62,
+      "from_status": "PREPROCESSING",
+      "to_status": "INFERENCING",
+      "created_at": 1782708006,
+      "message": "running aesthetic pipeline · primary provider",
+      "payload_json": "{\"provider\": \"ollama-primary\", \"model_name\": \"qwen2-vl\"}"
+    },
+    {
+      "id": 905,
+      "job_id": 62,
+      "from_status": "INFERENCING",
+      "to_status": "INFERENCING",
+      "created_at": 1782708066,
+      "message": "primary model timeout · routing to fallback",
+      "payload_json": "{\"error_type\": \"TIMEOUT\", \"primary\": \"ollama-primary\", \"fallback\": \"ollama-fallback\"}"
+    },
+    {
+      "id": 906,
+      "job_id": 62,
+      "from_status": "INFERENCING",
+      "to_status": "SUCCEEDED",
+      "created_at": 1782708120,
+      "message": "job succeeded (degraded · fallback used)",
+      "payload_json": "{\"fallback_used\": 1, \"degraded\": true, \"provider\": \"ollama-fallback\"}"
+    }
+  ],
+  "model_runs": [
+    {
+      "id": 701,
+      "job_id": 62,
+      "provider": "ollama-primary",
+      "model_name": "qwen2-vl",
+      "status": "TIMEOUT",
+      "latency_ms": 60000,
+      "error_type": "TIMEOUT",
+      "fallback_provider": "ollama-fallback",
+      "prompt_tokens": 1200,
+      "completion_tokens": 0,
+      "attempt": 1
+    },
+    {
+      "id": 702,
+      "job_id": 62,
+      "provider": "ollama-fallback",
+      "model_name": "qwen2-vl-fallback",
+      "status": "SUCCEEDED",
+      "latency_ms": 38000,
+      "error_type": null,
+      "fallback_provider": null,
+      "prompt_tokens": 1200,
+      "completion_tokens": 420,
+      "attempt": 2
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": 901,
+      "job_id": 62,
+      "kind": "analysis_results_json",
+      "path": "/archive/redacted",
+      "generated_at": 1782708120,
+      "metadata": {
+        "taxonomy": "analysis_results",
+        "role": "structured_output",
+        "degraded": true
+      },
+      "is_primary": true,
+      "stage": null,
+      "source": "aesthetic_pipeline",
+      "job_event_id": 906,
+      "created_at": 1782708120,
+      "taxonomy": "analysis_results",
+      "role": "structured_output"
+    }
+  ],
+  "primary_artifact": {
+    "artifact_id": 901,
+    "job_id": 62,
+    "kind": "analysis_results_json",
+    "path": "/archive/redacted",
+    "generated_at": 1782708120,
+    "is_primary": true
+  }
+}

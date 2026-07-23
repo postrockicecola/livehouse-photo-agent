@@ -145,10 +145,19 @@ export default function StudioPage() {
   }, [selected?.previews_dir]);
 
   useEffect(() => {
-    if (pendingAnalyzeJobId == null || !status?.job) return;
-    const job = status.job;
-    if (job.id !== pendingAnalyzeJobId && !job.is_running) return;
-    if (TERMINAL_JOB_STATUSES.has(job.status)) {
+    if (pendingAnalyzeJobId == null) return;
+    const job = status?.job;
+    if (!job) return;
+    // Clear optimistic lock once the session job is no longer actively running.
+    // Previously we kept pending forever when status still showed an older SUCCEEDED
+    // job (id mismatch → early return), which disabled「全量分析」with no feedback.
+    if (job.id === pendingAnalyzeJobId) {
+      if (!job.is_running || TERMINAL_JOB_STATUSES.has(job.status)) {
+        setPendingAnalyzeJobId(null);
+      }
+      return;
+    }
+    if (!job.is_running) {
       setPendingAnalyzeJobId(null);
     }
   }, [status?.job, pendingAnalyzeJobId]);
@@ -160,7 +169,9 @@ export default function StudioPage() {
   );
 
   const jobRunning = Boolean(status?.job?.is_running);
-  const analyzeLocked = jobRunning || pendingAnalyzeJobId != null;
+  // Only hard-lock while a job is actually running (or the POST is in flight via `busy`).
+  // `pendingAnalyzeJobId` is optimistic UI only — must not permanently disable the button.
+  const analyzeLocked = jobRunning;
   const canGallery = Boolean(selected?.has_analysis_results || status?.session?.has_analysis_results);
 
   const setList = useMemo(
@@ -200,20 +211,31 @@ export default function StudioPage() {
   };
 
   const onAnalyze = async () => {
-    if (!selected?.previews_dir || analyzeInFlightRef.current || analyzeLocked) return;
+    if (!selected?.previews_dir) {
+      setError("当前场次没有 Previews 路径，无法启动分析");
+      return;
+    }
+    if (analyzeInFlightRef.current) return;
+    if (analyzeLocked) {
+      const jid = status?.job?.id;
+      setMessage(jid != null ? `分析进行中 · job #${jid}，完成后可再次全量分析` : "分析进行中，请稍候");
+      return;
+    }
     analyzeInFlightRef.current = true;
     setBusy("analyze");
+    setError(null);
     setMessage(null);
     try {
-      const res = await startStudioAnalyze(selected.previews_dir);
+      const res = await startStudioAnalyze(selected.previews_dir, { forceFullRerun: true });
       setPendingAnalyzeJobId(res.job_id);
       setMessage(
         res.status === "already_running"
           ? `分析已在队列中 · job #${res.job_id}`
-          : `已排队 job #${res.job_id}`,
+          : `已排队全量分析 · job #${res.job_id}`,
       );
       await refreshStatus(selected);
     } catch (e: unknown) {
+      setPendingAnalyzeJobId(null);
       setError(e instanceof Error ? e.message : "启动分析失败");
     } finally {
       analyzeInFlightRef.current = false;
