@@ -448,161 +448,172 @@ export function ChatDock({
     setUser(null);
   }, [apiBase]);
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="打开 Gallery 助手"
-        className="fixed bottom-4 right-4 z-50 flex h-11 items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.08] px-4 text-[13px] text-white/80 shadow-lg backdrop-blur-md transition-colors hover:bg-white/[0.14]"
-      >
-        <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
-        AI 助手
-      </button>
-    );
-  }
-
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex h-[min(560px,calc(100vh-2rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
-      {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
-      <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
-          <div className="flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.03] p-0.5 text-[12px]">
-            {(["gallery", "general"] as AgentMode[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => switchMode(m)}
-                className={[
-                  "rounded-[4px] px-2 py-0.5 transition-colors",
-                  mode === m ? "bg-white/[0.12] text-white/85" : "text-white/40 hover:text-white/70",
-                ].join(" ")}
-              >
-                {MODE_LABEL[m]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          {user ? (
-            <button
-              type="button"
-              onClick={() => void doLogout()}
-              title={`已登录：${user.username}（点击退出）`}
-              className="max-w-[92px] truncate rounded-[3px] px-1.5 py-0.5 text-[12px] text-emerald-300/70 hover:text-emerald-200"
-            >
-              {user.username}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setAuthOpen(true)}
-              title="登录以持久保存对话"
-              className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
-            >
-              登录
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={resetChat}
-            title="清空对话"
-            className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
-          >
-            清空
-          </button>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="收起助手"
-            className="rounded-[3px] px-1.5 py-0.5 text-[14px] text-white/40 hover:text-white/70"
-          >
-            ×
-          </button>
-        </div>
-      </div>
-
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
-        {turns.length === 0 ? (
-          <div className="space-y-3 pt-2">
-            <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
-            <div className="flex flex-col gap-1.5">
-              {SUGGESTIONS[mode].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => void send(s)}
-                  className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          turns.map((t, i) => (
-            <div key={i} className={t.role === "user" ? "flex justify-end" : "flex justify-start"}>
-              <div
-                className={[
-                  "max-w-[88%] rounded-[6px] px-2.5 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words",
-                  t.role === "user"
-                    ? "bg-white/[0.1] text-white/85"
-                    : t.error
-                      ? "border border-rose-500/25 bg-rose-500/10 text-rose-100/85"
-                      : "border border-white/[0.06] bg-white/[0.03] text-white/75",
-                ].join(" ")}
-              >
-                {t.streaming && !t.text && !t.toolCalls?.length ? (
-                  <div className="flex items-center gap-1 text-white/40">
-                    <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40" />
-                    思考中…
-                  </div>
-                ) : (
-                  <div>
-                    {t.role === "assistant" ? <LinkifiedText text={t.text} /> : t.text}
-                    {t.streaming ? (
-                      <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-white/50 align-[-0.15em]" aria-hidden />
-                    ) : null}
-                  </div>
-                )}
-                {(t.toolCalls?.length || t.guardrails?.length) ? (
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {t.toolCalls?.map((c, j) => <ToolChip key={`t${j}`} call={c} />)}
-                    {t.guardrails?.map((g, j) => <GuardrailChip key={`g${j}`} ev={g} />)}
-                  </div>
-                ) : null}
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+      {open ? (
+        <div className="flex h-[min(560px,calc(100vh-5.5rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
+          {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
+          <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
+              <div className="flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.03] p-0.5 text-[12px]">
+                {(["gallery", "general"] as AgentMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => switchMode(m)}
+                    className={[
+                      "rounded-[4px] px-2 py-0.5 transition-colors",
+                      mode === m ? "bg-white/[0.12] text-white/85" : "text-white/40 hover:text-white/70",
+                    ].join(" ")}
+                  >
+                    {MODE_LABEL[m]}
+                  </button>
+                ))}
               </div>
             </div>
-          ))
-        )}
-      </div>
+            <div className="flex items-center gap-1">
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => void doLogout()}
+                  title={`已登录：${user.username}（点击退出）`}
+                  className="max-w-[92px] truncate rounded-[3px] px-1.5 py-0.5 text-[12px] text-emerald-300/70 hover:text-emerald-200"
+                >
+                  {user.username}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthOpen(true)}
+                  title="登录以持久保存对话"
+                  className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
+                >
+                  登录
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={resetChat}
+                title="清空对话"
+                className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
+              >
+                清空
+              </button>
+            </div>
+          </div>
 
-      <div className="shrink-0 border-t border-white/[0.06] p-2.5">
-        <div className="flex items-end gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                void send(input);
-              }
-            }}
-            rows={1}
-            placeholder={mode === "gallery" ? "问问这个 session 的照片…" : "给我一个任务：检索、算一算、或生成一份产物…"}
-            className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
-          />
-          <button
-            type="button"
-            disabled={sending || !input.trim()}
-            onClick={() => void send(input)}
-            className="h-[38px] shrink-0 rounded-[5px] border border-white/[0.1] bg-white/[0.08] px-3 text-[13px] text-white/75 transition-colors hover:bg-white/[0.14] disabled:opacity-35"
-          >
-            发送
-          </button>
+          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
+            {turns.length === 0 ? (
+              <div className="space-y-3 pt-2">
+                <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
+                <div className="flex flex-col gap-1.5">
+                  {SUGGESTIONS[mode].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => void send(s)}
+                      className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              turns.map((t, i) => (
+                <div key={i} className={t.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                  <div
+                    className={[
+                      "max-w-[88%] rounded-[6px] px-2.5 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words",
+                      t.role === "user"
+                        ? "bg-white/[0.1] text-white/85"
+                        : t.error
+                          ? "border border-rose-500/25 bg-rose-500/10 text-rose-100/85"
+                          : "border border-white/[0.06] bg-white/[0.03] text-white/75",
+                    ].join(" ")}
+                  >
+                    {t.streaming && !t.text && !t.toolCalls?.length ? (
+                      <div className="flex items-center gap-1 text-white/40">
+                        <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40" />
+                        思考中…
+                      </div>
+                    ) : (
+                      <div>
+                        {t.role === "assistant" ? <LinkifiedText text={t.text} /> : t.text}
+                        {t.streaming ? (
+                          <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-white/50 align-[-0.15em]" aria-hidden />
+                        ) : null}
+                      </div>
+                    )}
+                    {(t.toolCalls?.length || t.guardrails?.length) ? (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {t.toolCalls?.map((c, j) => <ToolChip key={`t${j}`} call={c} />)}
+                        {t.guardrails?.map((g, j) => <GuardrailChip key={`g${j}`} ev={g} />)}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="shrink-0 border-t border-white/[0.06] p-2.5">
+            <div className="flex items-end gap-2">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void send(input);
+                  }
+                }}
+                rows={1}
+                placeholder={mode === "gallery" ? "问问这个 session 的照片…" : "给我一个任务：检索、算一算、或生成一份产物…"}
+                className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={sending || !input.trim()}
+                onClick={() => void send(input)}
+                className="h-[38px] shrink-0 rounded-[5px] border border-white/[0.1] bg-white/[0.08] px-3 text-[13px] text-white/75 transition-colors hover:bg-white/[0.14] disabled:opacity-35"
+              >
+                发送
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={open ? "收起策展助手" : "打开策展助手"}
+        aria-expanded={open}
+        title={open ? "收起策展助手" : "策展助手"}
+        className={[
+          "flex h-12 w-12 items-center justify-center rounded-[14px] border shadow-lg backdrop-blur-md transition-colors",
+          open
+            ? "border-emerald-400/35 bg-emerald-400/15 text-emerald-100 hover:bg-emerald-400/25"
+            : "border-white/[0.1] bg-white/[0.08] text-white/80 hover:bg-white/[0.14]",
+        ].join(" ")}
+      >
+        {open ? (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        ) : (
+          <img
+            src="/brand/luma-icon.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-[10px] object-cover"
+            draggable={false}
+          />
+        )}
+      </button>
     </div>
   );
 }
