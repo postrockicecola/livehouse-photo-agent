@@ -1,13 +1,13 @@
 {
   "archive_root": "/archive/redacted",
-  "sessions_total": 9,
-  "photos_total": 15150,
-  "exported_photos_total": 12010,
+  "sessions_total": 55,
+  "photos_total": 40270,
+  "exported_photos_total": 4686,
   "avg_processing_sec": 435,
-  "auto_reject_rate_pct": 21,
-  "average_keep_rate_pct": 79,
-  "total_runtime_sec": 22181,
-  "total_runtime_hours": 6.2,
-  "auto_filter_rate_pct": 21,
-  "source": "brain"
+  "auto_reject_rate_pct": 88,
+  "average_keep_rate_pct": 12,
+  "total_runtime_sec": 23925,
+  "total_runtime_hours": 6.6,
+  "auto_filter_rate_pct": 88,
+  "source": "showcase_catalog"
 }
