@@ -50,8 +50,10 @@ import {
   type GalleryLoadSource,
   type GallerySort,
 } from "@/lib/galleryLoad";
+import { isShowcaseClient } from "@/lib/showcase";
 
 const API_BASE = getApiBase();
+const SHOWCASE = isShowcaseClient();
 const GALLERY_BURST_DEDUPE_PREF_KEY = "livehouse.galleryBurstDedupe";
 const GALLERY_SORT_TASTE_PREF_KEY = "livehouse.gallerySortPersonalized";
 const GALLERY_SORT_DIVERSE_PREF_KEY = "livehouse.gallerySortDiverse";
@@ -541,7 +543,8 @@ export default function HomePage() {
       }
       pendingVibePreviewRef.current = false;
       setAgentPreviewVariant("vibe");
-      setAgentPreviewItems(pool.slice(0, 12));
+      // Keep up to a full delivery shortlist so "修刚才选出的 N 张" is visible.
+      setAgentPreviewItems(pool.slice(0, 40));
       setSelectionPreviewOpen(false);
       setActionMsg(`助手已应用「${sv.label_zh}」，已打开风格预览`);
     },
@@ -560,7 +563,10 @@ export default function HomePage() {
         const files = Array.isArray(meta.files)
           ? meta.files.map((f) => String(f || "").trim()).filter(Boolean)
           : [];
-        if (files.length === 0) {
+        const paths = Array.isArray(meta.paths)
+          ? meta.paths.map((p) => String(p || "").trim()).filter(Boolean)
+          : [];
+        if (files.length === 0 && paths.length === 0) {
           setActionMsg("助手未找到匹配照片");
           return;
         }
@@ -572,17 +578,30 @@ export default function HomePage() {
         }
         const root = (galleryBasePath || "").replace(/\/$/, "");
         const resolved: GalleryItem[] = [];
-        for (const f of files) {
-          const hit = byBase.get(f);
+        const n = Math.max(files.length, paths.length);
+        for (let i = 0; i < n; i++) {
+          const f = files[i] || paths[i]?.split("/").pop() || "";
+          const showcasePath = paths[i]?.startsWith("/showcase/") ? paths[i] : "";
+          const hit = f ? byBase.get(f) : undefined;
           if (hit) {
             resolved.push(hit);
             continue;
           }
-          const abs = root ? `${root}/${f}` : f;
+          if (showcasePath) {
+            resolved.push({
+              file: f || showcasePath.split("/").pop(),
+              path: showcasePath,
+              path_quoted: showcasePath,
+            });
+            continue;
+          }
+          const abs = root && f ? `${root}/${f}` : f || paths[i] || "";
+          if (!abs) continue;
+          const isStatic = abs.startsWith("/showcase/") || abs.startsWith("/demo/");
           resolved.push({
-            file: f,
+            file: f || abs.split("/").pop(),
             path: abs,
-            path_quoted: encodeURIComponent(abs),
+            path_quoted: isStatic ? abs : encodeURIComponent(abs),
           });
         }
         setAgentPreviewVariant("agent");
@@ -606,10 +625,42 @@ export default function HomePage() {
         setSessionVibe(sv);
         setVibePrompt(sv.prompt ?? "");
         setUseSessionVibeForExport(sessionVibeMatched(sv));
+        const metaFiles = Array.isArray(meta.files)
+          ? meta.files.map((f) => String(f || "").trim()).filter(Boolean)
+          : [];
+        let fromMeta: GalleryItem[] = [];
+        if (metaFiles.length > 0) {
+          const byBase = new Map<string, GalleryItem>();
+          for (const it of items) {
+            const base = catalogBasenameForExport(it);
+            if (base) byBase.set(base, it);
+            if (it.file?.trim()) byBase.set(it.file.trim(), it);
+          }
+          const root = (galleryBasePath || "").replace(/\/$/, "");
+          fromMeta = metaFiles.map((f) => {
+            const hit = byBase.get(f);
+            if (hit) return hit;
+            const abs = root ? `${root}/${f}` : f;
+            return {
+              file: f,
+              path: abs,
+              path_quoted: encodeURIComponent(abs),
+            };
+          });
+        }
+        // Prefer explicit tool files → last agent shortlist → liked → all items.
         const liked = items.filter((it, idx) =>
           selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
         );
-        openVibeStylePreview(sv, liked.length > 0 ? liked : items);
+        const pool =
+          fromMeta.length > 0
+            ? fromMeta
+            : agentPreviewItems && agentPreviewItems.length > 0
+              ? agentPreviewItems
+              : liked.length > 0
+                ? liked
+                : items;
+        openVibeStylePreview(sv, pool);
         return;
       }
       if (action === "reload_curation" || action === "export_done") {
@@ -620,7 +671,7 @@ export default function HomePage() {
     };
     window.addEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
     return () => window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
-  }, [items, galleryBasePath, selectedKeys, openVibeStylePreview]);
+  }, [items, galleryBasePath, selectedKeys, agentPreviewItems, openVibeStylePreview]);
 
   // Off-gallery ChatDock → /gallery? open graded vibe preview once items + vibe are ready.
   useEffect(() => {
@@ -833,6 +884,10 @@ export default function HomePage() {
   };
 
   const onBatchExport = async () => {
+    if (SHOWCASE) {
+      setActionMsg("Showcase 只读：导出请本地 ./start_all.sh 后使用完整 Gallery。");
+      return;
+    }
     const itemsPayload: GalleryExportItem[] = selectedItems
       .map((it) => {
         const f = catalogBasenameForExport(it);
@@ -924,6 +979,10 @@ export default function HomePage() {
   };
 
   const onRunEnhance = async () => {
+    if (SHOWCASE) {
+      setActionMsg("Showcase 只读：AI 强化需本地 gallery_server。");
+      return;
+    }
     setBusy("enhance");
     setActionMsg("");
     try {
@@ -945,6 +1004,15 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-white">
       <StudioAppNav />
+      {SHOWCASE ? (
+        <div
+          role="status"
+          className="border-b border-amber-400/20 bg-amber-400/[0.07] px-[clamp(14px,3.5vw,44px)] py-2.5 text-center text-[11px] leading-relaxed text-amber-100/80"
+        >
+          Showcase · 只读演示（2026-04-16 keepers）· 可选片 / 预览 / 对话；导出与光学 Lab 请本地{" "}
+          <span className="font-mono text-amber-100/55">./start_all.sh</span>
+        </div>
+      ) : null}
       <main className="flex flex-1 flex-col pb-8">
       {selectedItems.length > 0 ? (
         <div
@@ -983,7 +1051,11 @@ export default function HomePage() {
             {!loadingItems && loadSource !== "none" ? (
               <p className="mt-1.5 text-[10px] text-white/25">
                 数据源:{" "}
-                {loadSource === "results_api" ? "API（分页）" : "analysis_results.json（客户端回退）"}
+                {SHOWCASE
+                  ? "Showcase fixture（agent-demo）"
+                  : loadSource === "results_api"
+                    ? "API（分页）"
+                    : "analysis_results.json（客户端回退）"}
               </p>
             ) : null}
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -1138,7 +1210,13 @@ export default function HomePage() {
                           const liked = items.filter((it, idx) =>
                             selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
                           );
-                          openVibeStylePreview(sessionVibe, liked.length > 0 ? liked : items);
+                          const pool =
+                            agentPreviewItems && agentPreviewItems.length > 0
+                              ? agentPreviewItems
+                              : liked.length > 0
+                                ? liked
+                                : items;
+                          openVibeStylePreview(sessionVibe, pool);
                         }}
                         className="shrink-0 rounded-[4px] border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-2 text-[11px] text-emerald-100/85 transition-colors hover:bg-emerald-400/[0.14] disabled:opacity-40"
                       >
@@ -1282,7 +1360,8 @@ export default function HomePage() {
             <button
               type="button"
               onClick={onBatchExport}
-              disabled={busy !== null}
+              disabled={busy !== null || SHOWCASE}
+              title={SHOWCASE ? "Showcase 只读：导出不可用" : undefined}
               className="rounded-[2px] border border-white/[0.05] bg-transparent px-2 py-1 text-[11px] text-white/55 transition-colors duration-150 ease-out hover:bg-white/[0.03] hover:text-white/75 disabled:opacity-35"
             >
               {busy === "export" ? "导出中…" : "批量导出"}
@@ -1290,7 +1369,8 @@ export default function HomePage() {
             <button
               type="button"
               onClick={onRunEnhance}
-              disabled={busy !== null}
+              disabled={busy !== null || SHOWCASE}
+              title={SHOWCASE ? "Showcase 只读：AI 强化不可用" : undefined}
               className="rounded-[2px] border border-white/[0.05] bg-transparent px-2 py-1 text-[11px] text-white/55 transition-colors duration-150 ease-out hover:bg-white/[0.03] hover:text-white/75 disabled:opacity-35"
             >
               {busy === "enhance" ? "提交中…" : "AI 强化"}

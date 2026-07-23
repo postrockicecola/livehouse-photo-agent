@@ -7,17 +7,17 @@ export async function POST(req: NextRequest) {
   if (isReadOnlyGalleryDeploy()) {
     return showcaseReadOnlyJson(
       {
-        detail: "Showcase 只读：导出需本地 gallery_server（./start_all.sh）。",
-        exported: 0,
+        detail: "Showcase 只读：口味画像重建需本地 gallery_server。",
+        profile: null,
       },
       403,
     );
   }
   try {
-    return await proxyGalleryApi(req, "api/export-images");
+    return await proxyGalleryApi(req, "api/gallery/taste/rebuild");
   } catch (e) {
     return NextResponse.json(
-      { detail: e instanceof Error ? e.message : "export unavailable" },
+      { detail: e instanceof Error ? e.message : "taste rebuild unavailable" },
       { status: 502 },
     );
   }

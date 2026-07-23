@@ -8,6 +8,7 @@ const DEMO_IMAGE_COUNT = 12; // web/public/demo/demo-01.jpg … demo-12.jpg
 
 /** Bundled per-session heroes only: session-NN.jpg / session-NN-portrait.jpg */
 const SHOWCASE_COVER_FILE_RE = /^session-\d{2,}(?:-portrait)?\.jpg$/i;
+const SHOWCASE_AGENT_DEMO_RE = /^frame-\d{2}\.jpg$/i;
 
 /** Deterministically map an arbitrary `path` to one of the bundled demo photos. */
 function demoImageFor(path: string): string {
@@ -19,15 +20,17 @@ function demoImageFor(path: string): string {
   return `/demo/demo-${String(n).padStart(2, "0")}.jpg`;
 }
 
+function decodePath(path: string): string {
+  try {
+    return decodeURIComponent(path.trim());
+  } catch {
+    return path.trim();
+  }
+}
+
 /** Resolve a showcase cover token to its static public URL, or null. */
 function showcaseCoverFor(path: string): string | null {
-  const decoded = (() => {
-    try {
-      return decodeURIComponent(path.trim());
-    } catch {
-      return path.trim();
-    }
-  })();
+  const decoded = decodePath(path);
   // Reject traversal / odd separators; only allow the opaque cover filename.
   if (!decoded || decoded.includes("..") || decoded.includes("\\") || decoded.includes("\0")) {
     return null;
@@ -36,6 +39,23 @@ function showcaseCoverFor(path: string): string | null {
   const file = normalized.includes("/") ? normalized.split("/").pop() || "" : normalized;
   if (!SHOWCASE_COVER_FILE_RE.test(file)) return null;
   return `/showcase/covers/${file}`;
+}
+
+/** Agent / Gallery showcase keepers under ``public/showcase/agent-demo/``. */
+function showcaseAgentDemoFor(path: string): string | null {
+  const decoded = decodePath(path);
+  if (!decoded || decoded.includes("..") || decoded.includes("\\") || decoded.includes("\0")) {
+    return null;
+  }
+  if (decoded.startsWith("/showcase/agent-demo/")) {
+    const file = decoded.slice("/showcase/agent-demo/".length);
+    if (SHOWCASE_AGENT_DEMO_RE.test(file) && !file.includes("/")) return decoded;
+  }
+  const normalized = decoded.replace(/^\/+/, "").replace(/^showcase\/agent-demo\//i, "");
+  if (SHOWCASE_AGENT_DEMO_RE.test(normalized) && !normalized.includes("/")) {
+    return `/showcase/agent-demo/${normalized}`;
+  }
+  return null;
 }
 
 /**
@@ -48,6 +68,8 @@ export async function GET(req: NextRequest) {
   const path = req.nextUrl.searchParams.get("path") ?? "";
 
   if (isShowcase()) {
+    const agent = showcaseAgentDemoFor(path);
+    if (agent) return NextResponse.redirect(new URL(agent, req.url));
     const cover = showcaseCoverFor(path);
     return NextResponse.redirect(new URL(cover ?? demoImageFor(path), req.url));
   }

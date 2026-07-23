@@ -80,7 +80,7 @@ export function LandingGallerySection() {
           >
             Open Gallery
           </Link>
-          <p className="font-mono text-[10px] text-white/28">真实场次界面 · 导出样片见下方</p>
+          <p className="font-mono text-[10px] text-white/28">只读 Showcase 选片台 · 完整导出请本地启动</p>
         </div>
       </div>
 

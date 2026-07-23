@@ -88,7 +88,7 @@ export const LANDING_HERO = {
   ctaPrimary: LANDING_STUDIO_CTA,
   ctaSecondary: { label: "看主链路", href: "#workflow" },
   promptIdle: "试试：找出吉他手特写…",
-  promptSubmitHref: "/gallery",
+  promptSubmitHref: "/studio",
   /** Hero CTAs under the prompt — first is the primary product entry. */
   promptCtas: [
     { label: "打开 Agent", href: STUDIO_HOME, primary: true },
@@ -348,7 +348,8 @@ export const LANDING_PRODUCT_MATRIX = {
       role: "选片界面",
       description: "看分数和标签，人工确认导出。",
       href: "/gallery",
-      showcaseHref: "#gallery",
+      /** Read-only Showcase Gallery is live — same destination as full mode. */
+      showcaseHref: "/gallery",
     },
     {
       id: "brain",
@@ -488,7 +489,7 @@ export const LANDING_DOC_LINKS: NavLink[] = [
   { label: "主链路", href: "#workflow", description: "门控 → 作业 → 有界 VLM" },
   { label: "Evaluation", href: "/eval", description: "Stage3 / Agent 基线与出处" },
   { label: "Infra", href: "#infra", description: "队列、Worker、重试、死信" },
-  { label: "Gallery", href: "#gallery", description: "读结果并确认选片" },
+  { label: "Gallery", href: "/gallery", description: "读结果并确认选片" },
 ];
 
 export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
@@ -506,7 +507,7 @@ export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
       { label: "主链路", href: "#workflow" },
       { label: "推理阶段", href: "#ai-layer" },
       { label: "Infra", href: "#infra" },
-      { label: "Gallery", href: "#gallery" },
+      { label: "Gallery", href: "/gallery" },
       { label: "Brain", href: "#brain" },
       { label: "Personal", href: "/personal" },
     ],

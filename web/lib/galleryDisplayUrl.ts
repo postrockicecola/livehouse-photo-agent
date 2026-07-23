@@ -24,14 +24,36 @@ function rotateQuery(rotateDeg: number): string {
   return rot ? `&rotate=${rot}` : "";
 }
 
+/** Static public assets (Showcase) — skip the image proxy. */
+function staticPublicPath(pathOrQuoted: string): string | null {
+  const raw = pathOrQuoted.trim();
+  if (!raw) return null;
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    /* keep raw */
+  }
+  if (
+    decoded.startsWith("/showcase/") ||
+    decoded.startsWith("/demo/") ||
+    decoded.startsWith("/brand/")
+  ) {
+    return decoded;
+  }
+  return null;
+}
+
 /** 原始预览 JPEG（回退用）。 */
 export function buildGalleryPlainImageUrl(
   apiBase: string,
   item: GalleryItem,
   maxSide: number = GALLERY_PLAIN_THUMB_MAX_SIDE,
 ): string | null {
-  const pq = item.path_quoted?.trim();
+  const pq = item.path_quoted?.trim() || item.path?.trim() || "";
   if (!pq) return null;
+  const staticPath = staticPublicPath(pq);
+  if (staticPath) return staticPath;
   const path = filmPathQueryValue(pq);
   const rot = rotateQuery(Number(item.rotate_degrees ?? 0));
   return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}`;

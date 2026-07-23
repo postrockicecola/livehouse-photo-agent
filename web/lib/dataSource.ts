@@ -18,6 +18,7 @@ import studioSessions from "@/fixtures/studio-sessions.json";
 import studioStatus from "@/fixtures/studio-status.json";
 import studioFeaturedFrames from "@/fixtures/studio-featured-frames.json";
 import studioInfraOverview from "@/fixtures/studio-infra-overview.json";
+import galleryShowcaseResults from "@/fixtures/gallery-showcase-results.json";
 import infraMetrics from "@/fixtures/infra-metrics.json";
 import infraMetricsHistory from "@/fixtures/infra-metrics-history.json";
 import infraWorkers from "@/fixtures/infra-workers.json";
@@ -56,6 +57,7 @@ const FIXTURES = {
   "studio-status": studioStatus,
   "studio-featured-frames": studioFeaturedFrames,
   "studio-infra-overview": studioInfraOverview,
+  "gallery-showcase-results": galleryShowcaseResults,
   "infra-metrics": infraMetrics,
   "infra-metrics-history": infraMetricsHistory,
   "infra-workers": infraWorkers,
