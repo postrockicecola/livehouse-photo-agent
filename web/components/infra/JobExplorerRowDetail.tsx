@@ -9,6 +9,7 @@ import {
   type JobEventRow,
   type InfraJobRow,
 } from "@/lib/infraJobExplorer";
+import { isShowcaseClient } from "@/lib/showcase";
 
 type ModelRunRow = {
   id?: number;
@@ -55,12 +56,14 @@ export function JobExplorerRowDetail({ jobId, apiBase, workerNameById }: Props) 
   const [stageGroupLabel, setStageGroupLabel] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const showcase = isShowcaseClient();
+  const detailBase = showcase ? `${apiBase}/api/showcase/infra` : `${apiBase}/api/infra`;
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetch(`${apiBase}/api/infra/jobs/${jobId}`, { cache: "no-store" })
+    fetch(`${detailBase}/jobs/${jobId}`, { cache: "no-store" })
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<JobDetail>;
@@ -77,11 +80,11 @@ export function JobExplorerRowDetail({ jobId, apiBase, workerNameById }: Props) 
     return () => {
       cancelled = true;
     };
-  }, [jobId, apiBase]);
+  }, [jobId, detailBase]);
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${apiBase}/api/infra/jobs/${jobId}/stages`, { cache: "no-store" })
+    fetch(`${detailBase}/jobs/${jobId}/stages`, { cache: "no-store" })
       .then(async (r) => {
         if (!r.ok) return null;
         return r.json() as Promise<{ items?: InfraJobRow[] }>;
@@ -94,7 +97,7 @@ export function JobExplorerRowDetail({ jobId, apiBase, workerNameById }: Props) 
     return () => {
       cancelled = true;
     };
-  }, [jobId, apiBase]);
+  }, [jobId, detailBase]);
 
   if (loading) {
     return <div className="px-4 py-6 text-sm text-zinc-500">Loading execution detail…</div>;

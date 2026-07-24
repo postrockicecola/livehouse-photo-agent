@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getApiBase } from "@/lib/apiBase";
 import { AgentRunCard } from "@/components/infra/AgentRunCard";
 import { isAgentSpanLabel, type AgentRunSummary } from "@/lib/agentRun";
+import { isShowcaseClient } from "@/lib/showcase";
 
 const API_BASE = getApiBase();
 
@@ -131,14 +132,29 @@ type Props = {
   apiPath: string;
   backHref?: string;
   title?: string;
+  /** SSR / showcase snapshot — used when live API 404s or in SHOWCASE_MODE. */
+  fallbackData?: TimelineBody | null;
 };
 
-export function JobTimeline({ apiPath, backHref = "/infra", title = "Job timeline" }: Props) {
-  const [data, setData] = useState<TimelineBody | null>(null);
+export function JobTimeline({
+  apiPath,
+  backHref = "/infra",
+  title = "Job timeline",
+  fallbackData = null,
+}: Props) {
+  const showcase = isShowcaseClient();
+  const [data, setData] = useState<TimelineBody | null>(fallbackData);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!(showcase && fallbackData));
 
   useEffect(() => {
+    if (showcase && fallbackData) {
+      setData(fallbackData);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     const u = apiPath.startsWith("http") ? apiPath : `${API_BASE.replace(/\/$/, "")}/${apiPath.replace(/^\//, "")}`;
     (async () => {
@@ -146,6 +162,13 @@ export function JobTimeline({ apiPath, backHref = "/infra", title = "Job timelin
       try {
         const r = await fetch(u, { cache: "no-store" });
         if (!r.ok) {
+          if (fallbackData) {
+            if (!cancelled) {
+              setData(fallbackData);
+              setError(null);
+            }
+            return;
+          }
           if (r.status === 404) throw new Error("未找到该 job / trace");
           throw new Error(`request failed: ${r.status}`);
         }
@@ -155,7 +178,14 @@ export function JobTimeline({ apiPath, backHref = "/infra", title = "Job timelin
           setError(null);
         }
       } catch (e: unknown) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "load failed");
+        if (!cancelled) {
+          if (fallbackData) {
+            setData(fallbackData);
+            setError(null);
+          } else {
+            setError(e instanceof Error ? e.message : "load failed");
+          }
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -163,7 +193,7 @@ export function JobTimeline({ apiPath, backHref = "/infra", title = "Job timelin
     return () => {
       cancelled = true;
     };
-  }, [apiPath]);
+  }, [apiPath, fallbackData, showcase]);
 
   const tw = data?.time_window;
   const t0 = tw?.t0 ?? 0;
