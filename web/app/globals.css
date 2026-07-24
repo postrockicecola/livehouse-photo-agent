@@ -330,23 +330,22 @@ input.optical-slider:disabled::-webkit-slider-thumb {
   overflow-x: clip;
 }
 
-/* First screen — Moonshot-like: 100svh, centered slogan + wide prompt */
+/* First screen — fill the viewport, but never clip CTAs on short laptops */
 .landing-hero {
   position: relative;
   display: flex;
-  height: 100svh;
   min-height: 100svh;
-  max-height: 100svh;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  padding: 5.5rem 1.25rem 5.5rem;
+  overflow-x: clip;
+  overflow-y: visible;
+  padding: 5.5rem 1.25rem 4.5rem;
 }
 
 @media (min-width: 640px) {
   .landing-hero {
-    padding: 5.5rem 2rem 6rem;
+    padding: 5.5rem 2rem 5rem;
   }
 }
 
@@ -381,13 +380,14 @@ input.optical-slider:disabled::-webkit-slider-thumb {
   width: min(48rem, calc(100% - 0.5rem));
   flex-direction: column;
   align-items: center;
-  margin-top: 26vh;
+  /* Prefer optical centering on tall screens; collapse on short 13" laptop viewports. */
+  margin-top: clamp(0.25rem, 8vh, 22vh);
 }
 
 @media (min-width: 900px) {
   .landing-hero-stage {
     width: min(52rem, 78vw);
-    margin-top: 28vh;
+    margin-top: clamp(0.5rem, 10vh, 26vh);
   }
 }
 
@@ -404,37 +404,30 @@ input.optical-slider:disabled::-webkit-slider-thumb {
 }
 
 .landing-hero-meta {
-  position: absolute;
-  inset-inline: 1.25rem;
-  bottom: 1.25rem;
+  position: relative;
   z-index: 10;
   display: flex;
+  width: min(48rem, calc(100% - 0.5rem));
   max-width: 104rem;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem 0.75rem;
-  margin-inline: auto;
+  margin: 1.75rem auto 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 10px;
   color: rgba(255, 255, 255, 0.4);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 900px) {
   .landing-hero-meta {
-    inset-inline: 2rem;
-    bottom: 1.5rem;
+    width: min(52rem, 78vw);
   }
 }
 
 .landing-hero-prompt {
   width: 100%;
-  margin-top: 2.25rem;
-}
-
-@media (min-width: 640px) {
-  .landing-hero-prompt {
-    margin-top: 2.75rem;
-  }
+  margin-top: clamp(1.1rem, 3.5vh, 2.75rem);
 }
 
 .landing-hero-prompt-box {
@@ -442,7 +435,7 @@ input.optical-slider:disabled::-webkit-slider-thumb {
   display: flex;
   align-items: flex-end;
   width: 100%;
-  min-height: 8rem;
+  min-height: 7rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 1.5rem;
   background: rgba(12, 12, 12, 0.78);
@@ -586,30 +579,23 @@ input.optical-slider:disabled::-webkit-slider-thumb {
 
 .landing-hero-prompt-ctas {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.85rem;
-  margin-top: 1.5rem;
-}
-
-@media (min-width: 640px) {
-  .landing-hero-prompt-ctas {
-    flex-direction: row;
-    gap: 0.75rem 1rem;
-  }
+  gap: 0.65rem 0.85rem;
+  margin-top: clamp(0.9rem, 2.5vh, 1.5rem);
 }
 
 .landing-hero-prompt-cta-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 11.5rem;
+  min-width: min(11.5rem, 100%);
   border: 1px solid rgba(255, 255, 255, 0.88);
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.94);
-  padding: 0.7rem 1.55rem;
+  padding: 0.65rem 1.35rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
   font-weight: 600;
@@ -651,6 +637,52 @@ input.optical-slider:disabled::-webkit-slider-thumb {
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.92);
+}
+
+/* 13" MacBook / short laptop browsers (~700–860px content height) */
+@media (max-height: 860px) {
+  .landing-hero {
+    justify-content: flex-start;
+    padding-top: 4.75rem;
+    /* Extra bottom room so CTAs clear the ChatDock FAB. */
+    padding-bottom: 3.25rem;
+  }
+
+  .landing-hero-stage {
+    margin-top: 0.35rem;
+  }
+
+  .landing-hero-slogan {
+    font-size: clamp(1.55rem, 4.2vh, 2.35rem);
+  }
+
+  .landing-hero-stage > p {
+    margin-top: 0.65rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  .landing-hero-prompt-box {
+    min-height: 5.75rem;
+  }
+
+  .landing-hero-prompt-field {
+    padding: 0.85rem 0.35rem 0.85rem 1rem;
+  }
+
+  .landing-hero-prompt-input {
+    min-height: 3.5rem;
+    font-size: 0.9rem;
+  }
+
+  .landing-hero-prompt-rotator {
+    inset: 0.85rem 0.35rem auto 1rem;
+    font-size: 0.9rem;
+  }
+
+  .landing-hero-meta {
+    margin-top: 1.1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -361,7 +361,7 @@ export default function InfraPage() {
   );
 
   return (
-    <main className="min-h-screen px-4 py-4 sm:px-6">
+    <main className="min-h-screen px-3 py-3 sm:px-6 sm:py-4">
       <ShowcaseBanner />
       <SystemStatusBar
         verdict={health.verdict}

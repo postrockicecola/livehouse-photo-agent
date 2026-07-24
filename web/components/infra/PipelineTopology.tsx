@@ -60,14 +60,17 @@ export function PipelineTopology({ stages, jobsByStatus, loading }: Props) {
 
   return (
     <ControlPlaneSection eyebrow="Pipeline" title="Topology" right={<LivePulse />}>
-      <div className="overflow-x-auto pb-1">
-        <div key={tick} className="infra-panel-refresh flex min-w-[720px] items-stretch gap-0">
+      <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+        <div
+          key={tick}
+          className="infra-panel-refresh flex min-w-0 flex-col items-stretch gap-2 sm:min-w-[640px] sm:flex-row sm:gap-0 lg:min-w-[720px]"
+        >
           {nodes.map((node, idx) => {
             const tone = nodeTone(node.failed, node.active);
             return (
-              <div key={node.id} className="flex flex-1 items-center">
+              <div key={node.id} className="flex min-w-0 flex-1 items-center">
                 <div
-                  className={`flex min-h-[6.75rem] flex-1 flex-col rounded-xl border bg-panel2/60 p-4 transition-colors duration-500 ${NODE_RING[tone]}`}
+                  className={`flex min-h-[5.5rem] w-full flex-1 flex-col rounded-xl border bg-panel2/60 p-3 transition-colors duration-500 sm:min-h-[6.75rem] sm:p-4 ${NODE_RING[tone]}`}
                 >
                   <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{node.label}</div>
                   <div className="mt-3 grid flex-1 grid-cols-3 gap-2 text-center">

@@ -32,7 +32,7 @@ export function LandingHero() {
 
       <div className="landing-hero-stage">
         <h1 className="landing-hero-slogan">{title}</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-white/45 sm:text-base">
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-white/45 sm:mt-4 sm:text-base">
           {subtitle}
         </p>
         <LandingHeroPrompt />

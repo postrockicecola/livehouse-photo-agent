@@ -85,7 +85,7 @@ export function StudioCurrentSessionHero({
 
   return (
     <section aria-labelledby="studio-current-session">
-      <div className="relative flex min-h-[calc(100svh-42px)] flex-col overflow-hidden border-b border-white/[0.07]">
+      <div className="relative flex min-h-[min(720px,calc(100svh-42px))] flex-col overflow-x-clip border-b border-white/[0.07] max-[860px]:min-h-0">
         {heroUrl ? (
           <picture>
             {heroPortraitUrl ? (
@@ -173,52 +173,55 @@ export function StudioCurrentSessionHero({
                 </dd>
               </div>
             </dl>
-          </div>
 
-          {children ? (
-            <div className="flex flex-col gap-6 px-6 pb-5 pt-1">{children}</div>
-          ) : null}
-
-          <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-6 pt-2">
-            <button
-              type="button"
-              disabled={busy !== null}
-              onClick={onAnalyze}
-              title={
-                analyzeLocked
-                  ? "当前场次已有分析任务在跑，完成后可再点全量分析"
-                  : "清空本场分析结果并全量重跑 Stage1–3"
-              }
-              className={`h-[30px] rounded-[5px] border px-3.5 text-xs tracking-[0.03em] transition-colors disabled:cursor-not-allowed disabled:opacity-35 ${
-                analyzeLocked
-                  ? "border-amber-400/30 bg-amber-400/[0.08] text-amber-100/85"
-                  : "border-white/15 bg-white/[0.06] text-[#e8e8e8] hover:bg-white/[0.1]"
-              }`}
-            >
-              {busy === "analyze" ? "…" : analyzeLocked ? "分析中…" : "全量分析"}
-            </button>
-            <Link
-              href="/gallery"
-              className={`inline-flex h-[30px] items-center rounded-[5px] border px-3.5 text-xs tracking-[0.03em] transition-colors ${
-                canGallery
-                  ? "border-[#e8e8e8] bg-[#e8e8e8] text-[#111] hover:bg-white"
-                  : "pointer-events-none border-white/10 bg-white/[0.04] text-white/25"
-              }`}
-              aria-disabled={!canGallery}
-            >
-              Open gallery
-            </Link>
-            {!isActive ? (
+            {/* Keep primary actions above pipeline/stats so 13" laptops see them without scrolling. */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 disabled={busy !== null}
-                onClick={onActivate}
-                className="h-[30px] rounded-[5px] border border-white/10 px-3 text-xs tracking-[0.03em] text-white/45 transition-colors hover:border-white/20 hover:text-white/70 disabled:opacity-30"
+                onClick={onAnalyze}
+                title={
+                  analyzeLocked
+                    ? "当前场次已有分析任务在跑，完成后可再点全量分析"
+                    : "清空本场分析结果并全量重跑 Stage1–3"
+                }
+                className={`h-[30px] rounded-[5px] border px-3.5 text-xs tracking-[0.03em] transition-colors disabled:cursor-not-allowed disabled:opacity-35 ${
+                  analyzeLocked
+                    ? "border-amber-400/30 bg-amber-400/[0.08] text-amber-100/85"
+                    : "border-white/15 bg-white/[0.06] text-[#e8e8e8] hover:bg-white/[0.1]"
+                }`}
               >
-                {busy === "activate" ? "…" : "Set active"}
+                {busy === "analyze" ? "…" : analyzeLocked ? "分析中…" : "全量分析"}
               </button>
-            ) : null}
+              <Link
+                href="/gallery"
+                className={`inline-flex h-[30px] items-center rounded-[5px] border px-3.5 text-xs tracking-[0.03em] transition-colors ${
+                  canGallery
+                    ? "border-[#e8e8e8] bg-[#e8e8e8] text-[#111] hover:bg-white"
+                    : "pointer-events-none border-white/10 bg-white/[0.04] text-white/25"
+                }`}
+                aria-disabled={!canGallery}
+              >
+                Open gallery
+              </Link>
+              {!isActive ? (
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={onActivate}
+                  className="h-[30px] rounded-[5px] border border-white/10 px-3 text-xs tracking-[0.03em] text-white/45 transition-colors hover:border-white/20 hover:text-white/70 disabled:opacity-30"
+                >
+                  {busy === "activate" ? "…" : "Set active"}
+                </button>
+              ) : null}
+            </div>
           </div>
+
+          {children ? (
+            <div className="flex flex-col gap-6 px-6 pb-6 pt-1">{children}</div>
+          ) : (
+            <div className="pb-6" aria-hidden />
+          )}
         </div>
       </div>
     </section>
