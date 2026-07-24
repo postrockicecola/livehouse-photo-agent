@@ -1,6 +1,8 @@
 import { JobTimeline } from "@/components/JobTimeline";
 import { AppNav } from "@/components/ui/AppNav";
 
+export const dynamic = "force-dynamic";
+
 export default function InfraJobDetailPage({ params }: { params: { jobId: string } }) {
   return (
     <div className="min-h-screen">

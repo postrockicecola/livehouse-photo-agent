@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 import {
@@ -19,10 +20,20 @@ type Props = {
 };
 
 export function InfraGuidedTour({ onExpandJob, autoStart = false }: Props) {
+  const router = useRouter();
   const [open, setOpen] = useState(autoStart);
   const [step, setStep] = useState(0);
   const provenance = resolveClientProvenance();
   const current = INFRA_TOUR_STEPS[step];
+
+  const openJobCase = useCallback(
+    (jobId: number) => {
+      onExpandJob?.(jobId);
+      // Full timeline page is the durable drill-down (events / artifacts / model calls).
+      router.push(`/infra/jobs/${jobId}`);
+    },
+    [onExpandJob, router],
+  );
 
   const focusStep = useCallback(
     (id: TourStepId, index: number) => {
@@ -82,10 +93,7 @@ export function InfraGuidedTour({ onExpandJob, autoStart = false }: Props) {
           <button
             key={c.id}
             type="button"
-            onClick={() => {
-              onExpandJob?.(c.jobId);
-              document.getElementById("tour-jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
+            onClick={() => openJobCase(c.jobId)}
             className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-3 text-left transition-colors hover:border-zinc-600"
           >
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">

@@ -32,14 +32,14 @@ export const WALKTHROUGH_CASES = [
     jobId: SHOWCASE_SUCCESS_JOB_ID,
     title: "成功作业",
     summary: "QUEUED → CLAIMED → PREPROCESSING → INFERENCING → SUCCEEDED",
-    detail: "展开后可看事件时间线、产物与模型调用。",
+    detail: "点击打开事件时间线、产物与模型调用。",
   },
   {
     id: "fallback",
     jobId: SHOWCASE_FALLBACK_JOB_ID,
     title: "降级恢复",
     summary: "主模型超时 → fallback 接管 → degraded 成功",
-    detail: "两次 model_run attempt：primary TIMEOUT，fallback SUCCEEDED。",
+    detail: "点击打开：primary TIMEOUT → fallback SUCCEEDED。",
   },
 ] as const;
 

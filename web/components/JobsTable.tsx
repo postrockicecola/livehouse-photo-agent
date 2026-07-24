@@ -262,6 +262,10 @@ export function JobsTable({
     [jobs, search, workerNameById, agentOnly],
   );
 
+  /** Walkthrough may expand #61/#62 before the list row is present — still show detail. */
+  const orphanExpandedId =
+    expandedId != null && !filteredJobs.some((j) => j.id === expandedId) ? expandedId : null;
+
   useEffect(() => {
     if (didAutoExpand || defaultExpandedId == null) return;
     if (!filteredJobs.some((j) => j.id === defaultExpandedId)) return;
@@ -606,6 +610,20 @@ export function JobsTable({
           </div>
         </>
       )}
+
+      {orphanExpandedId != null ? (
+        <div className="mt-3 overflow-hidden rounded-xl border border-sky-500/25 bg-zinc-950/50">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stroke/70 px-3 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-sky-400/80">
+              Walkthrough job #{orphanExpandedId}
+            </p>
+            <Link href={`/infra/jobs/${orphanExpandedId}`} className="text-xs text-sky-400 hover:underline">
+              Full timeline →
+            </Link>
+          </div>
+          <JobExplorerRowDetail jobId={orphanExpandedId} apiBase={apiBase} workerNameById={workerNameById} />
+        </div>
+      ) : null}
     </section>
   );
 }
