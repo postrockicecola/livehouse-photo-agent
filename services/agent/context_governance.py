@@ -29,12 +29,18 @@ def truncate_tool_observation(
     return truncate_text(observation, max_chars, label="tool result")
 
 
-def compress_working_memory(working: dict[str, Any], *, max_files: int = 30) -> dict[str, Any]:
+# Match gallery_search max limit so a full shortlist (e.g. 40 keepers) survives turns.
+DEFAULT_WORKING_MEMORY_FILES = 100
+
+
+def compress_working_memory(
+    working: dict[str, Any], *, max_files: int = DEFAULT_WORKING_MEMORY_FILES
+) -> dict[str, Any]:
     """Keep a compact, JSON-serializable working-memory snapshot for the next turn."""
     out: dict[str, Any] = {}
-    files = working.get("last_files") or working.get("files") or []
+    files = working.get("last_files") or working.get("files") or working.get("selected_keys") or []
     if isinstance(files, list):
-        out["last_files"] = [str(f) for f in files[:max_files]]
+        out["last_files"] = [str(f) for f in files[:max_files] if str(f).strip()]
     cites = working.get("last_citations") or working.get("citations") or []
     if isinstance(cites, list):
         slim = []
@@ -61,13 +67,16 @@ def working_memory_prompt_block(working: dict[str, Any]) -> str:
     if not compact:
         return ""
     files = compact.get("last_files") or []
-    lines = ["WORKING MEMORY (from earlier tools this session):"]
+    lines = [
+        "WORKING MEMORY (from earlier tools this session — reuse these files when the user "
+        "says 刚才选出的 / 这些 / 那批; NEVER ask the user to re-list filenames):"
+    ]
     if compact.get("last_query"):
         lines.append(f"- last_query: {compact['last_query']}")
     if compact.get("last_tool"):
         lines.append(f"- last_tool: {compact['last_tool']}")
     if files:
-        lines.append(f"- last_files ({len(files)}): {', '.join(files[:15])}")
+        lines.append(f"- last_files ({len(files)}): {', '.join(files)}")
     cites = compact.get("last_citations") or []
     for c in cites[:5]:
         lines.append(f"- cite {c.get('file')}: {c.get('caption')}")

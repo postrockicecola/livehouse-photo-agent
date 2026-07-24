@@ -36,7 +36,7 @@ STAGE3_DIM_PROMPT_LINES: dict[str, str] = {
     "light_color_character": "light sculpting + color mood (not exposure correctness alone).",
     "moment_peak": "decisive instant, gesture/expression peak, timing strength.",
     "atmosphere_impact": "crowd/stage energy, emotional storytelling, vibe.",
-    "deliverable_subject": "client-ready: face usable, pose completeness, blocking/occlusion.",
+    "deliverable_subject": "client-ready readability: eyes/expression usable; mic/hand occlusion OK if emotion reads; only heavy face wipeout is fatal.",
 }
 
 # Strict JSON contract (single object) for Stage3 VLM — keys must stay aligned with parsers.

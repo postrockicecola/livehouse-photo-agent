@@ -24,6 +24,7 @@ from utils.stage3_result import (
     reconcile_stage3_result_from_legacy,
 )
 from engine.operators.image_processor import ImageProcessor
+from engine.operators.stage2_prefilter import row_ambiguous_tags
 
 # Stage3 admission presets when ``processing.pipeline_mode`` is set (fast | balanced | strict).
 # Omit ``pipeline_mode`` in YAML to keep using ``stage3_gating`` thresholds only (legacy).
@@ -369,6 +370,10 @@ def apply_stage3_candidates_gating(
     scales ``top_k_ratio`` by input job size, tightens threshold using score distribution,
     and logs inferred GPU savings vs admitting the full Stage2 pool.
 
+    ``ambiguous_reserve`` (optional): after score-based selection, keep up to N Stage2 rows
+    tagged ``ambiguous_tags`` (motion / haze / no_face / …) that would otherwise be gated out,
+    so livehouse edge cases still reach VLM within ``max_candidates``.
+
     Returns ``(kept_rows, skipped_rows, diagnostics)``.
     """
     thresh, ratio, gating_meta = resolve_stage3_gating_params(config)
@@ -436,14 +441,51 @@ def apply_stage3_candidates_gating(
     else:
         kept = list(pool)
 
+    amb_reserve = 0
+    try:
+        amb_reserve = max(0, int(sg.get("ambiguous_reserve", 0) or 0))
+    except (TypeError, ValueError):
+        amb_reserve = 0
+
+    amb_admitted = 0
+    cap_n: int | None = None
     cap_raw = sg.get("max_candidates")
     if cap_raw is not None:
         try:
             cap_n = int(cap_raw)
-            if cap_n >= 0:
-                kept = kept[:cap_n]
         except (TypeError, ValueError):
-            pass
+            cap_n = None
+
+    if cap_n is not None and cap_n >= 0:
+        if amb_reserve > 0 and cap_n > 0:
+            reserve_n = min(amb_reserve, cap_n)
+            primary_cap = max(0, cap_n - reserve_n)
+            primary = kept[:primary_cap]
+            primary_names = {str(r["file_name"]) for r in primary}
+            # Prefer ambiguous frames already above the Stage2 threshold (pool),
+            # then fall back to below-threshold ambiguous so haze/motion keepers survive.
+            amb_pool = [
+                r
+                for r in pool
+                if str(r["file_name"]) not in primary_names and row_ambiguous_tags(r)
+            ]
+            if len(amb_pool) < reserve_n:
+                seen_amb = {str(r["file_name"]) for r in amb_pool} | primary_names
+                extra = [
+                    r
+                    for r in enriched
+                    if str(r["file_name"]) not in seen_amb and row_ambiguous_tags(r)
+                ]
+                extra.sort(key=lambda x: float(x["_stage2_norm"]), reverse=True)
+                amb_pool = amb_pool + extra
+            amb_picked = amb_pool[:reserve_n]
+            amb_admitted = len(amb_picked)
+            used = primary_names | {str(r["file_name"]) for r in amb_picked}
+            filler = [r for r in kept if str(r["file_name"]) not in used]
+            remain = cap_n - len(primary) - len(amb_picked)
+            kept = primary + amb_picked + filler[: max(0, remain)]
+        else:
+            kept = kept[:cap_n]
 
     kept_names = {str(r["file_name"]) for r in kept}
     skipped = [r for r in enriched if str(r["file_name"]) not in kept_names]
@@ -467,6 +509,8 @@ def apply_stage3_candidates_gating(
         "stage3_inferences_saved": int(saved_inf),
         "estimated_gpu_seconds_saved": round(float(saved_inf) * est_sec, 2),
         "estimated_vlm_seconds_per_image": est_sec,
+        "ambiguous_reserve": amb_reserve,
+        "ambiguous_admitted": amb_admitted,
         "distribution": dist_meta,
         **gating_meta,
     }

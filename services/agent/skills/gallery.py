@@ -966,6 +966,7 @@ class GallerySelectSkill:
             output=summary,
             metadata={
                 "selected_keys": keys,
+                "files": keys,
                 "count": len(keys),
                 "missing": missing,
                 "ui_action": "reload_curation",
@@ -1017,14 +1018,28 @@ class ApplyFilmVibeSkill:
         vibe = read_session_vibe(self._base_dir)
         label = (vibe or {}).get("label_zh") or decision.label_zh
         variant = (vibe or {}).get("film_variant") or decision.film_variant
+        files: list[str] = []
+        try:
+            from utils.gallery_curation import read_gallery_curation
+
+            cur = read_gallery_curation(self._base_dir) or {}
+            files = [str(f).strip() for f in (cur.get("selected_keys") or []) if str(f).strip()]
+        except Exception:
+            files = []
         summary = (
             f"已应用风格「{label}」（{variant}）。"
-            "Gallery 会自动打开套用该胶片的风格预览；若未弹出，请点工具旁的「打开风格预览」。"
+            "请点回复下方的「打开风格预览」查看效果（不要用 Markdown 图片列表）。"
         )
         return SkillResult(
             ok=True,
             output=summary,
-            metadata={"ui_action": "reload_vibe", "session_vibe": vibe, "decision": decision.to_json()},
+            metadata={
+                "ui_action": "reload_vibe",
+                "session_vibe": vibe,
+                "decision": decision.to_json(),
+                "files": files,
+                "count": len(files),
+            },
         )
 
 

@@ -10,8 +10,10 @@ import os
 from collections import deque
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+
+from utils.http_security import require_ops_auth
 
 router = APIRouter()
 
@@ -1093,7 +1095,7 @@ def infra_get_job_stages(job_id: int):
 
 
 @router.post("/api/infra/jobs/{job_id}/retry", response_model=InfraJobActionResponse)
-def infra_retry_job(job_id: int):
+def infra_retry_job(job_id: int, _ops: None = Depends(require_ops_auth)):
     """
     Manual retry: re-queue with **attempt reset to 0** and cleared worker claim / errors.
 
@@ -1121,7 +1123,7 @@ def infra_retry_job(job_id: int):
 
 
 @router.post("/api/infra/jobs/{job_id}/cancel", response_model=InfraJobActionResponse)
-def infra_cancel_job(job_id: int):
+def infra_cancel_job(job_id: int, _ops: None = Depends(require_ops_auth)):
     from utils.luma_brain import get_job, update_job_status
 
     conn = _with_conn()
@@ -1211,7 +1213,7 @@ def infra_list_workers():
 
 
 @router.post("/api/infra/workers/{worker_id}/pause", response_model=InfraWorkerActionResponse)
-def infra_worker_pause(worker_id: int):
+def infra_worker_pause(worker_id: int, _ops: None = Depends(require_ops_auth)):
     """
     Set worker to ``PAUSED``: no new job claims; existing inflight work should finish or be requeued
     by maintenance if the process dies. Heartbeat does not override this state.
@@ -1231,7 +1233,7 @@ def infra_worker_pause(worker_id: int):
 
 
 @router.post("/api/infra/workers/{worker_id}/resume", response_model=InfraWorkerActionResponse)
-def infra_worker_resume(worker_id: int):
+def infra_worker_resume(worker_id: int, _ops: None = Depends(require_ops_auth)):
     """Set worker to ``ONLINE`` (new claims and dispatch headroom allowed when capacity permits)."""
     from utils.luma_brain import set_worker_control_status
 
@@ -1248,7 +1250,7 @@ def infra_worker_resume(worker_id: int):
 
 
 @router.post("/api/infra/workers/{worker_id}/drain", response_model=InfraWorkerActionResponse)
-def infra_worker_drain(worker_id: int):
+def infra_worker_drain(worker_id: int, _ops: None = Depends(require_ops_auth)):
     """
     Set worker to ``DRAINING``: do not claim new work; run existing inflight to completion.
     Dispatch/headroom count only ``ONLINE`` capacity, so this worker stops receiving new ``run_job`` work.
@@ -1583,18 +1585,34 @@ class RLHFVoteRequest(BaseModel):
 
 
 @router.post("/api/rlhf/vote")
-def rlhf_submit_vote(body: RLHFVoteRequest):
+def rlhf_submit_vote(body: RLHFVoteRequest, _ops: None = Depends(require_ops_auth)):
     """Record one pairwise human preference vote."""
+    from pathlib import Path
+
+    from utils.http_security import path_is_under_roots
     from utils.rlhf import record_vote
 
     if body.winner_path == body.loser_path:
         raise HTTPException(status_code=400, detail="winner_path and loser_path must differ")
+    try:
+        from api.gallery_routes import _gallery_path_roots
+
+        roots = _gallery_path_roots()
+    except Exception:
+        roots = []
+    for label, raw in (("winner_path", body.winner_path), ("loser_path", body.loser_path)):
+        try:
+            p = Path(raw).expanduser().resolve(strict=False)
+        except OSError as exc:
+            raise HTTPException(status_code=400, detail=f"invalid {label}") from exc
+        if not p.is_file() or (roots and not path_is_under_roots(p, roots)):
+            raise HTTPException(status_code=403, detail=f"{label} not allowed")
     conn = _with_conn()
     try:
         vote_id = record_vote(
             conn,
-            winner_path=body.winner_path,
-            loser_path=body.loser_path,
+            winner_path=str(Path(body.winner_path).expanduser().resolve()),
+            loser_path=str(Path(body.loser_path).expanduser().resolve()),
             session_key=body.session_key,
             source="manual",
             voter_id=body.voter_id,
@@ -1690,7 +1708,7 @@ def experiments_list_variants(active_only: bool = Query(default=True)):
 
 
 @router.post("/api/experiments/variants")
-def experiments_upsert_variant(body: PromptVariantUpsertRequest):
+def experiments_upsert_variant(body: PromptVariantUpsertRequest, _ops: None = Depends(require_ops_auth)):
     """Register or update a prompt variant."""
     from utils.rlhf import upsert_prompt_variant
 
@@ -1711,7 +1729,7 @@ def experiments_upsert_variant(body: PromptVariantUpsertRequest):
 
 
 @router.post("/api/experiments/runs")
-def experiments_record_run(body: ExperimentRunRequest):
+def experiments_record_run(body: ExperimentRunRequest, _ops: None = Depends(require_ops_auth)):
     """Record one prompt experiment run."""
     from utils.rlhf import record_experiment_run
 

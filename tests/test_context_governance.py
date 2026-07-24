@@ -33,3 +33,12 @@ def test_working_memory_prompt_block():
     block = working_memory_prompt_block(wm)
     assert "鼓手" in block
     assert "a.jpg" in block
+    assert "NEVER ask the user to re-list filenames" in block
+
+
+def test_compress_working_memory_keeps_forty_files():
+    files = [f"img_{i:03d}.jpg" for i in range(40)]
+    wm = compress_working_memory({"last_files": files, "last_tool": "gallery_search"})
+    assert len(wm["last_files"]) == 40
+    block = working_memory_prompt_block(wm)
+    assert "img_000.jpg" in block and "img_039.jpg" in block

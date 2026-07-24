@@ -224,12 +224,22 @@ def cmd_run(args: argparse.Namespace) -> int:
     rep = build_report(joined, topks)
     from scripts.eval.protocol import stamp_protocol
 
+    config_path = getattr(args, "config", None) or "configs/eval_stage3.yaml"
+    manifest_out = getattr(args, "manifest_out", None)
+    if manifest_out is None and args.json:
+        manifest_out = str(Path(args.json).with_name("version_manifest.json"))
+
+    want_manifest = not getattr(args, "no_manifest", False)
     stamp_protocol(
         rep,
         labels_path=args.labels,
         predictions_path=args.predictions,
-        config_path=getattr(args, "config", None) or "configs/eval_stage3.yaml",
+        config_path=config_path,
         seed=getattr(args, "seed", None),
+        attach_manifest=want_manifest,
+        manifest_out=None if not want_manifest else manifest_out,
+        dataset_name=getattr(args, "dataset_name", None),
+        dataset_version=getattr(args, "dataset_version", None),
     )
     print_report(rep)
     if args.json:
@@ -237,6 +247,70 @@ def cmd_run(args: argparse.Namespace) -> int:
         with open(args.json, "w", encoding="utf-8") as fh:
             json.dump(rep, fh, ensure_ascii=False, indent=2)
         print(f"\nReport written to {args.json}")
+    if manifest_out and want_manifest:
+        print(f"Version manifest written to {manifest_out}")
+        ref = rep.get("version_manifest") or {}
+        if ref.get("version_manifest_hash"):
+            print(f"version_manifest_hash={ref['version_manifest_hash']}")
+
+    # Emit eval_run.v1 bundle (run.json + metrics + optional baseline diff).
+    artifact_root = getattr(args, "artifact_root", None)
+    if artifact_root is None and args.json and not getattr(args, "no_eval_run", False):
+        artifact_root = str(Path(args.json).parent / "runs")
+    if artifact_root and not getattr(args, "no_eval_run", False):
+        from quality.eval_run import emit_from_stage3_report, item_scores_from_joined
+        from quality.manifest import build_version_manifest
+
+        if manifest_out and Path(manifest_out).is_file():
+            version_manifest = json.loads(Path(manifest_out).read_text(encoding="utf-8"))
+        else:
+            kw: dict[str, Any] = {
+                "config_path": config_path,
+                "labels_path": args.labels,
+            }
+            if getattr(args, "dataset_name", None):
+                kw["dataset_name"] = args.dataset_name
+            if getattr(args, "dataset_version", None):
+                kw["dataset_version"] = args.dataset_version
+            version_manifest = build_version_manifest(**kw)
+            if want_manifest and not manifest_out:
+                # Keep a sibling pin next to the artifact root parent when possible.
+                pin = Path(artifact_root).parent / "version_manifest.json"
+                from quality.manifest import write_version_manifest
+
+                write_version_manifest(pin, version_manifest)
+                print(f"Version manifest written to {pin}")
+
+        run, diff = emit_from_stage3_report(
+            rep,
+            artifact_root=artifact_root,
+            version_manifest=version_manifest,
+            dataset_name=getattr(args, "dataset_name", None) or "golden_core",
+            dataset_version=getattr(args, "dataset_version", None) or "0.1.0",
+            suite="stage3_scoring",
+            baseline_path=getattr(args, "baseline", None),
+            item_scores=item_scores_from_joined(joined.pairs),
+            tags=["stage3_scoring"],
+        )
+        print(f"Eval run written to {run['artifact_root']}/run.json")
+        print(f"eval_run_id={run['eval_run_id']}")
+        if diff is not None:
+            worst = (diff.get("worst_metric_moves") or [])[:5]
+            print(f"Baseline diff: {len(diff.get('metric_deltas') or [])} metrics compared")
+            for row in worst:
+                print(
+                    f"  {row.get('metric')}: {row.get('baseline')} → {row.get('current')} "
+                    f"(Δ={row.get('delta')})"
+                )
+            regs = diff.get("top_regressors") or []
+            if regs:
+                print("Top abs-error regressors:")
+                for row in regs[:5]:
+                    print(
+                        f"  {row.get('file_key')}: abs_err "
+                        f"{row.get('baseline_abs_error')} → {row.get('current_abs_error')} "
+                        f"(Δ={row.get('delta_abs_error')})"
+                    )
 
     if args.output_md:
         from scripts.eval.report import render_markdown
@@ -275,6 +349,42 @@ def main(argv: list[str] | None = None) -> int:
     pr.add_argument("--json", default=None, help="optional path to dump the report as JSON")
     pr.add_argument("--output-md", default=None, dest="output_md",
                     help="optional path to write a Markdown report (e.g. reports/eval/run.md)")
+    pr.add_argument(
+        "--config",
+        default="configs/eval_stage3.yaml",
+        help="eval config used for version_manifest + protocol (default: %(default)s)",
+    )
+    pr.add_argument(
+        "--manifest-out",
+        default=None,
+        dest="manifest_out",
+        help="write version_manifest.v1 JSON (default: sibling version_manifest.json when --json is set)",
+    )
+    pr.add_argument(
+        "--no-manifest",
+        action="store_true",
+        dest="no_manifest",
+        help="skip version_manifest.v1 attach/write",
+    )
+    pr.add_argument(
+        "--artifact-root",
+        default=None,
+        dest="artifact_root",
+        help="write eval_run.v1 bundle under this dir (default: <json-parent>/runs when --json is set)",
+    )
+    pr.add_argument(
+        "--no-eval-run",
+        action="store_true",
+        dest="no_eval_run",
+        help="skip eval_run.v1 artifact bundle",
+    )
+    pr.add_argument(
+        "--baseline",
+        default=None,
+        help="baseline eval_run run.json or artifact dir for diff.json",
+    )
+    pr.add_argument("--dataset-name", default=None, dest="dataset_name")
+    pr.add_argument("--dataset-version", default=None, dest="dataset_version")
     pr.set_defaults(func=cmd_run)
 
     pt = sub.add_parser("template", help="generate a labeling skeleton from predictions")

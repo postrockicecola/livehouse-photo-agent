@@ -1,0 +1,60 @@
+{
+  "schema_version": "eval_run.v1",
+  "eval_run_id": "evr_01EXAMPLE000000000000000",
+  "suite": "stage3_scoring",
+  "status": "succeeded",
+  "started_at": "2026-07-23T16:05:00+00:00",
+  "finished_at": "2026-07-23T16:40:00+00:00",
+  "version_manifest": {
+    "manifest_id": "exp_stage3_eval_temp0_example",
+    "version_manifest_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "dataset": {
+    "name": "golden_core",
+    "version": "0.1.0",
+    "split_filter": ["smoke"]
+  },
+  "metrics": {
+    "schema": "metrics.stage3_scoring.v1",
+    "spearman_overall": 0.72,
+    "pearson_overall": 0.7,
+    "mae_overall": 8.4,
+    "rmse_overall": 11.2,
+    "parse_fail_rate": 0.0,
+    "n_scored": 32
+  },
+  "artifact_root": "quality/store/runs/evr_01EXAMPLE000000000000000",
+  "baseline_run_id": null,
+  "gate": {
+    "name": "smoke",
+    "result": "pass",
+    "checks": [
+      {
+        "id": "parse_fail_rate_max",
+        "result": "pass",
+        "metric": "parse_fail_rate",
+        "actual": 0.0,
+        "threshold": 0.05
+      },
+      {
+        "id": "spearman_overall_min",
+        "result": "pass",
+        "metric": "spearman_overall",
+        "actual": 0.72,
+        "threshold": 0.5
+      }
+    ]
+  },
+  "counts": {
+    "items_total": 32,
+    "items_scored": 32,
+    "parse_fail": 0
+  },
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-07-23T16:40:00+00:00",
+    "git_sha": "deadbeef",
+    "seed": 20260611
+  },
+  "tags": ["example", "phase0"]
+}

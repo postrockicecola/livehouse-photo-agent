@@ -18,6 +18,9 @@ jobs:
       - run: pip install -r requirements.txt -r requirements-dev.txt
       # Critical-rules-only gate: syntax errors and undefined names (F821-class bugs).
       - run: ruff check --select E9,F63,F7,F82 --exclude archive .
+      # Quality platform Phase-0: contracts + golden hydrate + pinned stage3_scoring smoke.
+      - run: python quality/validate_contracts.py
+      - run: python -m quality.smoke
       # External-service tests (Ollama / Redis) are marker-excluded; see pytest.ini.
       - run: pytest -m "not requires_ollama and not requires_redis" -q
       # Reliability scenarios on an isolated temp SQLite (no broker needed).

@@ -8,7 +8,7 @@ alwaysApply: false
 
 **Pipeline:** OpenCV stages → aesthetic scoring → VLM → `analysis_results.json` + web galleries.
 
-**Stack:** Python (core); FastAPI `gallery_server.py`; Celery + Redis; Next.js + Tailwind `web/`; Go ingest (`main.go`, `scanner.go`, `executor.go`, …), `preview_extractor.go` (build tag `tools`), `organizer.go` (tools).
+**Stack:** Python (core); FastAPI `gallery_server.py`; Celery + Redis; Next.js + Tailwind `web/`; Go ingest (`main.go`, `scanner.go`, `executor.go`, …), `preview_extractor.go` (build tag `tools`).
 
 **Config:** `configs/livehouse.yaml` (`paths.source_dir`, `model.*`, `processing.*`). JSON: `utils/json_safe` (NumPy). VLM: `PrioritizedInferenceQueue` — no unbounded parallel Ollama. Stage 3: `services/processor/stages/deep_analysis.py`, `engine/models/vlm_model.py`; keep VLM output schema stable unless migrating.
 

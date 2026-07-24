@@ -99,6 +99,12 @@ def _ensure_schema(conn: sqlite3.Connection, abs_path: str) -> None:
     # land even if this process previously initialized an older schema revision.
     with _SCHEMA_LOCK:
         conn.executescript(_SCHEMA)
+        cols = {
+            str(r[1])
+            for r in conn.execute("PRAGMA table_info(conversations)").fetchall()
+        }
+        if "working_memory" not in cols:
+            conn.execute("ALTER TABLE conversations ADD COLUMN working_memory TEXT")
         conn.commit()
         _SCHEMA_INITIALIZED.add(abs_path)
 
@@ -268,8 +274,80 @@ def reset_conversation(conn: sqlite3.Connection, owner: str, session_id: str, mo
         (owner, session_id, mode),
     ).fetchone()
     if row is not None:
-        conn.execute("DELETE FROM messages WHERE conversation_id=?", (int(row["id"]),))
+        cid = int(row["id"])
+        conn.execute("DELETE FROM messages WHERE conversation_id=?", (cid,))
+        conn.execute(
+            "UPDATE conversations SET working_memory=NULL, updated_at=? WHERE id=?",
+            (time.time(), cid),
+        )
         conn.commit()
+
+
+def get_working_memory(conn: sqlite3.Connection, conversation_id: int) -> dict[str, Any]:
+    """Return the durable short-term working memory for a conversation (may be empty)."""
+    import json
+
+    row = conn.execute(
+        "SELECT working_memory FROM conversations WHERE id=?",
+        (conversation_id,),
+    ).fetchone()
+    if row is None:
+        return {}
+    raw = row["working_memory"] if "working_memory" in row.keys() else None
+    if not raw:
+        return {}
+    try:
+        data = json.loads(raw)
+    except (TypeError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def set_working_memory(
+    conn: sqlite3.Connection, conversation_id: int, working: dict[str, Any]
+) -> None:
+    """Persist compact working memory (last search hits, etc.) for the next turn."""
+    import json
+
+    from services.agent.context_governance import compress_working_memory
+
+    compact = compress_working_memory(working or {})
+    payload = json.dumps(compact, ensure_ascii=False) if compact else None
+    conn.execute(
+        "UPDATE conversations SET working_memory=?, updated_at=? WHERE id=?",
+        (payload, time.time(), conversation_id),
+    )
+    conn.commit()
+
+
+def working_memory_from_events(events: list[dict[str, Any]]) -> dict[str, Any]:
+    """Best-effort rebuild of working memory from recent tool_call / done events."""
+    from services.agent.context_governance import compress_working_memory
+
+    for ev in reversed(events or []):
+        wm = ev.get("working_memory")
+        if isinstance(wm, dict) and (wm.get("last_files") or wm.get("last_tool")):
+            return compress_working_memory(wm)
+        if str(ev.get("type") or "") != "tool_call" and "tool" not in ev:
+            continue
+        meta = ev.get("metadata") if isinstance(ev.get("metadata"), dict) else {}
+        files = meta.get("files") or meta.get("selected_keys")
+        if not files:
+            continue
+        rebuilt: dict[str, Any] = {
+            "last_tool": ev.get("tool"),
+            "last_files": list(files),
+        }
+        args = ev.get("args") if isinstance(ev.get("args"), dict) else {}
+        if args.get("query") is not None:
+            rebuilt["last_query"] = args.get("query")
+        if meta.get("citations"):
+            rebuilt["last_citations"] = list(meta.get("citations") or [])
+        rag = meta.get("rag") if isinstance(meta.get("rag"), dict) else {}
+        if rag.get("mode") is not None:
+            rebuilt["last_rag_mode"] = rag.get("mode")
+        return compress_working_memory(rebuilt)
+    return {}
 
 
 def message_count(conn: sqlite3.Connection, conversation_id: int) -> int:

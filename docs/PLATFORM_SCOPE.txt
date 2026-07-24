@@ -46,6 +46,13 @@ Batch E hooks (scaffolding, not full platform)
    Optional TracerProvider bootstrap (infra/otel_bootstrap.py).
    No Alertmanager / Grafana shipped.
 
+5. HTTP security (local-demo friendly, fail-closed off-loopback)
+   LIVEHOUSE_OPS_TOKEN / LIVEHOUSE_INFRA_TOKEN — mutating infra + luma-professional.
+   LIVEHOUSE_INGEST_TOKEN — ingest hook (required off-loopback).
+   LIVEHOUSE_ALLOW_INSECURE_LOCAL=1 — opt-in open auth for demos.
+   LIVEHOUSE_CORS_ORIGINS — comma list; default Lab URL + localhost:3000 (never *+credentials).
+   /image path queries are allowlisted to gallery/session/RAW roots.
+
 ==============================================================================
 Interview one-liner
 ==============================================================================

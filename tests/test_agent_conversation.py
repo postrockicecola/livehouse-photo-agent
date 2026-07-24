@@ -119,6 +119,34 @@ def test_chat_runs_tool_then_answers():
     assert "tool" in roles
 
 
+def test_working_memory_tracks_selected_keys_as_last_files():
+    class _Select:
+        name = "gallery_select"
+        description = "select"
+        parameters = {"type": "object", "properties": {"files": {"type": "array"}}}
+
+        def run(self, args):
+            keys = list(args.get("files") or [])
+            return SkillResult(
+                ok=True,
+                output=f"selected {len(keys)}",
+                metadata={"selected_keys": keys, "ui_action": "reload_curation"},
+            )
+
+    reg = SkillRegistry()
+    reg.register(_Select())
+    scripted = iter(
+        [
+            '{"tool":"gallery_select","args":{"files":["a.jpg","b.jpg"]}}',
+            "已选中 2 张",
+        ]
+    )
+    agent = ConversationalAgent(lambda _m: next(scripted), skills=reg)
+    res = agent.chat("标出来")
+    assert res.working_memory.get("last_files") == ["a.jpg", "b.jpg"]
+    assert res.working_memory.get("last_tool") == "gallery_select"
+
+
 def test_chat_breaks_on_repeated_identical_tool_call():
     reg = SkillRegistry()
     reg.register(_echo_skill())

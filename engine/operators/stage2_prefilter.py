@@ -1,6 +1,8 @@
-"""Aggressive Stage 2 pre-gates (cheap CV) and near-duplicate suppression (perceptual pHash).
+"""Stage 2 pre-gates (cheap CV) and near-duplicate suppression (perceptual pHash).
 
-Prefer false negatives before expensive VLM. Optional via ``processing.stage2_prefilter`` in config.
+Livehouse policy: hard-reject only empty / unstructured severe blur / extreme blowout.
+Ambiguous concert frames (motion blur, backlight crush, no frontal face, haze, crowd
+energy) pass with ``ambiguous_tags`` so Stage3 admission can reserve VLM slots.
 """
 from __future__ import annotations
 
@@ -113,6 +115,22 @@ def need_phash_for_pipeline(config: Mapping[str, Any]) -> bool:
     return bool(p.get("enabled", False))
 
 
+def row_ambiguous_tags(row: Mapping[str, Any]) -> List[str]:
+    """Collect ambiguous tags from a Stage2 eligible row (debug_info or top-level)."""
+    dbg = row.get("debug_info") if isinstance(row.get("debug_info"), Mapping) else {}
+    raw = dbg.get("ambiguous_tags") if isinstance(dbg, Mapping) else None
+    if raw is None:
+        raw = row.get("ambiguous_tags")
+    if not isinstance(raw, (list, tuple)):
+        return []
+    out: List[str] = []
+    for t in raw:
+        s = str(t).strip()
+        if s:
+            out.append(s)
+    return out
+
+
 @dataclass
 class Stage2ImageResult:
     fast_score: float
@@ -152,6 +170,16 @@ def _bright_subject_cover_frac(gray: np.ndarray) -> float:
     return float(mask.mean())
 
 
+def _structured_motion_escape(blur_type: str, edge_ratio: float) -> bool:
+    """Intentional / structured motion should not hard-die on low Laplacian."""
+    bt = str(blur_type or "")
+    if bt == "artistic_motion_blur":
+        return True
+    if bt in ("motion_blur", "slight_blur") and float(edge_ratio) >= 0.0035:
+        return True
+    return False
+
+
 def assess_stage2_per_image(
     image_path: str,
     config: Mapping[str, Any],
@@ -161,7 +189,10 @@ def assess_stage2_per_image(
     img_bgr: Optional[np.ndarray] = None,
 ) -> Stage2ImageResult:
     """
-    Single decode when possible: fast aesthetic + optional pHash (Stage3/cache / dedup) + aggressive prefilter rules.
+    Single decode when possible: fast aesthetic + optional pHash + prefilter rules.
+
+    Hard rejects are rare (read fail, unstructured severe blur, extreme blowout).
+    Softer livehouse defects become ``ambiguous_tags`` and still pass.
     """
     pf = stage2_prefilter_settings(config)
     enabled = bool(pf.get("enabled", False))
@@ -170,6 +201,7 @@ def assess_stage2_per_image(
     want_phash = enabled or need_phash_for_pipeline(config) or want_phash_for_s3_cache
 
     dbg_x: Dict[str, Any] = {}
+    ambiguous: List[str] = []
     pre_reason: Optional[str] = None
     ok = True
 
@@ -200,72 +232,111 @@ def assess_stage2_per_image(
             )
 
         gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-        lap_min = float(pf.get("laplacian_var_min", 0.0) or 0.0)
-        if lap_min > 0.0:
-            lv = float(ImageProcessor._laplacian_var(gray))
-            dbg_x["stage2_laplacian_var"] = lv
-            if lv < lap_min:
-                ok = False
-                pre_reason = f"stage2_blur_laplacian<{lap_min:.1f}"
+        bt = str(debug_info.get("blur_type") or "")
+        edges = float(debug_info.get("edge_ratio", 0.0) or 0.0)
+        contrast = float(debug_info.get("contrast", 0.0) or 0.0)
 
-        if ok and bool(pf.get("reject_motion_blur", True)):
-            bt = str(debug_info.get("blur_type") or "")
-            if bt == "motion_blur":
+        lv = float(ImageProcessor._laplacian_var(gray))
+        dbg_x["stage2_laplacian_var"] = lv
+
+        # Soft blur band (default) vs hard unstructured floor.
+        soft_lap = float(pf.get("laplacian_var_min", 40.0) or 0.0)
+        hard_lap = float(pf.get("laplacian_var_hard_min", 18.0) or 0.0)
+        if hard_lap > 0.0 and lv < hard_lap:
+            if _structured_motion_escape(bt, edges):
+                ambiguous.append("soft_blur_structured")
+            else:
+                ok = False
+                pre_reason = f"stage2_blur_laplacian_hard<{hard_lap:.1f}"
+        elif soft_lap > 0.0 and lv < soft_lap:
+            ambiguous.append("soft_blur")
+
+        if ok and bt == "motion_blur":
+            if bool(pf.get("reject_motion_blur", False)):
                 ok = False
                 pre_reason = "stage2_motion_blur_reject"
+            else:
+                ambiguous.append("motion_blur")
+        elif bt == "artistic_motion_blur":
+            ambiguous.append("artistic_motion_blur")
 
         hf = float(debug_info.get("highlight_frac", 0.0) or 0.0)
         sf = float(debug_info.get("shadow_frac", 0.0) or 0.0)
 
-        if ok:
+        # Extreme blowout remains a hard reject; mild crush/blowout → ambiguous.
+        hard_hf = pf.get("hard_highlight_frac")
+        if ok and hard_hf is not None and hf > float(hard_hf):
+            ok = False
+            pre_reason = "stage2_extreme_overexposure"
+        else:
             max_hf = pf.get("max_highlight_frac")
-            max_sf = pf.get("max_shadow_frac")
             if max_hf is not None and hf > float(max_hf):
-                ok = False
-                pre_reason = "stage2_overexposed"
-            elif max_sf is not None and sf > float(max_sf):
-                ok = False
-                pre_reason = "stage2_underexposed"
+                ambiguous.append("highlight_hot")
+            max_sf = pf.get("max_shadow_frac")
+            if max_sf is not None and sf > float(max_sf):
+                ambiguous.append("shadow_crush")
 
-        if ok:
-            hard_hf = pf.get("hard_highlight_frac")
-            if hard_hf is not None and hf > float(hard_hf):
-                ok = False
-                pre_reason = "stage2_extreme_overexposure"
+        # Haze / smoke: low contrast + sparse edges — keep, mark for VLM.
+        if contrast > 0 and contrast < 12.0 and edges < 0.006:
+            ambiguous.append("haze_low_contrast")
 
         require_face = bool(pf.get("require_face", False))
-        crowd_cap: Optional[int] = None
+        face_soft = bool(pf.get("face_soft_gate", True))
+        crowd_hard: Optional[int] = None
+        crowd_soft: Optional[int] = None
         cm_raw = pf.get("crowd_obstruction_max_faces")
         if cm_raw is not None:
             try:
-                crowd_cap = int(cm_raw)
+                crowd_hard = int(cm_raw)
             except (TypeError, ValueError):
-                crowd_cap = None
-        need_faces = require_face or (crowd_cap is not None and crowd_cap > 0)
+                crowd_hard = None
+        cs_raw = pf.get("soft_crowd_max_faces")
+        if cs_raw is not None:
+            try:
+                crowd_soft = int(cs_raw)
+            except (TypeError, ValueError):
+                crowd_soft = None
+
+        need_faces = require_face or face_soft or (
+            (crowd_hard is not None and crowd_hard > 0)
+            or (crowd_soft is not None and crowd_soft > 0)
+        )
 
         nf = -1
         if ok and need_faces:
             mn = int(pf.get("face_min_neighbors", 5) or 5)
             nf = _count_faces(gray, mn)
             dbg_x["face_count"] = nf
-            if require_face:
-                if nf == -1:
-                    pass  # cascade missing
-                elif nf < 1:
+            if nf == -1:
+                pass  # cascade missing
+            elif nf < 1:
+                if require_face:
                     ok = False
                     pre_reason = "stage2_no_face_subject"
-            if ok and crowd_cap is not None and crowd_cap > 0 and nf >= 0 and nf > crowd_cap:
+                elif face_soft:
+                    ambiguous.append("no_face")
+            if ok and crowd_hard is not None and crowd_hard > 0 and nf > crowd_hard:
                 ok = False
                 pre_reason = "stage2_crowd_obstruction"
+            elif (
+                ok
+                and crowd_soft is not None
+                and crowd_soft > 0
+                and nf >= 0
+                and nf > crowd_soft
+            ):
+                ambiguous.append("crowd_dense")
 
         if ok:
             cmin = pf.get("composition_min")
             if cmin is not None:
-                comp = float(ImageProcessor.assess_composition(str(image_path), gray=gray, img_bgr=img_bgr))
+                comp = float(
+                    ImageProcessor.assess_composition(str(image_path), gray=gray, img_bgr=img_bgr)
+                )
                 dbg_x["composition_score"] = comp
                 if comp < float(cmin):
-                    ok = False
-                    pre_reason = "stage2_extreme_clipping_or_framing"
+                    # Soft only: bright-centroid proxy fails on gel/backlight stages.
+                    ambiguous.append("weak_composition_proxy")
 
         if ok:
             tiny_thr = pf.get("tiny_subject_bright_frac_min")
@@ -273,8 +344,17 @@ def assess_stage2_per_image(
                 bfrac = _bright_subject_cover_frac(gray)
                 dbg_x["bright_subject_frac"] = bfrac
                 if bfrac < float(tiny_thr):
-                    ok = False
-                    pre_reason = "stage2_tiny_subject"
+                    ambiguous.append("tiny_bright_subject")
+
+        # Deduplicate tags while preserving order.
+        seen: set[str] = set()
+        amb_uniq: List[str] = []
+        for t in ambiguous:
+            if t not in seen:
+                seen.add(t)
+                amb_uniq.append(t)
+        if amb_uniq:
+            dbg_x["ambiguous_tags"] = amb_uniq
 
         return Stage2ImageResult(
             fast_score=float(fs),

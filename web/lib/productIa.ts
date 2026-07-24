@@ -83,73 +83,6 @@ export const LANDING_HERO = {
   ],
 } as const;
 
-/** Keys on the live `/api/landing/stats` payload a scale stat can bind to. */
-export type LandingStatKey =
-  | "sessions_total"
-  | "photos_total"
-  | "analyzed_photos_total"
-  | "exported_photos_total";
-
-export type LandingScaleStat = {
-  id: string;
-  /** Live-stats field this cell binds to; live value (when present) overrides `value`. */
-  statKey: LandingStatKey;
-  value: number;
-  suffix?: string;
-  label: string;
-  caption: string;
-  narrative: string;
-  detailHref?: string;
-  detailLabel?: string;
-};
-
-export const LANDING_SCALE_INTRO = {
-  eyebrow: "规模（次级）",
-  title: "归档场次上的累计规模。",
-  subtitle:
-    "补充上下文，不是第一印象。优先 Live；不可达时为 Recorded 数量级，均带 provenance 标签。",
-} as const;
-
-export const LANDING_SCALE_STATS: LandingScaleStat[] = [
-  {
-    id: "sessions",
-    statKey: "sessions_total",
-    value: 50,
-    suffix: "+",
-    label: "Sessions",
-    caption: "已建档场次",
-    narrative: "每场独立建档，带时间线和文件索引。",
-    detailHref: `${STUDIO_HOME}#sessions`,
-    detailLabel: "在 Studio 查看场次",
-  },
-  {
-    id: "archived",
-    statKey: "photos_total",
-    value: 27000,
-    suffix: "+",
-    label: "Photos",
-    caption: "入库照片（预览 + RAW）",
-    narrative: "导出时预览与 RAW 按目录配对。",
-  },
-  {
-    id: "evaluations",
-    statKey: "analyzed_photos_total",
-    value: 8000,
-    suffix: "+",
-    label: "Analyzed",
-    caption: "完成多阶段分析",
-    narrative: "粗筛 → 打分 → VLM，再人工确认。",
-  },
-  {
-    id: "brain",
-    statKey: "exported_photos_total",
-    value: 573,
-    label: "In ledger",
-    caption: "写入 Brain 的记录",
-    narrative: "结果进可查询的作业账本。",
-  },
-];
-
 export type NavLink = {
   label: string;
   href: string;
@@ -192,13 +125,6 @@ export const LANDING_WORKFLOW = {
   ] satisfies WorkflowStep[],
 } as const;
 
-export type BrainEntity = {
-  id: string;
-  label: string;
-  caption: string;
-  countKey: keyof LandingBrainCounts;
-};
-
 export type LandingBrainCounts = {
   jobs: number;
   events: number;
@@ -216,23 +142,6 @@ export const LANDING_BRAIN_FALLBACK_COUNTS: LandingBrainCounts = {
   photos: 573,
   snapshots: 0,
 };
-
-export const LANDING_BRAIN = {
-  id: "brain",
-  eyebrow: "Data model",
-  title: "每次推理都进账本。",
-  subtitle: "Jobs、Events、Artifacts、Sessions——pipeline 步骤和 Agent step 都能查。",
-  manifesto: ["推理有记录", "产物可回放", "状态可追查"],
-  entities: [
-    { id: "jobs", label: "Jobs", caption: "作业与生命周期", countKey: "jobs" },
-    { id: "events", label: "Events", caption: "状态变更事件", countKey: "events" },
-    { id: "artifacts", label: "Artifacts", caption: "分析结果与导出", countKey: "artifacts" },
-    { id: "sessions", label: "Sessions", caption: "场次与时间线", countKey: "sessions" },
-    { id: "photos", label: "Photos", caption: "单张入库与结论", countKey: "photos" },
-    { id: "snapshots", label: "Snapshots", caption: "运行时快照", countKey: "snapshots" },
-  ] satisfies BrainEntity[],
-  infraHref: "/infra/brain",
-} as const;
 
 export type LandingInfraMetrics = {
   queue_depth: number;
@@ -410,75 +319,6 @@ export const LANDING_AI_LAYER = {
   },
 } as const;
 
-export type AgentLoopStep = {
-  id: string;
-  label: string;
-  tagline: string;
-};
-
-export type AgentTool = {
-  id: string;
-  name: string;
-  description: string;
-};
-
-export type AgentSurface = {
-  id: string;
-  title: string;
-  description: string;
-  href: string;
-  cta: string;
-};
-
-/** Optional curation loop + ChatDock (shown in Infra / Gallery, not as a landing pitch). */
-export const LANDING_AGENT = {
-  id: "agent",
-  eyebrow: "Agent",
-  title: "预算内的选片循环。",
-  subtitle: "在候选集上 inspect / analyze / finalize，把每一步决策记进作业时间线。",
-  honesty: "步数与推理次数有上限；异常输出时回退到确定性策略。",
-  loop: [
-    { id: "observe", label: "Observe", tagline: "看候选和已有分数" },
-    { id: "plan", label: "Plan", tagline: "选下一个 tool" },
-    { id: "act", label: "Act", tagline: "inspect / analyze / …" },
-    { id: "reflect", label: "Reflect", tagline: "需要的话升级再看" },
-    { id: "finalize", label: "Finalize", tagline: "给出 keepers 并结束" },
-  ] satisfies AgentLoopStep[],
-  tools: [
-    { id: "inspect", name: "inspect", description: "看元数据和粗信号" },
-    { id: "analyze", name: "analyze", description: "按 tier 调 VLM" },
-    { id: "compare", name: "compare", description: "并排比较" },
-    { id: "cluster", name: "cluster", description: "合并连拍近似图" },
-    { id: "query", name: "query_gallery", description: "复用历史分析" },
-    { id: "finalize", name: "finalize", description: "出选片结果" },
-  ] satisfies AgentTool[],
-  surfaces: [
-    {
-      id: "runs",
-      title: "Agent runs",
-      description: "在 Infra 看 step、LLM/heuristic 比例、keepers。",
-      href: "/infra",
-      cta: "打开 Infra →",
-    },
-    {
-      id: "chat",
-      title: "ChatDock",
-      description: "在 Gallery 问场次：读分数和 keep/trash，不改文件。",
-      href: "/gallery",
-      cta: "打开 Gallery →",
-    },
-  ] satisfies AgentSurface[],
-  guards: ["max_steps", "inference budget", "FINALIZE"],
-} as const;
-
-export const LANDING_DOC_LINKS: NavLink[] = [
-  { label: "上手", href: "#", description: "从入库到第一次 Gallery 选片" },
-  { label: "主链路", href: "#workflow", description: "门控 → 作业 → 有界 VLM" },
-  { label: "Evaluation", href: "/eval", description: "Stage3 / Agent 基线与出处" },
-  { label: "Infra", href: "#infra", description: "队列、Worker、重试、死信" },
-  { label: "Gallery", href: "/gallery", description: "读结果并确认选片" },
-];
-
 export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   {
     title: "界面",
@@ -531,9 +371,3 @@ export const APP_MORE_NAV: NavLink[] = [
   { label: "Personal", href: "/personal" },
   { label: "Site", href: "/" },
 ];
-
-/** @deprecated Prefer APP_PRIMARY_NAV */
-export const STUDIO_PRIMARY_NAV: NavLink[] = APP_PRIMARY_NAV;
-
-/** @deprecated Prefer APP_MORE_NAV */
-export const STUDIO_SECONDARY_NAV: NavLink[] = APP_MORE_NAV;

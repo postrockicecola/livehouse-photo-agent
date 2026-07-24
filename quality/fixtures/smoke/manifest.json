@@ -1,0 +1,14 @@
+{
+  "seed": 1,
+  "target": 8,
+  "items": [
+    {"file": "smoke__a.jpg", "session": "smoke", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "source_path": "quality/fixtures/smoke/images/a.jpg"},
+    {"file": "smoke__b.jpg", "session": "smoke", "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "source_path": "quality/fixtures/smoke/images/b.jpg"},
+    {"file": "smoke__c.jpg", "session": "smoke", "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "source_path": "quality/fixtures/smoke/images/c.jpg"},
+    {"file": "smoke__d.jpg", "session": "smoke", "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_path": "quality/fixtures/smoke/images/d.jpg"},
+    {"file": "smoke__e.jpg", "session": "smoke", "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "source_path": "quality/fixtures/smoke/images/e.jpg"},
+    {"file": "smoke__f.jpg", "session": "smoke", "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "source_path": "quality/fixtures/smoke/images/f.jpg"},
+    {"file": "smoke__g.jpg", "session": "smoke", "sha256": "1111111111111111111111111111111111111111111111111111111111111111", "source_path": "quality/fixtures/smoke/images/g.jpg"},
+    {"file": "smoke__h.jpg", "session": "smoke", "sha256": "2222222222222222222222222222222222222222222222222222222222222222", "source_path": "quality/fixtures/smoke/images/h.jpg"}
+  ]
+}

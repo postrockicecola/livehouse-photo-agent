@@ -1,0 +1,35 @@
+{
+  "schema_version": "golden_item.v1",
+  "item_id": "20260130__DSC02506",
+  "file": "20260130__DSC02506.jpg",
+  "file_key": "20260130__dsc02506",
+  "content_hash": "9a75ab9b65e22b4714a17f913ff607333f947edea48c5f9074e5fd1d6f58ae9e",
+  "source_path": "Livehouse_Archive/2026-01-30/Previews/DSC02506.jpg",
+  "session": "2026-01-30",
+  "label": {
+    "label_schema": "stage3_dims_v1",
+    "overall": 76.0,
+    "dims": {
+      "focus_sharpness": 7.0,
+      "exposure_control": 6.5,
+      "noise_cleanliness": null,
+      "composition_framing": 7.0,
+      "light_color_character": 6.0,
+      "moment_peak": 8.0,
+      "atmosphere_impact": 7.5,
+      "deliverable_subject": 7.0
+    },
+    "keep": true,
+    "category": "keep",
+    "notes": "strong moment; album depth, not hero"
+  },
+  "splits": ["core", "smoke"],
+  "slices": ["stage_front", "motion"],
+  "provenance": {
+    "origin": "imported",
+    "label_version": "labels_v0",
+    "imported_from": "data/eval/labels.jsonl"
+  },
+  "created_at": "2026-07-23T16:00:00+00:00",
+  "updated_at": "2026-07-23T16:00:00+00:00"
+}

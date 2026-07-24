@@ -34,6 +34,7 @@ import copy
 import json
 import logging
 import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -69,18 +70,22 @@ class Stage3PHashCache:
         max_hamming: int = 7,
         persist_path: Path | str | None = None,
         on_persist: Callable[[], None] | None = None,
+        max_entries: int = 4096,
     ) -> None:
         self._max_hamming = max(0, int(max_hamming))
+        self._max_entries = max(1, int(max_entries))
         self._persist_path = Path(persist_path) if persist_path else None
         self._on_persist = on_persist
         self._lock = threading.Lock()
-        self._by_phash: dict[int, dict[str, Any]] = {}
+        # LRU via OrderedDict (move_to_end on hit/store; popitem(last=False) evicts).
+        self._by_phash: OrderedDict[int, dict[str, Any]] = OrderedDict()
 
         self._lookups = 0
         self._hits_exact = 0
         self._hits_similar = 0
         self._misses = 0
         self._saved_inferences = 0
+        self._evictions = 0
 
     @property
     def max_hamming(self) -> int:
@@ -104,6 +109,7 @@ class Stage3PHashCache:
             if ph in self._by_phash:
                 self._hits_exact += 1
                 self._saved_inferences += 1
+                self._by_phash.move_to_end(ph)
                 out = copy.deepcopy(self._by_phash[ph])
                 out[CACHE_HIT_META_KEY] = {
                     "kind": "exact",
@@ -114,6 +120,7 @@ class Stage3PHashCache:
 
             best_p: int | None = None
             best_d = self._max_hamming + 1
+            # Cap similar scan cost on large caches (still O(n) but bounded by max_entries).
             for k in self._by_phash:
                 d = hamming_64(ph, k)
                 if d < best_d:
@@ -123,6 +130,7 @@ class Stage3PHashCache:
             if best_p is not None and best_d <= self._max_hamming:
                 self._hits_similar += 1
                 self._saved_inferences += 1
+                self._by_phash.move_to_end(best_p)
                 out = copy.deepcopy(self._by_phash[best_p])
                 out[CACHE_HIT_META_KEY] = {
                     "kind": "similar",
@@ -133,6 +141,11 @@ class Stage3PHashCache:
 
             self._misses += 1
             return None
+
+    def _evict_if_needed_unlocked(self) -> None:
+        while len(self._by_phash) > self._max_entries:
+            self._by_phash.popitem(last=False)
+            self._evictions += 1
 
     def store_result(self, phash: int, result: Mapping[str, Any]) -> None:
         """Store a successful Stage3 dict under ``phash`` (ignored if phash is 0 or result not storable)."""
@@ -145,6 +158,8 @@ class Stage3PHashCache:
         to_store.pop(CACHE_HIT_META_KEY, None)
         with self._lock:
             self._by_phash[ph] = to_store
+            self._by_phash.move_to_end(ph)
+            self._evict_if_needed_unlocked()
 
     def clear(self) -> None:
         with self._lock:
@@ -165,6 +180,8 @@ class Stage3PHashCache:
                 "stage3_vlm_cache_saved_inferences": self._saved_inferences,
                 "stage3_vlm_cache_hit_rate": round(hits / max(1, lookups), 6) if lookups else 0.0,
                 "stage3_vlm_cache_entries": len(self._by_phash),
+                "stage3_vlm_cache_max_entries": self._max_entries,
+                "stage3_vlm_cache_evictions": self._evictions,
             }
 
     def save_to_json(self, path: Path | str | None = None) -> None:
@@ -218,6 +235,7 @@ class Stage3PHashCache:
                 if isinstance(val, dict):
                     self._by_phash[k] = val
                     loaded += 1
+            self._evict_if_needed_unlocked()
         logger.info("stage3_vlm_cache loaded %s entries from %s", loaded, p)
         return loaded
 
@@ -233,9 +251,10 @@ def stage3_cache_from_config(config: Mapping[str, Any]) -> Stage3PHashCache | No
     if not isinstance(raw, dict) or not raw.get("enabled", False):
         return None
     max_h = int(raw.get("max_hamming", 7) or 7)
+    max_entries = int(raw.get("max_entries", 4096) or 4096)
     path_raw = raw.get("persist_path")
     persist_path = Path(str(path_raw)) if path_raw else None
-    c = Stage3PHashCache(max_hamming=max_h, persist_path=persist_path)
+    c = Stage3PHashCache(max_hamming=max_h, persist_path=persist_path, max_entries=max_entries)
     if persist_path and raw.get("load_on_start", True) and persist_path.is_file():
         try:
             c.load_from_json(persist_path, merge=True)

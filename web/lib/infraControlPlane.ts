@@ -188,19 +188,6 @@ export function aggregateFailureBuckets(
   };
 }
 
-/**
- * Stable mock utilization for demo when host metrics are unavailable.
- * @deprecated Do not surface in the observability UI — fabricated metrics
- * erode trust during incidents. Kept only for non-prod demos.
- */
-export function mockWorkerUtil(workerKey: string): { cpuPct: number; memPct: number } {
-  let h = 0;
-  for (let i = 0; i < workerKey.length; i++) h = (h * 31 + workerKey.charCodeAt(i)) >>> 0;
-  const cpuPct = 18 + (h % 55);
-  const memPct = 22 + ((h >> 8) % 48);
-  return { cpuPct, memPct };
-}
-
 /** Single client-observed sample of the control plane, accumulated per poll. */
 export type InfraHistoryPoint = {
   t: number;

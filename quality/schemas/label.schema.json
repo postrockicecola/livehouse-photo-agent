@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/label.schema.json",
+  "title": "Label v1",
+  "description": "Human ground truth for Stage3-style scoring. Scales: overall 0-100, dims 0-10. Null dim = unlabeled.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "label_schema": {
+      "type": "string",
+      "const": "stage3_dims_v1",
+      "default": "stage3_dims_v1"
+    },
+    "overall": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "dims": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "focus_sharpness": { "$ref": "#/$defs/dim_score" },
+        "exposure_control": { "$ref": "#/$defs/dim_score" },
+        "noise_cleanliness": { "$ref": "#/$defs/dim_score" },
+        "composition_framing": { "$ref": "#/$defs/dim_score" },
+        "light_color_character": { "$ref": "#/$defs/dim_score" },
+        "moment_peak": { "$ref": "#/$defs/dim_score" },
+        "atmosphere_impact": { "$ref": "#/$defs/dim_score" },
+        "deliverable_subject": { "$ref": "#/$defs/dim_score" }
+      }
+    },
+    "keep": { "type": ["boolean", "null"] },
+    "category": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "string", "enum": ["best", "keep", "trash"] }
+      ]
+    },
+    "notes": { "type": "string", "default": "" }
+  },
+  "$defs": {
+    "dim_score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 10
+    }
+  }
+}

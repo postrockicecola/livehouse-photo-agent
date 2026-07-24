@@ -1,0 +1,8 @@
+{"file": "smoke__a.jpg", "overall": 80.0, "dims": {"focus_sharpness": 8.0, "moment_peak": 7.0}, "keep": true, "notes": "fixture"}
+{"file": "smoke__b.jpg", "overall": 72.0, "dims": {"focus_sharpness": 7.0, "moment_peak": 6.5}, "keep": true, "notes": "fixture"}
+{"file": "smoke__c.jpg", "overall": 55.0, "dims": {"focus_sharpness": 4.0, "moment_peak": 5.0}, "keep": false, "notes": "fixture"}
+{"file": "smoke__d.jpg", "overall": 40.0, "dims": {"focus_sharpness": 3.0, "moment_peak": 3.5}, "keep": false, "notes": "fixture"}
+{"file": "smoke__e.jpg", "overall": 90.0, "dims": {"focus_sharpness": 9.0, "moment_peak": 9.0}, "keep": true, "notes": "fixture"}
+{"file": "smoke__f.jpg", "overall": 30.0, "dims": {"focus_sharpness": 2.0, "moment_peak": 2.0}, "keep": false, "notes": "fixture"}
+{"file": "smoke__g.jpg", "overall": 68.0, "dims": {"focus_sharpness": 6.0, "moment_peak": 7.0}, "keep": true, "notes": "fixture"}
+{"file": "smoke__h.jpg", "overall": 48.0, "dims": {"focus_sharpness": 5.0, "moment_peak": 4.0}, "keep": false, "notes": "fixture"}

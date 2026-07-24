@@ -19,13 +19,17 @@ here is the seam that a stronger backend slots behind.
 """
 from __future__ import annotations
 
+import logging
 import os
+import signal
 import subprocess
 import sys
 import tempfile
 from typing import Any
 
 from services.agent.skills.base import SkillResult
+
+logger = logging.getLogger(__name__)
 
 try:  # POSIX-only; absent on Windows
     import resource
@@ -112,23 +116,48 @@ class PythonExecSkill:
             # Minimal, scrubbed environment; isolated cwd; isolated interpreter mode.
             env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": workdir, "TMPDIR": workdir}
             try:
-                proc = subprocess.run(
+                proc = subprocess.Popen(
                     [sys.executable, "-I", "-B", script],
                     cwd=workdir,
                     env=env,
-                    capture_output=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     text=True,
-                    timeout=timeout,
                     preexec_fn=_make_preexec(self._cpu, self._mem_mb, self._fsize_mb),
                 )
-            except subprocess.TimeoutExpired as exc:
-                partial, _ = _truncate(exc.stdout or "" if isinstance(exc.stdout, str) else "")
-                return SkillResult(
-                    ok=False,
-                    output=partial,
-                    error=f"timed out after {timeout}s",
-                    metadata={"timed_out": True, "timeout_s": timeout},
-                )
+                try:
+                    stdout, stderr = proc.communicate(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    # Kill the whole process group started via setsid().
+                    try:
+                        if proc.pid:
+                            os.killpg(proc.pid, signal.SIGKILL)
+                    except (ProcessLookupError, PermissionError, OSError):
+                        try:
+                            proc.kill()
+                        except OSError:
+                            pass
+                    try:
+                        stdout, stderr = proc.communicate(timeout=2)
+                    except Exception:
+                        stdout, stderr = "", ""
+                    partial, _ = _truncate(stdout or "")
+                    logger.warning("python_exec timed out after %ss; process group killed", timeout)
+                    return SkillResult(
+                        ok=False,
+                        output=partial,
+                        error=f"timed out after {timeout}s",
+                        metadata={"timed_out": True, "timeout_s": timeout},
+                    )
+                # Mirror CompletedProcess fields for the success path below.
+                class _Proc:
+                    returncode = proc.returncode
+                    stdout = stdout
+                    stderr = stderr
+
+                proc = _Proc()
+            except OSError as exc:
+                return SkillResult(ok=False, error=f"exec failed: {exc}")
 
         stdout, out_trunc = _truncate(proc.stdout or "")
         stderr, err_trunc = _truncate(proc.stderr or "")

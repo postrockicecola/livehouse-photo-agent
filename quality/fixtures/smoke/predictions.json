@@ -1,0 +1,10 @@
+[
+  {"file": "smoke__a.jpg", "overall_score": 78.0, "dimensions": {"focus_sharpness": 7.5, "moment_peak": 7.2}},
+  {"file": "smoke__b.jpg", "overall_score": 70.0, "dimensions": {"focus_sharpness": 6.8, "moment_peak": 6.2}},
+  {"file": "smoke__c.jpg", "overall_score": 58.0, "dimensions": {"focus_sharpness": 4.5, "moment_peak": 5.2}},
+  {"file": "smoke__d.jpg", "overall_score": 42.0, "dimensions": {"focus_sharpness": 3.2, "moment_peak": 3.8}},
+  {"file": "smoke__e.jpg", "overall_score": 88.0, "dimensions": {"focus_sharpness": 8.8, "moment_peak": 8.7}},
+  {"file": "smoke__f.jpg", "overall_score": 35.0, "dimensions": {"focus_sharpness": 2.5, "moment_peak": 2.4}},
+  {"file": "smoke__g.jpg", "overall_score": 66.0, "dimensions": {"focus_sharpness": 5.8, "moment_peak": 6.8}},
+  {"file": "smoke__h.jpg", "overall_score": 50.0, "dimensions": {"focus_sharpness": 5.2, "moment_peak": 4.3}}
+]

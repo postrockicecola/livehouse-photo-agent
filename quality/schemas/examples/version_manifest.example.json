@@ -1,0 +1,40 @@
+{
+  "schema_version": "version_manifest.v1",
+  "manifest_id": "exp_stage3_eval_temp0_example",
+  "created_at": "2026-07-23T16:00:00+00:00",
+  "prompt": {
+    "prompt_id": "stage3",
+    "version": "stage3_v5",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "profile": "stage3_v5"
+  },
+  "model": {
+    "provider": "ollama",
+    "model_name": "qwen2.5vl:7b",
+    "temperature": 0.0,
+    "num_predict": 512,
+    "fallback_model_name": null,
+    "endpoint_class": "local_ollama"
+  },
+  "workflow": {
+    "workflow_id": "pipeline_stage3",
+    "version": "0.1.0",
+    "config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "stage3_strategy": "full_only",
+    "gating": false,
+    "planner": null
+  },
+  "dataset": {
+    "name": "golden_core",
+    "version": "0.1.0",
+    "labels_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "manifest_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "code": {
+    "git_sha": "deadbeef",
+    "dirty": false,
+    "ref": "HEAD"
+  },
+  "eval_protocol": "quality_protocol_v1",
+  "tags": ["example", "phase0"]
+}

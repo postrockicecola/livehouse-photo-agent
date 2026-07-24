@@ -119,8 +119,11 @@ def studio_put_ingest_config(body: IngestConfigPutBody):
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except OSError as e:
-        raise HTTPException(status_code=500, detail=f"failed to write ingest config: {e}") from e
+    except OSError:
+        import logging
+
+        logging.getLogger(__name__).exception("failed to write ingest config")
+        raise HTTPException(status_code=500, detail="failed to write ingest config") from None
 
 
 @router.get("/api/studio/sessions")
@@ -202,7 +205,11 @@ def studio_status(
         finally:
             conn.close()
     except Exception:
-        pass
+        import logging
+
+        logging.getLogger(__name__).exception(
+            "studio_status brain lookup failed previews=%s", previews_path
+        )
 
     pipeline = pipeline_view_with_stages(
         job,
@@ -275,12 +282,14 @@ def studio_start_analyze(body: AnalyzeBody):
     enable_checkpoint = False if force_full else (
         True if body.enable_checkpoint is None else bool(body.enable_checkpoint)
     )
-    job_payload: dict = {
-        "config_path": config_path,
-        "enable_checkpoint": enable_checkpoint,
-        "force_full_rerun": force_full,
-        "source_dir": str(previews),
-    }
+    from services.analyze_dispatch import build_analyze_job_payload
+
+    job_payload: dict = build_analyze_job_payload(
+        config_path=config_path,
+        source_dir=str(previews),
+        enable_checkpoint=enable_checkpoint,
+        force_full_rerun=force_full,
+    )
 
     conn = brain_connect()
     try:
@@ -315,8 +324,11 @@ def studio_start_analyze(body: AnalyzeBody):
                 force_full_rerun=force_full,
                 trace_id=trace_id,
             )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"create_job failed: {e}") from e
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).exception("studio create_job failed previews=%s", previews)
+        raise HTTPException(status_code=500, detail="create_job failed") from None
     finally:
         conn.close()
 

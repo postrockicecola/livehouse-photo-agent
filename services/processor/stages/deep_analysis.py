@@ -251,19 +251,21 @@ def _run_inference_full(
 
 
 _infer_sync_fallback_pool_singleton: ThreadPoolExecutor | None = None
+_infer_sync_fallback_pool_lock = Lock()
 
 
 def _infer_sync_fallback_pool() -> ThreadPoolExecutor:
     """Rare fallback when the client lacks infer_*_future (router-only mocks)."""
     global _infer_sync_fallback_pool_singleton
-    if _infer_sync_fallback_pool_singleton is None:
-        import os as _os
+    with _infer_sync_fallback_pool_lock:
+        if _infer_sync_fallback_pool_singleton is None:
+            import os as _os
 
-        _infer_sync_fallback_pool_singleton = ThreadPoolExecutor(
-            max_workers=max(8, min(64, (_os.cpu_count() or 4) * 8)),
-            thread_name_prefix="stage3_infer_sync_fb",
-        )
-    return _infer_sync_fallback_pool_singleton
+            _infer_sync_fallback_pool_singleton = ThreadPoolExecutor(
+                max_workers=max(8, min(64, (_os.cpu_count() or 4) * 8)),
+                thread_name_prefix="stage3_infer_sync_fb",
+            )
+        return _infer_sync_fallback_pool_singleton
 
 
 def _infer_future_fast(
@@ -363,9 +365,9 @@ def should_run_full_after_fast(
     After fast Stage3, decide whether dimensional full inference is worth the cost.
 
     Uses fast dict shape from :func:`analyze_stage3_fast` (score, tags, optional dimensions).
-    ``debug_info`` is reserved for future signals; composition uses ``dimensions`` only.
+    Stage1/Stage2 ``debug_info`` (ambiguous_tags, motion/haze cues) also unlocks full rubric
+    so intentional blur / backlight / no-face atmosphere frames are not stuck on fast-only.
     """
-    _ = debug_info
     score = float(result_fast.get("score") or result_fast.get("fast_ai_score") or 0.0)
     tags = list(result_fast.get("tags") or [])
 
@@ -384,6 +386,21 @@ def should_run_full_after_fast(
     )
     if comp >= 8:
         return True
+
+    if isinstance(debug_info, Mapping):
+        amb = debug_info.get("ambiguous_tags") or []
+        if isinstance(amb, (list, tuple)) and any(str(t).strip() for t in amb):
+            return True
+        bt = str(debug_info.get("blur_type") or "")
+        if bt in ("artistic_motion_blur", "motion_blur"):
+            return True
+        try:
+            contrast = float(debug_info.get("contrast") or 99.0)
+            edges = float(debug_info.get("edge_ratio") or 1.0)
+        except (TypeError, ValueError):
+            contrast, edges = 99.0, 1.0
+        if contrast < 12.0 and edges < 0.006:
+            return True
 
     return False
 

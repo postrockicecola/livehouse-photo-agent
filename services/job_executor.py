@@ -25,7 +25,10 @@ from celery.utils.log import get_task_logger
 
 from infra.worker_manager import WorkerManager, long_task_heartbeat
 from services.gallery_film_prewarm import enqueue_gallery_cinestill_prewarm
-from services.job_artifacts import build_success_artifact_event_payload
+from services.job_artifacts import (
+    build_executor_success_base,
+    build_success_artifact_event_payload,
+)
 from services.job_errors import classify_exception
 from services.job_lifecycle import JobLifecycle
 from services.job_payload import parse_job_payload
@@ -261,13 +264,13 @@ class JobExecutor:
                 else None
             ) or {}
             succeed_payload = build_success_artifact_event_payload(
-                base={
-                    "worker_id": worker_id,
-                    "session_id": session_id,
-                    "source_dir": source_dir,
-                    "trace_id": trace_id,
-                    "job_type": job_type,
-                },
+                base=build_executor_success_base(
+                    worker_id=worker_id,
+                    session_id=session_id,
+                    source_dir=source_dir,
+                    trace_id=trace_id,
+                    job_type=job_type,
+                ),
                 analysis_results_path=ap.get("analysis_results"),
                 preview_html_path=ap.get("preview_html"),
                 folder_galleries=list(ap.get("folder_galleries") or []),
@@ -465,17 +468,17 @@ class JobExecutor:
             total_latency_ms = max(0, int(time.time() * 1000) - run_started_ms)
             generated_at = int(time.time())
             exec_mode = payload.get("execution_mode") or "staged_pipeline"
-            succeed_base: dict[str, Any] = {
-                "worker_id": worker_id,
-                "session_id": session_id,
-                "source_dir": source_dir,
-                "trace_id": trace_id,
-                "job_type": STAGE_JOB_TYPE,
-                "stage_name": stage_name,
-                "execution_mode": exec_mode,
-                "config_path": config_path,
-                "stage_output": stage_result,
-            }
+            succeed_base: dict[str, Any] = build_executor_success_base(
+                worker_id=worker_id,
+                session_id=session_id,
+                source_dir=source_dir,
+                trace_id=trace_id,
+                job_type=STAGE_JOB_TYPE,
+                stage_name=stage_name,
+                execution_mode=exec_mode,
+                config_path=config_path,
+                stage_output=stage_result,
+            )
 
             ap = artifact_paths if artifact_paths else None
             if artifact_paths:

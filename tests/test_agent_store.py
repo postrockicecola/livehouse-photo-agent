@@ -150,3 +150,37 @@ def test_agent_events_roundtrip(conn):
     events = store.load_agent_events(conn, cid)
     assert [e["type"] for e in events] == ["tool_call", "done"]
     assert events[0]["tool"] == "gallery_search"
+
+
+def test_working_memory_persists_and_clears_on_reset(conn):
+    owner = "user:1"
+    cid = store.get_or_create_conversation(conn, owner, "s", "gallery")
+    files = [f"keep_{i}.jpg" for i in range(40)]
+    store.set_working_memory(
+        conn,
+        cid,
+        {"last_tool": "gallery_search", "last_files": files, "last_query": "交片"},
+    )
+    wm = store.get_working_memory(conn, cid)
+    assert wm["last_tool"] == "gallery_search"
+    assert len(wm["last_files"]) == 40
+    assert wm["last_files"][0] == "keep_0.jpg"
+
+    store.reset_conversation(conn, owner, "s", "gallery")
+    assert store.get_working_memory(conn, cid) == {}
+
+
+def test_working_memory_from_events_uses_last_search_files():
+    events = [
+        {
+            "type": "tool_call",
+            "tool": "gallery_search",
+            "args": {"limit": 2},
+            "ok": True,
+            "metadata": {"files": ["a.jpg", "b.jpg"]},
+        },
+        {"type": "done", "reply": "ok"},
+    ]
+    wm = store.working_memory_from_events(events)
+    assert wm["last_files"] == ["a.jpg", "b.jpg"]
+    assert wm["last_tool"] == "gallery_search"

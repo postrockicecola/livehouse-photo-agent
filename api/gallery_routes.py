@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from celery import Celery
-from fastapi import APIRouter, Header, HTTPException, Query
+from fastapi import APIRouter, Header, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -248,7 +248,6 @@ def _previews_dir_has_images(dir_path: str, *, limit: int = 32) -> bool:
                     for f in child.iterdir():
                         if f.is_file() and f.suffix.lower() in exts and not f.name.startswith("._"):
                             return True
-                        break
                 except OSError:
                     continue
     except OSError:
@@ -316,12 +315,14 @@ def _runtime_base_dir() -> str:
                 _gallery_active_dir_cache = (cache_key, resolved)
                 return resolved
     except Exception:
-        pass
+        import logging
+
+        logging.getLogger(__name__).exception("gallery runtime base dir resolve failed; using BASE_DIR")
     return base
 
 
 def _gallery_path_roots() -> list[Path]:
-    """Directories used to resolve relative ``path`` values (JSON often relative to project / session)."""
+    """Allowlisted roots for ``/image`` and similar path query params."""
     roots: list[Path] = []
     seen: set[str] = set()
 
@@ -335,13 +336,33 @@ def _gallery_path_roots() -> list[Path]:
             seen.add(k)
             roots.append(r)
 
-    add(Path(BASE_DIR))
-    add(Path(_runtime_base_dir()))
+    base = Path(BASE_DIR)
+    runtime = Path(_runtime_base_dir())
+    add(base)
+    add(runtime)
+    add(base.parent)
+    add(runtime.parent)
+    try:
+        resolver = _path_resolver(str(runtime))
+        session_dir, raw_hint = resolver.session_and_raw_hint()
+        add(session_dir)
+        if raw_hint is not None:
+            add(Path(raw_hint))
+        add(session_dir / "film_results")
+        add(base.parent / "film_results")
+        add(runtime.parent / "exported_images")
+        add(base.parent / "exported_images")
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).debug("gallery path roots: PathResolver expand failed", exc_info=True)
     return roots
 
 
 def _resolve_gallery_image_path(path_query: str) -> Path | None:
-    """Resolve ``/image`` / film-render ``path=`` to a real file (relative to gallery & runtime roots)."""
+    """Resolve ``path=`` to a real file **inside** gallery/session/RAW allowlisted roots."""
+    from utils.http_security import path_is_under_roots
+
     raw = (path_query or "").strip()
     if not raw:
         return None
@@ -350,13 +371,20 @@ def _resolve_gallery_image_path(path_query: str) -> Path | None:
     except OSError:
         return None
 
+    roots = _gallery_path_roots()
     trials: list[Path] = []
     if first.is_absolute():
-        trials.append(first.resolve())
+        try:
+            trials.append(first.resolve(strict=False))
+        except OSError:
+            pass
 
-    for base in _gallery_path_roots():
-        trials.append((base / raw).resolve())
-        trials.append((base / raw.lstrip("./")).resolve())
+    for base in roots:
+        try:
+            trials.append((base / raw).resolve(strict=False))
+            trials.append((base / raw.lstrip("./")).resolve(strict=False))
+        except OSError:
+            continue
 
     seen: set[str] = set()
     for cand in trials:
@@ -365,17 +393,13 @@ def _resolve_gallery_image_path(path_query: str) -> Path | None:
             if key in seen:
                 continue
             seen.add(key)
-            if cand.is_file():
-                return cand.resolve()
+            if not cand.is_file():
+                continue
+            resolved = cand.resolve()
+            if path_is_under_roots(resolved, roots):
+                return resolved
         except OSError:
             continue
-
-    try:
-        ap = Path(os.path.abspath(raw))
-        if ap.is_file():
-            return ap.resolve()
-    except OSError:
-        pass
     return None
 
 
@@ -570,8 +594,11 @@ def serve_category_gallery(folder_type: str) -> str:
     try:
         with open(gallery_file, "r", encoding="utf-8") as f:
             return f.read()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).exception("failed to read category gallery %s", gallery_file)
+        raise HTTPException(status_code=500, detail="gallery file unreadable")
 
 
 @router.get("/api/vibe/session")
@@ -668,6 +695,9 @@ def put_gallery_curation(req: GalleryCurationPutRequest):
 
         taste_rebuild = rebuild_taste_profile(base_dir)
     except Exception:
+        import logging
+
+        logging.getLogger(__name__).exception("taste profile rebuild failed for %s", base_dir)
         taste_rebuild = {"ok": False, "error": "rebuild_failed"}
     data = read_gallery_curation(base_dir)
     return {
@@ -787,17 +817,17 @@ def export_images(req: ExportRequest):
 
     try:
         return _export_images_impl(req)
-    except Exception as e:
-        import traceback
+    except Exception:
+        import logging
 
-        traceback.print_exc()
+        logging.getLogger(__name__).exception("export_images failed")
         return JSONResponse(
             status_code=500,
             content=json_safe(
                 {
                     "success": False,
                     "error": "export failed",
-                    "detail": str(e),
+                    "detail": "export failed",
                 }
             ),
         )
@@ -1038,7 +1068,11 @@ def _export_images_impl(req: ExportRequest):
                 items=export_feedback_items,
             )
         except Exception:
-            pass
+            import logging
+
+            logging.getLogger(__name__).exception(
+                "append_export_feedback_event failed base_dir=%s", base_dir
+            )
     resp: dict[str, object] = {
         "success": ok,
         "count": success_jpeg,
@@ -1119,13 +1153,14 @@ def queue_backlog():
 
 @router.post("/api/ingest/check_new_images")
 def check_new_images(
+    request: Request,
     config_path: str = Query(default=os.getenv("LIVEHOUSE_CONFIG", "configs/livehouse.yaml")),
     x_luma_token: str | None = Header(default=None, alias="X-Luma-Token"),
 ):
     """Recommended ingest hook: enqueue ``tasks.process_brain_ingested`` (seed jobs → ``tasks.run_job``)."""
-    expected = os.getenv("LIVEHOUSE_INGEST_TOKEN", "").strip()
-    if expected and (x_luma_token or "").strip() != expected:
-        raise HTTPException(status_code=401, detail="invalid or missing X-Luma-Token")
+    from utils.http_security import require_ingest_auth
+
+    require_ingest_auth(request, x_luma_token=x_luma_token)
 
     try:
         from utils.luma_brain import brain_connect
@@ -1171,8 +1206,11 @@ def enqueue_analysis(
             enable_checkpoint=enable_checkpoint,
             trace_id=trace_id,
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"create_job failed: {e}") from e
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).exception("create_analyze_path_job failed")
+        raise HTTPException(status_code=500, detail="create_job failed") from None
     finally:
         conn.close()
 
@@ -1272,10 +1310,37 @@ def enqueue_prewarm_gallery_film():
 
 
 @router.post("/api/tasks/luma-professional")
-def enqueue_luma_workflow(raw_path: str, out_path: str):
+def enqueue_luma_workflow(
+    request: Request,
+    raw_path: str,
+    out_path: str,
+    x_livehouse_ops_token: str | None = Header(default=None, alias="X-Livehouse-Ops-Token"),
+    x_luma_token: str | None = Header(default=None, alias="X-Luma-Token"),
+    authorization: str | None = Header(default=None),
+):
+    """Enqueue luma professional workflow — ops-auth + path allowlist required."""
+    from utils.http_security import path_is_under_roots, require_ops_auth
+
+    require_ops_auth(
+        request,
+        x_livehouse_ops_token=x_livehouse_ops_token,
+        x_luma_token=x_luma_token,
+        authorization=authorization,
+    )
+    roots = _gallery_path_roots()
+    try:
+        raw_p = Path(raw_path).expanduser().resolve(strict=False)
+        out_p = Path(out_path).expanduser().resolve(strict=False)
+    except OSError as exc:
+        raise HTTPException(status_code=400, detail="invalid path") from exc
+    if not raw_p.is_file() or not path_is_under_roots(raw_p, roots):
+        raise HTTPException(status_code=403, detail="raw_path not allowed")
+    if not path_is_under_roots(out_p, roots) and not path_is_under_roots(out_p.parent, roots):
+        raise HTTPException(status_code=403, detail="out_path not allowed")
+
     task = celery_client.send_task(
         "tasks.run_luma_professional_workflow",
-        kwargs={"raw_path": raw_path, "out_path": out_path},
+        kwargs={"raw_path": str(raw_p), "out_path": str(out_p)},
     )
     return {"task_id": task.id, "task_name": "tasks.run_luma_professional_workflow"}
 

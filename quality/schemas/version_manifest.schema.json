@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/version_manifest.schema.json",
+  "title": "Version Manifest v1",
+  "description": "Pinned prompt + model + workflow + dataset + code for a reproducible eval or production pin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "created_at",
+    "prompt",
+    "model",
+    "workflow",
+    "dataset",
+    "code",
+    "eval_protocol"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "version_manifest.v1"
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version_manifest_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of canonical JSON of this object excluding this field. Attach after hashing."
+    },
+    "prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prompt_id", "version", "content_hash"],
+      "properties": {
+        "prompt_id": { "type": "string", "minLength": 1 },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "e.g. stage3_v5 (STAGE3_PROMPT_VERSION)."
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profile": {
+          "type": "string",
+          "description": "Production stamp alias (stage3_meta.prompt_profile)."
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model_name", "temperature"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["ollama", "vllm", "openai", "mock"]
+        },
+        "model_name": { "type": "string", "minLength": 1 },
+        "temperature": { "type": "number", "minimum": 0 },
+        "num_predict": { "type": ["integer", "null"], "minimum": 1 },
+        "fallback_model_name": { "type": ["string", "null"] },
+        "endpoint_class": {
+          "type": "string",
+          "description": "Logical endpoint class; do not store secrets."
+        },
+        "agent_chat_model": { "type": ["string", "null"] },
+        "digest": {
+          "type": ["string", "null"],
+          "description": "Weights or container digest when known."
+        }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow_id", "version", "config_hash"],
+      "properties": {
+        "workflow_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "config_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "stage3_strategy": {
+          "type": ["string", "null"],
+          "enum": ["fast_first", "full_only", null]
+        },
+        "gating": {
+          "description": "false, true, or a named policy id.",
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        },
+        "planner": { "type": ["string", "null"] }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Semver or dated pin, e.g. 0.1.0"
+        },
+        "labels_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "manifest_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "code": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["git_sha", "dirty"],
+      "properties": {
+        "git_sha": { "type": ["string", "null"] },
+        "dirty": { "type": "boolean" },
+        "ref": { "type": ["string", "null"] }
+      }
+    },
+    "eval_protocol": {
+      "type": "string",
+      "minLength": 1,
+      "description": "e.g. quality_protocol_v1"
+    },
+    "notes": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

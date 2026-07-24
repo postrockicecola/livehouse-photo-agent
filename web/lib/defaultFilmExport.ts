@@ -56,11 +56,6 @@ export function gallerySelectionKey(item: GalleryItem, fallbackIndex?: number): 
   return "";
 }
 
-/** @deprecated 使用 ``gallerySelectionKey``；保留别名以免大范围重命名。 */
-export function exportPreferenceKey(item: GalleryItem): string {
-  return gallerySelectionKey(item);
-}
-
 /** Same source resolution as Lab ``buildStyleEntries`` film rows (before → main → absolute paths). */
 export function filmSourcePathQuotedForItem(item: GalleryItem): string | null {
   return (

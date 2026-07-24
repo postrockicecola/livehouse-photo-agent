@@ -101,8 +101,17 @@ def stamp_protocol(
     config_path: str | Path | None = None,
     seed: int | None = None,
     extra: Mapping[str, Any] | None = None,
+    attach_manifest: bool = False,
+    manifest_out: str | Path | None = None,
+    dataset_name: str | None = None,
+    dataset_version: str | None = None,
 ) -> dict[str, Any]:
-    """Attach a ``protocol`` block in-place and return the report."""
+    """Attach a ``protocol`` block in-place and return the report.
+
+    When ``attach_manifest`` is true, also build ``version_manifest.v1``
+    (see ``quality/manifest.py``), attach a compact ref on the report, and
+    optionally write the full manifest to ``manifest_out``.
+    """
     proto: dict[str, Any] = {
         "schema_version": "1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -127,4 +136,28 @@ def stamp_protocol(
     if extra:
         proto["extra"] = dict(extra)
     report["protocol"] = proto
+
+    if attach_manifest:
+        from quality.manifest import (
+            build_version_manifest,
+            stamp_report_with_manifest,
+            write_version_manifest,
+        )
+
+        kw: dict[str, Any] = {
+            "config_path": config_path or "configs/eval_stage3.yaml",
+            "labels_path": labels_path,
+        }
+        if dataset_name:
+            kw["dataset_name"] = dataset_name
+        if dataset_version:
+            kw["dataset_version"] = dataset_version
+        manifest = build_version_manifest(**kw)
+        stamp_report_with_manifest(report, manifest)
+        if manifest_out:
+            write_version_manifest(manifest_out, manifest)
+            proto.setdefault("extra", {})
+            if isinstance(proto["extra"], dict):
+                proto["extra"]["manifest_path"] = str(Path(manifest_out).as_posix())
+
     return report

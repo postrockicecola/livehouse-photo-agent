@@ -100,6 +100,29 @@ def _job_dir(job_id: str) -> Path:
     return _JOBS_ROOT / job_id
 
 
+_MAX_PORTRAIT_JOBS_ON_DISK = 40
+
+
+def _prune_old_jobs(*, keep: int = _MAX_PORTRAIT_JOBS_ON_DISK) -> int:
+    """Delete oldest job dirs under ``_JOBS_ROOT`` when count exceeds ``keep``."""
+    if not _JOBS_ROOT.is_dir():
+        return 0
+    dirs = [p for p in _JOBS_ROOT.iterdir() if p.is_dir()]
+    if len(dirs) <= keep:
+        return 0
+    dirs.sort(key=lambda p: p.stat().st_mtime)
+    removed = 0
+    for p in dirs[: max(0, len(dirs) - keep)]:
+        try:
+            import shutil
+
+            shutil.rmtree(p, ignore_errors=True)
+            removed += 1
+        except OSError:
+            logger.warning("portrait job prune failed for %s", p, exc_info=True)
+    return removed
+
+
 def _write_meta(job_id: str, patch: dict[str, Any]) -> dict[str, Any]:
     d = _job_dir(job_id)
     d.mkdir(parents=True, exist_ok=True)
@@ -494,6 +517,11 @@ def create_job(
             "ComfyUI not ready: start ComfyUI locally and ensure workflow/checkpoint paths in "
             f"{_resolve_config_path()} (or set LIVEHOUSE_PORTRAIT_CONFIG)"
         )
+
+    try:
+        _prune_old_jobs()
+    except Exception:
+        logger.warning("portrait job prune skipped", exc_info=True)
 
     job_id = uuid.uuid4().hex[:16]
     job_d = _job_dir(job_id)

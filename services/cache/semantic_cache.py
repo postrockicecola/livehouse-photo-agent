@@ -92,6 +92,7 @@ class SemanticCache:
         self._persist_path = Path(persist_path) if persist_path else None
         self._lock = threading.Lock()
         self._by_key: dict[str, _Entry] = {}
+        self._max_entries = 2048
 
         self._lookups = 0
         self._hits_exact = 0
@@ -162,6 +163,10 @@ class SemanticCache:
         entry = _Entry(text=text, embedding=vec, response=copy.deepcopy(response))
         with self._lock:
             self._by_key[_norm_key(text)] = entry
+            while len(self._by_key) > self._max_entries:
+                # dict preserves insertion order (3.7+); drop oldest key.
+                oldest = next(iter(self._by_key))
+                del self._by_key[oldest]
 
     def clear(self) -> None:
         with self._lock:

@@ -186,18 +186,23 @@ processing:
     llm_num_predict: 160
     llm_timeout: 90
 
-  # Aggressive Stage2 pre-VLM filters (single decode with fast aesthetic). Prefer false negatives.
+  # Stage2 pre-VLM filters (single decode with fast aesthetic).
+  # Hard-reject only unstructured severe blur / extreme blowout; ambiguous livehouse frames
+  # (motion, haze, no frontal face, dense crowd, weak bright-centroid) pass with ambiguous_tags.
   stage2_prefilter:
     enabled: true
-    laplacian_var_min: 72.0           # Extra blur guard vs Stage1 soft penalties
-    max_highlight_frac: 0.38         # Reject heavy blowout highlights (Stage1 debug highlight_frac)
-    max_shadow_frac: 0.58             # Reject crushed shadows
-    reject_motion_blur: true          # Stage1 blur_type == motion_blur → skip VLM pool
-    hard_highlight_frac: 0.44         # Stricter blowout than max_highlight_frac
-    crowd_obstruction_max_faces: 8    # Too many faces → likely obstructed subject (0 to disable)
-    composition_min: 36.0             # OpenCV composition proxy; low → clipping / no clear subject
-    tiny_subject_bright_frac_min: 0.0035   # Bright-subject mask area; below → tiny subject
-    require_face: true                # Haar frontal face; set false for atmosphere-only selects
+    laplacian_var_min: 40.0           # Soft band → ambiguous_tags (not hard reject)
+    laplacian_var_hard_min: 18.0      # Hard reject only unstructured blur below this
+    max_highlight_frac: 0.38          # Soft → ambiguous highlight_hot
+    max_shadow_frac: 0.58             # Soft → ambiguous shadow_crush
+    reject_motion_blur: false         # motion_blur → ambiguous (VLM decides intent)
+    hard_highlight_frac: 0.55         # Hard reject only extreme blowout
+    crowd_obstruction_max_faces: 0    # 0 = disable hard crowd kill
+    soft_crowd_max_faces: 8           # Dense faces → ambiguous crowd_dense
+    composition_min: 36.0             # Soft → ambiguous (bright-centroid proxy fails on gel/backlight)
+    tiny_subject_bright_frac_min: 0.0035   # Soft → ambiguous tiny_bright_subject
+    require_face: false               # Do not hard-kill atmosphere / silhouette / instrument frames
+    face_soft_gate: true              # No Haar face → ambiguous no_face (reserve VLM slot)
     face_min_neighbors: 5
     phash_near_dup:
       enabled: true
@@ -241,15 +246,17 @@ processing:
   stage3_vlm_cache:
     enabled: true
     max_hamming: 7                 # reuse if Hamming distance <= this (< 8); same metric as stage2 phash
+    max_entries: 4096              # LRU cap — prevents unbounded growth across long sessions
     persist_path: null             # e.g. ".luma_pipeline_staged/stage3_vlm_cache.json" to survive restarts
     load_on_start: true            # when persist_path is set, merge on cache construction
 
   # Reduce Stage3 calls: after Stage2 + dedupe, sort by normalized score, then threshold + top fraction.
   stage3_gating:
     dynamic_batch_gating: true        # scale top-k by job size + distribution-based threshold
-    stage3_threshold: 0.66
-    top_k_ratio: 0.24                 # multiplied by batch scale (>1000 → tighter); see max_candidates
-    max_candidates: 16                # hard cap after dynamic top-k (set null to disable)
+    stage3_threshold: 0.60            # slightly looser so haze/motion keepers stay in pool
+    top_k_ratio: 0.28                 # multiplied by batch scale (>1000 → tighter); see max_candidates
+    max_candidates: 48                # hard cap after dynamic top-k (set null to disable)
+    ambiguous_reserve: 12             # slots reserved for Stage2 ambiguous_tags within max_candidates
     estimated_vlm_seconds_per_image: 22.0   # for est. GPU time saved in logs
     # Optional overrides: dynamic_percentile_floor, dynamic_z_sigma, dynamic_threshold_cap
 
@@ -267,7 +274,7 @@ stage3:
   # full_only: legacy — dimensional prompt on every candidate (higher latency)
   strategy: fast_first
   # Cap on how many images may run full dimensional VLM per batch (among those that pass early-exit rules).
-  full_analysis_top_k: 5
+  full_analysis_top_k: 8
   # Legacy YAML field; fast-first full routing uses code rules (score ≥85, tags, dimensions), not this value.
   full_analysis_score_threshold: 85
   fast_num_predict: 220

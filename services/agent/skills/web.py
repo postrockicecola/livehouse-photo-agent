@@ -151,6 +151,12 @@ class WebFetchSkill:
         if not re.match(r"^https?://", url, re.IGNORECASE):
             return SkillResult(ok=False, error="'url' must be an absolute http(s) URL")
         try:
+            from utils.http_security import assert_public_http_url
+
+            url = assert_public_http_url(url)
+        except ValueError as exc:
+            return SkillResult(ok=False, error=str(exc))
+        try:
             status, body = self._fetch(url)
         except Exception as exc:
             return SkillResult(ok=False, error=f"fetch failed: {exc}")

@@ -756,6 +756,8 @@ class PipelineStageRunner:
                     "admission_percentile": gate_diag.get("admission_percentile"),
                     "stage3_inferences_saved": gate_diag.get("stage3_inferences_saved"),
                     "estimated_gpu_seconds_saved": gate_diag.get("estimated_gpu_seconds_saved"),
+                    "ambiguous_reserve": gate_diag.get("ambiguous_reserve"),
+                    "ambiguous_admitted": gate_diag.get("ambiguous_admitted"),
                 },
                 "images_entering_stage3": gate_diag.get("after", len(eligible)),
             },

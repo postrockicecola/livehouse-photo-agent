@@ -73,15 +73,3 @@ export function buildGalleryCinestillRenderUrl(
   const rot = rotateQuery(Number(item.rotate_degrees ?? 0));
   return `${apiBase}/api/lab/film-render?path=${path}&variant=${encodeURIComponent(variant)}&max_side=${maxSide}${rot}`;
 }
-
-/** @deprecated 使用 ``buildGalleryPlainImageUrl`` + ``buildGalleryCinestillRenderUrl`` 渐进加载。 */
-export function buildGalleryFilmThumbUrl(
-  apiBase: string,
-  item: GalleryItem,
-  options?: { maxSide?: number; variant?: string },
-): string | null {
-  return (
-    buildGalleryCinestillRenderUrl(apiBase, item, options) ??
-    buildGalleryPlainImageUrl(apiBase, item, options?.maxSide ?? GALLERY_PLAIN_THUMB_MAX_SIDE)
-  );
-}

@@ -228,8 +228,10 @@ class ConversationalAgent:
         self.working_memory["last_tool"] = name
         if args.get("query") is not None:
             self.working_memory["last_query"] = args.get("query")
-        if meta.get("files"):
-            self.working_memory["last_files"] = list(meta.get("files") or [])
+        # Prefer explicit result files; gallery_select exposes selected_keys instead.
+        files = meta.get("files") or meta.get("selected_keys") or args.get("files")
+        if files:
+            self.working_memory["last_files"] = list(files)
         if meta.get("citations"):
             self.working_memory["last_citations"] = list(meta.get("citations") or [])
         if meta.get("rag"):

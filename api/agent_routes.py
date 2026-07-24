@@ -118,8 +118,13 @@ def _system_prompt(registry) -> str:
         "- 复古胶片 / Cinestill / 黑白纪实 / 修成…风格看看 → "
         '{"tool":"apply_film_vibe","args":{"prompt":"<paste the user message>"}} '
         "(MUST call this tool — never claim the style was applied from prose alone. "
-        "Gallery auto-opens graded style preview and shows an 「打开风格预览」 button; "
-        "say 已打开风格预览 / 可点打开风格预览 only after the tool succeeded)\n"
+        "UI shows a clickable 「打开风格预览」 button under your reply; "
+        "say 已应用风格，请点下方「打开风格预览」 only after the tool succeeded. "
+        "NEVER dump Markdown image lists like ![](DSC….jpg) or enumerate dozens of filenames.)\n"
+        "- 把刚才选出的 / 这些 / 那批 修成…风格 → if WORKING MEMORY has last_files: "
+        "gallery_select(files=last_files) then apply_film_vibe(prompt=…). "
+        "Do NOT ask the user for filenames when last_files is present. "
+        "Keep the final answer to 1–2 short sentences — no photo grids.\n"
         "- 导出预览+RAW → export_selected (after selection exists)\n\n"
         "When answering search results, cite real file names from tool metadata.citations "
         "or rows — never invent photos.\n\n"
@@ -208,10 +213,11 @@ def _build_memory(system_prompt: str, history: list[dict[str, Any]]) -> Conversa
 
 
 def _load_conversation(owner: str, req: ChatRequest, system_prompt: str):
-    """Return ``(conversation_id, ConversationMemory)`` for this owner/session/mode.
+    """Return ``(conversation_id, ConversationMemory, working_memory)``.
 
-    Honors ``req.reset`` by clearing persisted messages first. A fresh connection is
-    used and closed here; persistence of the new turn opens its own connection later.
+    Honors ``req.reset`` by clearing persisted messages + working memory first.
+    Working memory is loaded from the conversation row, with a fallback rebuild from
+    recent tool events (so last gallery_search hits survive across HTTP turns).
     """
     conn = store.store_connect()
     try:
@@ -219,11 +225,18 @@ def _load_conversation(owner: str, req: ChatRequest, system_prompt: str):
         if req.reset:
             store.reset_conversation(conn, owner, req.session_id, req.mode)
             history: list[dict[str, Any]] = []
+            working: dict[str, Any] = {}
         else:
             history = store.load_messages(conn, conv_id)
+            working = store.get_working_memory(conn, conv_id)
+            if not working.get("last_files"):
+                events = store.load_agent_events(conn, conv_id, limit=40)
+                rebuilt = store.working_memory_from_events(events)
+                if rebuilt.get("last_files"):
+                    working = rebuilt
     finally:
         conn.close()
-    return conv_id, _build_memory(system_prompt, history)
+    return conv_id, _build_memory(system_prompt, history), working
 
 
 def _persist_turn(
@@ -232,6 +245,7 @@ def _persist_turn(
     reply: str,
     *,
     events: Optional[list[dict[str, Any]]] = None,
+    working_memory: Optional[dict[str, Any]] = None,
 ) -> int:
     """Append the user message + assistant reply; return the total message count."""
     conn = store.store_connect()
@@ -242,6 +256,8 @@ def _persist_turn(
         ])
         if events:
             store.append_agent_events(conn, conv_id, events)
+        if working_memory is not None:
+            store.set_working_memory(conn, conv_id, working_memory)
         return store.message_count(conn, conv_id)
     finally:
         conn.close()
@@ -316,15 +332,18 @@ def agent_chat_stream(
 
     user = resolve_user(authorization)
     owner = store.owner_key(user, req.session_id)
-    registry, system_prompt = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
-    system_prompt = _augment_system_prompt(system_prompt, owner)
+    registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
+    # Load history + working memory first so last_files can be injected into the prompt.
+    conv_id, memory, working = _load_conversation(owner, req, base_system)
+    system_prompt = _augment_system_prompt(base_system, owner, working)
+    memory.system_prompt = system_prompt
     stream_fn = _build_stream_fn(base_dir)
     events: list[GuardrailEvent] = []
     guardrails = Guardrails(on_event=events.append)
-    conv_id, memory = _load_conversation(owner, req, system_prompt)
     agent = ConversationalAgent(
         chat_fn, memory=memory, skills=registry, guardrails=guardrails,
         wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
+        working_memory=working,
     )
 
     def _gen():
@@ -336,6 +355,7 @@ def agent_chat_stream(
                         req.message,
                         str(ev.get("reply") or ""),
                         events=list(getattr(agent, "_events", []) or []),
+                        working_memory=dict(getattr(agent, "working_memory", {}) or {}),
                     )
                     ev = {
                         **ev,
@@ -365,16 +385,18 @@ def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=N
 
     user = resolve_user(authorization)
     owner = store.owner_key(user, req.session_id)
-    registry, system_prompt = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
-    system_prompt = _augment_system_prompt(system_prompt, owner)
+    registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
+    conv_id, memory, working = _load_conversation(owner, req, base_system)
+    system_prompt = _augment_system_prompt(base_system, owner, working)
+    memory.system_prompt = system_prompt
     events: list[GuardrailEvent] = []
     guardrails = Guardrails(on_event=events.append)
-    conv_id, memory = _load_conversation(owner, req, system_prompt)
     # Gallery skills read our own DB → trusted; don't fence their output as untrusted
     # (the fence hurts weaker chat models). Injection scanning still runs for observability.
     agent = ConversationalAgent(
         chat_fn, memory=memory, skills=registry, guardrails=guardrails,
         wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
+        working_memory=working,
     )
 
     try:
@@ -384,7 +406,13 @@ def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=N
         return ChatResponse(reply="", base_dir=base_dir, memory_turns=memory.turn_count,
                             error=f"model call failed: {exc}")
 
-    turns = _persist_turn(conv_id, req.message, result.reply, events=result.events)
+    turns = _persist_turn(
+        conv_id,
+        req.message,
+        result.reply,
+        events=result.events,
+        working_memory=result.working_memory,
+    )
     return ChatResponse(
         reply=result.reply,
         tool_calls=result.tool_calls,

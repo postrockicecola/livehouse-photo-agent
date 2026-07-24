@@ -576,7 +576,19 @@ class PrioritizedInferenceQueue:
         )
         lane = self._lane_for_request(req)
         t_adm0 = time.monotonic()
-        lane.admission.acquire()
+        admit_timeout = max(1.0, float(self.queue_wait_timeout_seconds or 60.0))
+        acquired = lane.admission.acquire(timeout=admit_timeout)
+        if not acquired:
+            fut = concurrent_futures.Future()
+            fut.set_result(
+                {
+                    "status": "error",
+                    "error": "inference admission timeout",
+                    "text": "",
+                    "model": "",
+                }
+            )
+            return fut
         if self._stop.is_set():
             lane.admission.release()
             fut = concurrent_futures.Future()

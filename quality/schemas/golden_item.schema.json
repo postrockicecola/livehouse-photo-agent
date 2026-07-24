@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/golden_item.schema.json",
+  "title": "Golden Item v1",
+  "description": "One curated media unit in a golden dataset version. Join via content_hash and file_key.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "item_id",
+    "file",
+    "content_hash",
+    "label",
+    "splits"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "golden_item.v1"
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable id; prefer {session}__{stem}."
+    },
+    "file": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Basename used for display and legacy join (labels.jsonl 'file')."
+    },
+    "file_key": {
+      "type": "string",
+      "description": "normalize_name(file); optional if derived at read time."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of image bytes, lowercase hex."
+    },
+    "uri": {
+      "type": "string",
+      "description": "Storage URI or repo-relative path to bytes."
+    },
+    "source_path": {
+      "type": "string",
+      "description": "Legacy alias of uri (data/eval/manifest.json)."
+    },
+    "session": {
+      "type": "string"
+    },
+    "label": {
+      "$ref": "label.schema.json"
+    },
+    "splits": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "smoke",
+          "core",
+          "hard",
+          "regression",
+          "agent_curation",
+          "agent_chat"
+        ]
+      }
+    },
+    "slices": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": ["human", "prod_promotion", "synthetic", "imported"]
+        },
+        "label_version": { "type": "string" },
+        "annotators": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "promoted_from_failure_id": { "type": "string" },
+        "imported_from": { "type": "string" }
+      }
+    },
+    "preferences_ref": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "pair_id references into preference sets."
+    },
+    "notes": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

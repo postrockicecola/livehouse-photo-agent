@@ -11,10 +11,11 @@ import logging
 import re
 from typing import Any, Optional
 
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, Request
 from pydantic import BaseModel, Field
 
 from services.agent import store
+from utils.http_security import check_auth_rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,8 @@ def resolve_user(authorization: Optional[str]) -> Optional[dict[str, Any]]:
 
 
 @router.post("/api/auth/register", response_model=AuthResponse)
-def register(req: RegisterRequest) -> AuthResponse:
+def register(req: RegisterRequest, request: Request) -> AuthResponse:
+    check_auth_rate_limit(request, username=req.username)
     if not _USERNAME_RE.match(req.username):
         return AuthResponse(error="用户名需为 3-32 位字母/数字/._- 组合")
     conn = store.store_connect()
@@ -79,7 +81,8 @@ def register(req: RegisterRequest) -> AuthResponse:
 
 
 @router.post("/api/auth/login", response_model=AuthResponse)
-def login(req: LoginRequest) -> AuthResponse:
+def login(req: LoginRequest, request: Request) -> AuthResponse:
+    check_auth_rate_limit(request, username=req.username)
     conn = store.store_connect()
     try:
         user = store.authenticate(conn, req.username, req.password)

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/eval_run.schema.json",
+  "title": "Eval Run v1",
+  "description": "One suite execution against a pinned version_manifest and dataset. Artifacts under artifact_root are immutable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "eval_run_id",
+    "suite",
+    "status",
+    "started_at",
+    "version_manifest",
+    "dataset",
+    "metrics",
+    "artifact_root"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "eval_run.v1"
+    },
+    "eval_run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque id, e.g. evr_ + ULID."
+    },
+    "suite": {
+      "type": "string",
+      "enum": [
+        "stage3_scoring",
+        "stage3_selection",
+        "gating_policy",
+        "agent_selection",
+        "agent_trajectory",
+        "agent_chat_cases",
+        "e2e_gallery_contract"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["queued", "running", "succeeded", "failed", "cancelled"]
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": ["string", "null"], "format": "date-time" },
+    "version_manifest": {
+      "description": "Full manifest or compact reference after hash is known.",
+      "oneOf": [
+        { "$ref": "version_manifest.schema.json" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["manifest_id", "version_manifest_hash"],
+          "properties": {
+            "manifest_id": { "type": "string" },
+            "version_manifest_hash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      ]
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "labels_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "manifest_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "split_filter": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "smoke",
+              "core",
+              "hard",
+              "regression",
+              "agent_curation",
+              "agent_chat"
+            ]
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["schema"],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "description": "e.g. metrics.stage3_scoring.v1"
+        }
+      },
+      "additionalProperties": true
+    },
+    "artifact_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_run_id": { "type": ["string", "null"] },
+    "experiment_id": { "type": ["string", "null"] },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "result"],
+      "properties": {
+        "name": { "type": "string" },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "skip"]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "result"],
+            "properties": {
+              "id": { "type": "string" },
+              "result": {
+                "type": "string",
+                "enum": ["pass", "fail", "skip"]
+              },
+              "metric": { "type": "string" },
+              "actual": {},
+              "threshold": {},
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "failure_ids": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "hardware": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "protocol": {
+      "type": "object",
+      "description": "Backward-compatible stamp_protocol() block.",
+      "additionalProperties": true,
+      "properties": {
+        "schema_version": { "type": "string" },
+        "generated_at": { "type": "string" },
+        "git_sha": { "type": ["string", "null"] },
+        "seed": { "type": ["integer", "null"] },
+        "hardware": { "type": "object" },
+        "model": { "type": "object" },
+        "inputs": { "type": "object" },
+        "extra": { "type": "object" }
+      }
+    },
+    "error": {
+      "type": ["string", "null"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -20,6 +20,7 @@ from api.auth_routes import router as auth_router
 from api.gallery_routes import configure_gallery_routes, router as gallery_router
 from api.infra_routes import router as infra_router
 from api.personal_routes import router as personal_router
+from utils.http_security import cors_allow_origins
 
 
 _REPO_ROOT = Path(__file__).resolve().parent
@@ -97,7 +98,7 @@ except Exception:
 app = FastAPI(title="Livehouse Gallery API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_allow_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

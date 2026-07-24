@@ -34,6 +34,9 @@ configs/studio_ingest.json
 # Stray pipeline eval outputs
 evaluation_*.json
 
+# Quality platform local run artifacts (schemas/contracts stay tracked)
+quality/store/
+
 # General-agent artifact workspace (per-session deliverables; local-only)
 data/agent_workspace/
 

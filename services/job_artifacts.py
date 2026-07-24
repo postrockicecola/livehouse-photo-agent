@@ -94,6 +94,27 @@ def _abspath(p: str | Path | None) -> str | None:
         return str(p)
 
 
+def build_executor_success_base(
+    *,
+    worker_id: int,
+    session_id: Any,
+    source_dir: str | None,
+    trace_id: str | None,
+    job_type: str,
+    **extra: Any,
+) -> dict[str, Any]:
+    """Shared success-event base fields for JobExecutor paths (avoids copy-paste drift)."""
+    base: dict[str, Any] = {
+        "worker_id": worker_id,
+        "session_id": session_id,
+        "source_dir": source_dir,
+        "trace_id": trace_id,
+        "job_type": job_type,
+    }
+    base.update(extra)
+    return base
+
+
 def build_success_artifact_event_payload(
     *,
     base: dict[str, Any],

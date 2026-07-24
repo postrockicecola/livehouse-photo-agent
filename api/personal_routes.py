@@ -1,6 +1,7 @@
 """Personal edition API (local ComfyUI portrait cartoon, etc.)."""
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -29,7 +30,9 @@ async def portrait_cartoon_create_job(
         raise HTTPException(status_code=400, detail="file must be an image")
     data = await image.read()
     try:
-        meta = pc.create_job(
+        # Comfy sync HTTP must not block the event loop.
+        meta = await asyncio.to_thread(
+            pc.create_job,
             image_bytes=data,
             user_prompt=prompt,
             denoise=denoise,
