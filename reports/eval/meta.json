@@ -11,7 +11,7 @@
   },
   "protocol": {
     "helper": "scripts/eval/protocol.py",
-    "lockfile": "requirements.lock",
+    "lockfile": "requirements.txt",
     "eval_config_temp0": "configs/eval_stage3.yaml"
   },
   "reports": [

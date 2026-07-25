@@ -410,7 +410,7 @@ Go（ingest 路径）★★
   · build tags（preview_extractor tools）
 
 通用工程
-  · Git、venv、requirements.lock 含义
+  · Git、venv、requirements.txt / requirements-dev.txt 含义
   · YAML 配置分层；密钥进 .env 不进仓库
   · HTTP：REST、状态码、CORS、token 鉴权直觉
 

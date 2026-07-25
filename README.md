@@ -131,7 +131,7 @@ UI: **`/eval`** (also summarized on the landing `#evaluation` section).
 Report index: [`reports/eval/meta.json`](reports/eval/meta.json).
 
 Fixed **250-image** human-labeled set (`data/eval/`). Config for full scoring: `configs/eval_stage3.yaml` (temp=0).  
-Eval reports stamp a `protocol` block (seed, config hash, hardware, git sha) via `scripts/eval/protocol.py`. Dependency lock: `requirements.lock`.
+Eval reports stamp a `protocol` block (seed, config hash, hardware, git sha) via `scripts/eval/protocol.py`.
 
 | Strategy | Quality | VLM calls | Latency | Cost | Source |
 |------|------|----------|------|------|-------------|

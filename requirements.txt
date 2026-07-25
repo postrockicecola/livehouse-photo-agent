@@ -14,15 +14,11 @@ uvicorn>=0.30
 jinja2>=3.1
 python-multipart>=0.0.9
 
-# Reproducible installs for eval / CI: pip install -r requirements.lock
-# Regenerate after intentional upgrades: pip freeze > requirements.lock
-
 # Async queue
 celery>=5.4
 redis>=5.0
 
-# Semantic / visual similarity search (optional — enable CLIP embedding pipeline)
-# CPU-only: pip install open-clip-torch; GPU: installs PyTorch with CUDA automatically.
+# CLIP embeddings for gallery similarity / diversity (optional at runtime if unused)
 open-clip-torch>=2.20
 
 # Structured LLM output — Pydantic-validated responses from vLLM / OpenAI-compatible backends
