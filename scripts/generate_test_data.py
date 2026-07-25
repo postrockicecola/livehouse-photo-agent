@@ -272,7 +272,7 @@ def main() -> None:
             "preview extraction needs real RAW files."
         )
         print(
-            f'  go run . --archive-root "{archive_root}" --only-session "{name}" '
+            f'  go run ./cmd/ingest --archive-root "{archive_root}" --only-session "{name}" '
             f"--poll-seconds 2 --stable-seconds 3 --verbose"
         )
 

@@ -193,8 +193,8 @@ data/eval/         固定标注集 / manifest
 reports/eval/      Recorded Run 报告（勿把 Simulated 当生产 SLO）
 deploy/            Docker / K8s 实验清单
 utils/             luma_brain、json_safe、http_security、stage3_dimensions
-Go 源码            main.go, scanner.go, executor.go, ingest_sd_brain.go,
-                   preview_extractor.go (build tag tools), luma_brain*.go
+Go 源码            cmd/ingest/ (main, scanner, executor, luma_brain*, …),
+                   cmd/preview-extractor/, cmd/arw-extractor/, cmd/jpeg-organizer/
 
 
 ==============================================================================
@@ -366,7 +366,7 @@ A14. 建议的掌握路径（读代码顺序）
   4. tasks/run_job.py → job_executor.py → job_lifecycle.py
   5. pipeline_stage_runner.py + engine/operators + deep_analysis.py
   6. inference/queue.py + router.py + ledger
-  7. luma_brain_schema.sql / utils/luma_brain（SSOT 表语义）
+  7. cmd/ingest/luma_brain_schema.sql / utils/luma_brain（SSOT 表语义）
 
 第 2 周 — 可观测与可靠
   8. api/infra_routes.py + web/app/infra

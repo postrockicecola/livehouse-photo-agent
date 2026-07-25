@@ -15,7 +15,7 @@ from services.agent.job_runner import run_curation_job
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA = (ROOT / "luma_brain_schema.sql").read_text(encoding="utf-8")
+SCHEMA = (ROOT / "cmd" / "ingest" / "luma_brain_schema.sql").read_text(encoding="utf-8")
 
 
 def _conn() -> sqlite3.Connection:

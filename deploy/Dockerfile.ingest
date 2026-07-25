@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
-COPY *.go luma_brain_schema.sql ./
-RUN CGO_ENABLED=1 go build -o /out/ingest_worker .
+COPY cmd/ingest/ ./cmd/ingest/
+RUN CGO_ENABLED=1 go build -o /out/ingest_worker ./cmd/ingest
 
 FROM debian:bookworm-slim
 
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY --from=build /out/ingest_worker /usr/local/bin/ingest_worker
-COPY luma_brain_schema.sql /app/luma_brain_schema.sql
+COPY cmd/ingest/luma_brain_schema.sql /app/luma_brain_schema.sql
 
 ENV LUMA_REPO_ROOT=/app \
     LUMA_ARCHIVE_ROOT=/data/archive \

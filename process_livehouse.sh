@@ -45,7 +45,7 @@ echo ""
 if [ ! -f "$ARW_EXTRACTOR" ]; then
     echo "⚠️  编译工具中..."
     cd "$PROJECT_DIR"
-    go build -o arw_extractor arw_extractor.go
+    go build -o arw_extractor ./cmd/arw-extractor
     cd - > /dev/null
 fi
 

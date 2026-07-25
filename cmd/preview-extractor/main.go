@@ -1,5 +1,3 @@
-//go:build tools
-
 package main
 
 import (
@@ -25,7 +23,7 @@ func loadDotEnvPreview() {
 	_ = godotenv.Load(filepath.Join(wd, ".env"))
 }
 
-// defaultBaseDir matches env.defaultArchiveRoot logic (this file is built standalone with go run preview_extractor.go).
+// defaultBaseDir matches env.defaultArchiveRoot logic (standalone: go run ./cmd/preview-extractor).
 func defaultBaseDir() string {
 	if v := strings.TrimSpace(os.Getenv("LUMA_ARCHIVE_ROOT")); v != "" {
 		p := v

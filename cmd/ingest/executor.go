@@ -29,7 +29,7 @@ func runSession(sessionDir string, ss *SessionState, workers int, pipelineCmd st
 
 	arwN := countARWFiles(effectiveRawDirForARW(sessionDir))
 	if arwN > 0 {
-		cmd := exec.Command("go", "run", "-tags=tools", "preview_extractor.go", "--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers))
+		cmd := exec.Command("go", "run", "./cmd/preview-extractor", "--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers))
 		cmd.Dir = repoRoot
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

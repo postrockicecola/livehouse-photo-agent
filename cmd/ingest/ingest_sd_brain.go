@@ -294,7 +294,7 @@ func runPreviewExtractor(repoRoot, sessionDir string, workers int) error {
 }
 
 func execCommandPreviewExtractor(repoRoot, sessionDir string, workers int) *exec.Cmd {
-	c := exec.Command("go", "run", "-tags=tools", "preview_extractor.go", "--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers))
+	c := exec.Command("go", "run", "./cmd/preview-extractor", "--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers))
 	c.Dir = repoRoot
 	return c
 }

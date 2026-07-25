@@ -1,5 +1,3 @@
-//go:build tools
-
 package main
 
 import (
@@ -204,7 +202,7 @@ func PrintInfo() {
 	fmt.Println("║          ARW 格式照片 JPEG 提取工具                         ║")
 	fmt.Println("║                                                            ║")
 	fmt.Println("║  功能: 从 Sony ARW 原始格式文件中提取 JPEG 预览             ║")
-	fmt.Println("║  用法: go run arw_extractor.go -input <输入目录>            ║")
+	fmt.Println("║  用法: go run ./cmd/arw-extractor -input <输入目录>         ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 }
@@ -222,7 +220,7 @@ func main() {
 	// 验证必要参数
 	if *inputDir == "" {
 		fmt.Println("❌ 错误: 必须指定 -input 参数")
-		fmt.Println("示例: go run arw_extractor.go -input /path/to/arw/folder")
+		fmt.Println("示例: go run ./cmd/arw-extractor -input /path/to/arw/folder")
 		os.Exit(1)
 	}
 

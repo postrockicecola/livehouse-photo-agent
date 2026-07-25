@@ -29,7 +29,7 @@ from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _DEFAULT_DB = _REPO_ROOT / "luma_brain.db"
-_SCHEMA_SQL = _REPO_ROOT / "luma_brain_schema.sql"
+_SCHEMA_SQL = _REPO_ROOT / "cmd" / "ingest" / "luma_brain_schema.sql"
 
 
 class ClaimFenceError(ValueError):

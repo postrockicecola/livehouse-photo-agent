@@ -25,7 +25,7 @@ grep -q -- '-Q' deploy/docker-entrypoint.sh
 echo "== Batch E docs / hooks present =="
 test -f docs/PLATFORM_SCOPE.txt
 grep -q 'LIVEHOUSE_BRAIN_BACKEND' utils/brain_backend.py
-grep -q 'content_digest' luma_brain_schema.sql
+grep -q 'content_digest' cmd/ingest/luma_brain_schema.sql
 
 echo "== focused pytest =="
 python -m pytest -q \

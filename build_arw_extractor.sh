@@ -13,7 +13,7 @@ if ! command -v go &> /dev/null; then
 fi
 
 # 编译
-GOOS=darwin GOARCH=arm64 go build -o arw_extractor arw_extractor.go
+GOOS=darwin GOARCH=arm64 go build -o arw_extractor ./cmd/arw-extractor
 
 if [ $? -eq 0 ]; then
     echo "✅ 编译成功！"

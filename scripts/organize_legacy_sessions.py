@@ -9,7 +9,7 @@ A legacy shoot folder usually holds loose images directly in the session dir::
     ...
 
 Studio / gallery expect the canonical layout (see ``utils/studio_sessions.py``
-``scan_archive_session_dirs`` + ``preview_extractor.go``)::
+``scan_archive_session_dirs`` + ``cmd/preview-extractor``)::
 
     Session/Previews/<stem>.jpg     # gallery previews (scan counts these)
     Session/RAW/<stem>.<rawext>     # paired RAW, located on export by stem
@@ -33,7 +33,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Source of truth for these sets:
-#   RAW exts  -> preview_extractor.go / services/film_render_service.py
+#   RAW exts  -> cmd/preview-extractor / services/film_render_service.py
 #   skip dirs -> utils/studio_sessions._SKIP_ARCHIVE_DIRS
 RAW_EXTS = frozenset({".arw", ".dng", ".cr2", ".cr3", ".nef", ".raf", ".rw2", ".orf"})
 JPEG_EXTS = frozenset({".jpg", ".jpeg"})

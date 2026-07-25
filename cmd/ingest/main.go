@@ -24,7 +24,7 @@ func main() {
 	maxPerScan := flag.Int("max-sessions-per-scan", 1, "Max sessions to dequeue per poll when idle (default 1). Pipeline runs in the background so scans keep discovering new folders.")
 	verbose := flag.Bool("verbose", false, "Log each session snapshot count (debug)")
 	onlySession := flag.String("only-session", "", "Only ingest this folder (basename like 2026-04-10 or absolute path). Ignores all other dates; uses a separate state file unless --state-file is set.")
-	repoRootFlag := flag.String("repo-root", "", "Project root containing run_pipeline.py and preview_extractor.go (default: $LUMA_REPO_ROOT, $LIVEHOUSE_REPO_ROOT, or cwd)")
+	repoRootFlag := flag.String("repo-root", "", "Project root containing run_pipeline.py and cmd/preview-extractor (default: $LUMA_REPO_ROOT, $LIVEHOUSE_REPO_ROOT, or cwd)")
 	sdMount := flag.String("sd-mount", "", "If set, incremental SD scanner with SQLite luma brain (mounted card path, e.g. /Volumes/CAMERA_SD). Legacy archive polling is disabled.")
 	brainDB := flag.String("brain-db", "luma_brain.db", "SQLite ledger path for --sd-mount (relative paths resolve under --repo-root)")
 	deviceID := flag.String("device-id", "", "Device id for SD mode (default: $DEVICE_ID or 'default'); omit flag to use env")
