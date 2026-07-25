@@ -1,0 +1,115 @@
+Agent slim checklist — Runtime + sharp Agent (interview-facing)
+Updated: 2026-07-25
+Companion: docs/agent_capability_map.md · docs/PROJECT_GUIDE.txt
+
+Goal: keep Agent as a first-class story, cut kitchen-sink surface.
+K8s / KEDA / operator: deferred (leave in tree for now).
+
+==============================================================================
+KEEP (core interview assets — default on)
+==============================================================================
+
+Runtime
+  services/agent/graph.py              LangGraph plan→act→reflect (production)
+  services/agent/conversation_graph.py Gallery chat decide→act→answer
+  services/agent/loop.py               CurationAgent entry (delegates to graph)
+  services/agent/conversation.py       ConversationalAgent entry
+  services/agent/planner.py            Heuristic / stratified / LLM planners
+  services/agent/tools.py              Inspect / Analyze / Finalize
+  services/agent/reflection.py
+  services/agent/types.py
+  services/agent/job_runner.py         Agent jobs on durable job path
+  services/agent/llm_backend.py
+  services/agent/chat_backend.py
+  services/agent/guardrails.py
+  services/agent/store.py              prefs / memory durability
+  services/agent/session.py
+  services/agent/context_governance.py
+  services/agent/prompt_cache.py
+  services/agent/openai_adapter.py
+
+Skills (product tools)
+  services/agent/skills/gallery.py
+  services/agent/skills/artifacts.py
+  services/agent/skills/memory.py
+  services/agent/skills/database.py
+  services/agent/skills/base.py
+  services/agent/skills/__init__.py
+
+API / UI
+  api/agent_routes.py                  /api/agent/chat · stream · trace
+  api/auth_routes.py                   conversation scoping
+  web/components/agent/*               ChatDock (Gallery-primary entry)
+  web/app/gallery                      curation + agent surface
+
+Eval (honest proof)
+  scripts/eval/eval_agent_selection.py
+  scripts/eval/eval_agent_trajectory.py
+  scripts/eval/eval_agent_chat_cases.py
+  tests/test_agent_*.py (langgraph + tools + conversation)
+  quality/ + curated data/eval baselines (not bulk run dumps)
+
+Docs
+  docs/agent_capability_map.md
+  this file
+
+==============================================================================
+DOWNGRADE (legacy / opt-in — not the story)
+==============================================================================
+
+Imperative runtime
+  services/agent/loop.py::_run_imperative
+  services/agent/conversation.py::_chat_imperative / _stream_chat_imperative
+  Env: LIVEHOUSE_AGENT_RUNTIME=imperative|loop|legacy
+  Default is LangGraph; missing langgraph → hard error (no silent fallback).
+  Kept for tests + emergency only.
+
+==============================================================================
+EXPERIMENT / SIDE (keep in tree, do not grow; resume line, not demo path)
+==============================================================================
+
+  services/agent/mcp/                  MCP server/client
+  services/agent/orchestrator.py       Multi-agent
+  services/agent/messaging.py
+  services/agent/rag.py                Hybrid RAG + CLIP (optional skill path)
+  services/agent/rl/                   RL / reinforce experiments
+  services/agent/skills/web.py
+  services/agent/skills/code_execution.py
+
+Interview tip: one sentence each is enough; do not open with these.
+
+==============================================================================
+REMOVED FROM TREE (cleanup pass)
+==============================================================================
+
+Personal / Comfy product
+  api/personal_routes.py · services/personal/ · configs/comfy/
+  web/app/personal · web/components/personal · web/lib/personal*
+
+Legacy static Gallery
+  static/gallery.html + gallery.js
+
+Demos / one-offs
+  demo_gallery/ · notebooks/ · tools/ · scripts/build_demo_gallery.py
+  luma_render2.py
+  reports/agent_demo_* · reports/gpu_demo/ · reports/loadtest/ · reports/rl/
+  reports/infra_scaling.* · stale reports/eval/baseline_v{2,3,4}* dumps
+
+Local-only (not git-tracked; purged on this machine)
+  models/eval/ · bulky data/eval/_*-run image dumps
+  (kept data/eval/_temp0_run/.../eligible_after_stage2.jsonl for eval defaults)
+
+Deferred (your call)
+  deploy/k8s/** · deploy/operator/**
+
+NOTE: No Triton kernels exist in this repo. Film grades use NumPy/OpenCV
+``op_kernel.py`` (still required by Lab / film_render_service).
+
+==============================================================================
+STILL TO SLIM LATER (not this pass)
+==============================================================================
+
+  Dual pipeline CLI (run_pipeline.py Mode A / Go Mode A)
+  engine/models/vlm_model.py deprecated façade
+  Showcase fixture stack (web/fixtures, public/showcase) — isolate build target
+  Bulk generated reports under reports/ · data/eval/_*/

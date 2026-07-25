@@ -177,12 +177,18 @@ _NO_ANSWER_FALLBACK = (
 )
 
 
+_LANGGRAPH_REQUIRED = (
+    "LangGraph is required for the production chat runtime. "
+    "Install langgraph, or set LIVEHOUSE_AGENT_RUNTIME=imperative for the legacy loop."
+)
+
+
 class ConversationalAgent:
     """A stateful, multi-turn chat agent that can call skills mid-turn.
 
-    Default runtime is the LangGraph ``decide → act → answer`` subgraph
-    (:mod:`services.agent.conversation_graph`); set ``LIVEHOUSE_AGENT_RUNTIME=imperative``
-    to force the legacy while-loop.
+    Production runtime is the LangGraph ``decide → act → answer`` subgraph
+    (:mod:`services.agent.conversation_graph`). Set ``LIVEHOUSE_AGENT_RUNTIME=imperative``
+    only for legacy / tests — missing LangGraph is a hard error, not a silent fallback.
     """
 
     def __init__(
@@ -212,7 +218,7 @@ class ConversationalAgent:
         # Working memory: last tool artifacts for the current dialogue (not durable prefs).
         self.working_memory: dict[str, Any] = dict(working_memory or {})
         self._events: list[dict[str, Any]] = []
-        self.last_backend: str = "imperative"
+        self.last_backend: str = "langgraph"
 
     def _emit(self, event: dict[str, Any]) -> None:
         self._events.append(event)
@@ -268,28 +274,24 @@ class ConversationalAgent:
             "final_answer_nudge": _FINAL_ANSWER_NUDGE,
         }
 
-    def _langgraph_enabled(self) -> bool:
-        from services.agent.conversation_graph import chat_runtime_preference, langgraph_available
+    def _imperative_requested(self) -> bool:
+        from services.agent.conversation_graph import chat_runtime_preference
 
-        return chat_runtime_preference() == "langgraph" and langgraph_available()
+        return chat_runtime_preference() == "imperative"
 
-    def _try_langgraph_turn(self, user_text: str, *, defer_answer: bool = False) -> Optional[dict[str, Any]]:
-        from services.agent.conversation_graph import run_chat_turn
+    def _run_langgraph_turn(self, user_text: str, *, defer_answer: bool = False) -> dict[str, Any]:
+        from services.agent.conversation_graph import langgraph_available, run_chat_turn
 
-        if not self._langgraph_enabled():
-            return None
-        try:
-            return dict(
-                run_chat_turn(
-                    user_text=user_text,
-                    max_tool_rounds=self._max_tool_rounds,
-                    defer_answer=defer_answer,
-                    **self._graph_kwargs(),
-                )
+        if not langgraph_available():
+            raise RuntimeError(_LANGGRAPH_REQUIRED)
+        return dict(
+            run_chat_turn(
+                user_text=user_text,
+                max_tool_rounds=self._max_tool_rounds,
+                defer_answer=defer_answer,
+                **self._graph_kwargs(),
             )
-        except Exception:
-            logger.exception("LangGraph chat turn failed; falling back to imperative loop")
-            return None
+        )
 
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
@@ -297,18 +299,18 @@ class ConversationalAgent:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
 
-        state = self._try_langgraph_turn(user_text, defer_answer=False)
-        if state is not None:
-            self.last_backend = str(state.get("backend") or "langgraph")
-            return TurnResult(
-                reply=str(state.get("reply") or ""),
-                tool_calls=list(state.get("tool_calls") or []),
-                working_memory=dict(self.working_memory),
-                events=list(self._events),
-            )
+        if self._imperative_requested():
+            self.last_backend = "imperative"
+            return self._chat_imperative(user_text)
 
-        self.last_backend = "imperative"
-        return self._chat_imperative(user_text)
+        state = self._run_langgraph_turn(user_text, defer_answer=False)
+        self.last_backend = str(state.get("backend") or "langgraph")
+        return TurnResult(
+            reply=str(state.get("reply") or ""),
+            tool_calls=list(state.get("tool_calls") or []),
+            working_memory=dict(self.working_memory),
+            events=list(self._events),
+        )
 
     def _chat_imperative(self, user_text: str) -> TurnResult:
         tool_calls: list[dict[str, Any]] = []
@@ -386,15 +388,16 @@ class ConversationalAgent:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
 
-        if self._langgraph_enabled():
-            try:
-                yield from self._stream_chat_langgraph(user_text, stream_fn=stream_fn)
-                return
-            except Exception:
-                logger.exception("LangGraph streaming chat failed; falling back to imperative loop")
+        if self._imperative_requested():
+            self.last_backend = "imperative"
+            yield from self._stream_chat_imperative(user_text, stream_fn=stream_fn)
+            return
 
-        self.last_backend = "imperative"
-        yield from self._stream_chat_imperative(user_text, stream_fn=stream_fn)
+        from services.agent.conversation_graph import langgraph_available
+
+        if not langgraph_available():
+            raise RuntimeError(_LANGGRAPH_REQUIRED)
+        yield from self._stream_chat_langgraph(user_text, stream_fn=stream_fn)
 
     def _stream_chat_langgraph(
         self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None

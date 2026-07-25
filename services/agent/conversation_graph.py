@@ -5,8 +5,8 @@ Graph shape::
     START → decide → act ⟲ decide → answer → END
                    ↘ answer (plain / forced)
 
-This is the **production** path for :class:`ConversationalAgent` when LangGraph is
-available. The imperative loop in ``conversation.py`` remains the fallback
+This is the **production** path for :class:`ConversationalAgent`. The imperative
+loop in ``conversation.py`` is legacy opt-in only
 (``LIVEHOUSE_AGENT_RUNTIME=imperative``).
 
 The compiled graph is also intended to be mounted as a **subgraph node** on the

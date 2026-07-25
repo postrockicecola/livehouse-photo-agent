@@ -87,3 +87,14 @@ def test_curation_agent_imperative_override(monkeypatch):
     )
     res = agent.run(_cands())
     assert res.metrics.get("backend") == "imperative"
+
+
+def test_curation_agent_requires_langgraph_when_default(monkeypatch):
+    monkeypatch.delenv("LIVEHOUSE_AGENT_RUNTIME", raising=False)
+    monkeypatch.setattr("services.agent.graph.langgraph_available", lambda: False)
+    agent = CurationAgent(
+        tools=_registry(_analyze),
+        config=AgentConfig(max_inferences=2, max_analyze_candidates=2, max_steps=50, allow_escalation=False),
+    )
+    with pytest.raises(RuntimeError, match="LangGraph is required"):
+        agent.run(_cands())

@@ -48,7 +48,7 @@ A3. 产品表面（你能点到的东西）
   Infra       /infra — 作业时间线、model_runs、worker、成本、Golden Signals
   Gallery     人工确认 + 导出（Previews 与 sibling RAW/ 配对）
   Eval        /eval — 固定评估集指标与 Agent 基线对比
-  ChatDock    Gallery 侧对话 Agent（扩展，非主链卖点）
+  ChatDock    Gallery 侧对话 Agent（一等能力：LangGraph tool-use + trace；见 AGENT_SLIM）
 
 Showcase 交互演示：http://127.0.0.1:3000/infra?tour=1
   Job #61 成功路径；Job #62 primary TIMEOUT → fallback → degraded
@@ -162,7 +162,7 @@ A6. 架构鸟瞰
   HTTP          gallery_server.py, api/
   Infra UI      web/app/infra/page.tsx
   Inference     inference/（model.use_inference_layer 时可切换）
-  Agent         services/agent/（Infra Experiments）
+  Agent         services/agent/（一等能力；锐化清单 docs/AGENT_SLIM.txt）
   Eval          scripts/eval_*, quality/, data/eval/, reports/eval/
 
 
@@ -184,12 +184,12 @@ engine/
   operators/       Stage1/2 OpenCV 算子（如 stage2_prefilter）
 inference/         可选推理层：queue, router, providers, ledger
 infra/             WorkerManager, metrics, gpu_telemetry, otel_bootstrap
-api/               gallery / infra / studio / agent / auth / personal
+api/               gallery / infra / studio / agent / auth
 gallery_server.py  FastAPI 入口
 web/               Next.js：Studio · Gallery · Infra · Eval
 scripts/           评估、chaos、GPU / scaling demo、label_server
 quality/           评估契约（schemas + dataset/eval_run）
-data/eval/         固定标注集 / manifest
+data/eval/         固定标注集 / manifest（勿提交大型 _*_run 产物）
 reports/eval/      Recorded Run 报告（勿把 Simulated 当生产 SLO）
 deploy/            Docker / K8s 实验清单
 utils/             luma_brain、json_safe、http_security、stage3_dimensions
@@ -218,7 +218,7 @@ A8. 配置与关键环境变量
   LIVEHOUSE_OPS_TOKEN / LIVEHOUSE_INFRA_TOKEN / LIVEHOUSE_INGEST_TOKEN
   LIVEHOUSE_ALLOW_INSECURE_LOCAL=1   # 仅本地 demo
   LIVEHOUSE_CORS_ORIGINS
-  LIVEHOUSE_AGENT_RUNTIME=imperative # 可选，关掉 LangGraph
+  LIVEHOUSE_AGENT_RUNTIME=imperative # legacy only；默认 LangGraph（缺包硬失败）
   LIVEHOUSE_BRAIN_BACKEND=sqlite|postgres  # postgres 目前为诚实 stub
   LIVEHOUSE_OTEL=1
   LIVEHOUSE_SCOPE_VLM_QUOTA_PER_HOUR
@@ -249,10 +249,13 @@ Router：
 
 
 ==============================================================================
-A10. Agent 能力（扩展，勿抢主链）
+A10. Agent 能力（一等能力，锐化后；勿堆厨余）
 ==============================================================================
 
-详见 docs/agent_capability_map.md。
+详见 docs/agent_capability_map.md · docs/AGENT_SLIM.txt。
+
+定位：挂在 durable job + Gallery 上的 LangGraph Agent（非外挂 chatbot）。
+默认 runtime 只有 LangGraph；imperative 仅 LIVEHOUSE_AGENT_RUNTIME=imperative。
 
 Curation（services/agent/graph.py）：
   START → plan → act → reflect → (END | plan)
@@ -262,18 +265,17 @@ Gallery chat（conversation_graph.py）：
   START → decide → act ⟲ → answer → END
   入口：ConversationalAgent.chat / stream_chat
 
-关键词映射：
-  ReAct / Plan-Execute   loop.py, planner.py
-  Tools / Skills         tools.py, skills/*
-  Multi-Agent            orchestrator.py, messaging.py
-  MCP                    services/agent/mcp/
-  RAG                    rag.py + CLIP EmbeddingService
+主叙事关键词：
+  ReAct / Plan-Execute   graph.py (+ loop.py 入口)
+  Tools / Skills         tools.py, skills/gallery|artifacts|memory|database
   Memory                 ConversationMemory / working_memory / preferences
   Observability          job_events, agent_events, GET /api/agent/trace
 
+侧线（简历可一句，勿当 demo 主路径）：
+  Multi-Agent / MCP / RAG+CLIP / RL → 见 AGENT_SLIM「EXPERIMENT」
+
 诚实结论（评估）：
-  预算约束选片 Agent 目前未稳定超过 heuristic 基线；面试如实讲，
-  把 Agent 放在 Infra Experiments。
+  预算约束选片 Agent 目前未稳定大幅超过 heuristic；面试如实讲数字与 trace。
 
 
 ==============================================================================

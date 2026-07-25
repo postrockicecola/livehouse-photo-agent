@@ -1,11 +1,9 @@
-"""Curation agent entrypoint: LangGraph-first ReAct runtime.
+"""Curation agent entrypoint: LangGraph ReAct runtime.
 
-Production path (default): ``plan → act → reflect`` StateGraph in
-:mod:`services.agent.graph`.
+Production path: ``plan → act → reflect`` StateGraph in :mod:`services.agent.graph`.
 
-Fallback: imperative ``while`` loop when ``LIVEHOUSE_AGENT_RUNTIME=imperative`` or
-``langgraph`` is not installed. Behaviour (tools, budgets, step_hook metrics) stays
-aligned so job_runner / orchestrator callers do not care which backend ran.
+Legacy: imperative ``while`` loop only when ``LIVEHOUSE_AGENT_RUNTIME=imperative``
+(tests / emergency). Missing ``langgraph`` is a hard error — no silent fallback.
 """
 from __future__ import annotations
 
@@ -30,9 +28,14 @@ logger = logging.getLogger(__name__)
 MetricsHook = Callable[[dict[str, Any]], None]
 StepHook = Callable[[AgentStep, AgentState], None]
 
+_LANGGRAPH_REQUIRED = (
+    "LangGraph is required for the production curation runtime. "
+    "Install langgraph, or set LIVEHOUSE_AGENT_RUNTIME=imperative for the legacy loop."
+)
+
 
 class CurationAgent:
-    """Runs agentic curation over candidate photos (LangGraph by default)."""
+    """Runs agentic curation over candidate photos (LangGraph production path)."""
 
     def __init__(
         self,
@@ -62,27 +65,26 @@ class CurationAgent:
     def run(self, candidates: list[Candidate]) -> AgentResult:
         from services.agent.graph import langgraph_available, run_curation_graph, runtime_preference
 
-        prefer = runtime_preference()
-        if prefer == "langgraph" and langgraph_available():
-            try:
-                return run_curation_graph(
-                    candidates,
-                    tools=self._tools,
-                    config=self._config,
-                    planner=self._planner,
-                    reflect_fn=self._reflect,
-                    step_hook=self._step_hook,
-                    metrics_hook=self._metrics_hook,
-                )
-            except Exception:
-                logger.exception("LangGraph curation runtime failed; falling back to imperative loop")
+        if runtime_preference() == "imperative":
+            result = self._run_imperative(candidates)
+            result.metrics = {**(result.metrics or {}), "backend": "imperative"}
+            return result
 
-        result = self._run_imperative(candidates)
-        result.metrics = {**(result.metrics or {}), "backend": "imperative"}
-        return result
+        if not langgraph_available():
+            raise RuntimeError(_LANGGRAPH_REQUIRED)
+
+        return run_curation_graph(
+            candidates,
+            tools=self._tools,
+            config=self._config,
+            planner=self._planner,
+            reflect_fn=self._reflect,
+            step_hook=self._step_hook,
+            metrics_hook=self._metrics_hook,
+        )
 
     def _run_imperative(self, candidates: list[Candidate]) -> AgentResult:
-        """Legacy while-loop runtime (fallback / explicit ``imperative`` preference)."""
+        """Legacy while-loop runtime (explicit ``LIVEHOUSE_AGENT_RUNTIME=imperative`` only)."""
         state = AgentState.from_candidates(candidates, self._config)
         steps: list[AgentStep] = []
         fallback_calls = 0

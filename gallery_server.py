@@ -13,13 +13,10 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-from fastapi.staticfiles import StaticFiles
-
 from api.agent_routes import router as agent_router
 from api.auth_routes import router as auth_router
 from api.gallery_routes import configure_gallery_routes, router as gallery_router
 from api.infra_routes import router as infra_router
-from api.personal_routes import router as personal_router
 from utils.http_security import cors_allow_origins
 
 
@@ -105,7 +102,6 @@ app.add_middleware(
 )
 app.include_router(gallery_router)
 app.include_router(infra_router)
-app.include_router(personal_router)
 app.include_router(agent_router)
 app.include_router(auth_router)
 
@@ -125,11 +121,6 @@ async def _unhandled_exception_handler(_request: Request, exc: Exception):
             "error_type": type(exc).__name__,
         },
     )
-
-_static_dir = _REPO_ROOT / "static"
-if _static_dir.is_dir():
-    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
-
 
 @app.get("/healthz")
 def healthz():
@@ -172,9 +163,9 @@ if __name__ == "__main__":
     print(f"📊 analysis_results.json: {RESULTS_JSON}")
     lab = os.getenv("LIVEHOUSE_LAB_URL", "http://127.0.0.1:3000").rstrip("/")
     print(f"🌍 Studio（浏览器）: {lab}/")
-    print(f"🖼  Gallery: {lab}/gallery")
-    print(f"🔗 API / 着陆页: http://127.0.0.1:{GALLERY_PORT}/")
-    print(f"📺 流式相册: http://127.0.0.1:{GALLERY_PORT}/static/gallery.html")
+    print(f"🖼  Gallery（Next）: {lab}/gallery")
+    print(f"🤖 Agent chat: {lab}/gallery （ChatDock）")
+    print(f"🔗 API: http://127.0.0.1:{GALLERY_PORT}/")
     print(f"📁 BASE_DIR: {BASE_DIR}")
     limit_conc = max(8, int(os.getenv("LIVEHOUSE_API_LIMIT_CONCURRENCY", "48")))
     uvicorn.run(

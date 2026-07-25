@@ -336,7 +336,7 @@ export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
       { label: "Infra", href: "#infra" },
       { label: "Gallery", href: "/gallery" },
       { label: "Brain", href: "#brain" },
-      { label: "Personal", href: "/personal" },
+      { label: "Agent", href: "/gallery" },
     ],
   },
   {
@@ -368,6 +368,5 @@ export const APP_PRIMARY_NAV: NavLink[] = [
 export const APP_MORE_NAV: NavLink[] = [
   { label: "Eval", href: "/eval" },
   { label: "Settings", href: "/config" },
-  { label: "Personal", href: "/personal" },
   { label: "Site", href: "/" },
 ];

@@ -1,4 +1,4 @@
-export type ProductMode = "professional" | "personal";
+export type ProductMode = "professional";
 
 const STORAGE_KEY = "livehouse.productMode";
 const REMEMBER_KEY = "livehouse.productModeRemember";
@@ -7,7 +7,8 @@ export function readProductMode(): ProductMode | null {
   if (typeof window === "undefined") return null;
   try {
     const v = localStorage.getItem(STORAGE_KEY);
-    if (v === "professional" || v === "personal") return v;
+    // Migrate legacy "personal" preference → professional.
+    if (v === "professional" || v === "personal") return "professional";
   } catch {
     /* ignore */
   }
@@ -41,10 +42,10 @@ export function clearProductModePref(): void {
   }
 }
 
-export function productModeHref(mode: ProductMode): string {
-  return mode === "professional" ? "/studio" : "/personal";
+export function productModeHref(_mode: ProductMode): string {
+  return "/studio";
 }
 
-export function productModeLabel(mode: ProductMode): string {
-  return mode === "professional" ? "专业版" : "个人版";
+export function productModeLabel(_mode: ProductMode): string {
+  return "专业版";
 }

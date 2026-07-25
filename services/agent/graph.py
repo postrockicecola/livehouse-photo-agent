@@ -1,8 +1,7 @@
 """LangGraph production runtime for curation (ReAct: plan → act → reflect).
 
-This is the **primary** agent loop when ``langgraph`` is installed. The imperative
-``while`` loop in :mod:`services.agent.loop` remains as an explicit fallback
-(``LIVEHOUSE_AGENT_RUNTIME=imperative`` or ImportError).
+This is the **only** default agent loop. The imperative ``while`` loop in
+:mod:`services.agent.loop` is legacy opt-in via ``LIVEHOUSE_AGENT_RUNTIME=imperative``.
 
 Graph shape (interview-visible)::
 

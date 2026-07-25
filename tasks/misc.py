@@ -76,23 +76,11 @@ def run_image_analysis(
 
 
 def _load_luma_callable():
-    """
-    Resolve user's requested luma_professional_workflow entrypoint.
-    Priority:
-      1) module `luma_professional_workflow.py` with function `luma_professional_workflow`
-      2) fallback to `luma_render2.luma_advanced_inpainting_workflow`
-    """
+    """Resolve optional ``luma_professional_workflow`` entrypoint if present in the repo."""
     try:
         from luma_professional_workflow import luma_professional_workflow  # type: ignore
 
         return luma_professional_workflow, "luma_professional_workflow.luma_professional_workflow"
-    except Exception:
-        pass
-
-    try:
-        from luma_render2 import luma_advanced_inpainting_workflow
-
-        return luma_advanced_inpainting_workflow, "luma_render2.luma_advanced_inpainting_workflow"
     except Exception:
         return None, None
 
@@ -105,8 +93,9 @@ def run_luma_professional_workflow(self, raw_path: str, out_path: str) -> Dict[s
     fn, source_name = _load_luma_callable()
     if fn is None:
         raise RuntimeError(
-            "No luma workflow callable found. Please add `luma_professional_workflow.py` "
-            "with function `luma_professional_workflow(raw_path, out_path)`."
+            "No luma workflow callable found. Add `luma_professional_workflow.py` "
+            "with `luma_professional_workflow(raw_path, out_path)` "
+            "(legacy `luma_render2` fallback was removed)."
         )
 
     logger.info("Running luma workflow via %s", source_name)
