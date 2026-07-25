@@ -1,0 +1,606 @@
+================================================================================
+Livehouse Photography Agent — 项目详解与技术基础地图
+================================================================================
+Audience : 想系统掌握本仓库的开发者 / 面试复盘 / 新人 onboarding
+Companion: README.md · docs/agent_capability_map.md · docs/PLATFORM_SCOPE.txt
+           docs/interview_pitch.txt · docs/interview_qa.txt
+Updated  : 2026-07-24
+
+本文分两部分：
+  A. 项目文档（问题、架构、主路径、模块、运行、边界、学习路线）
+  B. 应掌握的技术基础知识（按优先级分层）
+
+
+==============================================================================
+A1. 一句话定位
+==============================================================================
+
+这是一个「以作业（Job）为中心」的视觉 AI runtime：把昂贵、易失败的 VLM 推理
+放进可恢复、可观测、可评估的状态机里；Livehouse 演出选片是真实业务负载，
+不是抽象框架 demo。
+
+核心卖点不是「调用视觉模型打分」，而是：
+  Durable Jobs + Bounded Inference + Model Fallback + End-to-end Observability
+
+
+==============================================================================
+A2. 解决什么真实问题
+==============================================================================
+
+一场 Livehouse 会留下大量相似照片（预览 JPEG + 旁路 RAW）。脚本能跑通处理，
+但通常很难回答：
+
+  1) 任务跑到哪一步了？
+  2) Worker 崩溃后如何恢复，会不会重复执行？
+  3) 模型为什么变慢 / 超时？主模型挂了有没有降级？
+  4) 成本花在哪几次 VLM 调用上？
+  5) 筛选质量相对人工标注如何？门控是否真的省调用？
+
+本项目把流水线挂在持久作业系统上：SQL 是执行事实（SSOT），Celery 只传递
+job_id；Gallery / Infra Console 形成「提交 → 观测 → 确认导出」闭环。
+
+
+==============================================================================
+A3. 产品表面（你能点到的东西）
+==============================================================================
+
+  Studio      提交 / 浏览场次（sessions）
+  Infra       /infra — 作业时间线、model_runs、worker、成本、Golden Signals
+  Gallery     人工确认 + 导出（Previews 与 sibling RAW/ 配对）
+  Eval        /eval — 固定评估集指标与 Agent 基线对比
+  ChatDock    Gallery 侧对话 Agent（扩展，非主链卖点）
+
+Showcase 交互演示：http://127.0.0.1:3000/infra?tour=1
+  Job #61 成功路径；Job #62 primary TIMEOUT → fallback → degraded
+
+
+==============================================================================
+A4. 技术栈总览
+==============================================================================
+
+语言 / 运行时
+  Python 3.10+     核心处理、FastAPI、Celery worker、Agent、评估
+  Go               SD 卡 / Brain 入库、preview 提取（main.go, scanner.go, …）
+  TypeScript       Next.js + Tailwind 前端（web/）
+
+后端
+  FastAPI          gallery_server.py + api/*
+  Celery + Redis   任务通知与 worker 调度（权威状态不在 Celery）
+  SQLite           luma_brain.db — jobs / job_events / workers / model_runs SSOT
+  Ollama / vLLM    VLM 推理（可 OpenAI-compatible）
+
+视觉流水线
+  OpenCV           Stage1 门控（模糊、曝光、对比度等）
+  Fast aesthetic   Stage2 低成本打分
+  VLM (LLaVA 等)   Stage3 深度分析 → analysis_results.json
+
+Agent（扩展）
+  LangGraph        plan→act→reflect（生产 runtime）
+  ReAct / Skills   services/agent/*
+  MCP / RAG / CLIP 可选能力
+
+部署相关
+  start_all.sh / deploy/up.sh
+  可选 K8s + KEDA 演示（Infra Experiments，非主链）
+
+
+==============================================================================
+A5. 主路径（必须先背熟）
+==============================================================================
+
+线性主路径（面试 / 排障都从这里讲）：
+
+  ingest (Go SD/brain → sessions/photos)
+    → POST /api/ingest/check_new_images
+    → tasks.process_brain_ingested          # 播种 ANALYZE_SESSION jobs
+    → tasks.run_job(job_id)                 # Celery 只带 job_id
+    → services.job_executor.JobExecutor     # 原子 claim → run → finalize
+    → PipelineStageRunner
+         PREPARE_INPUT
+         → STAGE1_FILTER          # OpenCV 廉价门控
+         → STAGE2_FAST_SCORE      # 快速美学分
+         → STAGE3_VLM             # 有界推理队列
+         → WRITE_ARTIFACT / FINALIZE
+    → PrioritizedInferenceQueue + router    # primary → fallback
+    → artifacts: analysis_results.json, job_events, model_runs
+
+关键原则：
+  · Celery AsyncResult 不是权威；SQLite jobs 行才是。
+  · claim 用 BEGIN IMMEDIATE + 条件更新；重复投递第二次 claim 失败即 skip。
+  · 推理有并发上限与队列背压，禁止对 Ollama 无界并行。
+  · 每次模型 attempt 写入 ledger，供 Infra 归因。
+
+
+流水线阶段常量见 services/pipeline_stages.py：
+
+  PREPARE_INPUT → STAGE1_FILTER → STAGE2_FAST_SCORE → STAGE3_VLM
+  → WRITE_ARTIFACT → FINALIZE
+
+
+作业状态机（概念）：
+
+  QUEUED / FAILED_RETRYABLE
+    → CLAIMED
+    → PREPROCESSING → INFERENCING → (POSTPROCESSING) → SUCCEEDED
+  失败可：FAILED_RETRYABLE →（耗尽）DEAD_LETTERED
+  或：FAILED_PERMANENT / CANCELLED
+
+  Worker 崩溃：心跳 + claimed_at 过期 → requeue；旧 claim_generation 的终态
+  写入会被 ClaimFenceError 挡住（防僵尸覆盖）。
+
+
+==============================================================================
+A6. 架构鸟瞰
+==============================================================================
+
+  ┌─────────────┐     ┌──────────────────────────────────┐
+  │ Go ingest   │────▶│ SQLite Brain (sessions/photos)   │
+  └─────────────┘     └───────────────┬──────────────────┘
+                                      │ seed ANALYZE_*
+                                      ▼
+  ┌─────────────┐     ┌──────────────────────────────────┐
+  │ Redis/Celery│────▶│ JobExecutor + PipelineStageRunner│
+  │ (notify id) │     │ Stage1 → Stage2 → Stage3(VLM)    │
+  └─────────────┘     └───────────────┬──────────────────┘
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+           PrioritizedQueue    model_runs ledger   analysis_results
+           + fallback router         │                   │
+                    │                ▼                   ▼
+                    │         Infra Console          Gallery UI
+                    │         /api/infra/*           /api/gallery/*
+                    ▼
+              Agent (optional)：RAG / Chat / Curation / MCP
+
+
+分层「从哪读代码」：
+
+  Main path     tasks/run_job.py → services/job_executor.py
+                → services/processor/pipeline_stage_runner.py
+  Dispatch      tasks/ingest.py, services/scheduler/
+  HTTP          gallery_server.py, api/
+  Infra UI      web/app/infra/page.tsx
+  Inference     inference/（model.use_inference_layer 时可切换）
+  Agent         services/agent/（Infra Experiments）
+  Eval          scripts/eval_*, quality/, data/eval/, reports/eval/
+
+
+==============================================================================
+A7. 目录地图（按职责）
+==============================================================================
+
+configs/           livehouse.yaml 等 — paths / thresholds / model / processing
+tasks/             Celery：run_job, ingest, maintenance
+services/
+  job_executor.py  认领与执行编排（主路径心脏）
+  job_lifecycle.py 状态转移封装
+  processor/       Stage runners + stages/deep_analysis.py
+  agent/           LangGraph / tools / skills / MCP / RAG
+  scheduler/       调度与 requeue
+  cache/           semantic / stage3 缓存
+engine/
+  models/          VLM 封装
+  operators/       Stage1/2 OpenCV 算子（如 stage2_prefilter）
+inference/         可选推理层：queue, router, providers, ledger
+infra/             WorkerManager, metrics, gpu_telemetry, otel_bootstrap
+api/               gallery / infra / studio / agent / auth / personal
+gallery_server.py  FastAPI 入口
+web/               Next.js：Studio · Gallery · Infra · Eval
+scripts/           评估、chaos、GPU / scaling demo、label_server
+quality/           评估契约（schemas + dataset/eval_run）
+data/eval/         固定标注集 / manifest
+reports/eval/      Recorded Run 报告（勿把 Simulated 当生产 SLO）
+deploy/            Docker / K8s 实验清单
+utils/             luma_brain、json_safe、http_security、stage3_dimensions
+Go 源码            main.go, scanner.go, executor.go, ingest_sd_brain.go,
+                   preview_extractor.go (build tag tools), luma_brain*.go
+
+
+==============================================================================
+A8. 配置与关键环境变量
+==============================================================================
+
+主配置：configs/livehouse.yaml
+  paths.source_dir          预览根目录（Gallery + pipeline）
+  quality_thresholds.*      Stage1 OpenCV 阈值
+  fast_aesthetic.*          Stage2 门槛
+  model.provider/endpoint/model_name
+  model.max_concurrent_requests / max_inference_queue_size
+  model.fallback_model_name / queue_wait_timeout_seconds
+  model.agent_chat_model    Gallery 对话用文本模型（勿用纯视觉模型当 tool LLM）
+  model.use_inference_layer 切换到 inference/ 层
+
+环境（见 .env.example）：
+  CELERY_BROKER_URL / CELERY_RESULT_BACKEND
+  LUMA_BRAIN_DB / LUMA_ARCHIVE_ROOT
+  LIVEHOUSE_GALLERY_PREVIEWS_DIR
+  LIVEHOUSE_OPS_TOKEN / LIVEHOUSE_INFRA_TOKEN / LIVEHOUSE_INGEST_TOKEN
+  LIVEHOUSE_ALLOW_INSECURE_LOCAL=1   # 仅本地 demo
+  LIVEHOUSE_CORS_ORIGINS
+  LIVEHOUSE_AGENT_RUNTIME=imperative # 可选，关掉 LangGraph
+  LIVEHOUSE_BRAIN_BACKEND=sqlite|postgres  # postgres 目前为诚实 stub
+  LIVEHOUSE_OTEL=1
+  LIVEHOUSE_SCOPE_VLM_QUOTA_PER_HOUR
+
+前端：web/.env.local 的 NEXT_PUBLIC_* 必须与后端 /api/* 一致。
+
+活跃场次指针可能写在：
+  Livehouse_Archive/runtime/latest_session.json
+
+
+==============================================================================
+A9. 推理与背压（为什么这是「runtime」而不是脚本）
+==============================================================================
+
+PrioritizedInferenceQueue（inference/queue.py 等）：
+  · 限制 inflight / 队列长度
+  · 排队过久可触发 fallback_model 或错误
+  · 按 (namespace, project_key) 可选小时配额（默认关）
+
+Router：
+  · primary → fallback；每次 attempt 记入 model_runs
+  · 支持 Ollama / vLLM / OpenAI-compatible / mock
+
+已知边界（面试要主动说）：
+  · 背压主要是进程内，不是集群 GPU 配额
+  · Cancel 改 SSOT，不保证立刻掐断已在飞的 HTTP
+  · SQLite 单节点 SSOT，不是多活集群库
+
+
+==============================================================================
+A10. Agent 能力（扩展，勿抢主链）
+==============================================================================
+
+详见 docs/agent_capability_map.md。
+
+Curation（services/agent/graph.py）：
+  START → plan → act → reflect → (END | plan)
+  入口：CurationAgent.run()
+
+Gallery chat（conversation_graph.py）：
+  START → decide → act ⟲ → answer → END
+  入口：ConversationalAgent.chat / stream_chat
+
+关键词映射：
+  ReAct / Plan-Execute   loop.py, planner.py
+  Tools / Skills         tools.py, skills/*
+  Multi-Agent            orchestrator.py, messaging.py
+  MCP                    services/agent/mcp/
+  RAG                    rag.py + CLIP EmbeddingService
+  Memory                 ConversationMemory / working_memory / preferences
+  Observability          job_events, agent_events, GET /api/agent/trace
+
+诚实结论（评估）：
+  预算约束选片 Agent 目前未稳定超过 heuristic 基线；面试如实讲，
+  把 Agent 放在 Infra Experiments。
+
+
+==============================================================================
+A11. 评估与质量契约
+==============================================================================
+
+固定集：约 250 张人工标注（data/eval/）
+UI：/eval ；报告索引 reports/eval/meta.json
+
+典型 Recorded 数字（以报告为准，勿臆造）：
+  Stage3 vs 人工：Spearman≈0.36, MAE≈6.09, P@20≈0.55
+  两阶段门控：admitted Spearman≈0.52，VLM 调用约 6.4%（相对全量）
+  Agent stratified (budget 40)：sel.P≈0.43 — 略优于 greedy heuristic
+
+Provenance 标签（展示任何数字前先贴标签）：
+  Live | Recorded Run | Simulated | Showcase Fixture
+
+质量平台契约（quality/CONTRACTS.md）：
+  content_hash / file_key / item_id 连接键冻结
+  overall 0–100；dims 0–10；keep bool
+  新评估代码禁止另起一套 join key 或分数刻度
+
+
+常用命令：
+
+  python scripts/eval_stage3.py run --labels data/eval/labels.jsonl \
+      --predictions data/eval/images/analysis_results.json
+  python scripts/eval/eval_two_stage_gating.py --out reports/eval/two_stage_gating.json
+  python scripts/eval/eval_agent_selection.py ... --budget 40
+
+
+==============================================================================
+A12. 平台边界与 Batch E（hooks ≠ cutover）
+==============================================================================
+
+今天是什么：
+  单节点 job-centric AI runtime；namespace/project_key 是软标签过滤。
+
+今天不是什么：
+  多租户硬隔离 / Infra Console 的完整 RBAC·OIDC /
+  多写集群数据库 / 集群级公平配额。
+
+Batch E 已落地脚手架（见 docs/PLATFORM_SCOPE.txt）：
+  · LIVEHOUSE_BRAIN_BACKEND=postgres → NotImplementedError（防假 Postgres）
+  · artifacts.content_digest（本地 SHA-256，为对象存储 CAS 准备）
+  · 可选 per-scope VLM 小时配额
+  · 可选 OTEL bootstrap
+  · HTTP 安全：非 loopback 默认 fail-closed；本地可用 ALLOW_INSECURE_LOCAL
+
+真正 cutover 仍需：Postgres + 对象存储 + 集群配额 + 鉴权隔离。
+
+
+==============================================================================
+A13. 本地快速启动
+==============================================================================
+
+  python -m venv .venv && source .venv/bin/activate
+  pip install -r requirements.txt
+  cp .env.example .env
+  # 编辑 configs/livehouse.yaml：paths.source_dir, model.*
+  # 可选：cp web/.env.example web/.env.local
+
+  ./start_all.sh                 # Redis + Celery + FastAPI + Next.js
+  # 或 ./deploy/up.sh up --build
+
+  # 仅跑流水线（无 jobs / Infra 时间线）：
+  python run_pipeline.py --config configs/livehouse.yaml \
+      --source-dir "<previews>" --no-serve
+
+URL：
+  Next.js  http://127.0.0.1:3000
+  FastAPI  http://127.0.0.1:8080
+  Infra    /infra
+  Eval     /eval
+
+依赖：Python 3.10+、Redis、Node 18+、Ollama（或兼容 VLM HTTP）。
+可选：Go ingest、exiftool、macOS powermetrics（GPU 遥测）。
+
+
+==============================================================================
+A14. 建议的掌握路径（读代码顺序）
+==============================================================================
+
+第 0 周 — 跑通与体感
+  1. 读 README.md + 本文 A1–A5
+  2. start_all.sh，打开 /infra?tour=1，跟完 #61 / #62
+  3. 用小目录跑 run_pipeline.py，看 analysis_results.json
+
+第 1 周 — 主路径打穿
+  4. tasks/run_job.py → job_executor.py → job_lifecycle.py
+  5. pipeline_stage_runner.py + engine/operators + deep_analysis.py
+  6. inference/queue.py + router.py + ledger
+  7. luma_brain_schema.sql / utils/luma_brain（SSOT 表语义）
+
+第 2 周 — 可观测与可靠
+  8. api/infra_routes.py + web/app/infra
+  9. reliability_scenarios.py / claim fence 语义
+  10. docs/interview_qa.txt 可靠性卡片
+
+第 3 周 — Agent 与评估
+  11. services/agent/graph.py + conversation_graph.py
+  12. scripts/eval_* + quality/CONTRACTS.md
+  13. docs/agent_capability_map.md
+
+第 4 周 — 边界与平台化叙事
+  14. docs/PLATFORM_SCOPE.txt
+  15. Go ingest 与 sessions/photos 如何播种 jobs
+  16. 能用自己的话讲清「三项边界」与「下一步 cutover」
+
+
+==============================================================================
+B. 掌握本项目应具备的技术基础知识
+==============================================================================
+
+说明：不必一开始全部精通。标 ★ 的是读通主路径的最低门槛；
+标 ★★ 的是能改生产路径 / 答深挖面试；标 ★★★ 的是扩展与平台化方向。
+
+
+------------------------------------------------------------------------------
+B1. 编程语言与工程基础  ★
+------------------------------------------------------------------------------
+
+Python（必须）
+  · 类型注解、dataclass、上下文管理、logging
+  · 包结构与相对导入；pytest 基本用法
+  · 并发：threading / concurrent.futures；为何「假并行」打爆 Ollama
+  · JSON 序列化陷阱（NumPy 类型 → utils/json_safe）
+
+TypeScript + React（前端路径）★～★★
+  · Next.js App Router 基本页面与 fetch
+  · 环境变量 NEXT_PUBLIC_* 与 API 代理约定
+  · 不必一上来深挖全部 UI；先 Infra / Gallery 数据流
+
+Go（ingest 路径）★★
+  · 读懂 main/scanner/executor 级别即可
+  · SQLite 访问、文件系统扫描、进程/信号基本概念
+  · build tags（preview_extractor tools）
+
+通用工程
+  · Git、venv、requirements.lock 含义
+  · YAML 配置分层；密钥进 .env 不进仓库
+  · HTTP：REST、状态码、CORS、token 鉴权直觉
+
+
+------------------------------------------------------------------------------
+B2. 后端系统与作业编排  ★★（本项目灵魂）
+------------------------------------------------------------------------------
+
+必须建立的心智模型：
+  「消息队列通知」≠「执行事实源」
+  Celery 传 job_id；SQLite 事务 claim 才算开工。
+
+建议补齐的概念：
+  · 状态机：幂等、CAS（compare-and-swap）、generation / fencing
+  · At-least-once 投递 + 幂等消费者
+  · Retry vs dead-letter；stuck requeue；cancel 语义边界
+  · Worker capacity / admission control
+  · Celery + Redis：broker、worker、beat 各自职责
+  · FastAPI：路由拆分、依赖注入直觉、同步 vs 异步边界
+  · SQLite：BEGIN IMMEDIATE、单写者、何时该迁 Postgres
+
+推荐自学关键词：
+  job queue design, claim-check-work, saga/outbox（了解即可）,
+  backpressure, bulkhead, circuit breaker / fallback
+
+
+------------------------------------------------------------------------------
+B3. 计算机视觉与图像管线  ★～★★
+------------------------------------------------------------------------------
+
+Stage1 相关：
+  · 图像表示（BGR/RGB、直方图）
+  · 清晰度：Laplacian variance
+  · 运动模糊：梯度方向不对称（Sobel）
+  · 曝光 / 对比度启发式
+  · EXIF 方向与预览 JPEG vs RAW 配对
+
+Stage2：
+  · 「廉价美学分」作为召回/门控，而非最终裁判
+  · Precision/Recall 权衡：砍候选 vs 漏掉 keeper
+
+工程直觉：
+  · I/O 与 decode 常是热点；优化要量再动
+  · 预览图路径与归档目录约定（Previews + RAW/）
+
+
+------------------------------------------------------------------------------
+B4. 多模态模型与推理服务  ★★
+------------------------------------------------------------------------------
+
+概念：
+  · VLM vs 纯文本 LLM；vision token / 上下文长度
+  · 温度、max tokens、结构化输出（JSON schema 稳定性）
+  · 本地推理：Ollama；连续批处理：vLLM；OpenAI-compatible API
+  · 超时、重试、主备模型、降级质量（degraded success）
+  · 队列等待时间 vs 纯推理 wall time（延迟拆解）
+
+本仓库实践点：
+  · 保持 Stage3 输出 schema 稳定（除非显式迁移）
+  · agent_chat_model 与打分 VLM 分离
+  · model_runs 账本按 attempt 记账（成本 / 失败归因）
+
+
+------------------------------------------------------------------------------
+B5. Agent / LLM 应用工程  ★★（扩展主线）
+------------------------------------------------------------------------------
+
+概念地图（与 JD 对齐）：
+  · ReAct、Plan-and-Execute、Tool / Function Calling
+  · LangGraph 状态图：节点、边、循环退出条件
+  · Skills 封装、guardrails、上下文治理（截断 / 摘要）
+  · Memory：短期对话、working memory、长期偏好
+  · RAG：文本检索 + CLIP 多模态检索（本仓非托管向量库）
+  · MCP：把工具暴露给外部客户端
+  · 轨迹评估、badcase、budget 约束决策
+
+诚实要求：
+  · 会做 Agent ≠ 一定胜过启发式；要用固定集证明
+
+
+------------------------------------------------------------------------------
+B6. 评估、指标与数据契约  ★★
+------------------------------------------------------------------------------
+
+统计 / IR 基础：
+  · Spearman 相关、MAE
+  · Precision@K、Recall（keeper coverage）
+  · 分层采样 / 固定 seed / protocol 块（可复现）
+
+工程纪律：
+  · 标注集版本化、content_hash 连接
+  · Simulated 与 Recorded 严格分家
+  · 偏好对（preference pairs）为未来 SFT/DPO 留钩子
+
+
+------------------------------------------------------------------------------
+B7. 可观测性与运维  ★★
+------------------------------------------------------------------------------
+
+  · 结构化日志、trace_id / job_id 关联
+  · 事件时间线（job_events）vs 指标（Prometheus 风格 Golden Signals）
+  · 延迟拆解：queue_wait_ms / inference_ms / total_latency_ms
+  · OpenTelemetry 基础（本仓为可选 bootstrap）
+  · 混沌场景：僵尸 claim、重复投递、fallback 掩盖主故障
+
+
+------------------------------------------------------------------------------
+B8. 前端与产品交互  ★
+------------------------------------------------------------------------------
+
+  · 运营控制台信息架构：列表 → 详情时间线 → attempt 下钻
+  · Showcase Fixture 与 Live 数据切换（勿把 fixture 当线上 SLO）
+  · Tailwind 布局阅读能力即可；深度视觉设计非掌握主路径所必需
+
+
+------------------------------------------------------------------------------
+B9. 分布式与平台化（进阶）★★★
+------------------------------------------------------------------------------
+
+当你能讲清「为什么现在是单节点」之后，再补：
+  · Postgres 作为多写 SSOT 的迁移点
+  · 对象存储 + content-addressed blob（content_digest 的归宿）
+  · 集群级 GPU 配额 / 公平调度
+  · KEDA 按队列积压扩缩（本仓有演示清单）
+  · 多租户：软标签 vs RBAC / 真正隔离
+  · 训练闭环：RLHF 投票、prompt A/B、preference → SFT/DPO（实验向）
+
+
+------------------------------------------------------------------------------
+B10. 建议的学习资源类型（不绑定具体课）
+------------------------------------------------------------------------------
+
+按缺口补，而不是「全学完再读代码」：
+
+  缺口：作业系统     → 读分布式任务队列 / 幂等消费者短文 + 对照 job_lifecycle
+  缺口：CV 门控      → OpenCV 基础教程 + 对照 engine/operators
+  缺口：VLM          → Ollama 本地跑通 + 对照 deep_analysis / schemas
+  缺口：Agent        · LangGraph 官方教程 + 对照 graph.py
+  缺口：评估         · IR 评估入门 + 对照 scripts/eval_stage3.py
+  缺口：前端 Infra   · 只跟一条 job 详情的数据 fetch 链
+
+
+==============================================================================
+C. 面试时可用的「诚实三边界」
+==============================================================================
+
+  1. SQLite 是执行 SSOT — 适合单机复现，不是多活集群库。
+  2. 推理准入 / 背压主要在进程内 — 不是集群 GPU 配额。
+  3. 单节点共享卷上的本地路径产物 — 不是对象存储多副本。
+
+扩展实验（KEDA / Operator / RLHF / Agent 策展）可以讲，但不要和主路径抢镜头。
+
+
+==============================================================================
+D. 相关文档索引
+==============================================================================
+
+  README.md                      对外总览、启动、评估表、布局
+  docs/PROJECT_GUIDE.txt         本文（详解 + 技术基础地图）
+  docs/agent_capability_map.md   Agent 能力 ↔ JD 关键词
+  docs/PLATFORM_SCOPE.txt        平台范围 / Batch E hooks
+  docs/interview_pitch.txt       简历子弹与 demo 顺序
+  docs/interview_qa.txt          深挖问答卡片
+  quality/CONTRACTS.md           评估契约冻结说明
+  AGENTS.md / .cursor/rules/*    给编码 Agent 的仓库约定
+
+
+==============================================================================
+E. 你「掌握了」的验收标准（自测清单）
+==============================================================================
+
+能不看笔记回答：
+  [ ] 主路径从 ingest 到 analysis_results 的每一步模块名
+  [ ] 为什么 Celery 状态不是权威；claim 如何防重复执行
+  [ ] Stage1/2/3 各自优化目标与成本差异
+  [ ] queue 背压、fallback、model_runs 如何串起来
+  [ ] #61 与 #62 在 Infra 上分别证明什么
+  [ ] 三项边界 + Batch E「钩子 vs cutover」
+  [ ] Agent 在架构中的位置，以及当前评估的诚实结论
+  [ ] 如何用固定集复现一条 Stage3 或 gating 报告
+
+能动手完成：
+  [ ] 改一个 Stage1 阈值并解释对 keeper 的影响假设
+  [ ] 读懂一次 FAILED_RETRYABLE → 重试成功的 event 序列
+  [ ] 加一个只读 Infra API 字段并在 UI 展示（小改动）
+  [ ] 跑通一条 eval 脚本并解释 provenance
+
+================================================================================
+End of PROJECT_GUIDE
+================================================================================

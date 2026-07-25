@@ -4,7 +4,7 @@
 
 > A **job-centric AI runtime** for vision workflows: durable job state machines for VLM inference, with backpressure, fallback, a run ledger, and an operator console so work is recoverable, observable, and evaluable.
 
-Livehouse photography is the real business load — not an abstract framework demo. The core is not “call a vision model to score photos,” but putting expensive, flaky model calls inside a recoverable, observable, evaluable job system.
+Livehouse photography is the primary workload: a real batch vision pipeline, not a thin wrapper around a single model API. The focus is durable orchestration — expensive, flaky VLM calls run inside a recoverable, observable, evaluable job runtime.
 
 ```text
 Photo ingest
@@ -15,33 +15,37 @@ Photo ingest
   → Gallery / Infra Console
 ```
 
-Agent curation, KEDA, Operator, RLHF, and prompt labs are **Infra Experiments** (extensions). They are not co-equal with the main path.
+Agent curation, KEDA, Operator, RLHF, and prompt labs ship as **Infra Experiments** — optional extensions separate from the main path.
 
 ---
 
-## Product value (what interviewers see first)
+## Overview
+
+Livehouse Photography Agent processes a concert photo session end to end: cheap vision gates filter frames, durable jobs orchestrate bounded VLM inference, and the web UI exposes curation, export, and operational visibility.
 
 | Input | Output |
 |------|--------|
-| A Livehouse session of similar concert frames | Filtered set, scores, bilingual commentary, dedupe, Gallery export |
+| A session of similar Livehouse preview frames | Filtered keepers, scores, bilingual commentary, near-duplicate removal, Gallery export |
 
-Surfaces:
+### Web surfaces
 
-- **Studio** — submit / browse sessions
-- **Infra Console** (`/infra`) — jobs, timelines, model attempts, workers, cost
-- **Gallery** — human confirm + export
+- **Studio** — submit sessions and track processing status
+- **Infra Console** (`/infra`) — jobs, timelines, model attempts, workers, and cost
+- **Gallery** — review results, confirm selections, and export
 
-### Recorded outcome (showcase)
+### Reference run
 
-| Metric | Value | Provenance |
-|--------|------:|------------|
-| Photos in (session shape) | 412 | Recorded / Showcase figure |
+The repository ships a recorded session snapshot for local demos and the read-only showcase deploy:
+
+| Metric | Value | Source |
+|--------|------:|--------|
+| Photos in | 412 | Showcase fixture |
 | VLM calls (ledger) | 288 | `web/fixtures/infra-metrics.json` |
 | Keep rate | 79% | `landing-stats.average_keep_rate_pct` |
-| E2E (job #61) | ~12.5 min | `total_latency_ms` on ANALYZE_SESSION |
+| End-to-end (job #61) | ~12.5 min | `total_latency_ms` on `ANALYZE_SESSION` |
 
-**Interactive demo (until a video is recorded):** open [`/infra?tour=1`](http://127.0.0.1:3000/infra?tour=1).  
-Drop a 60–90s screencast at `web/public/demo/walkthrough.mp4` when ready.
+Try the guided Infra Console tour at [`/infra?tour=1`](http://127.0.0.1:3000/infra?tour=1).  
+Optional walkthrough video: `web/public/demo/walkthrough.mp4`.
 
 ### Data provenance labels
 
@@ -58,14 +62,14 @@ Do not present Simulated or Showcase Fixture numbers as live production SLOs.
 
 ---
 
-## Why this is not a typical AI demo
+## Design goals
 
-Four sells on the main path:
+The main path is built around four properties:
 
-- **Durable Jobs** — claim / retry / dead-letter live in SQL; Celery `AsyncResult` is not authoritative
-- **Bounded Inference** — prioritized queue, concurrency + backpressure limits
-- **Model Fallback** — primary → fallback routing with attempt ledger
-- **End-to-end Observability** — `job_events`, `model_runs` / attempts, Infra Console drill-down
+- **Durable jobs** — claim, retry, and dead-letter state live in SQL; Celery `AsyncResult` is not authoritative
+- **Bounded inference** — prioritized queue with concurrency and backpressure limits
+- **Model fallback** — primary → fallback routing with an attempt ledger
+- **End-to-end observability** — `job_events`, `model_runs` / attempts, and Infra Console drill-down
 
 ```mermaid
 flowchart LR
@@ -101,9 +105,9 @@ Celery carries only a `job_id`. SQLite (`jobs`, `job_events`, `workers`, model-r
 
 ---
 
-## Job walkthrough (showcase)
+## Job walkthrough
 
-Infra Console ships a **Guided Tour** (`/infra?tour=1`) and two highlighted jobs:
+The Infra Console includes a **Guided Tour** (`/infra?tour=1`) with two example jobs from the reference fixtures:
 
 ### Success — job `#61` (default expanded)
 
@@ -119,24 +123,23 @@ Drill-down: event timeline → provider calls (`model_runs`) → artifacts.
 primary TIMEOUT → fallback provider SUCCEEDED → job SUCCEEDED (degraded)
 ```
 
-Fixture: `web/fixtures/infra-job-detail-fallback.json` (two `model_run` attempts). Showcase routing serves `#62` from that snapshot; other job ids use the success detail.
+Fixture: `web/fixtures/infra-job-detail-fallback.json` (two `model_run` attempts). The read-only showcase serves job `#62` from that snapshot; other job IDs use the success detail fixture.
 
 ---
 
 ## Evaluation
 
 UI: **`/eval`** (also summarized on the landing `#evaluation` section).  
-Private interview notes (resume bullets / pitch scripts — not on the site): [`docs/interview_pitch.txt`](docs/interview_pitch.txt).  
-Report provenance index: [`reports/eval/meta.json`](reports/eval/meta.json).
+Report index: [`reports/eval/meta.json`](reports/eval/meta.json).
 
 Fixed **250-image** human-labeled set (`data/eval/`). Config for full scoring: `configs/eval_stage3.yaml` (temp=0).  
 Eval reports stamp a `protocol` block (seed, config hash, hardware, git sha) via `scripts/eval/protocol.py`. Dependency lock: `requirements.lock`.
 
-| 策略 | 质量 | VLM 调用 | 延迟 | 成本 | Provenance |
+| Strategy | Quality | VLM calls | Latency | Cost | Source |
 |------|------|----------|------|------|-------------|
-| 全量 VLM（eval Stage3） | Spearman **0.36** · MAE **6.09** · P@20 **0.55** | 100% of 250 | — | — | Recorded · `reports/eval/stage3_v6_qwen2vl_temp0.json` |
-| 两阶段门控（生产路径） | admitted Spearman **0.52** · MAE **4.48** · keeper coverage **0.06** | **6.4%** of 250 (16 calls) | — | ~15× fewer VLM calls | Recorded · offline replay · `reports/eval/two_stage_gating.json` |
-| Agent 策展（budget 40） | **stratified** sel. P **0.43** · keeper recall **0.20** | 40/250 = **16%** | — | lower VLM count by design | Recorded · `reports/eval/agent_selection.json` |
+| Full VLM (eval Stage3) | Spearman **0.36** · MAE **6.09** · P@20 **0.55** | 100% of 250 | — | — | Recorded · `reports/eval/stage3_v6_qwen2vl_temp0.json` |
+| Two-stage gating (production path) | admitted Spearman **0.52** · MAE **4.48** · keeper coverage **0.06** | **6.4%** of 250 (16 calls) | — | ~15× fewer VLM calls | Recorded · offline replay · `reports/eval/two_stage_gating.json` |
+| Agent curation (budget 40) | **stratified** sel. P **0.43** · keeper recall **0.20** | 40/250 = **16%** | — | lower VLM count by design | Recorded · `reports/eval/agent_selection.json` |
 
 **Agent vs baselines (n=250, budget=40, select 30):**
 
@@ -148,9 +151,9 @@ Eval reports stamp a `protocol` block (seed, config hash, hardware, git sha) via
 | oracle | 0.93 | 0.458 | 0.80 |
 
 **LLM arm (n=60 subset):** selection precision heuristic 0.33 vs llm 0.36; `llm_decision_rate≈0.06` with heavy heuristic fallback (`reports/eval/agent_selection_llm.json`).  
-**Honesty:** stratified allocation now beats greedy heuristic (and random on P@10 / sel. P) under the same budget; LLM planner still does not stably beat stratified. Preference pairs for a future SFT/DPO loop: `data/eval/preferences/`.
+**Notes:** stratified allocation beats greedy heuristic (and random on P@10 / sel. P) under the same budget; the LLM planner does not yet consistently beat stratified. Preference pairs for a future SFT/DPO loop: `data/eval/preferences/`.
 
-**Simulated / illustrative only (do not cite as production SLO):**
+**Simulated / illustrative only** (see [Data provenance labels](#data-provenance-labels)):
 
 - `reports/eval/quant_compare_example.json` — **Simulated**
 - `scripts/gpu_pressure_demo.py --simulate`, loadtest simulate artifacts — **Simulated**
@@ -195,21 +198,21 @@ Copy `web/.env.example` → `web/.env.local` if the API host/port differs.
 
 ---
 
-## Current boundaries (say these in interviews)
+## Scope and limitations
 
-This is a **single-node AI runtime**, not a production multi-tenant distributed platform:
+This project targets a **single-node AI runtime**. It is not designed as a multi-tenant distributed platform:
 
-1. **SQLite** is the execution SSOT (fine for one machine; not a cluster DB).
-2. **In-process inference admission** / bounded queue (not cluster-wide quotas).
-3. **Single-node shared volume** / local archive paths for artifacts.
+1. **SQLite** holds execution state (suitable for one machine; not a cluster database).
+2. **In-process inference admission** and a bounded queue (not cluster-wide quotas).
+3. **Single-node storage** with local archive paths for artifacts.
 
-**Batch E scaffolding** (hooks only — do not claim full platform cutover): portable brain backend selector (`LIVEHOUSE_BRAIN_BACKEND`), artifact `content_digest`, optional per-scope VLM hour quota, optional OTEL bootstrap, and `docs/PLATFORM_SCOPE.txt`. Details: `docs/PLATFORM_SCOPE.txt`.
+**Platform hooks (in progress):** portable brain backend selector (`LIVEHOUSE_BRAIN_BACKEND`), artifact `content_digest`, optional per-scope VLM hour quota, optional OTEL bootstrap. See [`docs/PLATFORM_SCOPE.txt`](docs/PLATFORM_SCOPE.txt).
 
 ---
 
-## Infra Experiments (extensions)
+## Infra Experiments
 
-Marked as experiments so they do not compete with the main path:
+Optional extensions, kept separate from the main processing path:
 
 | Extension | Where |
 |-----------|--------|
@@ -253,7 +256,7 @@ data/eval/      # fixed labels + manifest
 reports/eval/   # Recorded Run JSON reports
 ```
 
-Deeper design notes: `docs/agent_capability_map.md` (force-add if needed), interview pitch `docs/interview_pitch.txt`, and local long-form docs outside the repo.
+Deeper design notes: [`docs/PROJECT_GUIDE.txt`](docs/PROJECT_GUIDE.txt), [`docs/agent_capability_map.md`](docs/agent_capability_map.md).
 
 ---
 
