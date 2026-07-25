@@ -79,7 +79,7 @@ class InfraTimelineSpan(BaseModel):
 
 
 class InfraJobTimelineResponse(BaseModel):
-    """Aggregated per-job view for a console timeline / interview demo."""
+    """Aggregated per-job view for a console timeline."""
 
     job: dict[str, Any]
     project_scope: InfraProjectScope
@@ -675,7 +675,7 @@ def _build_infra_job_timeline(conn: Any, *, job_id: int) -> dict[str, Any] | Non
     if isinstance(pa, dict):
         primary_artifact = pa
 
-    # Provider / job-level ops context (for interviews: queue + router hints on the row)
+    # Provider / job-level ops context (queue + router hints on the row)
     prov_payload: dict[str, Any] = {}
     raw_payload = job.get("payload_json")
     if raw_payload:

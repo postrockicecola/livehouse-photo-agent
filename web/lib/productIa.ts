@@ -9,7 +9,7 @@
 export const MARKETING_HOME = "/";
 export const STUDIO_HOME = "/studio";
 
-/** Shared one-liner — keep README / landing / interview pitch aligned. */
+/** Shared one-liner — keep README / landing aligned. */
 export const PROJECT_POSITIONING = {
   oneLinerZh:
     "面向视觉工作流的 job-centric AI runtime：用持久作业状态机管理 VLM 推理，通过背压、降级、运行账本和控制台保证任务可恢复、可观察、可评估。",

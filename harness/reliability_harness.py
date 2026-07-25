@@ -1,5 +1,5 @@
 """
-Unified reliability verification harness: structured report documents for demos, CI, and interviews.
+Unified reliability verification harness: structured report documents for demos and CI.
 
 Consumers: ``scripts/chaos_runtime.py`` (``--report-dir``). Scenario implementations live in
 ``harness.reliability_scenarios``; this module wraps JSON/Markdown emission only.
@@ -44,7 +44,7 @@ def write_json_report(path: Path | str, results: list[ChaosScenarioResult]) -> P
 
 
 def write_markdown_report(path: Path | str, results: list[ChaosScenarioResult]) -> Path:
-    """Human-readable summary table + per-scenario detail (good for README screenshots / interviews)."""
+    """Human-readable summary table + per-scenario detail."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     doc = build_report_document(results)
@@ -89,8 +89,8 @@ def write_markdown_report(path: Path | str, results: list[ChaosScenarioResult]) 
         lines.append("")
         if row.get("design"):
             lines.append(f"- **Design**: {row['design']}")
-        if row.get("interview_line"):
-            lines.append(f"- **Interview line**: {row['interview_line']}")
+        if row.get("summary_line"):
+            lines.append(f"- **Summary**: {row['summary_line']}")
         assertions = row.get("assertions") or []
         if assertions:
             lines.append("- **Assertions:**")

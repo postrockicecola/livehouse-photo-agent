@@ -3,7 +3,7 @@
 This is the **only** default agent loop. The imperative ``while`` loop in
 :mod:`services.agent.loop` is legacy opt-in via ``LIVEHOUSE_AGENT_RUNTIME=imperative``.
 
-Graph shape (interview-visible)::
+Graph shape::
 
     START → plan → act → reflect → (finalize? END : plan)
 
@@ -301,7 +301,7 @@ def compile_agent_platform_graph(
     :func:`services.agent.conversation_graph.compile_chat_turn_graph`. The platform
     node ``gallery_chat`` invokes that subgraph and maps ``reply`` / ``tool_calls``
     back onto :class:`AgentPlatformState` (explicit invoke keeps parent/child schemas
-    decoupled — the interview-visible structure is still a subgraph mount).
+    decoupled — the structure is still a subgraph mount).
     """
     from langgraph.graph import END, START, StateGraph
 

@@ -45,8 +45,8 @@ const SPARK_COLOR: Record<InfraSemanticTone, string> = {
 /**
  * Estimated *decode* throughput (tokens/sec) for a single in-flight request,
  * derived from the token ledger: avg completion tokens / avg request latency.
- * This is the raw decode speed an interviewer means by "tokens/sec", computed
- * from real model_runs rows rather than a wall-clock guess.
+ * This is raw decode speed ("tokens/sec") derived from real model_runs rows
+ * rather than a wall-clock guess.
  */
 function deriveDecodeTps(cost: CostData | null): number | null {
   const t = cost?.totals;

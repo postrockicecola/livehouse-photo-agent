@@ -1,11 +1,11 @@
-Agent slim checklist — Runtime + sharp Agent (interview-facing)
-Updated: 2026-07-25
-Companion: docs/agent_capability_map.md · docs/PROJECT_GUIDE.txt
+Agent slim checklist — keep the Agent surface sharp
+Updated: 2026-07-26
+Companion: docs/PROJECT_GUIDE.txt · docs/PLATFORM_SCOPE.txt
 
-Goal: keep Agent as a first-class story, cut kitchen-sink surface.
+Goal: Agent is first-class; cut kitchen-sink surface.
 
 ==============================================================================
-KEEP (core interview assets — default on)
+KEEP (default on)
 ==============================================================================
 
 Runtime
@@ -41,7 +41,7 @@ API / UI
   web/components/agent/*               ChatDock (Gallery-primary entry)
   web/app/gallery                      curation + agent surface
 
-Eval (honest proof)
+Eval
   scripts/eval/eval_agent_selection.py
   scripts/eval/eval_agent_trajectory.py
   scripts/eval/eval_agent_chat_cases.py
@@ -49,11 +49,11 @@ Eval (honest proof)
   quality/ + curated data/eval baselines (not bulk run dumps)
 
 Docs
-  docs/agent_capability_map.md
   this file
+  docs/PLATFORM_SCOPE.txt
 
 ==============================================================================
-DOWNGRADE (legacy / opt-in — not the story)
+DOWNGRADE (legacy / opt-in)
 ==============================================================================
 
 Imperative runtime

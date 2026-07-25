@@ -48,6 +48,7 @@ data/agent_workspace/
 # Data layout: data/raw is local-only; data/eval (labels) and data/fixtures (small samples) are tracked
 data/raw/
 data/eval/images/
+data/eval/irr_*/
 data/eval/_*/
 data/eval/*.log
 models/eval/
@@ -86,3 +87,8 @@ data/bench/session_covers_sources.json
 
 # Markdown docs (currently messy; excluded from VCS. Use `git add -f <file>.md` to track specific ones)
 *.md
+
+# Private interview / resume notes — keep local only, never commit
+docs/interview_*
+docs/private/
+docs/agent_capability_map.md

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export prompt-experiment + eval-manifest snapshot for Infra Experiments / interviews.
+"""Export prompt-experiment + eval-manifest snapshot for Infra Experiments.
 
 Usage:
   python scripts/eval/export_experiment_report.py

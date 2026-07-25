@@ -1,10 +1,9 @@
 ================================================================================
 Livehouse Photography Agent — 项目详解与技术基础地图
 ================================================================================
-Audience : 想系统掌握本仓库的开发者 / 面试复盘 / 新人 onboarding
-Companion: README.md · docs/agent_capability_map.md · docs/PLATFORM_SCOPE.txt
-           docs/interview_pitch.txt · docs/interview_qa.txt
-Updated  : 2026-07-24
+Audience : 想系统掌握本仓库的开发者 / 新人 onboarding
+Companion: README.md · docs/PLATFORM_SCOPE.txt · docs/AGENT_SLIM.txt
+Updated  : 2026-07-26
 
 本文分两部分：
   A. 项目文档（问题、架构、主路径、模块、运行、边界、学习路线）
@@ -86,7 +85,7 @@ Agent（扩展）
 A5. 主路径（必须先背熟）
 ==============================================================================
 
-线性主路径（面试 / 排障都从这里讲）：
+线性主路径（排障与阅读代码都从这里讲）：
 
   ingest (Go SD/brain → sessions/photos)
     → POST /api/ingest/check_new_images
@@ -240,7 +239,7 @@ Router：
   · primary → fallback；每次 attempt 记入 model_runs
   · 支持 Ollama / vLLM / OpenAI-compatible / mock
 
-已知边界（面试要主动说）：
+已知边界：
   · 背压主要是进程内，不是集群 GPU 配额
   · Cancel 改 SSOT，不保证立刻掐断已在飞的 HTTP
   · SQLite 单节点 SSOT，不是多活集群库
@@ -250,7 +249,7 @@ Router：
 A10. Agent 能力（一等能力，锐化后；勿堆厨余）
 ==============================================================================
 
-详见 docs/agent_capability_map.md · docs/AGENT_SLIM.txt。
+详见 docs/AGENT_SLIM.txt。
 
 定位：挂在 durable job + Gallery 上的 LangGraph Agent（非外挂 chatbot）。
 默认 runtime 只有 LangGraph；imperative 仅 LIVEHOUSE_AGENT_RUNTIME=imperative。
@@ -270,7 +269,7 @@ Gallery chat（conversation_graph.py）：
   Observability          job_events, agent_events, GET /api/agent/trace
 
 诚实结论（评估）：
-  预算约束选片 Agent 目前未稳定大幅超过 heuristic；面试如实讲数字与 trace。
+  预算约束选片 Agent 目前未稳定大幅超过 heuristic；以固定评估集与 trace 为准。
 
 
 ==============================================================================
@@ -368,17 +367,16 @@ A14. 建议的掌握路径（读代码顺序）
 第 2 周 — 可观测与可靠
   8. api/infra_routes.py + web/app/infra
   9. harness/reliability_scenarios.py / claim fence 语义
-  10. docs/interview_qa.txt 可靠性卡片
 
 第 3 周 — Agent 与评估
-  11. services/agent/graph.py + conversation_graph.py
-  12. scripts/eval_* + quality/CONTRACTS.md
-  13. docs/agent_capability_map.md
+  10. services/agent/graph.py + conversation_graph.py
+  11. scripts/eval_* + quality/CONTRACTS.md
+  12. docs/AGENT_SLIM.txt
 
-第 4 周 — 边界与平台化叙事
-  14. docs/PLATFORM_SCOPE.txt
-  15. Go ingest 与 sessions/photos 如何播种 jobs
-  16. 能用自己的话讲清「三项边界」与「下一步 cutover」
+第 4 周 — 边界与平台化
+  13. docs/PLATFORM_SCOPE.txt
+  14. Go ingest 与 sessions/photos 如何播种 jobs
+  15. 讲清三项边界与「钩子 vs cutover」
 
 
 ==============================================================================
@@ -386,7 +384,7 @@ B. 掌握本项目应具备的技术基础知识
 ==============================================================================
 
 说明：不必一开始全部精通。标 ★ 的是读通主路径的最低门槛；
-标 ★★ 的是能改生产路径 / 答深挖面试；标 ★★★ 的是扩展与平台化方向。
+标 ★★ 的是能改生产路径；标 ★★★ 的是扩展与平台化方向。
 
 
 ------------------------------------------------------------------------------
@@ -478,7 +476,7 @@ B4. 多模态模型与推理服务  ★★
 B5. Agent / LLM 应用工程  ★★（扩展主线）
 ------------------------------------------------------------------------------
 
-概念地图（与 JD 对齐）：
+概念地图：
   · ReAct、Plan-and-Execute、Tool / Function Calling
   · LangGraph 状态图：节点、边、循环退出条件
   · Skills 封装、guardrails、上下文治理（截断 / 摘要）
@@ -550,7 +548,7 @@ B10. 建议的学习资源类型（不绑定具体课）
 
 
 ==============================================================================
-C. 面试时可用的「诚实三边界」
+C. 三项边界（单节点 runtime）
 ==============================================================================
 
   1. SQLite 是执行 SSOT — 适合单机复现，不是多活集群库。
@@ -564,33 +562,10 @@ D. 相关文档索引
 
   README.md                      对外总览、启动、评估表、布局
   docs/PROJECT_GUIDE.txt         本文（详解 + 技术基础地图）
-  docs/agent_capability_map.md   Agent 能力 ↔ JD 关键词
   docs/PLATFORM_SCOPE.txt        平台范围 / Batch E hooks
-  docs/interview_pitch.txt       简历子弹与 demo 顺序
-  docs/interview_qa.txt          深挖问答卡片
+  docs/AGENT_SLIM.txt            Agent 表面锐化清单
   quality/CONTRACTS.md           评估契约冻结说明
   AGENTS.md / .cursor/rules/*    给编码 Agent 的仓库约定
-
-
-==============================================================================
-E. 你「掌握了」的验收标准（自测清单）
-==============================================================================
-
-能不看笔记回答：
-  [ ] 主路径从 ingest 到 analysis_results 的每一步模块名
-  [ ] 为什么 Celery 状态不是权威；claim 如何防重复执行
-  [ ] Stage1/2/3 各自优化目标与成本差异
-  [ ] queue 背压、fallback、model_runs 如何串起来
-  [ ] #61 与 #62 在 Infra 上分别证明什么
-  [ ] 三项边界 + Batch E「钩子 vs cutover」
-  [ ] Agent 在架构中的位置，以及当前评估的诚实结论
-  [ ] 如何用固定集复现一条 Stage3 或 gating 报告
-
-能动手完成：
-  [ ] 改一个 Stage1 阈值并解释对 keeper 的影响假设
-  [ ] 读懂一次 FAILED_RETRYABLE → 重试成功的 event 序列
-  [ ] 加一个只读 Infra API 字段并在 UI 展示（小改动）
-  [ ] 跑通一条 eval 脚本并解释 provenance
 
 ================================================================================
 End of PROJECT_GUIDE

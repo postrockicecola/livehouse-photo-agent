@@ -3,7 +3,7 @@ Per-scope VLM admit budget (Batch E hook).
 
 Keyed by ``(namespace, project_key)`` with an hourly SQLite counter.
 Default is **off** (``LIVEHOUSE_SCOPE_VLM_QUOTA_PER_HOUR`` unset or ``0``) so demos
-are unchanged. This is not Redis cluster fair-share — interview as a process/SSOT
+are unchanged. This is not Redis cluster fair-share — treat as a process/SSOT
 quota scaffold that can move to a shared token bucket later.
 """
 from __future__ import annotations

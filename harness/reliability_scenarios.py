@@ -2,7 +2,7 @@
 Systematic reliability / chaos-style scenarios for SSOT jobs, workers, dispatch, and inference.
 
 Used by ``scripts/chaos_runtime.py`` and ``tests/test_reliability_chaos.py``. Each scenario
-returns structured evidence for demos and interviews (not production chaos engineering).
+returns structured evidence for demos and CI (not production chaos engineering).
 Package path: ``harness.reliability_scenarios``.
 """
 from __future__ import annotations
@@ -40,13 +40,13 @@ from utils.luma_brain import (
 
 @dataclass
 class ChaosScenarioResult:
-    """One scenario outcome: pass/fail plus narrative hooks for RELIABILITY.md / interviews."""
+    """One scenario outcome: pass/fail plus narrative hooks for reports."""
 
     id: str
     ok: bool
     design: str
     evidence: dict[str, Any] = field(default_factory=dict)
-    interview_line: str = ""
+    summary_line: str = ""
     assertions: list[str] = field(default_factory=list)
     metrics: dict[str, Any] = field(default_factory=dict)
 
@@ -106,7 +106,7 @@ def scenario_dead_letter_after_retries() -> ChaosScenarioResult:
                         ok=False,
                         design=design,
                         evidence={"error": "expected claim each round"},
-                        interview_line="Dead-letter path did not get three claims — check runnable statuses.",
+                        summary_line="Dead-letter path did not get three claims — check runnable statuses.",
                         assertions=["claim_jobs returns a row each retry round"],
                         metrics={"claims_completed": len(statuses)},
                     )
@@ -125,7 +125,7 @@ def scenario_dead_letter_after_retries() -> ChaosScenarioResult:
                     "final_job_status": final,
                     "final_attempt": int(row["attempt"]) if row else None,
                 },
-                interview_line=(
+                summary_line=(
                     "After three failed attempts, the job lands in DEAD_LETTERED so the queue "
                     "does not spin forever — ops can manual_retry or inspect payload."
                 ),
@@ -183,7 +183,7 @@ def scenario_worker_pause_and_drain_block_new_claims() -> ChaosScenarioResult:
                     "claims_while_paused": len(c_paused),
                     "claims_while_draining": len(c_drain),
                 },
-                interview_line=(
+                summary_line=(
                     "Pause and drain are first-class worker states: the orchestrator stops handing "
                     "out new work without deleting rows, matching k8s-style drain semantics."
                 ),
@@ -258,7 +258,7 @@ def scenario_stale_worker_heartbeat_requeues_job() -> ChaosScenarioResult:
                     "requeued_job_ids": requeued,
                     "job_status_after": final,
                 },
-                interview_line=(
+                summary_line=(
                     "We couple job staleness with worker heartbeat so recovery is safe: "
                     "only when both look abandoned do we put work back on the queue."
                 ),
@@ -356,7 +356,7 @@ def scenario_claim_fence_blocks_zombie_succeed() -> ChaosScenarioResult:
                     "fence_message": fence_msg,
                     "job_status_after": final_status,
                 },
-                interview_line=(
+                summary_line=(
                     "Stuck-requeue is not just status flip: claim_generation fences out the "
                     "abandoned writer so a late SUCCEEDED cannot clobber a reclaimed job."
                 ),
@@ -412,7 +412,7 @@ def scenario_inference_fallback_provider() -> ChaosScenarioResult:
             "degraded": meta.get("degraded"),
             "text_preview": (str(out.get("text") or ""))[:80],
         },
-        interview_line=(
+        summary_line=(
             "Fallback is explicit in metadata (degraded), so SLO dashboards can separate "
             "healthy primary traffic from emergency secondary completions."
         ),
@@ -449,7 +449,7 @@ def scenario_malformed_model_json_parse_safe() -> ChaosScenarioResult:
             "parsed_is_empty": parsed == {},
             "dimensions_keys_sample": list((parsed.get("dimensions") or {}).keys())[:4],
         },
-        interview_line=(
+        summary_line=(
             "Bad JSON is a fact of life with VLMs; we fail closed into a safe dict and log, "
             "instead of an uncaught parse exception."
         ),
@@ -481,7 +481,7 @@ def scenario_missing_source_dir_permanent_class() -> ChaosScenarioResult:
         ok=ok,
         design=design,
         evidence={"exception_type": type(exc).__name__, "classify_bucket": bucket},
-        interview_line=(
+        summary_line=(
             "We separate retryable infra errors from permanent misconfiguration; "
             "missing paths go straight to FAILED_PERMANENT-style handling in the executor."
         ),
@@ -558,7 +558,7 @@ def scenario_dispatch_weighted_fairness() -> ChaosScenarioResult:
                     "types_in_order": types_order,
                     "by_type_chosen": plan.by_type_chosen,
                 },
-                interview_line=(
+                summary_line=(
                     "Dispatch is not pure FIFO across heterogeneous job types: we cap per type "
                     "and round-robin so batch ingest cannot drown interactive path jobs."
                 ),
@@ -609,7 +609,7 @@ def scenario_dispatch_headroom_zero_when_all_paused() -> ChaosScenarioResult:
                     "total_worker_rows": plan.total_worker_rows,
                     "online_workers": plan.online_workers,
                 },
-                interview_line=(
+                summary_line=(
                     "Headroom-aware dispatch connects the SQLite worker registry to scheduling: "
                     "all-paused is equivalent to zero capacity for new dispatches."
                 ),
@@ -687,7 +687,7 @@ def results_to_jsonable(results: list[ChaosScenarioResult]) -> list[dict[str, An
                 "id": r.id,
                 "ok": r.ok,
                 "design": r.design,
-                "interview_line": r.interview_line,
+                "summary_line": r.summary_line,
                 "assertions": r.assertions,
                 "metrics": r.metrics,
                 "evidence": r.evidence,
@@ -708,7 +708,7 @@ def print_report(results: list[ChaosScenarioResult], *, as_json: bool) -> None:
         mark = "PASS" if r.ok else "FAIL"
         print(f"## [{mark}] {r.id}")
         print(f"design: {r.design}")
-        print(f"interview: {r.interview_line}")
+        print(f"summary: {r.summary_line}")
         if r.assertions:
             print(f"assertions: {json.dumps(r.assertions, ensure_ascii=False)}")
         if r.metrics:

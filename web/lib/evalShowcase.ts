@@ -235,4 +235,4 @@ export const QUALITY_COST_POINTS = [
   { arm: "full-vlm", vlmSharePct: 100, precision: 0.55, label: "Stage3 P@20 (full)" },
 ] as const;
 
-/* Resume bullets + interview pitches: docs/interview_pitch.txt — not on public pages. */
+/* Numbers below are sourced from reports/eval/* — do not invent latency/cost. */

@@ -239,7 +239,7 @@ data/eval/      # fixed labels + manifest
 reports/eval/   # Recorded Run JSON reports
 ```
 
-Deeper design notes: [`docs/PROJECT_GUIDE.txt`](docs/PROJECT_GUIDE.txt), [`docs/agent_capability_map.md`](docs/agent_capability_map.md).
+Deeper design notes: [`docs/PROJECT_GUIDE.txt`](docs/PROJECT_GUIDE.txt), [`docs/PLATFORM_SCOPE.txt`](docs/PLATFORM_SCOPE.txt).
 
 ---
 
