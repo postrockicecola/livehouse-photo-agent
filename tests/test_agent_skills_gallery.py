@@ -10,10 +10,7 @@ from services.agent.skills.gallery import (
     GallerySelectSkill,
     GalleryStatsSkill,
     MarkScoreGapSkill,
-    _clip_prompts,
-    _clip_query_text,
     _expand_query_terms,
-    _framing_intent,
     _style_intent,
     gallery_registry,
 )
@@ -92,35 +89,22 @@ def test_search_min_score_and_sort(tmp_path: Path) -> None:
 
 def test_search_query_matches_caption_and_tags(tmp_path: Path) -> None:
     _write_results(tmp_path, _sample_rows())
-    res = GallerySearchSkill(str(tmp_path)).run({"query": "吉他手", "mode": "text"})
+    res = GallerySearchSkill(str(tmp_path)).run({"query": "吉他手"})
     assert res.ok is True
     assert [r["file"] for r in res.metadata["rows"]] == ["a_best.jpg"]
-    assert res.metadata.get("citations")
-    assert res.metadata["citations"][0]["file"] == "a_best.jpg"
-    assert "rag" in res.metadata
+    assert "guitar" in " ".join(res.metadata.get("query_terms") or []) or "吉他" in " ".join(
+        res.metadata.get("query_terms") or []
+    )
 
 
-def test_clip_query_prefers_english_synonyms() -> None:
-    q = "找出吉他手弹琴的特写"
-    terms = _expand_query_terms(q)
-    clip_q = _clip_query_text(q, terms)
-    assert "guitar" in clip_q or "guitarist" in clip_q
-    assert "close-up" in clip_q or "closeup" in clip_q or "tight" in clip_q
-    assert "吉他" not in clip_q
+def test_expand_query_includes_synonyms() -> None:
+    terms = _expand_query_terms("找出吉他手弹琴的特写")
+    joined = " ".join(terms)
+    assert "guitar" in joined or "guitarist" in joined
+    assert "吉他" in joined or "吉他手" in joined
 
 
-def test_framing_intent_wide_uses_contrastive_clip_prompts() -> None:
-    q = "找出所有的全景照片"
-    assert _framing_intent(q) == "wide"
-    pos, neg, framing = _clip_prompts(q, _expand_query_terms(q))
-    assert framing == "wide"
-    assert "wide" in pos.lower() or "panorama" in pos.lower() or "establishing" in pos.lower()
-    assert neg and ("close-up" in neg.lower() or "closeup" in neg.lower() or "portrait" in neg.lower())
-    # Bare ambiguous token alone must not be the whole CLIP query.
-    assert pos.strip().lower() != "wide"
-
-
-def test_slow_shutter_style_intent_uses_exif_not_clip(tmp_path: Path, monkeypatch) -> None:
+def test_slow_shutter_style_intent_uses_exif(tmp_path: Path, monkeypatch) -> None:
     assert _style_intent("帮我找出十张慢门摄影的照片") == "slow_shutter"
     _write_results(
         tmp_path,

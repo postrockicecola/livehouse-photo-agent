@@ -210,20 +210,13 @@ function AssistantActionBar({
   );
 }
 
-const SUGGESTIONS: Record<AgentMode, string[]> = {
-  gallery: [
-    "帮我选出得分最高的 10 张",
-    "试试修成 Cinestill 800T 风格",
-    "试试修成 Kodak Portra 暖调风格",
-    "试试修成梦核式修图风格",
-    "找出吉他手弹琴的特写",
-  ],
-  general: [
-    "搜索 KEDA 的最新版本并总结它的用途",
-    "用 Python 算出前 20 个斐波那契数并求和",
-    "调研 SSE 与 WebSocket 的区别，写成一份 markdown 报告",
-  ],
-};
+const SUGGESTIONS: string[] = [
+  "帮我选出得分最高的 10 张",
+  "试试修成 Cinestill 800T 风格",
+  "试试修成 Kodak Portra 暖调风格",
+  "试试修成梦核式修图风格",
+  "找出吉他手弹琴的特写",
+];
 
 type PromptPhase = "select" | "style" | "find";
 
@@ -385,17 +378,8 @@ function RotatingPromptStage({
   );
 }
 
-const MODE_LABEL: Record<AgentMode, string> = {
-  gallery: "策展助手",
-  general: "通用助手",
-};
-
-const MODE_HINT: Record<AgentMode, string> = {
-  gallery:
-    "我可以基于当前 session 的分析结果回答关于评分、标签、保留/丢弃的问题（只读，不会改动文件）。",
-  general:
-    "我可以联网检索、读取网页、运行沙箱 Python、并把结果保存为可下载的产物。",
-};
+const MODE_HINT =
+  "我可以基于当前 session 的分析结果帮助搜索、初选、风格预览和导出（会通过工具写入策展状态）。";
 
 /** Render assistant text with clickable http(s) links (web results / artifacts). */
 function LinkifiedText({ text }: { text: string }) {
@@ -723,7 +707,7 @@ export function ChatDock({
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [mode, setMode] = useState<AgentMode>("gallery");
+  const mode: AgentMode = "gallery";
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [promptPhase, setPromptPhase] = useState<PromptPhase>(() =>
@@ -882,7 +866,7 @@ export function ChatDock({
         session_id: sessionIdRef.current,
         message,
         mode,
-        previews_dir: mode === "gallery" ? previewsDir ?? undefined : undefined,
+        previews_dir: previewsDir ?? undefined,
       };
 
       try {
@@ -983,16 +967,6 @@ export function ChatDock({
     }
   }, [context, mode, promptStages]);
 
-  const switchMode = useCallback(
-    (next: AgentMode) => {
-      if (next === mode) return;
-      setMode(next);
-      // The hydrate effect (keyed on mode) restores that mode's persisted transcript.
-      sessionIdRef.current = persistentSessionId(context, next);
-    },
-    [mode, context],
-  );
-
   const doAuth = useCallback(
     async (kind: "login" | "register", username: string, password: string) => {
       const u =
@@ -1034,21 +1008,7 @@ export function ChatDock({
           <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
-              <div className="flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.03] p-0.5 text-[12px]">
-                {(["gallery", "general"] as AgentMode[]).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => switchMode(m)}
-                    className={[
-                      "rounded-[4px] px-2 py-0.5 transition-colors",
-                      mode === m ? "bg-white/[0.12] text-white/85" : "text-white/40 hover:text-white/70",
-                    ].join(" ")}
-                  >
-                    {MODE_LABEL[m]}
-                  </button>
-                ))}
-              </div>
+              <span className="text-[12px] text-white/70">策展助手</span>
             </div>
             <div className="flex items-center gap-1">
               {user ? (
@@ -1084,7 +1044,7 @@ export function ChatDock({
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
             {turns.length === 0 ? (
               <div className="space-y-3 pt-2">
-                <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT[mode]}</p>
+                <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT}</p>
                 {promptStages ? (
                   <>
                     <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
@@ -1105,7 +1065,7 @@ export function ChatDock({
                       />
                     ) : null}
                     <div className="flex flex-col gap-1.5">
-                      {SUGGESTIONS[mode].map((s) => (
+                      {SUGGESTIONS.map((s) => (
                         <button
                           key={s}
                           type="button"
@@ -1189,7 +1149,7 @@ export function ChatDock({
                   }
                 }}
                 rows={1}
-                placeholder={mode === "gallery" ? "问问这个 session 的照片…" : "给我一个任务：检索、算一算、或生成一份产物…"}
+                placeholder="问问这个 session 的照片…"
                 className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
               />
               <button

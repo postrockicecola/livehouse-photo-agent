@@ -98,10 +98,8 @@ def test_cors_origins_not_wildcard():
     assert any("3000" in o for o in origins)
 
 
-def test_web_fetch_ssrf_blocked():
-    from services.agent.skills.web import WebFetchSkill
+def test_assert_public_http_url_blocks_loopback():
+    from utils.http_security import assert_public_http_url
 
-    skill = WebFetchSkill(fetcher=lambda url: (200, "should not run"))
-    res = skill.run({"url": "http://127.0.0.1/admin"})
-    assert res.ok is False
-    assert "not allowed" in (res.error or "") or "non-public" in (res.error or "")
+    with pytest.raises(ValueError, match="not allowed|non-public"):
+        assert_public_http_url("http://127.0.0.1/admin")

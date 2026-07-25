@@ -15,8 +15,6 @@ Photo ingest
   → Gallery / Infra Console
 ```
 
-Agent curation, KEDA, Operator, RLHF, and prompt labs ship as **Infra Experiments** — optional extensions separate from the main path.
-
 ---
 
 ## Overview
@@ -207,21 +205,6 @@ This project targets a **single-node AI runtime**. It is not designed as a multi
 3. **Single-node storage** with local archive paths for artifacts.
 
 **Platform hooks (in progress):** portable brain backend selector (`LIVEHOUSE_BRAIN_BACKEND`), artifact `content_digest`, optional per-scope VLM hour quota, optional OTEL bootstrap. See [`docs/PLATFORM_SCOPE.txt`](docs/PLATFORM_SCOPE.txt).
-
----
-
-## Infra Experiments
-
-Optional extensions, kept separate from the main processing path:
-
-| Extension | Where |
-|-----------|--------|
-| ReAct curation Agent + ChatDock | `services/agent/`, Gallery ChatDock, Infra → **Infra Experiments** |
-| KEDA scale-on-queue demos | `deploy/k8s/*keda*`, `scripts/infra_scaling_demo.py` (**Simulated** shape unless run in-cluster) |
-| RLHF pairwise voting | Infra Experiments panel |
-| Prompt A/B | Infra Experiments panel |
-| Apple Silicon GPU telemetry + squeeze demo | `infra/gpu_telemetry.py`, `scripts/gpu_pressure_demo.py` (`--simulate` = **Simulated**) |
-| Quantization compare | `scripts/eval/quant_compare.py`, `reports/eval/quant_compare_example.json` (example = **Simulated** / illustrative) |
 
 ---
 

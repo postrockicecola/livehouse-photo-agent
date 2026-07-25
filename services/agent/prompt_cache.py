@@ -22,9 +22,8 @@ engine, not here.** A harness cannot reuse attention state from Python. What a h
 2. **Measure the reuse.** :class:`PrefixCacheMeter` reports, per call, how many leading
    tokens are the shared prefix vs the fresh tail — i.e. the *upper bound* on what an
    upstream prefix cache can reuse, and a hit-rate the same way the other caches report
-   theirs. In a multi-agent fan-out (see :mod:`services.agent.orchestrator`) every
-   sub-agent shares the same prefix, so this is the number that explains why the
-   fan-out is cheap.
+   theirs. Shared system prefixes across repeated tool rounds are the number that
+   explains why multi-step chat stays cheap.
 
 The tokenizer is injected (``TokenizeFn = (text) -> int``) so this module has no model
 dependency; the default ~4-chars/token estimate matches

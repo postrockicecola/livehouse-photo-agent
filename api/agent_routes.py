@@ -26,7 +26,7 @@ from services.agent import store
 from services.agent.context_governance import working_memory_prompt_block
 from services.agent.conversation import ConversationalAgent, ConversationMemory
 from services.agent.guardrails import GuardrailEvent, Guardrails
-from services.agent.skills import agent_workspace_root, general_registry, safe_session_id
+from services.agent.skills import agent_workspace_root, safe_session_id
 from services.agent.skills.artifacts import sanitize_artifact_name
 from services.agent.skills.gallery import gallery_registry
 from services.agent.skills.memory import register_memory_skills
@@ -41,7 +41,7 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000)
     previews_dir: Optional[str] = None
     reset: bool = False
-    # "gallery" = read-only session copilot; "general" = web + sandbox code + artifacts.
+    # Gallery session copilot (only supported mode).
     mode: str = Field(default="gallery")
 
 
@@ -92,12 +92,11 @@ def _system_prompt(registry) -> str:
         "session mostly lacks VLM content tags/captions (Stage2/Stage3 skip labels only), so "
         "semantic queries like 吉他手/鼓手 cannot match via text — do NOT tell the user to "
         "try other keywords, and do NOT invent tags such as AI_Best_90+ / AI_Keep_60-90 "
-        "(those are score categories, not photo tags). Mention visual_available=false means "
-        "CLIP is missing (open-clip-torch). Only quote top_tags / semantic_tags from tool "
-        "metadata.\n"
+        "(those are score categories, not photo tags). Only quote top_tags / semantic_tags "
+        "from tool metadata.\n"
         "If metadata.style_intent is slow_shutter and count=0: report shutter_stats honestly "
         "(e.g. slowest EXIF shutter vs threshold) — this session has no long-exposure 慢门. "
-        "Do NOT list Stage3-skipped filenames as matches and do NOT claim visual RAG found them. "
+        "Do NOT list Stage3-skipped filenames as matches. "
         "You may briefly mention metadata.slowest_examples as the relatively slowest frames, "
         "but label them as not true 慢门.\n\n"
         "INTENT → TOOL MAP:\n"
@@ -108,9 +107,9 @@ def _system_prompt(registry) -> str:
         "- 连拍只留一张 → gallery_search(dedupe_burst=true, …)\n"
         "- 按分数排序 → gallery_search(sort_by=overall)\n"
         "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光… → "
-        '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10,"mode":"hybrid"}} '
-        "(hybrid RAG for subjects/framing; 慢门 uses RAW ExposureTime EXIF, not CLIP; "
-        "cite metadata.citations/files; Gallery auto-opens preview for metadata.files — "
+        '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10}} '
+        "(text match on tags/caption/reason with synonyms; 慢门 uses RAW ExposureTime EXIF; "
+        "cite metadata.files; Gallery auto-opens preview for metadata.files — "
         "say 已在预览页打开. Use gallery_select only if they want 初选/导出)\n"
         "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
         "- 技术高构图一般 → mark_score_gap\n"
@@ -126,39 +125,15 @@ def _system_prompt(registry) -> str:
         "Do NOT ask the user for filenames when last_files is present. "
         "Keep the final answer to 1–2 short sentences — no photo grids.\n"
         "- 导出预览+RAW → export_selected (after selection exists)\n\n"
-        "When answering search results, cite real file names from tool metadata.citations "
+        "When answering search results, cite real file names from tool metadata.files "
         "or rows — never invent photos.\n\n"
         f"AVAILABLE TOOLS:\n{_tool_catalog(registry)}"
     )
 
 
-def _general_system_prompt(registry) -> str:
-    """General-purpose agent prompt: web + sandboxed code + artifact tools."""
-    return (
-        "You are a helpful general-purpose AI agent. You can search and read the web, run "
-        "sandboxed Python, and save deliverables as downloadable artifacts.\n\n"
-        "TOOLS: to use a tool, reply with ONLY a single JSON object on its own line:\n"
-        '{\"tool\": \"<tool_name>\", \"args\": { ... }}\n'
-        "Work step by step: use ONE tool per step, read its result (shown above), then "
-        "decide the next step. When you have enough information, answer the user in plain "
-        "natural language (no JSON). Ground factual claims in web_fetch results rather than "
-        "guessing, and when the user wants a concrete deliverable, save it with write_artifact "
-        "and share the returned URL.\n\n"
-        f"AVAILABLE TOOLS:\n{_tool_catalog(registry)}"
-    )
-
-
 def _build_registry(mode: str, session_id: str, base_dir: str, *, owner: str):
-    """Return ``(registry, system_prompt)`` for the requested mode."""
-    if str(mode or "").strip().lower() == "general":
-        reg = general_registry(session_id)
-        register_memory_skills(
-            reg,
-            owner=owner,
-            persist=lambda k, v: _persist_pref(owner, k, v),
-            loader=lambda: _load_prefs(owner),
-        )
-        return reg, _general_system_prompt(reg)
+    """Return ``(registry, system_prompt)`` for the gallery copilot."""
+    _ = (mode, session_id)  # gallery-only today; mode kept for API compatibility
     reg = gallery_registry(base_dir)
     register_memory_skills(
         reg,
@@ -299,8 +274,9 @@ def _build_stream_fn(base_dir: str):
 
 
 def _max_rounds(mode: str) -> int:
-    """General tasks are multi-step (search → read → code → write); allow more rounds."""
-    return 6 if str(mode or "").strip().lower() == "general" else 3
+    """Gallery chat stays short-horizon (search → act → answer)."""
+    _ = mode
+    return 3
 
 
 def _sse(obj: dict[str, Any]) -> str:
@@ -473,11 +449,7 @@ def agent_trace(
 
 @router.get("/api/agent/artifacts/{session_id}/{name}")
 def agent_artifact(session_id: str, name: str) -> FileResponse:
-    """Serve an artifact written by the general agent's ``write_artifact`` skill.
-
-    The path is reconstructed from the sanitized session id + sanitized file name, so
-    a request can only ever address a file inside that session's workspace directory.
-    """
+    """Serve a file under the per-session agent workspace (sanitized path only)."""
     safe = safe_session_id(session_id)
     fname = sanitize_artifact_name(name)
     session_dir = os.path.join(agent_workspace_root(), safe)

@@ -30,7 +30,7 @@ export type AgentChatResponse = {
   error?: string | null;
 };
 
-export type AgentMode = "gallery" | "general";
+export type AgentMode = "gallery";
 
 export type AgentChatRequest = {
   session_id: string;

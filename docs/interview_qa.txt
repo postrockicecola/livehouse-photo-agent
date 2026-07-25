@@ -27,7 +27,7 @@ A: 单节点 AI runtime：运维简单、事务够用（BEGIN IMMEDIATE claim）
 Demo: 说出三项边界——SQLite SSOT / 进程内推理准入 / 单节点共享卷。
 
 Q: 为什么保留 Celery，而不是让 worker 直接轮询数据库？
-A: 解耦通知与执行；beat 可做 stuck requeue / dispatch round；KEDA 可按队列积压扩缩。
+A: 解耦通知与执行；beat 可做 stuck requeue / dispatch round。
    Worker 仍必须 claim SSOT，重复投递靠 claim 条件更新消化。
 
 ==============================================================================
@@ -75,8 +75,7 @@ Q: Ground truth 如何生成？
 A: 人工标注固定集；面试说明规模与局限，不夸大标注者一致性（若无无无 ICC 就不编）。
 
 Q: Agent 为什么比启发式更合适？如何证明收益 > 成本？
-A: 预算约束选片是 Agent 切入点；当前评估显示尚未稳定超过 heuristic 基线——
-   诚实讲，并把 Agent 放在 Infra Experiments / 扩展，不抢主链。
+A: 预算约束选片是 Agent 切入点；当前评估显示尚未稳定超过 heuristic 基线——诚实讲数字与 trace。
 
 ==============================================================================
 可观测性与运维
@@ -109,7 +108,6 @@ A: 权威：SQLite jobs/events/model_runs/workers。进程内：推理队列 inf
 2. 推理准入与背压主要在进程内；集群配额未做。
 3. Cancel ≠ 中止 in-flight HTTP；shutdown 只清排队。
 4. 中间状态（PREPROCESSING 等）仍可能被僵尸短暂改写；fencing 守住终端写入。
-5. KEDA / Operator / RLHF / Agent 是扩展实验，不是主链卖点。
 
 ==============================================================================
 Batch E（长期平台 — 已落地的是 hooks，不是 cutover）

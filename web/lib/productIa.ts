@@ -3,7 +3,7 @@
  *
  * Portfolio narrative (Batch A): product value first, then job-centric AI runtime.
  * Main path = ingest → cheap gates → durable jobs → bounded VLM → ledger → Gallery/Infra.
- * Agent / KEDA / RLHF / prompt labs = Infra Experiments (extensions), not co-equal headlines.
+ * Agent (LangGraph curation + gallery chat) is first-class on that path.
  */
 
 export const MARKETING_HOME = "/";

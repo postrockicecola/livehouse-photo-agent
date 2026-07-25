@@ -1,17 +1,15 @@
 """Tests for the generic, sandboxed Agent Skill layer (services/agent/skills).
 
-Covered: the registry contract (dispatch, error isolation, function-calling specs),
-the Python code-execution sandbox (success / failure / timeout / bad input), and the
-read-only SQLite query skill (SELECT works; writes and multi-statements are refused).
+Covered: the registry contract (dispatch, error isolation, function-calling specs)
+and the read-only SQLite query skill (SELECT works; writes and multi-statements are refused).
 """
 from __future__ import annotations
 
 import sqlite3
-import sys
 
 import pytest
 
-from services.agent.skills import PythonExecSkill, SQLiteQuerySkill, default_registry
+from services.agent.skills import SQLiteQuerySkill, default_registry
 from services.agent.skills.base import SkillRegistry, SkillResult
 
 
@@ -61,50 +59,15 @@ def test_registry_isolates_skill_exceptions():
     assert res.ok is False and "crashed" in (res.error or "")
 
 
-def test_tool_specs_are_openai_function_shape():
-    reg = default_registry()
+def test_tool_specs_are_openai_function_shape(sample_db):
+    reg = default_registry(db_path=sample_db)
     specs = reg.tool_specs()
     assert all(s["type"] == "function" for s in specs)
     names = {s["function"]["name"] for s in specs}
-    assert "python_exec" in names
+    assert "sqlite_query" in names
     for s in specs:
         assert "parameters" in s["function"]
         assert s["function"]["parameters"]["type"] == "object"
-
-
-# ------------------------------------------------------------------- code execution
-
-
-def test_python_exec_success_captures_stdout():
-    res = PythonExecSkill().run({"code": "print(6 * 7)"})
-    assert res.ok is True
-    assert res.output.strip() == "42"
-    assert res.metadata["returncode"] == 0
-
-
-def test_python_exec_nonzero_returncode_surfaces_error():
-    res = PythonExecSkill().run({"code": "raise ValueError('boom')"})
-    assert res.ok is False
-    assert "ValueError" in (res.error or "") or "ValueError" in res.metadata.get("stderr", "")
-    assert res.metadata["returncode"] != 0
-
-
-def test_python_exec_rejects_empty_code():
-    res = PythonExecSkill().run({"code": "   "})
-    assert res.ok is False and "non-empty" in (res.error or "")
-
-
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="preexec/timeout semantics POSIX-focused")
-def test_python_exec_times_out():
-    res = PythonExecSkill(default_timeout_s=1).run({"code": "while True:\n    pass", "timeout_s": 1})
-    assert res.ok is False
-    assert res.metadata.get("timed_out") is True
-
-
-def test_python_exec_isolated_from_pythonpath(tmp_path):
-    # -I mode must ignore an injected importable module on PYTHONPATH.
-    res = PythonExecSkill().run({"code": "import sys; print('site' in sys.modules)"})
-    assert res.ok is True
 
 
 # --------------------------------------------------------------------- sqlite query

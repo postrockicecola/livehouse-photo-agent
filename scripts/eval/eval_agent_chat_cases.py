@@ -88,19 +88,19 @@ def _scripted_chat(queue: list[str]) -> Callable[[list[dict[str, str]]], str]:
 
 CASES: list[Case] = [
     Case(
-        id="rag_search_drummer",
+        id="search_drummer",
         user="找鼓手特写",
         model_queue=[
-            json.dumps({"tool": "gallery_search", "args": {"query": "鼓手特写", "limit": 5, "mode": "text"}}),
-            "推荐 drum_01.jpg，citation grounded.",
+            json.dumps({"tool": "gallery_search", "args": {"query": "鼓手特写", "limit": 5}}),
+            "推荐 drum_01.jpg。",
         ],
-        expect={"tool": "gallery_search", "min_files": 1, "has_citations": True, "file_contains": "drum"},
+        expect={"tool": "gallery_search", "min_files": 1, "file_contains": "drum"},
     ),
     Case(
         id="empty_semantic_query",
         user="找萨克斯风",
         model_queue=[
-            json.dumps({"tool": "gallery_search", "args": {"query": "萨克斯风", "limit": 5, "mode": "text"}}),
+            json.dumps({"tool": "gallery_search", "args": {"query": "萨克斯风", "limit": 5}}),
             "本场没有萨克斯相关命中。",
         ],
         expect={"tool": "gallery_search", "min_files": 0, "allow_empty": True},
@@ -109,8 +109,8 @@ CASES: list[Case] = [
         id="repeat_tool_break",
         user="找吉他",
         model_queue=[
-            json.dumps({"tool": "gallery_search", "args": {"query": "吉他", "limit": 5, "mode": "text"}}),
-            json.dumps({"tool": "gallery_search", "args": {"query": "吉他", "limit": 5, "mode": "text"}}),
+            json.dumps({"tool": "gallery_search", "args": {"query": "吉他", "limit": 5}}),
+            json.dumps({"tool": "gallery_search", "args": {"query": "吉他", "limit": 5}}),
             # Forced final path may ignore this; harness accepts any non-JSON reply.
         ],
         expect={"tool": "gallery_search", "max_tool_calls": 1, "file_contains": "guitar"},
@@ -154,7 +154,6 @@ def run_case(case: Case, base_dir: Path, prefs: dict[str, str]) -> dict[str, Any
     tools = [tc.get("tool") for tc in result.tool_calls]
     meta = (result.tool_calls[0].get("metadata") if result.tool_calls else {}) or {}
     files = list(meta.get("files") or [])
-    citations = list(meta.get("citations") or [])
     exp = case.expect
     ok = True
     reasons: list[str] = []
@@ -168,10 +167,6 @@ def run_case(case: Case, base_dir: Path, prefs: dict[str, str]) -> dict[str, Any
     if exp.get("allow_empty") and len(files) != 0:
         # empty query case — soft fail if unexpected hits
         pass
-    if exp.get("has_citations") and not citations and files:
-        # text mode still emits citations from hybrid_retrieve
-        ok = False
-        reasons.append("missing citations")
     if exp.get("file_contains"):
         needle = str(exp["file_contains"]).lower()
         if not any(needle in str(f).lower() for f in files):
@@ -191,7 +186,6 @@ def run_case(case: Case, base_dir: Path, prefs: dict[str, str]) -> dict[str, Any
         "tool_calls": len(result.tool_calls),
         "tools": tools,
         "files": files,
-        "citations": len(citations),
         "elapsed_ms": elapsed_ms,
         "reply": (result.reply or "")[:200],
     }

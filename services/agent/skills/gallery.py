@@ -52,9 +52,6 @@ _QUERY_SYNONYMS: tuple[tuple[str, ...], ...] = (
     ("慢门", "慢快门", "长曝光", "拖影", "光轨", "slow shutter", "long exposure", "light trail", "light trails"),
 )
 
-# Framing intents need contrastive CLIP (pos − neg); bare "wide" is too weak alone.
-_WIDE_KEYS = ("全景", "舞台全景", "大场面", "wide stage", "wide shot", "establishing", "panorama", "远景")
-_CLOSE_KEYS = ("特写", "近景", "close-up", "closeup", "portrait", "tight crop")
 _SLOW_SHUTTER_KEYS = (
     "慢门",
     "慢快门",
@@ -69,24 +66,6 @@ _SLOW_SHUTTER_KEYS = (
 )
 # Livehouse "慢门/长曝光" — require slower than typical handheld concert (1/20–1/30).
 _SLOW_SHUTTER_MIN_S = 1.0 / 15.0
-_CLIP_FRAMING: dict[str, tuple[str, str]] = {
-    "wide": (
-        "wide establishing shot of a live concert stage from the audience, "
-        "full stage panorama with band and lights",
-        "tight close-up of a musician face or instrument filling the frame, portrait crop",
-    ),
-    "closeup": (
-        "tight close-up of a musician performing, face or instrument filling the frame",
-        "wide establishing shot of a full concert stage from far away, panorama",
-    ),
-}
-_CLIP_SUBJECT: tuple[tuple[tuple[str, ...], str], ...] = (
-    (("鼓手", "打鼓", "鼓点", "架子鼓", "drummer", "drums", "drumming"), "drummer playing drums on stage"),
-    (("吉他手", "吉他", "弹琴", "指弹", "guitarist", "guitar"), "electric guitarist playing guitar on stage"),
-    (("贝斯", "贝斯手", "bass", "bassist"), "bassist playing bass guitar on stage"),
-    (("歌手", "主唱", "人声", "singer", "vocalist"), "lead singer with microphone on stage"),
-    (("观众", "灯海", "crowd", "audience"), "concert crowd audience with phone lights"),
-)
 
 
 def _expand_query_terms(query: str) -> list[str]:
@@ -115,72 +94,14 @@ def _expand_query_terms(query: str) -> list[str]:
     return terms
 
 
-def _framing_intent(query: str) -> str | None:
-    """Return ``wide`` / ``closeup`` when the user asks for a shot type."""
-    q = (query or "").strip().lower()
-    if not q:
-        return None
-    # Prefer close-up when both appear (e.g. 全景里的特写 is rare; 吉他手特写 is common).
-    if any(k in q for k in _CLOSE_KEYS):
-        return "closeup"
-    if any(k in q for k in _WIDE_KEYS):
-        return "wide"
-    return None
-
-
 def _style_intent(query: str) -> str | None:
-    """Non-CLIP style intents that need structured signals (e.g. EXIF shutter)."""
+    """Style intents that need structured signals (e.g. EXIF shutter)."""
     q = (query or "").strip().lower()
     if not q:
         return None
     if any(k in q for k in _SLOW_SHUTTER_KEYS):
         return "slow_shutter"
     return None
-
-
-def _subject_clip_prompt(query: str) -> str | None:
-    q = (query or "").strip().lower()
-    for keys, prompt in _CLIP_SUBJECT:
-        if any(k.lower() in q for k in keys):
-            return prompt
-    return None
-
-
-def _clip_prompts(query: str, terms: list[str]) -> tuple[str, str | None, str | None]:
-    """Return ``(positive_clip, negative_clip|None, framing_intent|None)``."""
-    # Style intents must not fall through to weak CLIP synonym dumps.
-    if _style_intent(query) == "slow_shutter":
-        return (
-            "artistic long exposure concert photo with intentional motion blur and light trails",
-            "tack sharp frozen concert photo with crisp details",
-            "slow_shutter",
-        )
-    framing = _framing_intent(query)
-    subject = _subject_clip_prompt(query)
-    if framing and framing in _CLIP_FRAMING:
-        pos, neg = _CLIP_FRAMING[framing]
-        if subject and framing == "closeup":
-            # "吉他手特写" → subject close-up, not generic portrait.
-            pos = f"tight close-up of a {subject}"
-        elif subject and framing == "wide":
-            pos = f"wide establishing shot including {subject}, full stage panorama"
-        return pos, neg, framing
-    if subject:
-        # Subject-only: contrast against the opposite framing / wrong subject loosely.
-        return subject, "blurry unusable photo, empty stage with no performers", None
-    ascii_terms = [
-        t for t in terms if t and all(ord(c) < 128 for c in t) and any(c.isalpha() for c in t)
-    ]
-    # Prefer multi-word phrases; drop ultra-short ambiguous tokens like bare "wide".
-    phrases = [t for t in ascii_terms if " " in t or len(t) >= 5]
-    joined = " ".join(dict.fromkeys(phrases or ascii_terms))
-    return (joined[:240] if joined else (query or "").strip()), None, None
-
-
-def _clip_query_text(query: str, terms: list[str]) -> str:
-    """Back-compat: positive CLIP prompt only."""
-    pos, _, _ = _clip_prompts(query, terms)
-    return pos
 
 
 def _is_boilerplate_reason(text: str) -> bool:
@@ -192,44 +113,6 @@ def _is_boilerplate_reason(text: str) -> bool:
 
 def _is_pipeline_tag(tag: str) -> bool:
     return str(tag).strip().lower() in _PIPELINE_TAGS
-
-
-def _is_quality_rejected(row: dict[str, Any]) -> bool:
-    tags = {str(t).lower() for t in (row.get("tags") or [])}
-    cat = str(row.get("category") or "").lower()
-    return "low_quality" in tags or "stage2_prefilter" in tags or "trash" in cat
-
-
-def _prefer_visual_candidates(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Drop Stage2 reject / trash frames for CLIP when possible."""
-    kept = [r for r in rows if not _is_quality_rejected(r)]
-    return kept or rows
-
-
-def _cap_rag_candidates(
-    candidates: list[dict[str, Any]],
-    text_hits: list[dict[str, Any]],
-    *,
-    soft_cap: int = 60,
-    empty_text_cap: int = 180,
-) -> list[dict[str, Any]]:
-    """Limit CLIP corpus; enlarge when text retrieval found nothing."""
-    # Semantic queries with no tag hits should not burn CLIP budget on blur rejects.
-    pool = candidates if text_hits else _prefer_visual_candidates(candidates)
-    cap = empty_text_cap if not text_hits else soft_cap
-    if len(pool) <= cap:
-        return pool
-    seen: set[str] = set()
-    capped: list[dict[str, Any]] = []
-    for r in text_hits + sorted(pool, key=lambda x: _dim(x, "overall"), reverse=True):
-        fn = str(r.get("file") or "")
-        if not fn or fn in seen:
-            continue
-        seen.add(fn)
-        capped.append(r)
-        if len(capped) >= cap:
-            break
-    return capped
 
 
 def _load_rows(base_dir: str) -> list[dict[str, Any]]:
@@ -606,12 +489,11 @@ def _maybe_dedupe(rows: list[dict[str, Any]], base_dir: str, enabled: bool) -> l
 class GallerySearchSkill:
     name = "gallery_search"
     description = (
-        "Search the current session's analyzed photos (multimodal RAG). Filter by score bands "
+        "Search the current session's analyzed photos. Filter by score bands "
         "(overall / energy / technical / composition), tag substring, free-text query "
-        "(tags+caption+reason, Chinese↔English synonyms), optional CLIP visual similarity, "
-        "category, exclude trash/low-quality, and burst dedupe. When query is set, default "
-        "mode=hybrid fuses text + visual and returns citations. Sort by "
-        "overall|energy|technical|composition. Returns top-N with scores, tags, caption, citations."
+        "(tags+caption+reason, Chinese↔English synonyms), category, exclude trash/low-quality, "
+        "and burst dedupe. Sort by overall|energy|technical|composition. Returns top-N with "
+        "scores, tags, and caption."
     )
     parameters = {
         "type": "object",
@@ -628,18 +510,8 @@ class GallerySearchSkill:
             "query": {
                 "type": "string",
                 "description": (
-                    "Free-text / semantic query. Text matches tags/caption/reason with "
-                    "Chinese↔English synonyms; hybrid mode also ranks via CLIP text→image."
+                    "Free-text query. Matches tags/caption/reason with Chinese↔English synonyms."
                 ),
-            },
-            "mode": {
-                "type": "string",
-                "enum": ["hybrid", "text", "visual"],
-                "description": "Retrieval mode when query is set (default hybrid).",
-            },
-            "visual_weight": {
-                "type": "number",
-                "description": "CLIP weight in hybrid fusion 0-1 (default 0.45).",
             },
             "category": {"type": "string", "enum": list(_KNOWN_CATEGORIES)},
             "exclude_trash": {"type": "boolean", "description": "Drop AI_Trash_* categories."},
@@ -679,80 +551,23 @@ class GallerySearchSkill:
         filter_args["_sort_by"] = sort_by
         query = str(args.get("query") or "").strip()
         expanded = _expand_query_terms(query)
-        citations: list[dict[str, Any]] = []
-        rag_meta: dict[str, Any] = {}
 
         if query and _style_intent(query) == "slow_shutter":
             return _search_slow_shutter(rows, base_dir=self._base_dir, limit=limit)
 
-        clip_query = ""
-        clip_neg: str | None = None
-        framing: str | None = None
-        if query:
-            clip_query, clip_neg, framing = _clip_prompts(query, expanded)
-            # Score/category filters first (no text query gate), then hybrid RAG rank.
-            pre_args = dict(filter_args)
-            pre_args.pop("query", None)
-            candidates = _filter_rows(rows, pre_args)
-            text_hits = _filter_rows(rows, filter_args)
-            candidates = _cap_rag_candidates(candidates, text_hits)
-            from services.agent.rag import hybrid_retrieve
-
-            mode = str(args.get("mode") or "hybrid")
-            try:
-                vw = float(args["visual_weight"]) if args.get("visual_weight") is not None else 0.45
-            except (TypeError, ValueError):
-                vw = 0.45
-            # Framing intents rely on visual contrast; nudge weight up when no text tags.
-            if framing and not text_hits:
-                vw = max(vw, 0.65)
-            ranked, citations, rag_meta = hybrid_retrieve(
-                candidates,
-                query=clip_query or query,
-                query_terms=expanded,
-                base_dir=self._base_dir,
-                text_hit_score=lambda blob, terms: _query_hit_score(blob, terms),
-                text_blob=_text_blob,
-                mode=mode,
-                visual_weight=vw,
-                limit=max(limit * 3, limit),
-                negative_query=clip_neg,
-                framing_intent=framing,
-            )
-            filtered = ranked
-            sort_label = "RAG fused score"
-            rag_meta = {
-                **rag_meta,
-                "clip_query": clip_query,
-                "clip_negative": clip_neg,
-                "framing_intent": framing,
-                "text_hit_count": len(text_hits),
-            }
-        else:
-            filtered = _filter_rows(rows, filter_args)
-            sort_label = sort_by
+        filtered = _filter_rows(rows, filter_args)
+        sort_label = sort_by
 
         filtered = _maybe_dedupe(filtered, self._base_dir, bool(args.get("dedupe_burst")))
         top = [_record(r) for r in filtered[:limit]]
         files = [str(r["file"]) for r in top if r.get("file")]
-        if citations:
-            by_file = {str(c.get("file") or ""): c for c in citations}
-            citations = [by_file[f] for f in files if f in by_file]
         summary = f"{len(filtered)} photo(s) matched; showing top {len(top)} by {sort_label}."
-        if rag_meta:
-            summary += (
-                f" RAG mode={rag_meta.get('mode')} visual={rag_meta.get('visual_available')} "
-                f"citations={len(citations)}."
-            )
         meta: dict[str, Any] = {
             "rows": top,
             "count": len(filtered),
             "files": files,
             "ui_action": "search",
             "query_terms": expanded[:24],
-            "clip_query": clip_query or None,
-            "citations": citations,
-            "rag": rag_meta,
         }
         if not filtered:
             # Help the model explain empty results without inventing photos / fake tags.
@@ -777,7 +592,6 @@ class GallerySearchSkill:
             top_tags = sorted(tag_counts.items(), key=lambda kv: kv[1], reverse=True)[:12]
             semantic_tags = [(k, v) for k, v in top_tags if not _is_pipeline_tag(k)]
             pipeline_only = vlm_content == 0
-            visual_ok = bool((rag_meta or {}).get("visual_available"))
             meta["top_tags"] = [{"tag": k, "count": v} for k, v in top_tags]
             meta["semantic_tags"] = [{"tag": k, "count": v} for k, v in semantic_tags[:12]]
             meta["categories"] = cat_counts
@@ -786,7 +600,6 @@ class GallerySearchSkill:
             meta["tags_empty"] = not bool(top_tags)
             meta["pipeline_tags_only"] = pipeline_only
             meta["vlm_content_count"] = vlm_content
-            meta["visual_available"] = visual_ok
             # Do not list score-band category names (AI_Best_*) as if they were content tags.
             if pipeline_only:
                 summary += (
@@ -794,24 +607,13 @@ class GallerySearchSkill:
                     "content tags/captions (mostly Stage2/Stage3 skip labels like "
                     f"{[t[0] for t in top_tags[:5] if _is_pipeline_tag(t[0])] or 'none'}). "
                     "Do NOT ask the user to try other keywords — text search cannot invent "
-                    "鼓手/吉他手 tags. Recommend re-running Stage3/VLM on keepers"
-                    + (
-                        ", or install open-clip-torch so hybrid visual search can help."
-                        if not visual_ok
-                        else "; visual RAG was on but found no match in the scored corpus."
-                    )
-                )
-            elif not visual_ok:
-                summary += (
-                    " No semantic hits for this query in tags/captions, and CLIP visual RAG "
-                    "is unavailable (install open-clip-torch). "
-                    f"Session has {vlm_content}/{len(rows)} photos with VLM content; "
-                    f"semantic tags seen: {[t[0] for t in semantic_tags[:8]] or 'none'}."
+                    "鼓手/吉他手 tags. Recommend re-running Stage3/VLM on keepers."
                 )
             else:
                 summary += (
-                    " No semantic hits for this query in tags/captions (visual RAG also "
-                    f"empty). Session semantic tags: {[t[0] for t in semantic_tags[:8]]}."
+                    " No semantic hits for this query in tags/captions. "
+                    f"Session has {vlm_content}/{len(rows)} photos with VLM content; "
+                    f"semantic tags seen: {[t[0] for t in semantic_tags[:8]] or 'none'}."
                 )
         return SkillResult(ok=True, output=summary, metadata=meta)
 

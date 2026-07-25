@@ -14,7 +14,7 @@ Do not invent latency/cost percentages.
 1. 问题：Livehouse 一场会留下大量相似照片。脚本能跑通处理，但很难回答：任务到哪一步、失败如何恢复、模型为什么变慢、成本花在哪。
 2. 方案：把流水线挂在持久作业系统上：SQL 是执行事实，Celery 只通知 job id；低成本门控后再进有界 VLM；主备路由与每次 attempt 进账本。
 3. 产品：Studio 提交 → Infra 看时间线/模型调用/降级 → Gallery 确认导出。
-4. 边界：单节点 AI runtime——SQLite、进程内推理准入、单节点共享卷。KEDA / Operator / 训练闭环是扩展实验。
+4. 边界：单节点 AI runtime——SQLite、进程内推理准入、单节点共享卷。
 
 ## 10-minute demo order
 

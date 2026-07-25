@@ -3,7 +3,6 @@ Updated: 2026-07-25
 Companion: docs/agent_capability_map.md · docs/PROJECT_GUIDE.txt
 
 Goal: keep Agent as a first-class story, cut kitchen-sink surface.
-K8s / KEDA / operator: deferred (leave in tree for now).
 
 ==============================================================================
 KEEP (core interview assets — default on)
@@ -65,20 +64,6 @@ Imperative runtime
   Kept for tests + emergency only.
 
 ==============================================================================
-EXPERIMENT / SIDE (keep in tree, do not grow; resume line, not demo path)
-==============================================================================
-
-  services/agent/mcp/                  MCP server/client
-  services/agent/orchestrator.py       Multi-agent
-  services/agent/messaging.py
-  services/agent/rag.py                Hybrid RAG + CLIP (optional skill path)
-  services/agent/rl/                   RL / reinforce experiments
-  services/agent/skills/web.py
-  services/agent/skills/code_execution.py
-
-Interview tip: one sentence each is enough; do not open with these.
-
-==============================================================================
 REMOVED FROM TREE (cleanup pass)
 ==============================================================================
 
@@ -95,12 +80,22 @@ Demos / one-offs
   reports/agent_demo_* · reports/gpu_demo/ · reports/loadtest/ · reports/rl/
   reports/infra_scaling.* · stale reports/eval/baseline_v{2,3,4}* dumps
 
+Unverified agent side-tracks (removed 2026-07-25)
+  services/agent/mcp/
+  services/agent/orchestrator.py · messaging.py
+  services/agent/rag.py
+  services/agent/rl/ · scripts/rl/
+  services/agent/skills/web.py · code_execution.py
+  ChatDock "general" mode (web search / sandbox Python)
+
+Unverified infra side-tracks (removed 2026-07-25)
+  deploy/k8s/** · deploy/operator/**
+  scripts/infra_scaling_demo.py
+  (kept deploy/Dockerfile.* + docker-compose for local stack)
+
 Local-only (not git-tracked; purged on this machine)
   models/eval/ · bulky data/eval/_*-run image dumps
   (kept data/eval/_temp0_run/.../eligible_after_stage2.jsonl for eval defaults)
-
-Deferred (your call)
-  deploy/k8s/** · deploy/operator/**
 
 NOTE: No Triton kernels exist in this repo. Film grades use NumPy/OpenCV
 ``op_kernel.py`` (still required by Lab / film_render_service).
@@ -113,3 +108,4 @@ STILL TO SLIM LATER (not this pass)
   engine/models/vlm_model.py deprecated façade
   Showcase fixture stack (web/fixtures, public/showcase) — isolate build target
   Bulk generated reports under reports/ · data/eval/_*/
+  Infra Experiments UI panels (RLHF / prompt A/B) — separate from agent runtime

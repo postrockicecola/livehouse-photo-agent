@@ -77,11 +77,9 @@ A4. 技术栈总览
 Agent（扩展）
   LangGraph        plan→act→reflect（生产 runtime）
   ReAct / Skills   services/agent/*
-  MCP / RAG / CLIP 可选能力
 
 部署相关
   start_all.sh / deploy/up.sh
-  可选 K8s + KEDA 演示（Infra Experiments，非主链）
 
 
 ==============================================================================
@@ -151,7 +149,7 @@ A6. 架构鸟瞰
                     │         Infra Console          Gallery UI
                     │         /api/infra/*           /api/gallery/*
                     ▼
-              Agent (optional)：RAG / Chat / Curation / MCP
+              Agent：Chat / Curation（LangGraph）
 
 
 分层「从哪读代码」：
@@ -176,7 +174,7 @@ services/
   job_executor.py  认领与执行编排（主路径心脏）
   job_lifecycle.py 状态转移封装
   processor/       Stage runners + stages/deep_analysis.py
-  agent/           LangGraph / tools / skills / MCP / RAG
+  agent/           LangGraph / tools / skills / memory
   scheduler/       调度与 requeue
   cache/           semantic / stage3 缓存
 engine/
@@ -191,7 +189,7 @@ scripts/           评估、chaos、GPU / scaling demo、label_server
 quality/           评估契约（schemas + dataset/eval_run）
 data/eval/         固定标注集 / manifest（勿提交大型 _*_run 产物）
 reports/eval/      Recorded Run 报告（勿把 Simulated 当生产 SLO）
-deploy/            Docker / K8s 实验清单
+deploy/            本地 compose / 启动辅助
 utils/             luma_brain、json_safe、http_security、stage3_dimensions
 Go 源码            cmd/ingest/ (main, scanner, executor, luma_brain*, …),
                    cmd/preview-extractor/, cmd/arw-extractor/, cmd/jpeg-organizer/
@@ -270,9 +268,6 @@ Gallery chat（conversation_graph.py）：
   Tools / Skills         tools.py, skills/gallery|artifacts|memory|database
   Memory                 ConversationMemory / working_memory / preferences
   Observability          job_events, agent_events, GET /api/agent/trace
-
-侧线（简历可一句，勿当 demo 主路径）：
-  Multi-Agent / MCP / RAG+CLIP / RL → 见 AGENT_SLIM「EXPERIMENT」
 
 诚实结论（评估）：
   预算约束选片 Agent 目前未稳定大幅超过 heuristic；面试如实讲数字与 trace。
@@ -488,8 +483,6 @@ B5. Agent / LLM 应用工程  ★★（扩展主线）
   · LangGraph 状态图：节点、边、循环退出条件
   · Skills 封装、guardrails、上下文治理（截断 / 摘要）
   · Memory：短期对话、working memory、长期偏好
-  · RAG：文本检索 + CLIP 多模态检索（本仓非托管向量库）
-  · MCP：把工具暴露给外部客户端
   · 轨迹评估、badcase、budget 约束决策
 
 诚实要求：
@@ -539,9 +532,7 @@ B9. 分布式与平台化（进阶）★★★
   · Postgres 作为多写 SSOT 的迁移点
   · 对象存储 + content-addressed blob（content_digest 的归宿）
   · 集群级 GPU 配额 / 公平调度
-  · KEDA 按队列积压扩缩（本仓有演示清单）
   · 多租户：软标签 vs RBAC / 真正隔离
-  · 训练闭环：RLHF 投票、prompt A/B、preference → SFT/DPO（实验向）
 
 
 ------------------------------------------------------------------------------
@@ -565,8 +556,6 @@ C. 面试时可用的「诚实三边界」
   1. SQLite 是执行 SSOT — 适合单机复现，不是多活集群库。
   2. 推理准入 / 背压主要在进程内 — 不是集群 GPU 配额。
   3. 单节点共享卷上的本地路径产物 — 不是对象存储多副本。
-
-扩展实验（KEDA / Operator / RLHF / Agent 策展）可以讲，但不要和主路径抢镜头。
 
 
 ==============================================================================
