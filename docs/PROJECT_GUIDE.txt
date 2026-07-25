@@ -370,7 +370,7 @@ A14. 建议的掌握路径（读代码顺序）
 
 第 2 周 — 可观测与可靠
   8. api/infra_routes.py + web/app/infra
-  9. reliability_scenarios.py / claim fence 语义
+  9. harness/reliability_scenarios.py / claim fence 语义
   10. docs/interview_qa.txt 可靠性卡片
 
 第 3 周 — Agent 与评估

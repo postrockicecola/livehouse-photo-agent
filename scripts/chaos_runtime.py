@@ -11,8 +11,8 @@ _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from reliability_harness import write_reports_to_dir
-from reliability_scenarios import print_report, run_all_scenarios, run_scenarios
+from harness.reliability_harness import write_reports_to_dir
+from harness.reliability_scenarios import print_report, run_all_scenarios, run_scenarios
 
 
 def main() -> None:

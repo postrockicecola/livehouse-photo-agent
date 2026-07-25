@@ -3,6 +3,7 @@ Systematic reliability / chaos-style scenarios for SSOT jobs, workers, dispatch,
 
 Used by ``scripts/chaos_runtime.py`` and ``tests/test_reliability_chaos.py``. Each scenario
 returns structured evidence for demos and interviews (not production chaos engineering).
+Package path: ``harness.reliability_scenarios``.
 """
 from __future__ import annotations
 

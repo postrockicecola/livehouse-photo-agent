@@ -41,7 +41,7 @@ A: run_job 先 JobLifecycle.claim：仅 QUEUED|FAILED_RETRYABLE 且 attempt<max 
 Q: worker 在推理过程中崩溃会发生什么？
 A: 心跳过期 + claimed_at 过期 → requeue_stuck_jobs 回 QUEUED，并 bump claim_generation。
    若僵尸进程晚到 mark_job_succeeded，带旧 generation 会 ClaimFenceError，不能盖掉新 claim。
-Demo: chaos scenario claim-fence-zombie；reliability_scenarios.py。
+Demo: chaos scenario claim-fence-zombie；harness/reliability_scenarios.py。
 
 Q: 主模型超时或返回错误结构时如何处理？
 A: Router 主备降级；失败写入 model_runs；作业可 FAILED_RETRYABLE / fallback degraded。

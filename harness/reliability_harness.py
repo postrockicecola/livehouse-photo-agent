@@ -2,7 +2,7 @@
 Unified reliability verification harness: structured report documents for demos, CI, and interviews.
 
 Consumers: ``scripts/chaos_runtime.py`` (``--report-dir``). Scenario implementations live in
-``reliability_scenarios.py``; this module wraps JSON/Markdown emission only.
+``harness.reliability_scenarios``; this module wraps JSON/Markdown emission only.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from reliability_scenarios import ChaosScenarioResult, results_to_jsonable
+from harness.reliability_scenarios import ChaosScenarioResult, results_to_jsonable
 
 SCHEMA_VERSION = "1"
 

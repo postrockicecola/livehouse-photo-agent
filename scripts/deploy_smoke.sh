@@ -15,7 +15,7 @@ python -m py_compile \
   inference/queue.py \
   infra/scope_quota.py \
   infra/otel_bootstrap.py \
-  reliability_scenarios.py \
+  harness/reliability_scenarios.py \
   scripts/eval/export_experiment_report.py
 
 echo "== entrypoint honors LIVEHOUSE_WORKER_QUEUES =="

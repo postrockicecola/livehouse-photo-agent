@@ -1,8 +1,8 @@
-"""Schema checks for ``reliability_harness`` report documents (no DB)."""
+"""Schema checks for ``harness.reliability_harness`` report documents (no DB)."""
 from __future__ import annotations
 
-from reliability_harness import SCHEMA_VERSION, build_report_document, write_reports_to_dir
-from reliability_scenarios import scenario_malformed_model_json_parse_safe
+from harness.reliability_harness import SCHEMA_VERSION, build_report_document, write_reports_to_dir
+from harness.reliability_scenarios import scenario_malformed_model_json_parse_safe
 
 
 def test_build_report_document_includes_summary_and_scenarios():

@@ -1,9 +1,9 @@
-"""Automated checks for ``reliability_scenarios`` (isolated SQLite, no Celery)."""
+"""Automated checks for ``harness.reliability_scenarios`` (isolated SQLite, no Celery)."""
 from __future__ import annotations
 
 import pytest
 
-from reliability_scenarios import ALL_SCENARIOS, SCENARIO_BY_ID, run_all_scenarios
+from harness.reliability_scenarios import ALL_SCENARIOS, SCENARIO_BY_ID, run_all_scenarios
 
 
 @pytest.mark.parametrize(

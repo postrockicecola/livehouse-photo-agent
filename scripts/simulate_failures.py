@@ -149,7 +149,7 @@ def main() -> None:
     if args.scenario in {"stuck-job", "all"}:
         simulate_stuck_job_recovery()
     if args.scenario in {"chaos-matrix", "all"}:
-        from reliability_scenarios import print_report, run_all_scenarios
+        from harness.reliability_scenarios import print_report, run_all_scenarios
 
         chaos_results = run_all_scenarios()
         print_report(chaos_results, as_json=False)
