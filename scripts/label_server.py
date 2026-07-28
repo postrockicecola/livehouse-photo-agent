@@ -287,7 +287,9 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(f"no images found under {images_dir}\n")
         return 2
 
-    preds_path = Path(args.predictions).expanduser() if args.predictions else None
+    # Empty string / '-' disables AI reference (needed for blind re-label).
+    pred_arg = (args.predictions or "").strip()
+    preds_path = Path(pred_arg).expanduser() if pred_arg and pred_arg != "-" else None
     predictions_map = _load_predictions_map(preds_path)
 
     Handler.images_dir = images_dir

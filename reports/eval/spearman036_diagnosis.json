@@ -1,0 +1,12 @@
+{
+  "n": 250,
+  "spearman_all": 0.36248160609111757,
+  "pearson_all": 0.8425757990990804,
+  "spearman_midband_h_gt_20": 0.28653419681914577,
+  "pearson_midband_h_gt_20": 0.29728354473162927,
+  "n_human_le_20": 11,
+  "human_unique_values": 15,
+  "frac_human_at_70_75_80": 0.672,
+  "dims_labeled": 0,
+  "note": "Pearson 0.84 is almost entirely carried by ~11 extreme trash images; mid-band rank agreement \u22480.29."
+}

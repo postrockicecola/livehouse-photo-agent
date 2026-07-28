@@ -121,6 +121,63 @@ def group_mean_separation(
 
 
 # ---------------------------------------------------------------------------
+# Inter-rater agreement (two raters / two label rounds)
+# ---------------------------------------------------------------------------
+
+
+def cohen_kappa(a: Sequence[bool], b: Sequence[bool]) -> float:
+    """Cohen's κ for two aligned binary label sequences."""
+    xa = np.asarray(a, dtype=bool)
+    xb = np.asarray(b, dtype=bool)
+    if xa.shape != xb.shape or len(xa) == 0:
+        return float("nan")
+    n = float(len(xa))
+    po = float(np.mean(xa == xb))
+    p_yes = float(np.mean(xa)) * float(np.mean(xb))
+    p_no = float(np.mean(~xa)) * float(np.mean(~xb))
+    pe = p_yes + p_no
+    if pe >= 1.0:
+        return float("nan")
+    return float((po - pe) / (1.0 - pe))
+
+
+def icc_two_raters(
+    a: Sequence[float],
+    b: Sequence[float],
+) -> dict[str, float]:
+    """Shrout & Fleiss ICC for two fixed raters (single measures).
+
+    Returns ``icc2_1`` (absolute agreement) and ``icc3_1`` (consistency).
+    Subjects with either score missing/NaN are dropped.
+    """
+    xa, xb = _clean_pairs(a, b)
+    n = int(len(xa))
+    if n < 2:
+        return {"n": float(n), "icc2_1": float("nan"), "icc3_1": float("nan")}
+
+    # n subjects × 2 raters
+    Y = np.column_stack([xa, xb])
+    grand = float(Y.mean())
+    row_means = Y.mean(axis=1)
+    col_means = Y.mean(axis=0)
+
+    ss_rows = 2.0 * float(np.sum((row_means - grand) ** 2))
+    ss_cols = n * float(np.sum((col_means - grand) ** 2))
+    ss_total = float(np.sum((Y - grand) ** 2))
+    ss_err = ss_total - ss_rows - ss_cols
+
+    ms_rows = ss_rows / (n - 1)
+    ms_cols = ss_cols / 1.0  # k-1 = 1
+    ms_err = ss_err / (n - 1) if n > 1 else float("nan")
+
+    # ICC(3,1) consistency; ICC(2,1) absolute agreement (k=2)
+    icc3 = (ms_rows - ms_err) / (ms_rows + ms_err) if (ms_rows + ms_err) != 0 else float("nan")
+    denom2 = ms_rows + ms_err + 2.0 * (ms_cols - ms_err) / n
+    icc2 = (ms_rows - ms_err) / denom2 if denom2 != 0 else float("nan")
+    return {"n": float(n), "icc2_1": float(icc2), "icc3_1": float(icc3)}
+
+
+# ---------------------------------------------------------------------------
 # Bias / calibration analysis
 # ---------------------------------------------------------------------------
 
