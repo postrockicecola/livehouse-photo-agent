@@ -40,6 +40,9 @@ quality/store/
 # General-agent artifact workspace (per-session deliverables; local-only)
 data/agent_workspace/
 
+# Weekly agent review-queue exports (may contain user chat text); keep .gitkeep
+data/review_queue/*.jsonl
+
 # OS / IDE
 .DS_Store
 .idea/

@@ -135,8 +135,10 @@ def test_slow_shutter_style_intent_uses_exif(tmp_path: Path, monkeypatch) -> Non
     assert res.metadata["count"] == 0
     assert res.metadata["files"] == []
     assert res.metadata["style_intent"] == "slow_shutter"
+    assert "slowest_examples" not in res.metadata  # P1: no inventable near-miss list
+    assert "shutter_stats" in res.metadata
     assert "Stage3" not in (res.metadata["rows"][0]["caption"] if res.metadata["rows"] else "")
-    assert "do NOT list Stage3" in res.output or "no true" in res.output.lower() or "0 photo" in res.output
+    assert "0 photo" in res.output.lower() or "no true" in res.output.lower()
 
 
 def test_slow_shutter_returns_exif_hits(tmp_path: Path, monkeypatch) -> None:
@@ -202,8 +204,10 @@ def test_empty_search_flags_pipeline_only_session(tmp_path: Path) -> None:
     assert res.metadata["count"] == 0
     assert res.metadata["pipeline_tags_only"] is True
     assert res.metadata["vlm_content_count"] == 0
-    assert "Do NOT ask the user to try other keywords" in res.output
-    assert "VLM" in res.output or "Stage2" in res.output or "Stage3" in res.output
+    assert res.metadata.get("tag_status") == "not_available"
+    assert "top_tags" not in res.metadata
+    assert "semantic_tags" not in res.metadata
+    assert "not available" in res.output.lower() or "VLM" in res.output
 
 
 def test_search_query_expands_chinese_to_english_synonyms(tmp_path: Path) -> None:

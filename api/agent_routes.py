@@ -75,58 +75,52 @@ def _tool_catalog(registry) -> str:
     return json.dumps(tools, ensure_ascii=False)
 
 
+# Layered system prompt — deterministic shortlist/dedupe/sort/quality routing lives in
+# ``services.agent.intent_router`` (code), not in SEMANTIC_HINTS.
+PROTOCOL_PROMPT = (
+    "You are the Gallery copilot for a livehouse photography curation app. You help the "
+    "user search, select, grade, and export one shooting session's analyzed photos.\n\n"
+    "TOOLS: to use a tool, reply with ONLY a single JSON object on its own:\n"
+    '{"tool": "<tool_name>", "args": { ... }}\n'
+    "You may call tools in sequence within one turn (e.g. gallery_search then "
+    "gallery_select). NEVER call the exact same tool+args twice. When finished, answer "
+    "in plain natural language (no JSON). Never invent photo data — always get it from a "
+    "tool."
+)
+
+STYLE_PROMPT = (
+    "STYLE: Do NOT narrate plans or say you will search later. Call the tool now, then "
+    "give a short final answer. If count=0: report the tool summary honestly "
+    "(e.g. metadata.tag_status=not_available, or shutter_stats when style_intent=slow_shutter). "
+    "Keep answers concise; cite real file names/scores from tool metadata.files or rows only."
+)
+
+SEMANTIC_HINTS = (
+    "SEMANTIC TOOL HINTS (fuzzy intents — code already handles 选出N张/初选/交片/剔糊/"
+    "连拍去重/按分数排序/发Ins shortlist):\n"
+    "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光… → "
+    '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10}} '
+    "(text match on tags/caption/reason; 慢门 uses RAW ExposureTime EXIF; "
+    "cite metadata.files; say 已在预览页打开. gallery_select only if they want 初选/导出)\n"
+    "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
+    "- 技术高构图一般 → mark_score_gap\n"
+    "- 记住我的偏好 / 以后少选剪影 → remember_preference(key, value)\n"
+    "- 复古胶片 / Cinestill / 黑白纪实 / 修成…风格看看 → "
+    '{"tool":"apply_film_vibe","args":{"prompt":"<paste the user message>"}} '
+    "(MUST call this tool — never claim the style was applied from prose alone. "
+    "UI shows 「打开风格预览」; say 已应用风格，请点下方「打开风格预览」 only after success. "
+    "NEVER dump Markdown image lists or enumerate dozens of filenames.)\n"
+    "- 把刚才选出的 / 这些 / 那批 修成…风格 → if WORKING MEMORY has last_files: "
+    "gallery_select(files=last_files) then apply_film_vibe(prompt=…). "
+    "Do NOT ask for filenames when last_files is present. Final answer 1–2 short sentences.\n"
+    "- 导出预览+RAW → export_selected (after selection exists)"
+)
+
+
 def _system_prompt(registry) -> str:
-    """Gallery copilot prompt: bounded tool-call protocol + advertised tools."""
+    """Gallery copilot prompt: protocol + style + semantic hints + tool catalog."""
     return (
-        "You are the Gallery copilot for a livehouse photography curation app. You help the "
-        "user search, select, grade, and export one shooting session's analyzed photos.\n\n"
-        "TOOLS: to use a tool, reply with ONLY a single JSON object on its own:\n"
-        '{\"tool\": \"<tool_name>\", \"args\": { ... }}\n'
-        "You may call tools in sequence within one turn (e.g. gallery_search then "
-        "gallery_select). NEVER call the exact same tool+args twice. When finished, answer "
-        "in plain natural language (no JSON). Never invent photo data — always get it from a "
-        "tool. Keep answers concise and reference real file names/scores.\n\n"
-        "STYLE: Do NOT narrate plans or say you will search later. Call the tool now, then "
-        "give a short final answer. If count=0: report the tool summary honestly. "
-        "If metadata.pipeline_tags_only is true OR vlm_content_count is 0/near-zero: say this "
-        "session mostly lacks VLM content tags/captions (Stage2/Stage3 skip labels only), so "
-        "semantic queries like 吉他手/鼓手 cannot match via text — do NOT tell the user to "
-        "try other keywords, and do NOT invent tags such as AI_Best_90+ / AI_Keep_60-90 "
-        "(those are score categories, not photo tags). Only quote top_tags / semantic_tags "
-        "from tool metadata.\n"
-        "If metadata.style_intent is slow_shutter and count=0: report shutter_stats honestly "
-        "(e.g. slowest EXIF shutter vs threshold) — this session has no long-exposure 慢门. "
-        "Do NOT list Stage3-skipped filenames as matches. "
-        "You may briefly mention metadata.slowest_examples as the relatively slowest frames, "
-        "but label them as not true 慢门.\n\n"
-        "INTENT → TOOL MAP:\n"
-        "- 选出 N 张 / 初选 / 交片 → gallery_search(min_score≈70, exclude_trash=true, "
-        "limit=N, sort_by=overall) then gallery_select(files=…)\n"
-        "- 剔糊/过曝 → gallery_search(exclude_low_quality=true, exclude_trash=true) then "
-        "gallery_select if they want a clean shortlist\n"
-        "- 连拍只留一张 → gallery_search(dedupe_burst=true, …)\n"
-        "- 按分数排序 → gallery_search(sort_by=overall)\n"
-        "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光… → "
-        '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10}} '
-        "(text match on tags/caption/reason with synonyms; 慢门 uses RAW ExposureTime EXIF; "
-        "cite metadata.files; Gallery auto-opens preview for metadata.files — "
-        "say 已在预览页打开. Use gallery_select only if they want 初选/导出)\n"
-        "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
-        "- 技术高构图一般 → mark_score_gap\n"
-        "- 记住我的偏好 / 以后少选剪影 → remember_preference(key, value)\n"
-        "- 复古胶片 / Cinestill / 黑白纪实 / 修成…风格看看 → "
-        '{"tool":"apply_film_vibe","args":{"prompt":"<paste the user message>"}} '
-        "(MUST call this tool — never claim the style was applied from prose alone. "
-        "UI shows a clickable 「打开风格预览」 button under your reply; "
-        "say 已应用风格，请点下方「打开风格预览」 only after the tool succeeded. "
-        "NEVER dump Markdown image lists like ![](DSC….jpg) or enumerate dozens of filenames.)\n"
-        "- 把刚才选出的 / 这些 / 那批 修成…风格 → if WORKING MEMORY has last_files: "
-        "gallery_select(files=last_files) then apply_film_vibe(prompt=…). "
-        "Do NOT ask the user for filenames when last_files is present. "
-        "Keep the final answer to 1–2 short sentences — no photo grids.\n"
-        "- 导出预览+RAW → export_selected (after selection exists)\n\n"
-        "When answering search results, cite real file names from tool metadata.files "
-        "or rows — never invent photos.\n\n"
+        f"{PROTOCOL_PROMPT}\n\n{STYLE_PROMPT}\n\n{SEMANTIC_HINTS}\n\n"
         f"AVAILABLE TOOLS:\n{_tool_catalog(registry)}"
     )
 
@@ -214,12 +208,42 @@ def _load_conversation(owner: str, req: ChatRequest, system_prompt: str):
     return conv_id, _build_memory(system_prompt, history), working
 
 
+def _guardrail_events_for_store(raw: list[Any]) -> list[dict[str, Any]]:
+    """Serialize triggered guardrails into ``agent_events`` payloads (review-queue signal)."""
+    out: list[dict[str, Any]] = []
+    for e in raw or []:
+        if isinstance(e, GuardrailEvent):
+            if not e.triggered:
+                continue
+            out.append(
+                {
+                    "type": "guardrail",
+                    "kind": e.kind,
+                    "triggered": True,
+                    "matches": list(e.matches or []),
+                    "detail": dict(e.detail or {}),
+                }
+            )
+        elif isinstance(e, dict) and e.get("triggered"):
+            out.append(
+                {
+                    "type": "guardrail",
+                    "kind": e.get("kind"),
+                    "triggered": True,
+                    "matches": list(e.get("matches") or []),
+                    "detail": dict(e.get("detail") or {}),
+                }
+            )
+    return out
+
+
 def _persist_turn(
     conv_id: int,
     user_text: str,
     reply: str,
     *,
     events: Optional[list[dict[str, Any]]] = None,
+    guardrail_events: Optional[list[Any]] = None,
     working_memory: Optional[dict[str, Any]] = None,
 ) -> int:
     """Append the user message + assistant reply; return the total message count."""
@@ -229,8 +253,10 @@ def _persist_turn(
             {"role": "user", "content": user_text},
             {"role": "assistant", "content": reply},
         ])
-        if events:
-            store.append_agent_events(conn, conv_id, events)
+        to_store = list(events or [])
+        to_store.extend(_guardrail_events_for_store(list(guardrail_events or [])))
+        if to_store:
+            store.append_agent_events(conn, conv_id, to_store)
         if working_memory is not None:
             store.set_working_memory(conn, conv_id, working_memory)
         return store.message_count(conn, conv_id)
@@ -331,6 +357,7 @@ def agent_chat_stream(
                         req.message,
                         str(ev.get("reply") or ""),
                         events=list(getattr(agent, "_events", []) or []),
+                        guardrail_events=events,
                         working_memory=dict(getattr(agent, "working_memory", {}) or {}),
                     )
                     ev = {
@@ -387,6 +414,7 @@ def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=N
         req.message,
         result.reply,
         events=result.events,
+        guardrail_events=events,
         working_memory=result.working_memory,
     )
     return ChatResponse(

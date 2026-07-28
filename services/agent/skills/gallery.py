@@ -306,7 +306,7 @@ def _search_slow_shutter(
     if not times:
         summary = (
             "0 photo(s) matched for slow-shutter. Could not read ExposureTime from sibling "
-            "RAW/ (missing folder or exiftool). Do not invent 慢门 matches from Stage3-skip captions."
+            "RAW/ (missing folder or exiftool)."
         )
         return SkillResult(
             ok=True,
@@ -318,18 +318,17 @@ def _search_slow_shutter(
                 "ui_action": "search",
                 "style_intent": "slow_shutter",
                 "shutter_stats": stats,
-                "slowest_examples": [],
             },
         )
 
     if not hard:
         max_lab = _format_shutter(stats["max_s"]) if stats["max_s"] else "?"
+        # No slowest_examples when count=0 — avoids the model treating relative-slow
+        # frames as true 慢门 matches.
         summary = (
             f"0 photo(s) matched for slow-shutter / 长曝光. "
             f"Scanned {stats['n_with_exif']} RAW ExposureTime values; slowest is {max_lab} "
-            f"(threshold {_format_shutter(threshold)}). This session has no true 慢门 frames — "
-            "do NOT list Stage3-skipped / near-duplicate photos as matches, and do NOT claim "
-            "CLIP found slow-shutter content."
+            f"(threshold {_format_shutter(threshold)}). This session has no true 慢门 frames."
         )
         return SkillResult(
             ok=True,
@@ -341,7 +340,6 @@ def _search_slow_shutter(
                 "ui_action": "search",
                 "style_intent": "slow_shutter",
                 "shutter_stats": stats,
-                "slowest_examples": slowest_examples,
             },
         )
 
@@ -592,24 +590,26 @@ class GallerySearchSkill:
             top_tags = sorted(tag_counts.items(), key=lambda kv: kv[1], reverse=True)[:12]
             semantic_tags = [(k, v) for k, v in top_tags if not _is_pipeline_tag(k)]
             pipeline_only = vlm_content == 0
-            meta["top_tags"] = [{"tag": k, "count": v} for k, v in top_tags]
-            meta["semantic_tags"] = [{"tag": k, "count": v} for k, v in semantic_tags[:12]]
             meta["categories"] = cat_counts
             meta["session_size"] = len(rows)
-            meta["caption_samples"] = captions
-            meta["tags_empty"] = not bool(top_tags)
-            meta["pipeline_tags_only"] = pipeline_only
             meta["vlm_content_count"] = vlm_content
-            # Do not list score-band category names (AI_Best_*) as if they were content tags.
+            meta["pipeline_tags_only"] = pipeline_only
+            # Data-layer guard: when only pipeline labels exist, do not hand the model
+            # tag lists it can misquote as semantic content (AI_Best_* / stage3_skipped).
             if pipeline_only:
+                meta["tag_status"] = "not_available"
+                meta["tags_empty"] = True
                 summary += (
-                    f" No semantic hits. Session has {len(rows)} photo(s) but almost no VLM "
-                    "content tags/captions (mostly Stage2/Stage3 skip labels like "
-                    f"{[t[0] for t in top_tags[:5] if _is_pipeline_tag(t[0])] or 'none'}). "
-                    "Do NOT ask the user to try other keywords — text search cannot invent "
-                    "鼓手/吉他手 tags. Recommend re-running Stage3/VLM on keepers."
+                    f" No semantic hits. Session has {len(rows)} photo(s) but VLM content "
+                    "tags/captions are not available (Stage2/Stage3 skip labels only). "
+                    "Text search cannot match 鼓手/吉他手; re-run Stage3/VLM on keepers."
                 )
             else:
+                meta["tag_status"] = "available"
+                meta["top_tags"] = [{"tag": k, "count": v} for k, v in top_tags]
+                meta["semantic_tags"] = [{"tag": k, "count": v} for k, v in semantic_tags[:12]]
+                meta["caption_samples"] = captions
+                meta["tags_empty"] = not bool(top_tags)
                 summary += (
                     " No semantic hits for this query in tags/captions. "
                     f"Session has {vlm_content}/{len(rows)} photos with VLM content; "

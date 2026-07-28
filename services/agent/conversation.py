@@ -28,6 +28,7 @@ from services.agent.context_governance import (
     truncate_tool_observation,
 )
 from services.agent.guardrails import Guardrails
+from services.agent.intent_router import RouteMatch, route_gallery_intent
 from services.agent.skills.base import SkillRegistry
 
 logger = logging.getLogger(__name__)
@@ -293,11 +294,94 @@ class ConversationalAgent:
             )
         )
 
+    def _dispatch_call(self, tool: str, args: dict[str, Any], *, routed: str | None = None) -> dict[str, Any]:
+        """Run one skill, update memory / working memory, emit ``tool_call``."""
+        assert self._skills is not None
+        result = self._skills.dispatch(tool, args)
+        self._update_working_memory(tool, args, result)
+        self._record_tool_result(tool, result)
+        meta = dict(getattr(result, "metadata", None) or {})
+        if routed:
+            meta["routed"] = routed
+        tc = {
+            "tool": tool,
+            "args": args,
+            "ok": result.ok,
+            "metadata": meta,
+        }
+        self._emit({"type": "tool_call", **tc})
+        return tc
+
+    def _execute_route_match(self, match: RouteMatch) -> tuple[list[dict[str, Any]], list[str]]:
+        """Execute deterministic routed tool calls (no LLM tool-selection round)."""
+        tool_calls: list[dict[str, Any]] = []
+        observations: list[str] = []
+        if self._skills is None:
+            return tool_calls, observations
+
+        search_files: list[str] = []
+        for call in match.calls:
+            tc = self._dispatch_call(call.tool, dict(call.args), routed=match.rule_id)
+            tool_calls.append(tc)
+            observations.append(
+                f"{call.tool} -> {json.dumps({'ok': tc['ok'], 'metadata': tc['metadata']}, ensure_ascii=False)}"
+            )
+            if call.tool == "gallery_search" and tc.get("ok"):
+                search_files = list((tc.get("metadata") or {}).get("files") or [])
+
+        if match.select_after_search and search_files:
+            sel_args = {"files": search_files}
+            tc = self._dispatch_call("gallery_select", sel_args, routed=match.rule_id)
+            tool_calls.append(tc)
+            observations.append(
+                f"gallery_select -> {json.dumps({'ok': tc['ok'], 'metadata': tc['metadata']}, ensure_ascii=False)}"
+            )
+        return tool_calls, observations
+
+    def _chat_routed(self, user_text: str, match: RouteMatch) -> TurnResult:
+        """Deterministic tools + one LLM prose summary (no tool-call generation)."""
+        self.last_backend = f"routed:{match.rule_id}"
+        tool_calls, observations = self._execute_route_match(match)
+        final = self._force_final_answer(user_text, observations)
+        reply = self._finalize(final)
+        self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls, "routed": match.rule_id})
+        return TurnResult(
+            reply=reply,
+            tool_calls=tool_calls,
+            working_memory=dict(self.working_memory),
+            events=list(self._events),
+        )
+
+    def _stream_chat_routed(
+        self,
+        user_text: str,
+        match: RouteMatch,
+        *,
+        stream_fn: Optional[StreamChatFn] = None,
+    ) -> Iterator[dict[str, Any]]:
+        self.last_backend = f"routed:{match.rule_id}"
+        tool_calls, observations = self._execute_route_match(match)
+        for tc in tool_calls:
+            yield {"type": "tool_call", **tc}
+        joined = "\n".join(observations) if observations else "(no tool results)"
+        messages = [
+            {"role": "system", "content": _FINAL_ANSWER_SYSTEM},
+            {
+                "role": "user",
+                "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}",
+            },
+        ]
+        yield from self._stream_answer(messages, stream_fn, tool_calls)
+
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
+
+        match = route_gallery_intent(user_text) if self._skills is not None else None
+        if match is not None:
+            return self._chat_routed(user_text, match)
 
         if self._imperative_requested():
             self.last_backend = "imperative"
@@ -387,6 +471,11 @@ class ConversationalAgent:
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
+
+        match = route_gallery_intent(user_text) if self._skills is not None else None
+        if match is not None:
+            yield from self._stream_chat_routed(user_text, match, stream_fn=stream_fn)
+            return
 
         if self._imperative_requested():
             self.last_backend = "imperative"

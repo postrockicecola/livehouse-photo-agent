@@ -357,6 +357,42 @@ def message_count(conn: sqlite3.Connection, conversation_id: int) -> int:
     return int(row["n"]) if row else 0
 
 
+def list_conversations(
+    conn: sqlite3.Connection,
+    *,
+    since_ts: float | None = None,
+    until_ts: float | None = None,
+    limit: int = 500,
+) -> list[dict[str, Any]]:
+    """List conversations touched in ``[since_ts, until_ts)`` (by ``updated_at``)."""
+    clauses: list[str] = []
+    params: list[Any] = []
+    if since_ts is not None:
+        clauses.append("updated_at >= ?")
+        params.append(float(since_ts))
+    if until_ts is not None:
+        clauses.append("updated_at < ?")
+        params.append(float(until_ts))
+    where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+    params.append(max(1, min(5000, int(limit))))
+    rows = conn.execute(
+        f"SELECT id, owner, session_id, mode, created_at, updated_at "
+        f"FROM conversations {where} ORDER BY updated_at DESC LIMIT ?",
+        params,
+    ).fetchall()
+    return [
+        {
+            "id": int(r["id"]),
+            "owner": r["owner"],
+            "session_id": r["session_id"],
+            "mode": r["mode"],
+            "created_at": r["created_at"],
+            "updated_at": r["updated_at"],
+        }
+        for r in rows
+    ]
+
+
 # ----------------------------------------------------------------- preferences (long-term)
 
 

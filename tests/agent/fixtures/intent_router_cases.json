@@ -1,0 +1,147 @@
+[
+  {
+    "id": "select_10",
+    "user": "帮我选出10张交片",
+    "expect_rule": "shortlist_select",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "min_score": 70,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 10
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "chuxuan",
+    "user": "初选一批",
+    "expect_rule": "shortlist_select",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "min_score": 70,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 10
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "colloquial_bang_xuan_20",
+    "user": "帮我选20张照片",
+    "expect_rule": "shortlist_select",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "min_score": 70,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 20
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "ins_10",
+    "user": "帮我找出适合法发ins的十张照片",
+    "expect_rule": "shortlist_deliverable",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "min_score": 70,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 10
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "dedupe",
+    "user": "连拍只留一张",
+    "expect_rule": "dedupe_burst",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "dedupe_burst": true,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 20
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "sort_score",
+    "user": "按分数排序看看",
+    "expect_rule": "sort_overall",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "sort_by": "overall",
+      "limit": 20
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "quality",
+    "user": "剔糊过曝的图",
+    "expect_rule": "exclude_low_quality",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "exclude_low_quality": true,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 20
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "compound_dedupe_select",
+    "user": "去重之后选出20张",
+    "expect_rule": "dedupe_burst",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "dedupe_burst": true,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 20
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "compound_quality_jiaopian",
+    "user": "剔糊之后交片",
+    "expect_rule": "exclude_low_quality",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "exclude_low_quality": true,
+      "exclude_trash": true,
+      "sort_by": "overall",
+      "limit": 20
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "neg_sort",
+    "user": "不要按分数排序，我想看原始顺序",
+    "expect_rule": null
+  },
+  {
+    "id": "neg_dedupe",
+    "user": "别自动去重，我要看所有连拍",
+    "expect_rule": null
+  },
+  {
+    "id": "neg_quality",
+    "user": "不用剔除模糊的",
+    "expect_rule": null
+  },
+  {
+    "id": "semantic_guitar_falls_through",
+    "user": "找吉他手特写",
+    "expect_rule": null
+  },
+  {
+    "id": "film_vibe_falls_through",
+    "user": "修成复古胶片风格看看",
+    "expect_rule": null
+  },
+  {
+    "id": "shortlist_plus_panorama_falls_through",
+    "user": "选出20张，但多给我一些全景镜头",
+    "expect_rule": null
+  }
+]
