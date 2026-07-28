@@ -384,5 +384,4 @@ GALLERY_CHAT_MAPPING = {
     "SkillRegistry.dispatch": "node: act",
     "forced / plain final answer": "node: answer",
     "ConversationalAgent.chat": "run_chat_turn (LangGraph primary)",
-    "platform mount": "services.agent.graph.compile_agent_platform_graph → gallery_chat subgraph",
 }

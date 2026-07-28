@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { InfraWorkerRow } from "@/components/WorkersPanel";
 import { JobsTable } from "@/components/JobsTable";
-import { AgentCurationPanel } from "@/components/infra/AgentCurationPanel";
 import { CapacityAdmissionPanel } from "@/components/infra/CapacityAdmissionPanel";
 import { FailureCenter } from "@/components/infra/FailureCenter";
 import { GoldenSignals } from "@/components/infra/GoldenSignals";
@@ -482,7 +481,6 @@ export default function InfraPage() {
 
         {infraTab === "experiments" ? (
           <InfraExperimentsSection>
-            <AgentCurationPanel apiBase={API_BASE} />
             <RLHFVotePanel sessionKey={null} apiBase={API_BASE} />
             <PromptExperimentPanel experimentName="prompt_ab_demo" apiBase={API_BASE} />
           </InfraExperimentsSection>

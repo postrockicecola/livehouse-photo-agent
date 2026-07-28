@@ -95,19 +95,6 @@ class InfraJobTimelineResponse(BaseModel):
     time_window: InfraTimelineTimeWindow
     job_relationships: dict[str, Any] = Field(default_factory=dict)
     job_graph: dict[str, Any] = Field(default_factory=dict)
-    agent: dict[str, Any] | None = Field(
-        default=None,
-        description="Agentic curation run summary (decisions, escalations, keepers) when job_type is CURATE_*; null otherwise.",
-    )
-
-
-class InfraAgentRunsResponse(BaseModel):
-    """Recent agentic curation runs for the dashboard 'Agentic Curation' panel."""
-
-    count: int
-    runs: list[dict[str, Any]] = Field(default_factory=list)
-
-
 class InfraTraceLookupResponse(InfraJobTimelineResponse):
     """Same payload as a single-job timeline, plus trace-wide ids for linking."""
 
@@ -476,9 +463,6 @@ def _build_stage_job_graph(job: dict[str, Any], items: list[dict[str, Any]], *, 
     }
 
 
-_CURATE_JOB_TYPES = ("CURATE_PATH", "CURATE_SESSION")
-
-
 def _parse_json_obj(raw: Any) -> dict[str, Any]:
     if not raw:
         return {}
@@ -487,120 +471,6 @@ def _parse_json_obj(raw: Any) -> dict[str, Any]:
     except (json.JSONDecodeError, TypeError):
         return {}
     return val if isinstance(val, dict) else {}
-
-
-def _build_agent_run_summary(
-    job: dict[str, Any], events: list[dict[str, Any]], *, include_steps: bool = True
-) -> dict[str, Any] | None:
-    """Summarize a ``CURATE_*`` job into an agent-run view (decisions / escalations / keepers).
-
-    Reads the same ``job_events`` the rest of the console uses: each agent ANALYZE / FINALIZE
-    decision is an event with an ``agent_action`` payload, and the final selection lives in the
-    ``SUCCEEDED`` event's ``curation`` payload. Works mid-run (derives live counts from events)
-    and post-run (prefers the committed metrics). Returns ``None`` for non-agent jobs.
-    """
-    job_type = str(job.get("job_type") or "")
-    if job_type not in _CURATE_JOB_TYPES:
-        return None
-
-    payload = _parse_json_obj(job.get("payload_json"))
-    source_dir = str(payload.get("source_dir") or "")
-
-    steps: list[dict[str, Any]] = []
-    analyzed = 0
-    escalated = 0
-    curation: dict[str, Any] = {}
-    finalize_selected: list[Any] = []
-
-    for ev in events:
-        pj = _parse_json_obj(ev.get("payload_json"))
-        action = pj.get("agent_action")
-        if action == "analyze":
-            analyzed += 1
-            is_esc = pj.get("source") == "reflection"
-            if is_esc:
-                escalated += 1
-            if include_steps:
-                steps.append(
-                    {
-                        "action": "analyze",
-                        "image_id": pj.get("image_id"),
-                        "tier": pj.get("tier"),
-                        "score": pj.get("score"),
-                        "confidence": pj.get("confidence"),
-                        "ok": pj.get("ok"),
-                        "escalated": is_esc,
-                        "reflection": pj.get("reflection"),
-                        "reason": pj.get("reason"),
-                        "step": pj.get("step"),
-                        "latency_ms": pj.get("latency_ms"),
-                        "created_at": ev.get("created_at"),
-                    }
-                )
-        elif action == "finalize":
-            sel = pj.get("selected")
-            finalize_selected = sel if isinstance(sel, list) else []
-            if include_steps:
-                steps.append(
-                    {
-                        "action": "finalize",
-                        "selected": finalize_selected,
-                        "step": pj.get("step"),
-                        "created_at": ev.get("created_at"),
-                    }
-                )
-        if str(ev.get("to_status") or "") == "SUCCEEDED":
-            succ = _parse_json_obj(ev.get("payload_json"))
-            c = succ.get("curation")
-            if isinstance(c, dict):
-                curation = c
-
-    metrics = curation.get("metrics") if isinstance(curation.get("metrics"), dict) else {}
-    selection = curation.get("selection") if isinstance(curation.get("selection"), list) else []
-
-    keepers: list[dict[str, Any]] = []
-    for s in selection:
-        if not isinstance(s, dict):
-            continue
-        image_id = s.get("image_id")
-        keepers.append(
-            {
-                "image_id": image_id,
-                "score": s.get("score"),
-                "confidence": s.get("confidence"),
-                "tier": s.get("tier"),
-                "escalated": s.get("escalated"),
-                "image_path": os.path.join(source_dir, str(image_id)) if source_dir and image_id else None,
-            }
-        )
-
-    selected_count = metrics.get("selected_count")
-    if selected_count is None:
-        selected_count = len(selection) if selection else len(finalize_selected)
-
-    summary: dict[str, Any] = {
-        "is_agent_run": True,
-        "job_id": job.get("id"),
-        "job_type": job_type,
-        "status": job.get("status"),
-        "trace_id": job.get("trace_id"),
-        "created_at": job.get("created_at"),
-        "updated_at": job.get("updated_at"),
-        "total_latency_ms": job.get("total_latency_ms"),
-        "source_dir": source_dir or None,
-        "candidate_count": curation.get("candidate_count"),
-        "target_keepers": payload.get("target_keepers"),
-        "max_inferences": payload.get("max_inferences"),
-        # Derived from events so they update live mid-run; metrics carries the committed totals.
-        "analyzed": analyzed,
-        "escalated": escalated,
-        "selected_count": selected_count,
-        "metrics": metrics,
-        "keepers": keepers,
-    }
-    if include_steps:
-        summary["steps"] = steps
-    return summary
 
 
 def _build_infra_job_timeline(conn: Any, *, job_id: int) -> dict[str, Any] | None:
@@ -887,48 +757,7 @@ def _build_infra_job_timeline(conn: Any, *, job_id: int) -> dict[str, Any] | Non
         },
         "job_relationships": job_relationships,
         "job_graph": job_graph,
-        "agent": _build_agent_run_summary(out_job, events, include_steps=True),
     }
-
-
-@router.get("/api/infra/agent/runs", response_model=InfraAgentRunsResponse)
-def infra_agent_runs(limit: int = Query(default=8, ge=1, le=50)):
-    """Recent agentic curation runs (``CURATE_*``) with decisions/escalations/keepers.
-
-    Powers the dashboard 'Agentic Curation' panel — one compact summary per run, no
-    per-step detail (use the job timeline for that).
-    """
-    conn = _with_conn()
-    try:
-        rows = conn.execute(
-            """
-            SELECT * FROM jobs
-            WHERE job_type IN ('CURATE_PATH', 'CURATE_SESSION')
-            ORDER BY id DESC
-            LIMIT ?
-            """,
-            (limit,),
-        ).fetchall()
-        runs: list[dict[str, Any]] = []
-        for r in rows:
-            job = dict(r)
-            jid = int(job["id"])
-            ev_rows = conn.execute(
-                """
-                SELECT id, to_status, message, payload_json, created_at
-                FROM job_events
-                WHERE job_id = ?
-                ORDER BY created_at ASC, id ASC
-                LIMIT 2000
-                """,
-                (jid,),
-            ).fetchall()
-            summary = _build_agent_run_summary(job, [dict(e) for e in ev_rows], include_steps=False)
-            if summary is not None:
-                runs.append(summary)
-        return {"count": len(runs), "runs": runs}
-    finally:
-        conn.close()
 
 
 @router.get("/api/infra/jobs", response_model=InfraJobListResponse)

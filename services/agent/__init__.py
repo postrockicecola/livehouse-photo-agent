@@ -1,76 +1,22 @@
-"""Agentic curation layer over the Stage1/2/3 pipeline.
+"""Gallery conversational agent (skills + LangGraph chat turn).
 
-A ReAct-style loop where an LLM (or deterministic heuristic) planner decides, step
-by step and under an inference budget, which photos to inspect cheaply, which to
-deep-analyze with the VLM, when to escalate shaky results to a stronger model, and
-when to commit a final selection. Tools wrap existing capabilities and ride the
-real ``inference`` layer, so the agent reuses production serving infra rather than
-a parallel model path.
-
-Entry point: :class:`~services.agent.loop.CurationAgent` (LangGraph ``plan→act→reflect``
-by default; see :mod:`services.agent.graph`).
+Photo scoring / selection stays on the fixed Stage1→2→3 pipeline
+(``ANALYZE_*`` jobs). This package is the Gallery chat surface only:
+decide → act → answer, with deterministic intent routing for common asks.
 """
 from __future__ import annotations
 
-from services.agent.graph import (
-    LANGGRAPH_MAPPING,
-    compile_agent_platform_graph,
-    compile_curation_graph,
-    run_curation_graph,
-)
-from services.agent.llm_backend import (
-    build_curation_llm_planner,
-    build_curation_llm_planner_from_config,
-    build_planner_complete_fn,
-)
-from services.agent.loop import CurationAgent
-from services.agent.planner import HeuristicPlanner, LLMPlanner, Planner, StratifiedHeuristicPlanner
-from services.agent.reflection import ReflectionVerdict, reflect, validate_analysis
-from services.agent.tools import (
-    AnalyzeTool,
-    FinalizeTool,
-    InspectTool,
-    ToolRegistry,
-    build_stage3_analyze_fn,
-)
-from services.agent.types import (
-    ActionType,
-    AgentConfig,
-    AgentResult,
-    AgentState,
-    AgentStep,
-    Candidate,
-    ToolCall,
-    ToolResult,
+from services.agent.conversation import ConversationalAgent, ConversationMemory
+from services.agent.conversation_graph import (
+    GALLERY_CHAT_MAPPING,
+    compile_chat_turn_graph,
+    run_chat_turn,
 )
 
 __all__ = [
-    "ActionType",
-    "AgentConfig",
-    "AgentResult",
-    "AgentState",
-    "AgentStep",
-    "AnalyzeTool",
-    "Candidate",
-    "CurationAgent",
-    "FinalizeTool",
-    "HeuristicPlanner",
-    "StratifiedHeuristicPlanner",
-    "LANGGRAPH_MAPPING",
-    "build_curation_llm_planner",
-    "build_curation_llm_planner_from_config",
-    "build_planner_complete_fn",
-    "compile_agent_platform_graph",
-    "compile_curation_graph",
-    "InspectTool",
-    "LLMPlanner",
-    "Planner",
-    "ReflectionVerdict",
-    "ToolCall",
-    "ToolRegistry",
-    "ToolResult",
-    "build_stage3_analyze_fn",
-    "reflect",
-    "run_curation_graph",
-    "validate_analysis",
+    "ConversationalAgent",
+    "ConversationMemory",
+    "GALLERY_CHAT_MAPPING",
+    "compile_chat_turn_graph",
+    "run_chat_turn",
 ]

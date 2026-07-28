@@ -26,5 +26,5 @@ open-clip-torch>=2.20
 openai>=1.0
 instructor>=1.2
 
-# Agent runtime: curation ReAct graph (plan → act → reflect). Imperative loop is fallback.
+# Gallery chat LangGraph runtime (decide → act → answer).
 langgraph>=0.2

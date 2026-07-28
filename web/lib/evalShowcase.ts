@@ -28,17 +28,6 @@ export type StrategyRow = {
   reportPath: string;
 };
 
-export type AgentArmRow = {
-  arm: string;
-  n: number;
-  budget: number;
-  selectionPrecision: number;
-  analyzedKeeperRecall: number;
-  precisionAt10: number;
-  vlmCallsUsed: number;
-  provenance: ProvenanceKind;
-  reportPath: string;
-};
 
 export const EVAL_DATASET_META: EvalMeta = {
   dataset: "data/eval — stratified Livehouse archive sample + human labels",
@@ -78,18 +67,6 @@ export const STRATEGY_ROWS: StrategyRow[] = [
       "Offline replay of production apply_stage3_candidates_gating on the same 250 labels (not a second GPU pass). Gated Spearman is on the 16 admitted images only.",
     reportPath: "reports/eval/two_stage_gating.json",
   },
-  {
-    id: "agent-curate",
-    strategy: "Agent 策展（budgeted planner）",
-    quality: "sel. P 0.43 (stratified) · keeper recall 0.20",
-    vlmCallShare: "40 / 250 = 16% (budget)",
-    latency: "—",
-    cost: "lower VLM count by design",
-    provenance: "recorded",
-    notes:
-      "Default StratifiedHeuristicPlanner beats greedy heuristic (and random on P@10 / sel. P) under the same budget. LLM planner arm still ≈ heuristic with high fallback.",
-    reportPath: "reports/eval/agent_selection.json",
-  },
 ];
 
 export const STAGE3_HEADLINE = {
@@ -106,68 +83,6 @@ export const STAGE3_HEADLINE = {
   config: "configs/eval_stage3.yaml",
 };
 
-/** 250-img planner comparison (no LLM arm in this report). */
-export const AGENT_SELECTION_250: AgentArmRow[] = [
-  {
-    arm: "random",
-    n: 250,
-    budget: 40,
-    selectionPrecision: 0.4,
-    analyzedKeeperRecall: 0.205,
-    precisionAt10: 0.4,
-    vlmCallsUsed: 40,
-    provenance: "recorded",
-    reportPath: "reports/eval/agent_selection.json",
-  },
-  {
-    arm: "heuristic",
-    n: 250,
-    budget: 40,
-    selectionPrecision: 0.3,
-    analyzedKeeperRecall: 0.157,
-    precisionAt10: 0.4,
-    vlmCallsUsed: 40,
-    provenance: "recorded",
-    reportPath: "reports/eval/agent_selection.json",
-  },
-  {
-    arm: "stratified",
-    n: 250,
-    budget: 40,
-    selectionPrecision: 0.433,
-    analyzedKeeperRecall: 0.205,
-    precisionAt10: 0.5,
-    vlmCallsUsed: 40,
-    provenance: "recorded",
-    reportPath: "reports/eval/agent_selection.json",
-  },
-  {
-    arm: "oracle",
-    n: 250,
-    budget: 40,
-    selectionPrecision: 0.933,
-    analyzedKeeperRecall: 0.458,
-    precisionAt10: 0.8,
-    vlmCallsUsed: 40,
-    provenance: "recorded",
-    reportPath: "reports/eval/agent_selection.json",
-  },
-];
-
-/** Smaller LLM-included run — show honesty, not a production claim. */
-export const AGENT_SELECTION_LLM_60 = {
-  provenance: "recorded" as const,
-  n: 60,
-  budget: 15,
-  humanKeepers: 20,
-  reportPath: "reports/eval/agent_selection_llm.json",
-  arms: [
-    { arm: "heuristic", selectionPrecision: 0.333, analyzedKeeperRecall: 0.06, llmDecisionRate: null as number | null },
-    { arm: "llm", selectionPrecision: 0.357, analyzedKeeperRecall: 0.06, llmDecisionRate: 0.063 },
-  ],
-  honesty:
-    "LLM planner ≈ greedy heuristic on this 60-image slice; llm_decision_rate ≈ 6% with frequent fallback. Stratified (default) already beats greedy on the full 250-set; LLM has not yet beaten stratified.",
-};
 
 export const QUANT_COMPARE_NOTE = {
   provenance: "simulated" as const,
@@ -176,7 +91,7 @@ export const QUANT_COMPARE_NOTE = {
   note: "Example / illustrative quant_compare payload — mark Simulated. Do not cite as measured production SLO.",
 };
 
-/** Remaining gaps after the offline two-stage / stratified / preference scaffold. */
+/** Remaining gaps after the offline two-stage / preference scaffold. */
 export const EVAL_GAPS = [
   {
     id: "preference_training_loop",
@@ -200,18 +115,6 @@ export const EVAL_REPORT_INDEX = [
     summary: "Prod gating vs full-VLM · offline replay",
   },
   {
-    id: "agent250",
-    path: "reports/eval/agent_selection.json",
-    provenance: "recorded" as const,
-    summary: "Planner baselines · n=250 · budget=40",
-  },
-  {
-    id: "agent60",
-    path: "reports/eval/agent_selection_llm.json",
-    provenance: "recorded" as const,
-    summary: "LLM planner slice · n=60",
-  },
-  {
     id: "meta",
     path: "reports/eval/meta.json",
     provenance: "recorded" as const,
@@ -225,12 +128,8 @@ export const EVAL_REPORT_INDEX = [
   },
 ] as const;
 
-/** Simple quality vs VLM-budget points for a chart (from agent_selection 250). */
+/** Simple quality vs VLM-budget points for a chart (gating vs full Stage3). */
 export const QUALITY_COST_POINTS = [
-  { arm: "heuristic", vlmSharePct: 16, precision: 0.3, label: "heuristic @40" },
-  { arm: "random", vlmSharePct: 16, precision: 0.4, label: "random @40" },
-  { arm: "stratified", vlmSharePct: 16, precision: 0.433, label: "stratified @40" },
-  { arm: "oracle", vlmSharePct: 16, precision: 0.933, label: "oracle @40" },
   { arm: "two-stage", vlmSharePct: 6.4, precision: 0.3125, label: "gated P@eff20" },
   { arm: "full-vlm", vlmSharePct: 100, precision: 0.55, label: "Stage3 P@20 (full)" },
 ] as const;

@@ -140,7 +140,6 @@ export function fixtureForInfraPath(segments: string[]): FixtureName | null {
     "dead-letter": "infra-dead-letter",
     "runtime-stream": "infra-runtime-stream",
     brain: "infra-brain",
-    "agent/runs": "infra-agent-runs",
     jobs: "infra-jobs",
   };
   if (p in exact) return exact[p];

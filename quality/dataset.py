@@ -25,7 +25,7 @@ _REPO = Path(__file__).resolve().parents[1]
 _DEFAULT_REGISTRY = _REPO / "data" / "eval" / "dataset_registry.json"
 _DEFAULT_SPLITS = ("core",)
 _VALID_SPLITS = frozenset(
-    {"smoke", "core", "hard", "regression", "agent_curation", "agent_chat"}
+    {"smoke", "core", "hard", "regression", "agent_chat"}
 )
 
 

@@ -354,7 +354,6 @@ INFRA_ENDPOINTS: list[tuple[str, str, str]] = [
     ("dead-letter", "limit=15&offset=0", "infra-dead-letter"),
     ("runtime-stream", "events_limit=80", "infra-runtime-stream"),
     ("brain", "sessions_limit=15&photos_limit=30", "infra-brain"),
-    ("agent/runs", "limit=8", "infra-agent-runs"),
     ("jobs", "limit=100&offset=0", "infra-jobs"),
 ]
 

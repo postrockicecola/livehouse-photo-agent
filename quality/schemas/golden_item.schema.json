@@ -62,7 +62,6 @@
           "core",
           "hard",
           "regression",
-          "agent_curation",
           "agent_chat"
         ]
       }

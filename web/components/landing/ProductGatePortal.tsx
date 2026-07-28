@@ -42,8 +42,8 @@ export function ProductGatePortal() {
           Livehouse Photography Agent
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/40">
-          Job-centric 视觉 runtime：入库 → 多阶段分析 → Gallery 选片；Agent 以 LangGraph
-          tool-use 挂在真实作业与画廊之上。
+          Job-centric 视觉 runtime：入库 → 多阶段分析 → Gallery 选片；Gallery Agent 以
+          LangGraph tool-use 挂在真实作业与画廊之上。
         </p>
       </header>
 
@@ -70,15 +70,15 @@ export function ProductGatePortal() {
           </div>
 
           <p className="relative mt-4 max-w-sm text-sm leading-relaxed text-white/45">
-            现场摄影入库、OpenCV + VLM 流水线、Gallery 确认导出，以及带 trace 的 Agent
-            选片 / 对话。
+            现场摄影入库、OpenCV + VLM 流水线、Gallery 确认导出，以及带 trace 的
+            Gallery 对话 Agent。
           </p>
 
           <ul className="relative mt-6 flex-1 space-y-2.5">
             {[
               "Durable jobs · SQLite SSOT · Celery notify",
               "Stage1→2→3 · 有界推理队列 · model fallback",
-              "LangGraph Agent：plan→act→reflect + Gallery chat",
+              "LangGraph Gallery chat：decide→act→answer + skills",
               "Infra：job timeline · model_runs · eval 基线",
             ].map((f) => (
               <li key={f} className="flex items-start gap-2.5 font-mono text-[11px] text-white/38">

@@ -46,10 +46,6 @@ function formatTs(ts?: number | null): string {
 
 const TERMINAL_STATUSES = new Set(["SUCCEEDED", "FAILED_PERMANENT", "DEAD_LETTERED", "CANCELLED"]);
 
-function isAgentJob(job: InfraJobRow): boolean {
-  return (job.job_type ?? "").startsWith("CURATE");
-}
-
 function rowVisualClass(job: InfraJobRow): string {
   if (isFailedJob(job.status)) return "bg-red-950/25 border-l-2 border-l-red-500/70";
   if (isRunningJob(job.status)) return "bg-emerald-950/15 border-l-2 border-l-emerald-500/50";
@@ -137,7 +133,6 @@ export function JobsTable({
   defaultExpandedId = null,
 }: Props) {
   const [statusFilter, setStatusFilter] = useState<StatusFilterKey>("ALL");
-  const [agentOnly, setAgentOnly] = useState(false);
   const [search, setSearch] = useState("");
   const [traceQuery, setTraceQuery] = useState("");
   const [traceDebounced, setTraceDebounced] = useState("");
@@ -256,10 +251,8 @@ export function JobsTable({
 
   const filteredJobs = useMemo(
     () =>
-      jobs.filter(
-        (job) => (!agentOnly || isAgentJob(job)) && clientJobMatchesSearch(job, search, workerNameById),
-      ),
-    [jobs, search, workerNameById, agentOnly],
+      jobs.filter((job) => clientJobMatchesSearch(job, search, workerNameById)),
+    [jobs, search, workerNameById],
   );
 
   /** Walkthrough may expand #61/#62 before the list row is present — still show detail. */
@@ -308,19 +301,6 @@ export function JobsTable({
             {opt.label}
           </button>
         ))}
-        <span className="mx-1 self-center text-zinc-700">|</span>
-        <button
-          type="button"
-          onClick={() => setAgentOnly((v) => !v)}
-          className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${
-            agentOnly
-              ? "border-violet-500/50 bg-violet-950/30 text-violet-200"
-              : "border-stroke bg-panel2 text-zinc-400 hover:text-zinc-200"
-          }`}
-          title="Show only agentic curation jobs (CURATE_*)"
-        >
-          Agent
-        </button>
       </div>
 
       <div className="mb-4 grid gap-2 sm:grid-cols-2">
@@ -393,7 +373,6 @@ export function JobsTable({
                       </div>
                       <p className="mt-1 truncate font-mono text-[11px] text-zinc-500">
                         {job.job_type ?? "job"}
-                        {isAgentJob(job) ? " · agent" : ""}
                         {Number(job.fallback_used) > 0 ? " · fallback" : ""}
                       </p>
                     </div>
@@ -540,11 +519,6 @@ export function JobsTable({
                           )}
                           <div className="flex flex-wrap items-center gap-1 text-[10px] text-zinc-600">
                             {job.job_type ?? ""}
-                            {isAgentJob(job) ? (
-                              <span className="rounded border border-violet-500/40 bg-violet-950/30 px-1 py-px text-[9px] font-medium text-violet-200">
-                                agent
-                              </span>
-                            ) : null}
                             {Number(job.fallback_used) > 0 ? (
                               <span className="rounded border border-amber-500/40 bg-amber-950/30 px-1 py-px text-[9px] font-medium text-amber-200">
                                 fallback

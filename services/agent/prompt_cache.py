@@ -208,10 +208,7 @@ class PrefixCacheMeter:
 
 
 def metered_complete_fn(complete_fn: Callable[[str], str], meter: PrefixCacheMeter) -> Callable[[str], str]:
-    """Wrap a planner ``CompleteFn`` (str prompt -> str) so every call is metered.
-
-    Drop-in: ``LLMPlanner(metered_complete_fn(complete, meter))`` — no planner change.
-    """
+    """Wrap a text ``CompleteFn`` (str prompt -> str) so every call is metered."""
 
     def wrapped(prompt: str) -> str:
         meter.observe(prompt)

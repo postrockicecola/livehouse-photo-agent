@@ -137,19 +137,8 @@ Eval reports stamp a `protocol` block (seed, config hash, hardware, git sha) via
 |------|------|----------|------|------|-------------|
 | Full VLM (eval Stage3) | Spearman **0.36** · MAE **6.09** · P@20 **0.55** | 100% of 250 | — | — | Recorded · `reports/eval/stage3_v6_qwen2vl_temp0.json` |
 | Two-stage gating (production path) | admitted Spearman **0.52** · MAE **4.48** · keeper coverage **0.06** | **6.4%** of 250 (16 calls) | — | ~15× fewer VLM calls | Recorded · offline replay · `reports/eval/two_stage_gating.json` |
-| Agent curation (budget 40) | **stratified** sel. P **0.43** · keeper recall **0.20** | 40/250 = **16%** | — | lower VLM count by design | Recorded · `reports/eval/agent_selection.json` |
 
-**Agent vs baselines (n=250, budget=40, select 30):**
-
-| Arm | Selection precision | Keeper recall | P@10 |
-|-----|--------------------:|--------------:|-----:|
-| random | 0.40 | 0.205 | 0.40 |
-| heuristic (greedy fast_score) | 0.30 | 0.157 | 0.40 |
-| **stratified (default)** | **0.43** | **0.205** | **0.50** |
-| oracle | 0.93 | 0.458 | 0.80 |
-
-**LLM arm (n=60 subset):** selection precision heuristic 0.33 vs llm 0.36; `llm_decision_rate≈0.06` with heavy heuristic fallback (`reports/eval/agent_selection_llm.json`).  
-**Notes:** stratified allocation beats greedy heuristic (and random on P@10 / sel. P) under the same budget; the LLM planner does not yet consistently beat stratified. Preference pairs for a future SFT/DPO loop: `data/eval/preferences/`.
+Preference pairs for a future SFT/DPO loop: `data/eval/preferences/`.
 
 **Simulated / illustrative only** (see [Data provenance labels](#data-provenance-labels)):
 
@@ -165,11 +154,6 @@ python scripts/eval_stage3.py run --labels data/eval/labels.jsonl \
     --predictions data/eval/images/analysis_results.json
 # Production gating vs full-VLM (offline replay, no GPU):
 python scripts/eval/eval_two_stage_gating.py --out reports/eval/two_stage_gating.json
-# Planner arms (includes stratified default):
-python scripts/eval/eval_agent_selection.py --labels data/eval/labels.jsonl \
-    --predictions reports/eval/baseline_v4_stage1_two_merged_predictions.json \
-    --features data/eval/_temp0_run/.luma_pipeline_staged/eligible_after_stage2.jsonl \
-    --budget 40 --out reports/eval/agent_selection.json
 # Preference pairs for a future SFT/DPO loop:
 python scripts/eval/export_preferences.py --labels data/eval/labels.jsonl
 ```

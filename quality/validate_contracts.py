@@ -32,15 +32,12 @@ _SPLITS = {
     "core",
     "hard",
     "regression",
-    "agent_curation",
     "agent_chat",
 }
 _SUITES = {
     "stage3_scoring",
     "stage3_selection",
     "gating_policy",
-    "agent_selection",
-    "agent_trajectory",
     "agent_chat_cases",
     "e2e_gallery_contract",
 }

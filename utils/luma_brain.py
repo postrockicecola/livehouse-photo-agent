@@ -920,46 +920,6 @@ def analyze_path_job_payload(
     }
 
 
-def curate_path_job_payload(
-    *,
-    source_dir: str,
-    config_path: str = "configs/livehouse.yaml",
-    agent: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Canonical CURATE_PATH dict stored in ``jobs.payload_json`` (read by ``tasks.run_job``).
-
-    ``agent`` carries optional :class:`services.agent.types.AgentConfig` overrides
-    (target_keepers, max_inferences, allow_escalation, ...).
-    """
-    payload: dict[str, Any] = {"source_dir": source_dir, "config_path": config_path}
-    if agent:
-        payload["agent"] = dict(agent)
-    return payload
-
-
-def create_curate_path_job(
-    conn: sqlite3.Connection,
-    *,
-    source_dir: str,
-    config_path: str = "configs/livehouse.yaml",
-    agent: dict[str, Any] | None = None,
-    trace_id: str | None = None,
-    namespace: str | None = None,
-    project_key: str | None = None,
-) -> int:
-    """Insert a QUEUED ``CURATE_PATH`` job; dispatch ``tasks.run_job`` after this returns."""
-    payload = curate_path_job_payload(source_dir=source_dir, config_path=config_path, agent=agent)
-    return create_job(
-        conn,
-        job_type="CURATE_PATH",
-        session_id=None,
-        trace_id=trace_id,
-        payload=payload,
-        namespace=namespace,
-        project_key=project_key,
-    )
-
-
 def create_analyze_path_job(
     conn: sqlite3.Connection,
     *,

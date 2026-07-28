@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getApiBase } from "@/lib/apiBase";
-import { AgentRunCard } from "@/components/infra/AgentRunCard";
-import { isAgentSpanLabel, type AgentRunSummary } from "@/lib/agentRun";
 import { isShowcaseClient } from "@/lib/showcase";
 
 const API_BASE = getApiBase();
@@ -98,7 +96,6 @@ type TimelineBody = {
   time_window?: TimeWindow;
   job_relationships?: JobRelationships;
   job_graph?: JobGraphPayload;
-  agent?: AgentRunSummary | null;
 };
 
 function formatTs(ts?: number | null): string {
@@ -311,8 +308,6 @@ export function JobTimeline({
               </p>
             ) : null}
           </section>
-
-          {data.agent?.is_agent_run ? <AgentRunCard agent={data.agent} apiBase={API_BASE} /> : null}
 
           {data.job_graph && (data.job_graph.nodes?.length ?? 0) > 0 ? (
             <section className="glass rounded-xl border border-stroke p-4">
@@ -539,29 +534,12 @@ export function JobTimeline({
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">时间线（有序）</h2>
             <ul className="space-y-2">
               {(data.spans ?? []).map((s) => {
-                const agentSpan = s.kind === "job_event" && isAgentSpanLabel(s.label);
-                const escalatedSpan = agentSpan && s.label.includes("[escalated]");
-                const finalizeSpan = agentSpan && s.label.startsWith("agent finalize");
-                const badgeClass = escalatedSpan
-                  ? "bg-violet-500/20 text-violet-200 border-violet-500/50"
-                  : finalizeSpan
-                    ? "bg-emerald-500/20 text-emerald-200 border-emerald-500/50"
-                    : agentSpan
-                      ? "bg-sky-500/15 text-sky-200 border-sky-500/40"
-                      : kindClass(s.kind);
-                const badgeText = escalatedSpan
-                  ? "↑ agent escalate"
-                  : finalizeSpan
-                    ? "✓ agent finalize"
-                    : agentSpan
-                      ? "agent analyze"
-                      : s.kind.replaceAll("_", " ");
+                const badgeClass = kindClass(s.kind);
+                const badgeText = s.kind.replaceAll("_", " ");
                 return (
                 <li
                   key={s.id}
-                  className={`flex flex-col gap-1 rounded-lg border px-3 py-2 sm:flex-row sm:items-start sm:gap-3 ${
-                    escalatedSpan ? "border-violet-500/30 bg-violet-950/15" : "border-stroke/60 bg-panel2/30"
-                  }`}
+                  className="flex flex-col gap-1 rounded-lg border border-stroke/60 bg-panel2/30 px-3 py-2 sm:flex-row sm:items-start sm:gap-3"
                 >
                   <div className="w-44 shrink-0 text-xs text-zinc-500">
                     {formatTs(s.ts)}

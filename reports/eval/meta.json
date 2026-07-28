@@ -24,8 +24,17 @@
       "model": "qwen2-vl temp0",
       "config": "configs/eval_stage3.yaml",
       "hardware": null,
-      "metrics": ["spearman", "pearson", "mae", "precision_at_k"],
-      "headline": { "spearman": 0.362, "mae": 6.09, "precision_at_20": 0.55 }
+      "metrics": [
+        "spearman",
+        "pearson",
+        "mae",
+        "precision_at_k"
+      ],
+      "headline": {
+        "spearman": 0.362,
+        "mae": 6.09,
+        "precision_at_20": 0.55
+      }
     },
     {
       "id": "two_stage_gating",
@@ -36,46 +45,20 @@
       "n": 250,
       "predictions": "data/eval/images/analysis_results.json",
       "config": "configs/livehouse.yaml",
-      "metrics": ["spearman", "mae", "vlm_call_share", "keeper_coverage", "precision_at_k"],
+      "metrics": [
+        "spearman",
+        "mae",
+        "vlm_call_share",
+        "keeper_coverage",
+        "precision_at_k"
+      ],
       "headline": {
         "full_spearman": 0.362,
-        "gated_spearman_on_admitted": 0.520,
+        "gated_spearman_on_admitted": 0.52,
         "vlm_call_share": 0.064,
-        "keeper_coverage": 0.060
+        "keeper_coverage": 0.06
       },
       "note": "Production gating replay — not a second GPU pass. Gated Spearman is on the 16 admitted images only."
-    },
-    {
-      "id": "agent_selection_250",
-      "path": "reports/eval/agent_selection.json",
-      "provenance": "recorded",
-      "real_run": true,
-      "n": 250,
-      "budget": 40,
-      "selection_size": 30,
-      "model": null,
-      "config": "scripts/eval/eval_agent_selection.py",
-      "hardware": null,
-      "metrics": ["selection_precision", "analyzed_keeper_recall", "precision_at_k"],
-      "arms": ["random", "heuristic", "stratified", "oracle"],
-      "note": "Default production planner is StratifiedHeuristicPlanner; beats greedy heuristic under same budget."
-    },
-    {
-      "id": "agent_selection_llm_60",
-      "path": "reports/eval/agent_selection_llm.json",
-      "provenance": "recorded",
-      "real_run": true,
-      "n": 60,
-      "budget": 15,
-      "arms": ["random", "heuristic", "oracle", "llm"],
-      "honesty": "LLM planner ≈ heuristic; llm_decision_rate≈0.06 with heavy heuristic fallback."
-    },
-    {
-      "id": "agent_trajectory",
-      "path": "reports/eval/agent_trajectory.json",
-      "provenance": "recorded",
-      "real_run": true,
-      "note": "Behavior / budget utilization on synthetic or feature candidates — label-free."
     },
     {
       "id": "quant_compare_example",

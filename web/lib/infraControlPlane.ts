@@ -59,13 +59,12 @@ function normalizeStageKey(raw: string): PipelineNodeId | null {
   const upper = k.toUpperCase();
   if (upper.includes("STAGE1") || upper.includes("FILTER")) return "stage1";
   if (upper.includes("STAGE2") || upper.includes("FAST_SCORE")) return "stage2";
-  // Job-type rows from runtime-stream (ANALYZE_*/CURATE_*) are VLM-path work.
+  // Job-type rows from runtime-stream (ANALYZE_*) are VLM-path work.
   if (
     upper.includes("STAGE3") ||
     upper.includes("INFER") ||
     upper.includes("VLM") ||
-    upper.includes("ANALYZE") ||
-    upper.includes("CURATE")
+    upper.includes("ANALYZE")
   ) {
     return "stage3";
   }

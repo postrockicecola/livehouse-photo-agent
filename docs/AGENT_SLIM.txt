@@ -1,31 +1,25 @@
 Agent slim checklist — keep the Agent surface sharp
-Updated: 2026-07-26
+Updated: 2026-07-28
 Companion: docs/PROJECT_GUIDE.txt · docs/PLATFORM_SCOPE.txt
 
-Goal: Agent is first-class; cut kitchen-sink surface.
+Goal: Agent is Gallery chat only; photo scoring stays on the fixed pipeline.
 
 ==============================================================================
 KEEP (default on)
 ==============================================================================
 
 Runtime
-  services/agent/graph.py              LangGraph plan→act→reflect (production)
   services/agent/conversation_graph.py Gallery chat decide→act→answer
-  services/agent/loop.py               CurationAgent entry (delegates to graph)
   services/agent/conversation.py       ConversationalAgent entry
-  services/agent/planner.py            Heuristic / stratified / LLM planners
-  services/agent/tools.py              Inspect / Analyze / Finalize
-  services/agent/reflection.py
-  services/agent/types.py
-  services/agent/job_runner.py         Agent jobs on durable job path
-  services/agent/llm_backend.py
   services/agent/chat_backend.py
   services/agent/guardrails.py
   services/agent/store.py              prefs / memory durability
-  services/agent/session.py
   services/agent/context_governance.py
   services/agent/prompt_cache.py
   services/agent/openai_adapter.py
+  services/agent/intent_router.py      deterministic Gallery ask routing
+  services/agent/review_signals.py
+  services/agent/gallery_search_defaults.py
 
 Skills (product tools)
   services/agent/skills/gallery.py
@@ -39,13 +33,11 @@ API / UI
   api/agent_routes.py                  /api/agent/chat · stream · trace
   api/auth_routes.py                   conversation scoping
   web/components/agent/*               ChatDock (Gallery-primary entry)
-  web/app/gallery                      curation + agent surface
+  web/app/gallery                      gallery + chat surface
 
 Eval
-  scripts/eval/eval_agent_selection.py
-  scripts/eval/eval_agent_trajectory.py
   scripts/eval/eval_agent_chat_cases.py
-  tests/test_agent_*.py (langgraph + tools + conversation)
+  tests/test_agent_conversation*.py / skills / guardrails / store / …
   quality/ + curated data/eval baselines (not bulk run dumps)
 
 Docs
@@ -56,16 +48,22 @@ Docs
 DOWNGRADE (legacy / opt-in)
 ==============================================================================
 
-Imperative runtime
-  services/agent/loop.py::_run_imperative
+Imperative chat runtime
   services/agent/conversation.py::_chat_imperative / _stream_chat_imperative
   Env: LIVEHOUSE_AGENT_RUNTIME=imperative|loop|legacy
   Default is LangGraph; missing langgraph → hard error (no silent fallback).
   Kept for tests + emergency only.
 
 ==============================================================================
-REMOVED FROM TREE (cleanup pass)
+REMOVED FROM TREE
 ==============================================================================
+
+Curation ReAct agent (removed 2026-07-28)
+  services/agent/graph.py · loop.py · planner.py · tools.py · reflection.py
+  services/agent/types.py · job_runner.py · session.py · llm_backend.py
+  CURATE_* jobs · POST /api/tasks/curate · Infra Agent Curation panel
+  scripts/eval/eval_agent_selection.py · eval_agent_trajectory.py
+  (budgeted VLM selection stays in Stage2/3 pipeline gating)
 
 Personal / Comfy product
   api/personal_routes.py · services/personal/ · configs/comfy/
@@ -92,10 +90,6 @@ Unverified infra side-tracks (removed 2026-07-25)
   deploy/k8s/** · deploy/operator/**
   scripts/infra_scaling_demo.py
   (kept deploy/Dockerfile.* + docker-compose for local stack)
-
-Local-only (not git-tracked; purged on this machine)
-  models/eval/ · bulky data/eval/_*-run image dumps
-  (kept data/eval/_temp0_run/.../eligible_after_stage2.jsonl for eval defaults)
 
 NOTE: No Triton kernels exist in this repo. Film grades use NumPy/OpenCV
 ``op_kernel.py`` (still required by Lab / film_render_service).

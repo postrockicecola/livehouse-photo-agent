@@ -46,7 +46,7 @@ from services.result_service import (
     read_orientation_degrees_from_raw,
 )
 from utils.logging_context import new_trace_id
-from utils.luma_brain import brain_connect, create_analyze_path_job, create_curate_path_job
+from utils.luma_brain import brain_connect, create_analyze_path_job
 
 router = APIRouter()
 
@@ -1222,76 +1222,6 @@ def enqueue_analysis(
         "trace_id": trace_id,
         "run_task_id": task.id,
         "task_name": "tasks.run_job",
-    }
-
-
-@router.post("/api/tasks/curate")
-def enqueue_curation(
-    config_path: str = Query(default="configs/livehouse.yaml"),
-    source_dir: str | None = Query(default=None),
-    target_keepers: int | None = Query(default=None),
-    max_inferences: int | None = Query(default=None),
-    allow_escalation: bool | None = Query(default=None),
-    planner: str | None = Query(default=None, description="llm (default, unless provider=mock) | heuristic"),
-    planner_model: str | None = Query(default=None, description="override the LLM planner model (provider-native id)"),
-):
-    """
-    Create a ``CURATE_PATH`` job (agentic culling loop) and dispatch ``tasks.run_job``.
-
-    The loop is **LLM-first**: omit ``planner`` and the LLM tool-calling planner drives
-    the high-value decisions over the configured provider (heuristic fallback on bad
-    output). Pass ``planner=heuristic`` for the deterministic baseline (and it is the
-    default when ``provider=mock``, which has no planner LLM). The agent's per-step
-    decisions stream into ``job_events`` — open the job timeline in the Infra Console
-    (``/infra``) to watch inspect/analyze/escalate/finalize live.
-    """
-    if not source_dir or not str(source_dir).strip():
-        raise HTTPException(status_code=400, detail="source_dir is required")
-
-    agent_overrides: dict[str, Any] = {}
-    if target_keepers is not None:
-        agent_overrides["target_keepers"] = int(target_keepers)
-    if max_inferences is not None:
-        agent_overrides["max_inferences"] = int(max_inferences)
-    if allow_escalation is not None:
-        agent_overrides["allow_escalation"] = bool(allow_escalation)
-    if planner is not None:
-        pk = str(planner).strip().lower()
-        if pk not in ("heuristic", "llm"):
-            raise HTTPException(status_code=400, detail="planner must be 'heuristic' or 'llm'")
-        agent_overrides["planner"] = pk
-    if planner_model is not None and str(planner_model).strip():
-        agent_overrides["planner_model"] = str(planner_model).strip()
-
-    from services.agent.job_runner import resolve_default_planner_kind
-
-    effective_planner = agent_overrides.get("planner") or resolve_default_planner_kind(config_path)
-
-    trace_id = new_trace_id("curate_path")
-    conn = brain_connect()
-    try:
-        job_id = create_curate_path_job(
-            conn,
-            source_dir=str(source_dir).strip(),
-            config_path=config_path,
-            agent=agent_overrides or None,
-            trace_id=trace_id,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"create_job failed: {e}") from e
-    finally:
-        conn.close()
-
-    task = celery_client.send_task("tasks.run_job", args=[job_id])
-    return {
-        "ok": True,
-        "job_id": job_id,
-        "status": "QUEUED",
-        "trace_id": trace_id,
-        "run_task_id": task.id,
-        "task_name": "tasks.run_job",
-        "job_type": "CURATE_PATH",
-        "planner": effective_planner,
     }
 
 
