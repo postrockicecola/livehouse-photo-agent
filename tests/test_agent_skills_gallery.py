@@ -87,6 +87,52 @@ def test_search_min_score_and_sort(tmp_path: Path) -> None:
     assert res.metadata["count"] == 2
 
 
+def test_search_social_recipe_prefers_deliverable(tmp_path: Path) -> None:
+    rows = [
+        {
+            "file": "loud.jpg",
+            "overall_score": 92.0,
+            "scores": {"overall": 92.0, "energy": 9.5, "technical": 5.5, "composition": 8.0},
+            "energy": 9.5,
+            "technical": 5.5,
+            "composition": 8.0,
+            "dimensions": {"deliverable_subject": 5.0, "atmosphere_impact": 9.0, "moment_peak": 8.0},
+            "category": "AI_Best_90+",
+            "tags": ["crowd"],
+            "reason": "chaotic pit",
+        },
+        {
+            "file": "clean.jpg",
+            "overall_score": 78.0,
+            "scores": {"overall": 78.0, "energy": 7.0, "technical": 8.5, "composition": 7.5},
+            "energy": 7.0,
+            "technical": 8.5,
+            "composition": 7.5,
+            "dimensions": {"deliverable_subject": 8.5, "atmosphere_impact": 6.5, "moment_peak": 7.0},
+            "category": "AI_Keep_60-90",
+            "tags": ["portrait"],
+            "reason": "readable face",
+        },
+    ]
+    _write_results(tmp_path, rows)
+    res = GallerySearchSkill(str(tmp_path)).run(
+        {
+            "min_score": 65,
+            "min_deliverable": 7.0,
+            "min_technical": 6.0,
+            "sort_by": "deliverable_subject",
+            "recipe": "social",
+            "rationale": "social share",
+            "limit": 10,
+        }
+    )
+    assert res.ok is True
+    assert res.metadata["recipe"] == "social"
+    assert [r["file"] for r in res.metadata["rows"]] == ["clean.jpg"]
+    assert res.metadata["pick_reasons"][0]["file"] == "clean.jpg"
+    assert "deliverable" in res.metadata["pick_reasons"][0]["why"]
+
+
 def test_search_query_matches_caption_and_tags(tmp_path: Path) -> None:
     _write_results(tmp_path, _sample_rows())
     res = GallerySearchSkill(str(tmp_path)).run({"query": "吉他手"})

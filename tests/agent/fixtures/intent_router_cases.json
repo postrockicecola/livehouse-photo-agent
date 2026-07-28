@@ -1,13 +1,16 @@
 [
   {
-    "id": "select_10",
+    "id": "select_10_jiaopian",
     "user": "帮我选出10张交片",
-    "expect_rule": "shortlist_select",
+    "expect_rule": "shortlist_deliverable",
     "expect_tool": "gallery_search",
     "expect_args": {
       "min_score": 70,
+      "min_deliverable": 7.0,
       "exclude_trash": true,
+      "dedupe_burst": true,
       "sort_by": "overall",
+      "recipe": "deliverable",
       "limit": 10
     },
     "expect_select_after": true
@@ -20,7 +23,9 @@
     "expect_args": {
       "min_score": 70,
       "exclude_trash": true,
+      "dedupe_burst": true,
       "sort_by": "overall",
+      "recipe": "shortlist",
       "limit": 10
     },
     "expect_select_after": true
@@ -33,7 +38,9 @@
     "expect_args": {
       "min_score": 70,
       "exclude_trash": true,
+      "dedupe_burst": true,
       "sort_by": "overall",
+      "recipe": "shortlist",
       "limit": 20
     },
     "expect_select_after": true
@@ -41,15 +48,59 @@
   {
     "id": "ins_10",
     "user": "帮我找出适合法发ins的十张照片",
-    "expect_rule": "shortlist_deliverable",
+    "expect_rule": "shortlist_social",
     "expect_tool": "gallery_search",
     "expect_args": {
-      "min_score": 70,
+      "min_score": 65,
+      "min_deliverable": 7.0,
+      "min_technical": 6.0,
       "exclude_trash": true,
-      "sort_by": "overall",
+      "exclude_low_quality": true,
+      "dedupe_burst": true,
+      "sort_by": "deliverable_subject",
+      "recipe": "social",
       "limit": 10
     },
-    "expect_select_after": false
+    "expect_select_after": true
+  },
+  {
+    "id": "wechat_moments_10",
+    "user": "帮我挑选10张适合发朋友圈的",
+    "expect_rule": "shortlist_social",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "recipe": "social",
+      "sort_by": "deliverable_subject",
+      "limit": 10,
+      "dedupe_burst": true
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "energy_zha_10",
+    "user": "帮我选出最炸的10张",
+    "expect_rule": "shortlist_energy",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "recipe": "energy",
+      "sort_by": "atmosphere_impact",
+      "limit": 10,
+      "dedupe_burst": true
+    },
+    "expect_select_after": true
+  },
+  {
+    "id": "peak_5",
+    "user": "高潮瞬间挑5张",
+    "expect_rule": "shortlist_peak",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "recipe": "peak",
+      "sort_by": "moment_peak",
+      "limit": 5,
+      "dedupe_burst": true
+    },
+    "expect_select_after": true
   },
   {
     "id": "dedupe",
@@ -60,6 +111,7 @@
       "dedupe_burst": true,
       "exclude_trash": true,
       "sort_by": "overall",
+      "recipe": "dedupe",
       "limit": 20
     },
     "expect_select_after": false
@@ -71,6 +123,7 @@
     "expect_tool": "gallery_search",
     "expect_args": {
       "sort_by": "overall",
+      "recipe": "sort",
       "limit": 20
     },
     "expect_select_after": false
@@ -83,7 +136,9 @@
     "expect_args": {
       "exclude_low_quality": true,
       "exclude_trash": true,
+      "dedupe_burst": true,
       "sort_by": "overall",
+      "recipe": "quality",
       "limit": 20
     },
     "expect_select_after": false

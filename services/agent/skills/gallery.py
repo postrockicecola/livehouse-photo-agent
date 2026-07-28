@@ -16,7 +16,15 @@ from services.agent.skills.base import SkillRegistry, SkillResult
 logger = logging.getLogger(__name__)
 
 _KNOWN_CATEGORIES = ("AI_Best_90+", "AI_Keep_60-90", "AI_Trash_Below60", "best", "keep", "trash")
-_SORT_KEYS = ("overall", "energy", "technical", "composition")
+_SORT_KEYS = (
+    "overall",
+    "energy",
+    "technical",
+    "composition",
+    "deliverable_subject",
+    "atmosphere_impact",
+    "moment_peak",
+)
 _TRASH_HINTS = ("blur", "blurry", "out of focus", "过曝", "overex", "糊", "失焦", "exposure")
 # Pipeline / Stage2/3 ops labels — not VLM semantic content tags.
 _PIPELINE_TAGS = frozenset(
@@ -146,9 +154,46 @@ def _caption(row: dict[str, Any]) -> str:
 
 
 def _dim(row: dict[str, Any], key: str) -> float:
+    """Read a score / Stage3 dimension from flattened or nested row fields."""
     if key == "overall":
-        return float(row.get("overall_score") or 0.0)
-    return float(row.get(key) or 0.0)
+        try:
+            return float(row.get("overall_score") or 0.0)
+        except (TypeError, ValueError):
+            return 0.0
+    for container in (row, row.get("scores"), row.get("dimensions")):
+        if not isinstance(container, dict):
+            continue
+        if container.get(key) is None:
+            continue
+        try:
+            return float(container.get(key) or 0.0)
+        except (TypeError, ValueError):
+            continue
+    return 0.0
+
+
+def _pick_why(row: dict[str, Any], *, sort_by: str, recipe: str) -> str:
+    """One-line explainability for a shortlisted frame."""
+    overall = _dim(row, "overall")
+    parts = [f"overall {overall:.0f}"]
+    if recipe == "social" or sort_by == "deliverable_subject":
+        parts.append(f"deliverable {_dim(row, 'deliverable_subject'):.1f}")
+        parts.append(f"tech {_dim(row, 'technical'):.1f}")
+    elif recipe == "energy" or sort_by == "atmosphere_impact":
+        parts.append(f"atmosphere {_dim(row, 'atmosphere_impact'):.1f}")
+        if _dim(row, "energy") > 0:
+            parts.append(f"energy {_dim(row, 'energy'):.1f}")
+    elif recipe == "peak" or sort_by == "moment_peak":
+        parts.append(f"moment {_dim(row, 'moment_peak'):.1f}")
+    elif recipe == "deliverable":
+        parts.append(f"deliverable {_dim(row, 'deliverable_subject'):.1f}")
+    else:
+        if _dim(row, sort_by) and sort_by != "overall":
+            parts.append(f"{sort_by} {_dim(row, sort_by):.1f}")
+    cap = _caption(row)
+    if cap:
+        parts.append(cap[:40])
+    return " · ".join(parts)
 
 
 def _record(row: dict[str, Any], *, extra: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -159,6 +204,9 @@ def _record(row: dict[str, Any], *, extra: dict[str, Any] | None = None) -> dict
         "energy": round(_dim(row, "energy"), 1),
         "technical": round(_dim(row, "technical"), 1),
         "composition": round(_dim(row, "composition"), 1),
+        "deliverable_subject": round(_dim(row, "deliverable_subject"), 1),
+        "atmosphere_impact": round(_dim(row, "atmosphere_impact"), 1),
+        "moment_peak": round(_dim(row, "moment_peak"), 1),
         "category": row.get("category"),
         "tags": [t for t in (row.get("tags") or []) if not _is_pipeline_tag(str(t))],
         "caption": _caption(row),
@@ -388,6 +436,9 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
     max_technical = args.get("max_technical")
     min_composition = args.get("min_composition")
     max_composition = args.get("max_composition")
+    min_deliverable = args.get("min_deliverable")
+    min_atmosphere = args.get("min_atmosphere")
+    min_moment_peak = args.get("min_moment_peak")
     tag = str(args.get("tag") or "").strip().lower()
     query = str(args.get("query") or "").strip().lower()
     query_terms = _expand_query_terms(query) if query else []
@@ -405,6 +456,9 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
         energy = _dim(row, "energy")
         technical = _dim(row, "technical")
         composition = _dim(row, "composition")
+        deliverable = _dim(row, "deliverable_subject")
+        atmosphere = _dim(row, "atmosphere_impact")
+        moment = _dim(row, "moment_peak")
         cat = str(row.get("category") or "")
         blob = _text_blob(row)
 
@@ -424,6 +478,13 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
             continue
         if max_composition is not None and composition > float(max_composition):
             continue
+        # Stage3 dims are often missing on older rows — only enforce when the signal exists (>0).
+        if min_deliverable is not None and deliverable > 0 and deliverable < float(min_deliverable):
+            continue
+        if min_atmosphere is not None and atmosphere > 0 and atmosphere < float(min_atmosphere):
+            continue
+        if min_moment_peak is not None and moment > 0 and moment < float(min_moment_peak):
+            continue
         if category and cat != category:
             continue
         if exclude_trash and ("Trash" in cat or cat.lower() == "trash"):
@@ -440,11 +501,11 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
             q_score = _query_hit_score(blob, query_terms)
             if q_score <= 0:
                 continue
-        scored.append((q_score, _dim(row, sort_by), row))
+        scored.append((q_score, _dim(row, sort_by), overall, row))
 
-    # Stronger semantic hit first, then requested score.
-    scored.sort(key=lambda pair: (pair[0], pair[1]), reverse=True)
-    return [row for _, _, row in scored]
+    # Stronger semantic hit first, then requested score, then overall as tie-break.
+    scored.sort(key=lambda pair: (pair[0], pair[1], pair[2]), reverse=True)
+    return [row for _, _, _, row in scored]
 
 
 def _maybe_dedupe(rows: list[dict[str, Any]], base_dir: str, enabled: bool) -> list[dict[str, Any]]:
@@ -488,10 +549,11 @@ class GallerySearchSkill:
     name = "gallery_search"
     description = (
         "Search the current session's analyzed photos. Filter by score bands "
-        "(overall / energy / technical / composition), tag substring, free-text query "
-        "(tags+caption+reason, Chinese↔English synonyms), category, exclude trash/low-quality, "
-        "and burst dedupe. Sort by overall|energy|technical|composition. Returns top-N with "
-        "scores, tags, and caption."
+        "(overall / energy / technical / composition) and Stage3 dims "
+        "(deliverable_subject / atmosphere_impact / moment_peak), tag substring, free-text "
+        "query, category, exclude trash/low-quality, and burst dedupe. Sort by overall|energy|"
+        "technical|composition|deliverable_subject|atmosphere_impact|moment_peak. Returns "
+        "top-N with scores, why lines, recipe rationale, tags, and caption."
     )
     parameters = {
         "type": "object",
@@ -504,6 +566,18 @@ class GallerySearchSkill:
             "max_technical": {"type": "number"},
             "min_composition": {"type": "number"},
             "max_composition": {"type": "number"},
+            "min_deliverable": {
+                "type": "number",
+                "description": "Minimum Stage3 deliverable_subject (0-10) when present.",
+            },
+            "min_atmosphere": {
+                "type": "number",
+                "description": "Minimum Stage3 atmosphere_impact (0-10) when present.",
+            },
+            "min_moment_peak": {
+                "type": "number",
+                "description": "Minimum Stage3 moment_peak (0-10) when present.",
+            },
             "tag": {"type": "string", "description": "Only photos whose tags contain this substring."},
             "query": {
                 "type": "string",
@@ -519,6 +593,8 @@ class GallerySearchSkill:
             },
             "dedupe_burst": {"type": "boolean", "description": "Keep one best frame per near-dup / burst."},
             "sort_by": {"type": "string", "enum": list(_SORT_KEYS), "description": "Sort key (default overall)."},
+            "recipe": {"type": "string", "description": "Named shortlist recipe id (social/energy/…)."},
+            "rationale": {"type": "string", "description": "Human-readable recipe rationale."},
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "description": "Max rows (default 20)."},
         },
         "additionalProperties": False,
@@ -555,17 +631,34 @@ class GallerySearchSkill:
 
         filtered = _filter_rows(rows, filter_args)
         sort_label = sort_by
+        recipe = str(args.get("recipe") or "custom")
+        rationale = str(args.get("rationale") or f"按 {sort_label} 排序")
 
         filtered = _maybe_dedupe(filtered, self._base_dir, bool(args.get("dedupe_burst")))
-        top = [_record(r) for r in filtered[:limit]]
+        top_rows = filtered[:limit]
+        top = []
+        pick_reasons: list[dict[str, str]] = []
+        for r in top_rows:
+            why = _pick_why(r, sort_by=sort_by, recipe=recipe)
+            rec = _record(r, extra={"why": why})
+            top.append(rec)
+            if rec.get("file"):
+                pick_reasons.append({"file": str(rec["file"]), "why": why})
         files = [str(r["file"]) for r in top if r.get("file")]
-        summary = f"{len(filtered)} photo(s) matched; showing top {len(top)} by {sort_label}."
+        summary = (
+            f"{len(filtered)} photo(s) matched; showing top {len(top)} by {sort_label}."
+            f" recipe={recipe}. {rationale}"
+        )
         meta: dict[str, Any] = {
             "rows": top,
             "count": len(filtered),
             "files": files,
             "ui_action": "search",
             "query_terms": expanded[:24],
+            "recipe": recipe,
+            "rationale": rationale,
+            "sort_by": sort_label,
+            "pick_reasons": pick_reasons,
         }
         if not filtered:
             # Help the model explain empty results without inventing photos / fake tags.

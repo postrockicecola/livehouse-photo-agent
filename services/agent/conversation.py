@@ -166,11 +166,14 @@ class TurnResult:
 # messages are present, but answer correctly from a lean prompt that inlines the data.
 _FINAL_ANSWER_SYSTEM = (
     "You are a concise assistant. Answer the user's question using ONLY the provided tool "
-    "results. Do not output JSON and do not mention tools."
+    "results. Do not output JSON and do not mention tools. When metadata includes recipe / "
+    "rationale / pick_reasons / why, briefly explain the selection criteria and 1–3 example "
+    "photos with their why lines — do not invent scores."
 )
 _FINAL_ANSWER_NUDGE = (
     "Using ONLY the tool results already shown above, answer my question now in plain, "
-    "natural language. Do NOT output JSON and do NOT call any more tools."
+    "natural language. Prefer citing metadata.rationale and a few pick_reasons/why lines "
+    "when present. Do NOT output JSON and do NOT call any more tools."
 )
 _NO_ANSWER_FALLBACK = (
     "I gathered the data with the tools above but couldn't compose a final answer this "

@@ -7,7 +7,11 @@ from typing import Any, Optional
 
 import pytest
 
-from services.agent.gallery_search_defaults import shortlist_search_args
+from services.agent.gallery_search_defaults import (
+    energy_search_args,
+    shortlist_search_args,
+    social_search_args,
+)
 from services.agent.intent_router import RouteMatch, route_gallery_intent
 
 _FIXTURES = Path(__file__).parent / "agent" / "fixtures" / "intent_router_cases.json"
@@ -142,6 +146,19 @@ def test_shortlist_defaults_single_source() -> None:
     assert m.calls[0].args == shortlist_search_args(limit=8)
 
 
+def test_social_and_energy_recipes_single_source() -> None:
+    social = route_gallery_intent("帮我挑选10张适合发朋友圈的")
+    assert social is not None
+    assert social.rule_id == "shortlist_social"
+    assert social.calls[0].args == social_search_args(limit=10)
+    assert social.select_after_search is True
+
+    energy = route_gallery_intent("帮我选出最炸的10张")
+    assert energy is not None
+    assert energy.rule_id == "shortlist_energy"
+    assert energy.calls[0].args == energy_search_args(limit=10)
+
+
 def test_count_prefix_shared_constant() -> None:
     """_LIMIT_RE and _SELECT_SHORTLIST_RE must share _COUNT_PREFIX (no drift)."""
     import services.agent.intent_router as mod
@@ -189,7 +206,8 @@ def test_routed_chat_skips_tool_llm(tmp_path: Any, monkeypatch: Any) -> None:
     assert result.tool_calls
     assert result.tool_calls[0]["tool"] == "gallery_search"
     assert result.tool_calls[0]["args"]["limit"] == 10
-    assert result.tool_calls[0]["metadata"].get("routed") == "shortlist_select"
+    assert result.tool_calls[0]["metadata"].get("routed") == "shortlist_deliverable"
+    assert result.tool_calls[0]["args"].get("recipe") == "deliverable"
     assert any(tc["tool"] == "gallery_select" for tc in result.tool_calls)
     assert len(llm_calls) == 1
     assert "选出" in result.reply or "照片" in result.reply

@@ -96,8 +96,8 @@ STYLE_PROMPT = (
 )
 
 SEMANTIC_HINTS = (
-    "SEMANTIC TOOL HINTS (fuzzy intents — code already handles 选出N张/初选/交片/剔糊/"
-    "连拍去重/按分数排序/发Ins shortlist):\n"
+    "SEMANTIC TOOL HINTS (fuzzy intents — code already handles 选出N张/初选/交片/朋友圈/"
+    "最炸/高潮瞬间/剔糊/连拍去重/按分数排序/发Ins social shortlist):\n"
     "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光… → "
     '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10}} '
     "(text match on tags/caption/reason; 慢门 uses RAW ExposureTime EXIF; "
