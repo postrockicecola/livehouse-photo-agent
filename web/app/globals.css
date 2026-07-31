@@ -426,8 +426,16 @@ input.optical-slider:disabled::-webkit-slider-thumb {
 }
 
 .landing-hero-prompt {
-  width: 100%;
+  /* Narrower than the slogan column so the dialog reads as a focused input. */
+  width: min(36rem, 92%);
   margin-top: clamp(1.1rem, 3.5vh, 2.75rem);
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) {
+  .landing-hero-prompt {
+    width: min(38rem, 62vw);
+  }
 }
 
 .landing-hero-prompt-box {
