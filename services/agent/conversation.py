@@ -88,6 +88,15 @@ class ConversationMemory:
         self._turns.append(Message("assistant", text))
         self._enforce_budget()
 
+    def add_assistant_tool_call(self, tool: str, args: dict[str, Any]) -> None:
+        """Record the model's tool decision so the next decide sees a complete chain.
+
+        Protocol order is ``assistant({"tool","args"}) → tool(result)``. Skipping the
+        assistant turn leaves a bare tool observation with no causal anchor.
+        """
+        payload = json.dumps({"tool": tool, "args": args or {}}, ensure_ascii=False)
+        self.add_assistant(payload)
+
     def add_tool_result(self, name: str, content: str, *, max_chars: int = DEFAULT_TOOL_RESULT_CHARS) -> None:
         self._turns.append(Message("tool", truncate_tool_observation(content, max_chars=max_chars), name=name))
         self._enforce_budget()
@@ -248,8 +257,9 @@ class ConversationalAgent:
             self.working_memory["last_rag_mode"] = (meta.get("rag") or {}).get("mode")
         self.working_memory = compress_working_memory(self.working_memory)
 
-    def _record_tool_result(self, name: str, result) -> None:
-        """Add a tool observation to memory, fencing it as untrusted only when asked."""
+    def _record_tool_result(self, name: str, result, *, args: Optional[dict[str, Any]] = None) -> None:
+        """Commit ``assistant(tool-call) → tool(result)`` so decide history stays causal."""
+        self.memory.add_assistant_tool_call(name, dict(args or {}))
         obs = json.dumps(result.to_observation(), ensure_ascii=False)
         if self._guardrails is not None:
             if self._wrap_tool_output:
@@ -302,7 +312,7 @@ class ConversationalAgent:
         assert self._skills is not None
         result = self._skills.dispatch(tool, args)
         self._update_working_memory(tool, args, result)
-        self._record_tool_result(tool, result)
+        self._record_tool_result(tool, result, args=args)
         meta = dict(getattr(result, "metadata", None) or {})
         if routed:
             meta["routed"] = routed
@@ -423,7 +433,7 @@ class ConversationalAgent:
             seen.add(key)
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
             self._update_working_memory(call["tool"], call["args"], result)
-            self._record_tool_result(call["tool"], result)
+            self._record_tool_result(call["tool"], result, args=call["args"])
             observations.append(f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}")
             tc = {
                 "tool": call["tool"],
@@ -556,7 +566,7 @@ class ConversationalAgent:
             seen.add(key)
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
             self._update_working_memory(call["tool"], call["args"], result)
-            self._record_tool_result(call["tool"], result)
+            self._record_tool_result(call["tool"], result, args=call["args"])
             observations.append(
                 f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
             )

@@ -64,3 +64,6 @@ def test_conversational_agent_uses_langgraph_backend(monkeypatch):
     assert agent.last_backend == "langgraph"
     assert res.reply == "pong from graph"
     assert res.tool_calls[0]["tool"] == "echo"
+    non_system = [m for m in agent.memory.messages() if m["role"] != "system"]
+    assert [m["role"] for m in non_system] == ["user", "assistant", "tool", "assistant"]
+    assert json.loads(non_system[1]["content"]) == {"tool": "echo", "args": {"v": "pong"}}

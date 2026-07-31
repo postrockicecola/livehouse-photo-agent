@@ -70,7 +70,7 @@ def compile_chat_turn_graph(
     wrap_tool_output: bool,
     max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
-    record_tool_result: Callable[[str, Any], None],
+    record_tool_result: Callable[..., None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
@@ -148,7 +148,8 @@ def compile_chat_turn_graph(
         args = dict(call.get("args") or {})
         result = skills.dispatch(tool, args)
         update_working_memory(tool, args, result)
-        record_tool_result(tool, result)
+        # ConversationalAgent._record_tool_result writes assistant(tool-call) then tool(result).
+        record_tool_result(tool, result, args=args)
         obs = f"{tool} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
         tc = {
             "tool": tool,
@@ -290,7 +291,7 @@ def run_chat_turn(
     wrap_tool_output: bool,
     max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
-    record_tool_result: Callable[[str, Any], None],
+    record_tool_result: Callable[..., None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
@@ -337,7 +338,7 @@ def iter_chat_turn_updates(
     wrap_tool_output: bool,
     max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
-    record_tool_result: Callable[[str, Any], None],
+    record_tool_result: Callable[..., None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],

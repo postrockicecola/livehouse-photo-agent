@@ -6,6 +6,8 @@ tool-calling protocol over a real :class:`SkillRegistry`.
 """
 from __future__ import annotations
 
+import json
+
 from services.agent.conversation import (
     ConversationalAgent,
     ConversationMemory,
@@ -114,9 +116,11 @@ def test_chat_runs_tool_then_answers():
         {"tool": "echo", "args": {"v": "pong"}, "ok": True, "metadata": {}}
     ]
     assert res.working_memory.get("last_tool") == "echo"
-    # A tool-role message carrying the observation is in memory.
-    roles = [m["role"] for m in agent.memory.messages()]
-    assert "tool" in roles
+    # Protocol chain: user → assistant(tool-call) → tool(result) → assistant(final).
+    non_system = [m for m in agent.memory.messages() if m["role"] != "system"]
+    assert [m["role"] for m in non_system] == ["user", "assistant", "tool", "assistant"]
+    assert json.loads(non_system[1]["content"]) == {"tool": "echo", "args": {"v": "pong"}}
+    assert non_system[2].get("name") == "echo"
 
 
 def test_working_memory_tracks_selected_keys_as_last_files():
@@ -145,6 +149,27 @@ def test_working_memory_tracks_selected_keys_as_last_files():
     res = agent.chat("标出来")
     assert res.working_memory.get("last_files") == ["a.jpg", "b.jpg"]
     assert res.working_memory.get("last_tool") == "gallery_select"
+
+
+def test_second_decide_sees_assistant_tool_call_anchor():
+    """Second decide must see the prior assistant decision, not a bare tool blob."""
+    reg = SkillRegistry()
+    reg.register(_echo_skill())
+    seen_second: list[list[str]] = []
+
+    def chat_fn(msgs):
+        roles = [m["role"] for m in msgs if m["role"] != "system"]
+        if "tool" in roles:
+            seen_second.append(roles)
+            return "done after seeing my own tool call"
+        return json.dumps({"tool": "echo", "args": {"v": "1"}})
+
+    agent = ConversationalAgent(chat_fn, skills=reg, max_tool_rounds=2)
+    res = agent.chat("go")
+    assert res.reply == "done after seeing my own tool call"
+    assert seen_second, "expected a second decide after the tool ran"
+    # ... user, assistant(decision), tool(result) — causal chain intact for decide #2
+    assert seen_second[0][-3:] == ["user", "assistant", "tool"]
 
 
 def test_chat_breaks_on_repeated_identical_tool_call():
