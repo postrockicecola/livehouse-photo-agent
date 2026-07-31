@@ -5,20 +5,11 @@ import { isShowcase } from "@/lib/dataSource";
 export const dynamic = "force-dynamic";
 
 const DEMO_IMAGE_COUNT = 12; // web/public/demo/demo-01.jpg … demo-12.jpg
+const DEMO_FILE_RE = /^demo-(0[1-9]|1[0-2])\.jpg$/i;
 
 /** Bundled per-session heroes only: session-NN.jpg / session-NN-portrait.jpg */
 const SHOWCASE_COVER_FILE_RE = /^session-\d{2,}(?:-portrait)?\.jpg$/i;
 const SHOWCASE_AGENT_DEMO_RE = /^frame-\d{2}\.jpg$/i;
-
-/** Deterministically map an arbitrary `path` to one of the bundled demo photos. */
-function demoImageFor(path: string): string {
-  let hash = 0;
-  for (let i = 0; i < path.length; i += 1) {
-    hash = (hash * 31 + path.charCodeAt(i)) >>> 0;
-  }
-  const n = (hash % DEMO_IMAGE_COUNT) + 1;
-  return `/demo/demo-${String(n).padStart(2, "0")}.jpg`;
-}
 
 function decodePath(path: string): string {
   try {
@@ -26,6 +17,29 @@ function decodePath(path: string): string {
   } catch {
     return path.trim();
   }
+}
+
+/** Resolve an explicit demo token (`demo-01.jpg` / `/demo/demo-01.jpg`) without re-hashing. */
+function explicitDemoFor(path: string): string | null {
+  const decoded = decodePath(path);
+  if (!decoded || decoded.includes("..") || decoded.includes("\\") || decoded.includes("\0")) {
+    return null;
+  }
+  const file = decoded.replace(/^\/+/, "").replace(/^demo\//i, "");
+  if (!DEMO_FILE_RE.test(file) || file.includes("/")) return null;
+  return `/demo/${file.toLowerCase()}`;
+}
+
+/** Deterministically map an arbitrary `path` to one of the bundled demo photos. */
+function demoImageFor(path: string): string {
+  const explicit = explicitDemoFor(path);
+  if (explicit) return explicit;
+  let hash = 0;
+  for (let i = 0; i < path.length; i += 1) {
+    hash = (hash * 31 + path.charCodeAt(i)) >>> 0;
+  }
+  const n = (hash % DEMO_IMAGE_COUNT) + 1;
+  return `/demo/demo-${String(n).padStart(2, "0")}.jpg`;
 }
 
 /** Resolve a showcase cover token to its static public URL, or null. */
@@ -71,7 +85,10 @@ export async function GET(req: NextRequest) {
     const agent = showcaseAgentDemoFor(path);
     if (agent) return NextResponse.redirect(new URL(agent, req.url));
     const cover = showcaseCoverFor(path);
-    return NextResponse.redirect(new URL(cover ?? demoImageFor(path), req.url));
+    if (cover) return NextResponse.redirect(new URL(cover, req.url));
+    const demo = explicitDemoFor(path);
+    if (demo) return NextResponse.redirect(new URL(demo, req.url));
+    return NextResponse.redirect(new URL(demoImageFor(path), req.url));
   }
 
   try {
