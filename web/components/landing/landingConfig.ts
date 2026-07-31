@@ -2,9 +2,9 @@
 export const LANDING_GALLERY_SECTION = {
   id: "gallery",
   eyebrow: "产品结果",
-  title: "读 AI 结果，人做最终确认。",
+  title: "读 AI 结果，也能对话着选。",
   subtitle:
-    "输入现场照片，输出筛选、评分、双语解释与画廊。分数和标签来自上游 VLM；这里做人工确认。界面上的分数字段为产品示意叠加（Simulated overlay），底图来自真实场次。",
+    "流水线给出筛选、评分与标签；Gallery 里人工确认，并用对话 Agent 搜片、初选、试胶片风格、导出。界面分数字段为产品示意叠加（Simulated overlay），底图来自真实场次。",
 } as const;
 
 export type LandingGalleryFeature = {
@@ -16,7 +16,8 @@ export type LandingGalleryFeature = {
 export const LANDING_GALLERY_FEATURES: LandingGalleryFeature[] = [
   { id: "score", label: "VLM 评分", description: "整体分 · Energy · Technical · Composition" },
   { id: "tags", label: "结构化标签", description: "VLM 语义字段，可检索" },
-  { id: "style", label: "风格预览", description: "胶片 Lab 实时试色" },
+  { id: "agent", label: "对话 Agent", description: "自然语言搜、选、定风格" },
+  { id: "style", label: "风格预览", description: "胶片 / 梦核等 Showcase grade" },
   { id: "select", label: "人工确认", description: "点选、标记、偏好反馈" },
   { id: "export", label: "导出交付", description: "预览与 RAW 批量导出" },
 ];

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
-import { LANDING_NAV, LANDING_STUDIO_CTA, STUDIO_HOME } from "@/lib/productIa";
+import { LANDING_AGENT_HOME, LANDING_NAV, LANDING_STUDIO_CTA } from "@/lib/productIa";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]";
@@ -57,7 +57,7 @@ export function LandingNav() {
 
         <div className="flex items-center gap-2.5 sm:gap-3">
           <Link
-            href={STUDIO_HOME}
+            href={LANDING_AGENT_HOME}
             className={`rounded-full bg-white px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0a0a0a] transition-opacity hover:opacity-90 sm:px-5 ${focusRing}`}
           >
             {LANDING_STUDIO_CTA}

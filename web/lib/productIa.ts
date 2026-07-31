@@ -29,7 +29,11 @@ export const PROJECT_POSITIONING = {
   ],
 } as const;
 
-/** Primary CTA — nav + hero + closing. Points at Studio (agent workbench). */
+/**
+ * Primary marketing CTA — name the Agent, land on Gallery (chat surface).
+ * Studio remains the session / ANALYZE workbench via secondary CTAs.
+ */
+export const LANDING_AGENT_HOME = "/gallery";
 export const LANDING_STUDIO_CTA = "打开 Agent";
 
 /**
@@ -65,7 +69,7 @@ export const LANDING_HERO = {
   /** First-screen slogan — product value before infra nouns. */
   title: "现场照片，变成可交付的选片结果。",
   subtitle:
-    "低成本视觉门控 → 持久作业 → 有界 VLM → Gallery / Infra Console。摄影是真实业务负载，用来验证可恢复、可观察的推理作业系统。",
+    "低成本门控与持久作业把场次算完；Gallery 对话 Agent 用自然语言搜、选、定风格、导出。摄影是真实负载，用来验证可恢复、可观察的推理作业系统。",
   description: PROJECT_POSITIONING.oneLinerZh,
   /**
    * Fixed first-viewport background (from ``data/eval/images/20260424__DSC04199.jpg``).
@@ -75,11 +79,13 @@ export const LANDING_HERO = {
   ctaPrimary: LANDING_STUDIO_CTA,
   ctaSecondary: { label: "看主链路", href: "#workflow" },
   promptIdle: "试试：找出吉他手特写…",
-  promptSubmitHref: "/studio",
-  /** Hero CTAs under the prompt — first is the primary product entry. */
+  /** Hero prompt submits into Gallery chat (Agent opens with ``?q=``). */
+  promptSubmitHref: LANDING_AGENT_HOME,
+  /** Hero CTAs — Agent first; Studio / Infra as supporting surfaces. */
   promptCtas: [
-    { label: "打开 Agent", href: STUDIO_HOME, primary: true },
-    { label: "打开 Infra", href: "/infra" },
+    { label: "打开 Agent", href: LANDING_AGENT_HOME, primary: true },
+    { label: "Studio 工作台", href: STUDIO_HOME },
+    { label: "Infra 控制台", href: "/infra" },
   ],
 } as const;
 
@@ -94,8 +100,6 @@ export const LANDING_NAV: NavLink[] = [
   { label: "结果", href: "#outcome", description: "一次运行的交付指标" },
   { label: "画廊", href: "#gallery", description: "筛选与确认" },
   { label: "主链路", href: "#workflow", description: "门控 → 作业 → VLM" },
-  { label: "Infra", href: "#infra", description: "队列、Worker、账本" },
-  { label: "工作台", href: "#products", description: "Studio / Gallery / Console" },
 ];
 
 export type WorkflowStep = {
@@ -108,7 +112,7 @@ export const LANDING_WORKFLOW = {
   eyebrow: "主链路",
   title: "从入库到可追踪的推理作业。",
   subtitle:
-    "场次先建成可恢复的作业，再经 OpenCV → 美学分 → 有界 VLM；状态、调用与产物都写进账本，可在 Infra 里回看。",
+    "场次先建成可恢复的作业，再经 OpenCV → 美学分 → 有界 VLM；状态、调用与产物都写进账本。交付侧用 Gallery 确认，并用对话 Agent 操作选片结果。",
   phases: [
     { id: "ingest", label: "Ingest", range: [0, 0] },
     { id: "orchestrate", label: "Run", range: [1, 4] },
@@ -121,7 +125,7 @@ export const LANDING_WORKFLOW = {
     { id: "pipeline-runner", title: "Cheap Gates", tagline: "OpenCV / 快速美学分先过滤。" },
     { id: "inference", title: "Bounded VLM", tagline: "有界并发、可降级的多模态推理。" },
     { id: "artifacts", title: "Ledger", tagline: "job / event / model_run / artifact 可追。" },
-    { id: "gallery", title: "Gallery", tagline: "人工确认选片并导出。" },
+    { id: "gallery", title: "Gallery + Agent", tagline: "确认选片；对话搜、选、定风格、导出。" },
   ] satisfies WorkflowStep[],
 } as const;
 
@@ -169,102 +173,6 @@ export const LANDING_INFRA_FALLBACK_METRICS: LandingInfraMetrics = {
   jobs_total: 0,
   model_runs_total: 0,
 };
-
-export type InfraPillar = {
-  id: string;
-  label: string;
-  caption: string;
-  metricKey: keyof LandingInfraMetrics;
-};
-
-export const LANDING_INFRA = {
-  id: "infra",
-  eyebrow: "AI Infra",
-  title: "推理作业的控制面。",
-  subtitle: "看队列深度、作业时间线、模型调用与失败恢复——同一套 API 驱动执行与控制台。",
-  highlights: [
-    {
-      id: "recovery",
-      title: "Durable Jobs",
-      description: "认领、重试、死信写在 SQL；Celery 结果不是权威状态。",
-    },
-    {
-      id: "retry",
-      title: "失败可恢复",
-      description: "失败可重试，attempt 可查；确认搞不定的进 dead letter。",
-    },
-    {
-      id: "scheduling",
-      title: "Bounded Inference",
-      description: "有界队列与准入控制，避免把推理端打满。",
-    },
-    {
-      id: "queue",
-      title: "可观察账本",
-      description: "作业时间线、模型调用、成本与产物可 drill-down。",
-    },
-  ],
-  pillars: [
-    { id: "jobs", label: "Jobs", caption: "账本作业总数", metricKey: "jobs_total" },
-    { id: "workers", label: "Workers", caption: "在线 / 总数", metricKey: "workers_online" },
-    { id: "vlm", label: "Model runs", caption: "推理调用账本", metricKey: "model_runs_total" },
-    { id: "recovery", label: "Recovery", caption: "重新入队", metricKey: "recovery_requeues" },
-    { id: "monitoring", label: "Monitoring", caption: "运行快照", metricKey: "monitoring_snapshots" },
-  ] satisfies InfraPillar[],
-  consoleHref: "/infra",
-} as const;
-
-export type ProductMatrixItem = {
-  id: string;
-  name: string;
-  role: string;
-  description: string;
-  href: string;
-  showcaseHref?: string;
-  featured?: boolean;
-};
-
-export const LANDING_PRODUCT_MATRIX = {
-  id: "products",
-  eyebrow: "工作台",
-  title: "从提交作业到确认交付。",
-  subtitle: "Studio 触发分析，Gallery 确认选片，Brain 查账，Infra 看运行态。",
-  products: [
-    {
-      id: "studio",
-      name: "Studio",
-      role: "工作台",
-      description: "看场次、触发 ANALYZE、进 Gallery。",
-      href: STUDIO_HOME,
-      featured: true,
-    },
-    {
-      id: "gallery",
-      name: "Gallery",
-      role: "选片界面",
-      description: "看分数和标签，人工确认导出。",
-      href: "/gallery",
-      /** Read-only Showcase Gallery is live — same destination as full mode. */
-      showcaseHref: "/gallery",
-    },
-    {
-      id: "brain",
-      name: "Brain",
-      role: "数据账本",
-      description: "查 job、事件和产物。",
-      href: "/infra/brain",
-      showcaseHref: "#brain",
-    },
-    {
-      id: "infra",
-      name: "Infra",
-      role: "运维台",
-      description: "队列、Worker、重试与模型调用归因。",
-      href: "/infra",
-      showcaseHref: "#infra",
-    },
-  ] satisfies ProductMatrixItem[],
-} as const;
 
 export type AiFlowStep = {
   id: string;
@@ -331,28 +239,28 @@ export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   {
     title: "内容",
     links: [
+      { label: "结果", href: "#outcome" },
       { label: "主链路", href: "#workflow" },
-      { label: "推理阶段", href: "#ai-layer" },
-      { label: "Infra", href: "#infra" },
-      { label: "Gallery", href: "/gallery" },
-      { label: "Brain", href: "#brain" },
-      { label: "Agent", href: "/gallery" },
+      { label: "Gallery Agent", href: "/gallery" },
+      { label: "Evaluation", href: "/eval" },
     ],
   },
   {
     title: "资源",
     links: [
-      { label: "Docs", href: "#docs" },
-      { label: "Documentation", href: "#" },
-      { label: "GitHub", href: "#" },
+      {
+        label: "GitHub",
+        href: "https://github.com/postrockicecola/livehouse-photo-agent",
+      },
+      { label: "README", href: "https://github.com/postrockicecola/livehouse-photo-agent#readme" },
     ],
   },
   {
     title: "运维",
     links: [
-      { label: "Infra 说明", href: "#infra" },
       { label: "Infra 控制台", href: "/infra" },
-      { label: "Brain 控制台", href: "/infra/brain" },
+      { label: "五分钟 walkthrough", href: "/infra?tour=1" },
+      { label: "Brain", href: "/infra/brain" },
     ],
   },
 ];

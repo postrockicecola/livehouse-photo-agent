@@ -66,7 +66,7 @@ export function LandingOutcomeSection() {
           <div>
             <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/30">Keep rate</dt>
             <dd className="mt-2 text-3xl font-light tabular-nums text-white/90">{o.keepRatePct}%</dd>
-            <p className="mt-1 text-xs text-white/30">归档平均入选率</p>
+            <p className="mt-1 text-xs text-white/30">代表性场次入选率</p>
           </div>
           <div>
             <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/30">E2E</dt>

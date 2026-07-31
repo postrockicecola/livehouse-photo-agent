@@ -9,7 +9,7 @@ export function LandingFooter() {
           <div className="lg:col-span-1">
             <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/75">Luma Studio</p>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/32">
-              以现场摄影为真实负载的视觉作业系统：可恢复的推理任务、有界模型调用，以及可回看的运行账本。
+              以现场摄影为真实负载的视觉作业系统：可恢复的推理任务、有界模型调用、可回看账本，以及 Gallery 对话选片。
             </p>
           </div>
 
@@ -19,14 +19,19 @@ export function LandingFooter() {
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    {link.href.startsWith("#") || link.href.startsWith("/") ? (
+                    {link.href.startsWith("http://") || link.href.startsWith("https://") ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-white/42 transition-colors hover:text-white/72"
+                      >
+                        {link.label}
+                      </a>
+                    ) : link.href.startsWith("#") || link.href.startsWith("/") ? (
                       <Link
                         href={link.href}
-                        className={`text-sm transition-colors ${
-                          col.title === "Operators"
-                            ? "text-white/30 hover:text-white/52"
-                            : "text-white/42 hover:text-white/72"
-                        }`}
+                        className="text-sm text-white/42 transition-colors hover:text-white/72"
                       >
                         {link.label}
                       </Link>

@@ -78,9 +78,9 @@ export function LandingGallerySection() {
             href="/gallery"
             className="inline-flex rounded-full bg-white px-6 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0a0a0a] transition-opacity hover:opacity-90"
           >
-            Open Gallery
+            打开 Gallery
           </Link>
-          <p className="font-mono text-[10px] text-white/28">只读 Showcase 选片台 · 完整导出请本地启动</p>
+          <p className="font-mono text-[10px] text-white/28">只读 Showcase · 对话选片可试；完整导出请本地启动</p>
         </div>
       </div>
 

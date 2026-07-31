@@ -14,15 +14,18 @@ export const RECORDED_OUTCOME = {
   jobId: SHOWCASE_SUCCESS_JOB_ID,
   photosIn: 412,
   vlmCalls: 288,
+  /**
+   * Representative keep rate for the showcase ANALYZE_SESSION shape (not archive-wide
+   * ``landing-stats.average_keep_rate_pct``, which is a tapered catalog funnel).
+   */
   keepRatePct: 79,
   /** Job #61 total_latency_ms ≈ 749984 → ~12.5 min */
   e2eMinutes: 12.5,
-  notes:
-    "VLM calls and keep rate from committed showcase fixtures (model_runs ledger + landing-stats). E2E is job #61 wall time. Session photo count is a representative showcase figure for that ANALYZE_SESSION shape — not a live counter.",
+  /** Short zh caption under the outcome strip — keep casual, not a provenance essay. */
+  notes: "Showcase 固定快照，非实时计数。E2E 取自 job #61。",
   sourceFiles: [
     "web/fixtures/infra-job-detail.json",
     "web/fixtures/infra-metrics.json",
-    "web/fixtures/landing-stats.json",
   ],
 } as const;
 

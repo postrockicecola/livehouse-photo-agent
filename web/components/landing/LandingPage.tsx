@@ -1,17 +1,15 @@
 import Link from "next/link";
-import { LANDING_STUDIO_CTA, STUDIO_HOME } from "@/lib/productIa";
+import { LANDING_AGENT_HOME, LANDING_STUDIO_CTA } from "@/lib/productIa";
 import { LandingFooter } from "./LandingFooter";
 import { LandingGallerySection } from "./LandingGallerySection";
 import { LandingHero } from "./LandingHero";
 import { LandingNav } from "./LandingNav";
 import { LandingOutcomeSection } from "./LandingOutcomeSection";
-import { LandingProductMatrixSection } from "./LandingProductMatrixSection";
-import { LandingInfraSection } from "./LandingInfraSection";
 import { LandingWorkflowSection } from "./LandingWorkflowSection";
 
 /**
- * Marketing home — one path: outcome → gallery → workflow → infra → workspaces.
- * Eval / Brain / Stats / Docs live as deeper links (footer + product matrix), not equal chapters.
+ * Marketing home — one path: outcome → gallery → workflow → try CTA.
+ * Infra / Eval live as deeper links (footer + closing CTAs), not equal chapters.
  */
 export function LandingPage() {
   return (
@@ -22,8 +20,6 @@ export function LandingPage() {
         <LandingOutcomeSection />
         <LandingGallerySection />
         <LandingWorkflowSection />
-        <LandingInfraSection />
-        <LandingProductMatrixSection />
 
         <section className="landing-section border-t border-white/[0.05] py-20 sm:py-28">
           <div className="mx-auto w-full max-w-[104rem] px-5 text-center sm:px-8 lg:px-12">
@@ -31,12 +27,12 @@ export function LandingPage() {
             <h2 className="mt-4 text-3xl font-light tracking-tight text-white/[0.9] sm:text-4xl">
               先看交付结果，再打开作业控制面。
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-sm text-white/38">
-              Studio 提交场次，Gallery 确认选片，Infra 查看作业与模型调用。
+            <p className="mx-auto mt-4 max-w-lg text-sm text-white/38">
+              Studio 提交场次，Gallery 确认并用对话 Agent 选片，Infra 查看作业与模型调用。
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Link
-                href={STUDIO_HOME}
+                href={LANDING_AGENT_HOME}
                 className="inline-flex rounded-full bg-white px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[#0a0a0a] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
               >
                 {LANDING_STUDIO_CTA}

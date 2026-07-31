@@ -39,7 +39,7 @@ The repository ships a recorded session snapshot for local demos and the read-on
 |--------|------:|--------|
 | Photos in | 412 | Showcase fixture |
 | VLM calls (ledger) | 288 | `web/fixtures/infra-metrics.json` |
-| Keep rate | 79% | `landing-stats.average_keep_rate_pct` |
+| Keep rate | 79% | Representative showcase run (`RECORDED_OUTCOME`; not archive-wide `landing-stats`) |
 | End-to-end (job #61) | ~12.5 min | `total_latency_ms` on `ANALYZE_SESSION` |
 
 Try the guided Infra Console tour at [`/infra?tour=1`](http://127.0.0.1:3000/infra?tour=1).  
