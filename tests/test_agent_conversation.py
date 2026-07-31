@@ -172,6 +172,44 @@ def test_second_decide_sees_assistant_tool_call_anchor():
     assert seen_second[0][-3:] == ["user", "assistant", "tool"]
 
 
+def test_lean_final_answer_keeps_prefs_and_working_memory():
+    """Forced final-answer prompt must still see prefs + last_files (not only tool blobs)."""
+    from services.agent.store import preferences_prompt_block
+
+    reg = SkillRegistry()
+    reg.register(_echo_skill())
+    calls: list[list[dict]] = []
+
+    def chat_fn(msgs):
+        calls.append(list(msgs))
+        if len(calls) == 1:
+            return json.dumps({"tool": "echo", "args": {"v": "x"}})
+        return "picked with your silhouette preference in mind"
+
+    prefs = preferences_prompt_block({"avoid_silhouettes": "true"})
+    mem = ConversationMemory(
+        system_prompt=f"You are the Gallery copilot.\n\n{prefs}",
+        max_tokens=10_000,
+    )
+    agent = ConversationalAgent(
+        chat_fn,
+        memory=mem,
+        skills=reg,
+        max_tool_rounds=1,  # one tool then forced lean final
+        working_memory={"last_files": ["a.jpg", "b.jpg"], "last_tool": "gallery_search"},
+    )
+    res = agent.chat("选出几张")
+    assert "silhouette" in res.reply or "preference" in res.reply
+    assert len(calls) >= 2, "expected decide + lean final-answer model calls"
+    lean = calls[-1]
+    assert [m["role"] for m in lean] == ["system", "user"]
+    sys_txt = lean[0]["content"]
+    assert "SESSION CONTEXT" in sys_txt
+    assert "avoid_silhouettes" in sys_txt
+    assert "a.jpg" in sys_txt
+    assert "AVAILABLE TOOLS" not in sys_txt  # still lean — no tool protocol dump
+
+
 def test_chat_breaks_on_repeated_identical_tool_call():
     reg = SkillRegistry()
     reg.register(_echo_skill())

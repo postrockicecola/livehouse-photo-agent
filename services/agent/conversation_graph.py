@@ -73,11 +73,10 @@ def compile_chat_turn_graph(
     record_tool_result: Callable[..., None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
+    build_final_answer_messages: Callable[[str, list[str]], list[dict[str, str]]],
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
     emit: Optional[TurnHook] = None,
     no_answer_fallback: str,
-    final_answer_system: str,
-    final_answer_nudge: str,
 ):
     """Compile the decide→act→answer turn graph (closures bind one agent instance)."""
     from langgraph.graph import END, START, StateGraph
@@ -218,15 +217,8 @@ def compile_chat_turn_graph(
             _emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
             return {"reply": reply, "done": True, "backend": "langgraph"}
 
-        # Tools ran / repeat / budget → forced lean final answer.
-        joined = "\n".join(observations) if observations else "(no tool results)"
-        messages = [
-            {"role": "system", "content": final_answer_system},
-            {
-                "role": "user",
-                "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{final_answer_nudge}",
-            },
-        ]
+        # Tools ran / repeat / budget → forced lean final answer (prefs/WM inlined).
+        messages = build_final_answer_messages(user_text, observations)
         if defer:
             return {
                 "reply": None,
@@ -294,11 +286,10 @@ def run_chat_turn(
     record_tool_result: Callable[..., None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
+    build_final_answer_messages: Callable[[str, list[str]], list[dict[str, str]]],
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
     emit: Optional[TurnHook],
     no_answer_fallback: str,
-    final_answer_system: str,
-    final_answer_nudge: str,
     defer_answer: bool = False,
 ) -> ChatTurnState:
     app = compile_chat_turn_graph(
@@ -312,11 +303,10 @@ def run_chat_turn(
         record_tool_result=record_tool_result,
         finalize=finalize,
         force_final_answer=force_final_answer,
+        build_final_answer_messages=build_final_answer_messages,
         parse_tool_call=parse_tool_call,
         emit=emit,
         no_answer_fallback=no_answer_fallback,
-        final_answer_system=final_answer_system,
-        final_answer_nudge=final_answer_nudge,
     )
     init = _initial_chat_state(
         user_text=user_text,
@@ -341,11 +331,10 @@ def iter_chat_turn_updates(
     record_tool_result: Callable[..., None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
+    build_final_answer_messages: Callable[[str, list[str]], list[dict[str, str]]],
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
     emit: Optional[TurnHook],
     no_answer_fallback: str,
-    final_answer_system: str,
-    final_answer_nudge: str,
     defer_answer: bool = True,
 ):
     """Yield ``(node_name, partial_state)`` as the chat subgraph runs (for SSE)."""
@@ -360,11 +349,10 @@ def iter_chat_turn_updates(
         record_tool_result=record_tool_result,
         finalize=finalize,
         force_final_answer=force_final_answer,
+        build_final_answer_messages=build_final_answer_messages,
         parse_tool_call=parse_tool_call,
         emit=emit,
         no_answer_fallback=no_answer_fallback,
-        final_answer_system=final_answer_system,
-        final_answer_nudge=final_answer_nudge,
     )
     init = _initial_chat_state(
         user_text=user_text,

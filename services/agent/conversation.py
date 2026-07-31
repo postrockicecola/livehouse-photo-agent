@@ -26,6 +26,7 @@ from services.agent.context_governance import (
     DEFAULT_TOOL_RESULT_CHARS,
     compress_working_memory,
     truncate_tool_observation,
+    working_memory_prompt_block,
 )
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, route_gallery_intent
@@ -177,13 +178,25 @@ _FINAL_ANSWER_SYSTEM = (
     "You are a concise assistant. Answer the user's question using ONLY the provided tool "
     "results. Do not output JSON and do not mention tools. When metadata includes recipe / "
     "rationale / pick_reasons / why, briefly explain the selection criteria and 1–3 example "
-    "photos with their why lines — do not invent scores."
+    "photos with their why lines — do not invent scores. When SESSION CONTEXT lists user "
+    "preferences or last_files, honor them in wording and framing — still never invent photo data."
 )
 _FINAL_ANSWER_NUDGE = (
     "Using ONLY the tool results already shown above, answer my question now in plain, "
     "natural language. Prefer citing metadata.rationale and a few pick_reasons/why lines "
     "when present. Do NOT output JSON and do NOT call any more tools."
 )
+_PREFS_SECTION_PREFIX = "LONG-TERM USER PREFERENCES"
+
+
+def _prefs_block_from_system(system_prompt: str) -> str:
+    """Pull the durable-prefs section out of the full (tool-protocol) system prompt."""
+    if not system_prompt or _PREFS_SECTION_PREFIX not in system_prompt:
+        return ""
+    for chunk in system_prompt.split("\n\n"):
+        if chunk.strip().startswith(_PREFS_SECTION_PREFIX):
+            return chunk.strip()
+    return ""
 _NO_ANSWER_FALLBACK = (
     "I gathered the data with the tools above but couldn't compose a final answer this "
     "turn. Please rephrase your question or ask about a specific photo or metric."
@@ -281,11 +294,10 @@ class ConversationalAgent:
             "record_tool_result": self._record_tool_result,
             "finalize": self._finalize,
             "force_final_answer": self._force_final_answer,
+            "build_final_answer_messages": self._build_final_answer_messages,
             "parse_tool_call": _parse_tool_call,
             "emit": self._emit,
             "no_answer_fallback": _NO_ANSWER_FALLBACK,
-            "final_answer_system": _FINAL_ANSWER_SYSTEM,
-            "final_answer_nudge": _FINAL_ANSWER_NUDGE,
         }
 
     def _imperative_requested(self) -> bool:
@@ -376,15 +388,9 @@ class ConversationalAgent:
         tool_calls, observations = self._execute_route_match(match)
         for tc in tool_calls:
             yield {"type": "tool_call", **tc}
-        joined = "\n".join(observations) if observations else "(no tool results)"
-        messages = [
-            {"role": "system", "content": _FINAL_ANSWER_SYSTEM},
-            {
-                "role": "user",
-                "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}",
-            },
-        ]
-        yield from self._stream_answer(messages, stream_fn, tool_calls)
+        yield from self._stream_answer(
+            self._build_final_answer_messages(user_text, observations), stream_fn, tool_calls
+        )
 
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
@@ -592,12 +598,9 @@ class ConversationalAgent:
             yield from self._stream_answer(self.memory.messages(), stream_fn, tool_calls)
             return
 
-        joined = "\n".join(observations) if observations else "(no tool results)"
-        messages = [
-            {"role": "system", "content": _FINAL_ANSWER_SYSTEM},
-            {"role": "user", "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}"},
-        ]
-        yield from self._stream_answer(messages, stream_fn, tool_calls)
+        yield from self._stream_answer(
+            self._build_final_answer_messages(user_text, observations), stream_fn, tool_calls
+        )
 
     def _iter_final_tokens(
         self, messages: list[dict[str, str]], stream_fn: Optional[StreamChatFn]
@@ -662,19 +665,45 @@ class ConversationalAgent:
         self._emit(ev)
         return ev
 
+    def _lean_session_context(self) -> str:
+        """Compact prefs + working memory for the lean final-answer prompt (no tool protocol)."""
+        parts: list[str] = []
+        prefs = _prefs_block_from_system(self.memory.system_prompt or "")
+        if prefs:
+            parts.append(prefs)
+        wm = working_memory_prompt_block(self.working_memory)
+        if wm:
+            parts.append(wm)
+        return "\n\n".join(parts)
+
+    def _build_final_answer_messages(
+        self, user_text: str, observations: list[str]
+    ) -> list[dict[str, str]]:
+        """Lean final-answer messages: tool results + prefs/WM, without the tool-call protocol."""
+        joined = "\n".join(observations) if observations else "(no tool results)"
+        system = _FINAL_ANSWER_SYSTEM
+        ctx = self._lean_session_context()
+        if ctx:
+            system = (
+                f"{system}\n\nSESSION CONTEXT (honor when wording; do not invent data "
+                f"beyond tool results):\n{ctx}"
+            )
+        return [
+            {"role": "system", "content": system},
+            {
+                "role": "user",
+                "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}",
+            },
+        ]
+
     def _force_final_answer(self, user_text: str, observations: list[str]) -> str:
         """Synthesize the final prose answer from a CLEAN, lean prompt.
 
-        We deliberately drop the tool-protocol system prompt and ``role:"tool"`` messages
-        here: weaker models ignore them and answer generically, but reliably answer when
-        the question + tool results are inlined in a minimal prompt. Strong models normally
-        answer in-loop and never reach this path.
+        Drops the heavy tool-protocol system prompt and ``role:"tool"`` turns (weaker
+        models ignore those and answer generically) but keeps a short SESSION CONTEXT
+        with durable prefs + working memory so wording still honors user preferences.
         """
-        joined = "\n".join(observations) if observations else "(no tool results)"
-        messages = [
-            {"role": "system", "content": _FINAL_ANSWER_SYSTEM},
-            {"role": "user", "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}"},
-        ]
+        messages = self._build_final_answer_messages(user_text, observations)
         final = self._chat(messages)
         if _parse_tool_call(final) is not None:
             return _NO_ANSWER_FALLBACK
