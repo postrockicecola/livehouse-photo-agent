@@ -27,7 +27,6 @@ import infraCost from "@/fixtures/infra-cost.json";
 import infraDeadLetter from "@/fixtures/infra-dead-letter.json";
 import infraRuntimeStream from "@/fixtures/infra-runtime-stream.json";
 import infraBrain from "@/fixtures/infra-brain.json";
-import infraAgentRuns from "@/fixtures/infra-agent-runs.json";
 import infraJobs from "@/fixtures/infra-jobs.json";
 import infraJobDetail from "@/fixtures/infra-job-detail.json";
 import infraJobDetailFallback from "@/fixtures/infra-job-detail-fallback.json";
@@ -66,7 +65,6 @@ const FIXTURES = {
   "infra-dead-letter": infraDeadLetter,
   "infra-runtime-stream": infraRuntimeStream,
   "infra-brain": infraBrain,
-  "infra-agent-runs": infraAgentRuns,
   "infra-jobs": infraJobs,
   "infra-job-detail": infraJobDetail,
   "infra-job-detail-fallback": infraJobDetailFallback,
