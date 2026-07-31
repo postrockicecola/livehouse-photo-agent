@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-20T02:13:06.150787+00:00",
+  "generated_at": "2026-07-31T14:16:39.996147+00:00",
   "tool": "build_session_covers",
   "privacy": "EXIF/ICC stripped; opaque session-NN filenames; no absolute paths",
-  "count": 55,
+  "count": 56,
   "covers": [
     {
       "slug": "session-01",
@@ -553,6 +553,16 @@
       "source_portrait_basename": "",
       "date": "2026-07-11",
       "band": "于贞",
+      "venue": ""
+    },
+    {
+      "slug": "session-57",
+      "path": "/showcase/covers/session-57.jpg",
+      "path_portrait": "",
+      "source_basename": "DSC09945.jpg",
+      "source_portrait_basename": "",
+      "date": "2026-07-29",
+      "band": "SeaPower",
       "venue": ""
     }
   ]

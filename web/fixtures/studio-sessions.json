@@ -1,7 +1,29 @@
 {
   "archive_root": "/archive",
-  "count": 55,
+  "count": 56,
   "sessions": [
+    {
+      "session_key": "Session 57",
+      "session_dir": "/archive/session-57",
+      "previews_dir": "/archive/session-57/Previews",
+      "preview_count": 632,
+      "has_analysis_results": true,
+      "cover_path_quoted": "/showcase/covers/session-57.jpg",
+      "brain_session_id": 57,
+      "photos_ingested": 632,
+      "photos_analyzed": 289,
+      "source": "showcase_catalog",
+      "last_job_status": "SUCCEEDED",
+      "funnel": {
+        "imported": 632,
+        "filtered": 499,
+        "scored": 289,
+        "picked": 71,
+        "exported": 57
+      },
+      "session_date": "2026-07-29",
+      "band_name": "SeaPower"
+    },
     {
       "session_key": "Session 56",
       "session_dir": "/archive/session-56",
@@ -1239,26 +1261,33 @@
     }
   ],
   "active": {
-    "session_key": "Session 56",
-    "session_dir": "/archive/session-56",
-    "previews_dir": "/archive/session-56/Previews",
-    "preview_count": 2348,
+    "session_key": "Session 57",
+    "session_dir": "/archive/session-57",
+    "previews_dir": "/archive/session-57/Previews",
+    "preview_count": 632,
     "has_analysis_results": true,
-    "cover_path_quoted": "/showcase/covers/session-56.jpg",
+    "cover_path_quoted": "/showcase/covers/session-57.jpg",
     "cover_portrait_path_quoted": "",
-    "session_date": "2026-07-11",
-    "band_name": "于贞",
+    "session_date": "2026-07-29",
+    "band_name": "SeaPower",
     "venue": "",
     "funnel": {
-      "imported": 2348,
-      "filtered": 1855,
-      "scored": 1076,
-      "picked": 235,
-      "exported": 188
+      "imported": 632,
+      "filtered": 499,
+      "scored": 289,
+      "picked": 71,
+      "exported": 57
     },
-    "photos_ingested": 2348
+    "photos_ingested": 632
   },
   "recent_deliveries": [
+    {
+      "session_key": "Session 57",
+      "session_date": "2026-07-29",
+      "photos_imported": 632,
+      "photos_exported": 57,
+      "previews_dir": "/archive/session-57/Previews"
+    },
     {
       "session_key": "Session 56",
       "session_date": "2026-07-11",
@@ -1307,13 +1336,6 @@
       "photos_imported": 1104,
       "photos_exported": 121,
       "previews_dir": "/archive/session-50/Previews"
-    },
-    {
-      "session_key": "Session 49",
-      "session_date": "2026-06-13",
-      "photos_imported": 2677,
-      "photos_exported": 268,
-      "previews_dir": "/archive/session-49/Previews"
     }
   ]
 }
