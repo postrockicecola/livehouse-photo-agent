@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-31T14:16:39.996147+00:00",
+  "generated_at": "2026-07-31T14:19:31.735821+00:00",
   "tool": "build_session_covers",
   "privacy": "EXIF/ICC stripped; opaque session-NN filenames; no absolute paths",
   "count": 56,
@@ -449,7 +449,7 @@
       "slug": "session-46",
       "path": "/showcase/covers/session-46.jpg",
       "path_portrait": "/showcase/covers/session-46-portrait.jpg",
-      "source_basename": "DSC03754.jpg",
+      "source_basename": "DSC03630.jpg",
       "source_portrait_basename": "DSC03630.jpg",
       "date": "2026-06-05",
       "band": "浅水ShallowEnd",
