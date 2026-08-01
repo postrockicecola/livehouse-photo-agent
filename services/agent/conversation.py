@@ -170,6 +170,7 @@ class TurnResult:
     tool_calls: list[dict[str, Any]] = field(default_factory=list)
     working_memory: dict[str, Any] = field(default_factory=dict)
     events: list[dict[str, Any]] = field(default_factory=list)
+    trace: dict[str, Any] = field(default_factory=dict)
 
 
 # Clean, minimal context used to force a final answer. Weaker chat models (e.g. llava)
@@ -246,6 +247,13 @@ class ConversationalAgent:
         self.working_memory: dict[str, Any] = dict(working_memory or {})
         self._events: list[dict[str, Any]] = []
         self.last_backend: str = "langgraph"
+        self.last_trace: dict[str, Any] = {}
+        self._turn_parse_fail: bool = False
+
+    def _reset_turn_state(self) -> None:
+        self._events = []
+        self._turn_parse_fail = False
+        self.last_trace = {}
 
     def _emit(self, event: dict[str, Any]) -> None:
         self._events.append(event)
@@ -383,12 +391,13 @@ class ConversationalAgent:
         tool_calls, observations = self._execute_route_match(match)
         final = self._force_final_answer(user_text, observations)
         reply = self._finalize(final)
-        self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls, "routed": match.rule_id})
+        self._done_event(reply, tool_calls, routed=match.rule_id)
         return TurnResult(
             reply=reply,
             tool_calls=tool_calls,
             working_memory=dict(self.working_memory),
             events=list(self._events),
+            trace=dict(self.last_trace),
         )
 
     def _stream_chat_routed(
@@ -408,7 +417,7 @@ class ConversationalAgent:
 
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
-        self._events = []
+        self._reset_turn_state()
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
@@ -423,11 +432,15 @@ class ConversationalAgent:
 
         state = self._run_langgraph_turn(user_text, defer_answer=False)
         self.last_backend = str(state.get("backend") or "langgraph")
+        reply = str(state.get("reply") or "")
+        tool_calls = list(state.get("tool_calls") or [])
+        self._attach_trace_to_done(reply, tool_calls)
         return TurnResult(
-            reply=str(state.get("reply") or ""),
-            tool_calls=list(state.get("tool_calls") or []),
+            reply=reply,
+            tool_calls=tool_calls,
             working_memory=dict(self.working_memory),
             events=list(self._events),
+            trace=dict(self.last_trace),
         )
 
     def _chat_imperative(self, user_text: str) -> TurnResult:
@@ -441,12 +454,13 @@ class ConversationalAgent:
             call = _parse_tool_call(raw)
             if call is None:
                 reply = self._finalize(raw)
-                self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+                self._done_event(reply, tool_calls)
                 return TurnResult(
                     reply=reply,
                     tool_calls=tool_calls,
                     working_memory=dict(self.working_memory),
                     events=list(self._events),
+                    trace=dict(self.last_trace),
                 )
             key = f"{call['tool']}:{json.dumps(call['args'], sort_keys=True, ensure_ascii=False)}"
             if key in seen:
@@ -469,24 +483,27 @@ class ConversationalAgent:
         if not tool_calls:
             final = self._chat(self.memory.messages())
             if _parse_tool_call(final) is not None:
+                self._turn_parse_fail = True
                 final = _NO_ANSWER_FALLBACK
             reply = self._finalize(final)
-            self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+            self._done_event(reply, tool_calls)
             return TurnResult(
                 reply=reply,
                 tool_calls=tool_calls,
                 working_memory=dict(self.working_memory),
                 events=list(self._events),
+                trace=dict(self.last_trace),
             )
 
         final = self._force_final_answer(user_text, observations)
         reply = self._finalize(final)
-        self._emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+        self._done_event(reply, tool_calls)
         return TurnResult(
             reply=reply,
             tool_calls=tool_calls,
             working_memory=dict(self.working_memory),
             events=list(self._events),
+            trace=dict(self.last_trace),
         )
 
     def stream_chat(
@@ -503,7 +520,7 @@ class ConversationalAgent:
         Tool rounds use the LangGraph chat subgraph when available (``defer_answer``);
         the final answer is streamed afterward so SSE behaviour stays unchanged.
         """
-        self._events = []
+        self._reset_turn_state()
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
@@ -672,15 +689,75 @@ class ConversationalAgent:
             yield {"type": "token", "text": reply}
         yield self._done_event(reply, tool_calls)
 
-    def _done_event(self, reply: str, tool_calls: list[dict[str, Any]]) -> dict[str, Any]:
+    def _build_turn_trace(
+        self,
+        reply: str,
+        tool_calls: list[dict[str, Any]],
+        *,
+        routed: Optional[str] = None,
+    ) -> dict[str, Any]:
+        backend = str(self.last_backend or "")
+        rule_id = routed
+        if rule_id is None and backend.startswith("routed:"):
+            rule_id = backend.split(":", 1)[1]
+        grounding_hits = [e for e in self._events if e.get("type") == "grounding_violation"]
+        guardrail_matches: list[str] = []
+        for e in self._events:
+            if e.get("type") == "guardrail" and e.get("triggered"):
+                for m in e.get("matches") or []:
+                    guardrail_matches.append(str(m))
+        return {
+            "backend": backend or "unknown",
+            "rule_id": rule_id,
+            "rounds_used": len(tool_calls),
+            "grounding_ok": not grounding_hits,
+            "parse_fail": bool(self._turn_parse_fail),
+            "guardrail_matches": guardrail_matches,
+            "json_leak": _parse_tool_call(reply or "") is not None,
+        }
+
+    def _attach_trace_to_done(
+        self,
+        reply: str,
+        tool_calls: list[dict[str, Any]],
+        *,
+        routed: Optional[str] = None,
+    ) -> dict[str, Any]:
+        """Patch the latest ``done`` event (LangGraph) or emit an enriched one."""
+        trace = self._build_turn_trace(reply, tool_calls, routed=routed)
+        self.last_trace = trace
+        for e in reversed(self._events):
+            if e.get("type") == "done":
+                e["reply"] = reply
+                e["tool_calls"] = tool_calls
+                e["routed"] = rule if (rule := trace.get("rule_id")) else e.get("routed")
+                e["trace"] = trace
+                e.update(trace)
+                return e
+        return self._done_event(reply, tool_calls, routed=routed, emit=True)
+
+    def _done_event(
+        self,
+        reply: str,
+        tool_calls: list[dict[str, Any]],
+        *,
+        routed: Optional[str] = None,
+        emit: bool = True,
+    ) -> dict[str, Any]:
+        trace = self._build_turn_trace(reply, tool_calls, routed=routed)
+        self.last_trace = trace
         ev = {
             "type": "done",
             "reply": reply,
             "tool_calls": tool_calls,
             "memory_turns": self.memory.turn_count,
             "working_memory": dict(self.working_memory),
+            "routed": routed or trace.get("rule_id"),
+            "trace": trace,
+            **trace,
         }
-        self._emit(ev)
+        if emit:
+            self._emit(ev)
         return ev
 
     def _lean_session_context(self) -> str:
@@ -724,6 +801,7 @@ class ConversationalAgent:
         messages = self._build_final_answer_messages(user_text, observations)
         final = self._chat(messages)
         if _parse_tool_call(final) is not None:
+            self._turn_parse_fail = True
             return _NO_ANSWER_FALLBACK
         return final
 

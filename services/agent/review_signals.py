@@ -10,6 +10,21 @@ from typing import Any, Optional
 from services.agent.intent_router import has_count_shortlist_phrase
 
 
+def _trace_from_done(ev: dict[str, Any]) -> dict[str, Any]:
+    tr = ev.get("trace")
+    if isinstance(tr, dict) and tr:
+        return dict(tr)
+    return {
+        "backend": ev.get("backend"),
+        "rule_id": ev.get("rule_id"),
+        "rounds_used": ev.get("rounds_used"),
+        "grounding_ok": ev.get("grounding_ok"),
+        "parse_fail": ev.get("parse_fail"),
+        "guardrail_matches": ev.get("guardrail_matches"),
+        "json_leak": ev.get("json_leak"),
+    }
+
+
 def pair_user_turns(
     messages: list[dict[str, Any]],
     events: list[dict[str, Any]],
@@ -19,31 +34,39 @@ def pair_user_turns(
     turns_from_events: list[dict[str, Any]] = []
     current_tools: list[dict[str, Any]] = []
     current_guards: list[dict[str, Any]] = []
+    current_grounding: list[dict[str, Any]] = []
     for ev in events:
         et = str(ev.get("type") or "")
         if et == "tool_call":
             current_tools.append(ev)
         elif et == "guardrail":
             current_guards.append(ev)
+        elif et == "grounding_violation":
+            current_grounding.append(ev)
         elif et == "done":
             tcs = list(ev.get("tool_calls") or current_tools)
             turns_from_events.append(
                 {
                     "tool_calls": tcs,
                     "reply": ev.get("reply"),
-                    "routed": ev.get("routed"),
+                    "routed": ev.get("routed") or _trace_from_done(ev).get("rule_id"),
                     "guardrails": list(current_guards),
+                    "trace": _trace_from_done(ev),
+                    "grounding_violations": list(current_grounding),
                 }
             )
             current_tools = []
             current_guards = []
-    if current_tools or current_guards:
+            current_grounding = []
+    if current_tools or current_guards or current_grounding:
         turns_from_events.append(
             {
                 "tool_calls": list(current_tools),
                 "reply": None,
                 "routed": None,
                 "guardrails": list(current_guards),
+                "trace": {},
+                "grounding_violations": list(current_grounding),
             }
         )
 
@@ -52,7 +75,14 @@ def pair_user_turns(
         base = (
             turns_from_events[i]
             if i < len(turns_from_events)
-            else {"tool_calls": [], "reply": None, "routed": None, "guardrails": []}
+            else {
+                "tool_calls": [],
+                "reply": None,
+                "routed": None,
+                "guardrails": [],
+                "trace": {},
+                "grounding_violations": [],
+            }
         )
         out.append({"user_text": str(u.get("content") or ""), **base})
     return out
@@ -89,6 +119,12 @@ def collect_turn_reasons(turn: dict[str, Any]) -> list[str]:
 
     if has_count_shortlist_phrase(str(turn.get("user_text") or "")) and not turn_was_routed(turn):
         reasons.append("route_near_miss")
+
+    trace = turn.get("trace") if isinstance(turn.get("trace"), dict) else {}
+    if turn.get("grounding_violations") or trace.get("grounding_ok") is False:
+        reasons.append("grounding_violation")
+    if trace.get("parse_fail") or trace.get("json_leak"):
+        reasons.append("parse_fail")
 
     # de-dupe preserving order
     seen: set[str] = set()
@@ -162,5 +198,7 @@ def annotation_stub(
             "reply": (turn or {}).get("reply"),
             "routed": (turn or {}).get("routed"),
             "guardrails": (turn or {}).get("guardrails") or [],
+            "trace": (turn or {}).get("trace") or {},
+            "grounding_violations": (turn or {}).get("grounding_violations") or [],
         },
     }

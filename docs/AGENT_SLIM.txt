@@ -42,10 +42,14 @@ Eval
   scripts/eval/eval_agent_router_paraphrases.py
   scripts/eval/eval_agent_live.py            # L1 mock (CI) / live model suites
   scripts/eval/agent_case_score.py           # shared L0/L1 scoring metrics
+  scripts/eval/report_agent_quality_weekly.py
+  scripts/agent/export_review_queue.py       # production→review candidates
+  scripts/agent/promote_to_fixtures.py       # review→router/paraphrase/cases
   scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS
   quality/agent_cases.py + schemas/agent_chat_case.schema.json
   services/agent/groundedness.py           # final-answer file cite gate
-  tests/test_agent_eval_l0.py / test_agent_live_eval.py / test_agent_groundedness.py / …
+  services/agent/review_signals.py         # review heuristics (+ grounding/parse)
+  tests/test_agent_eval_l0.py / test_agent_live_eval.py / test_agent_turn_trace.py / …
 
 Docs
   this file

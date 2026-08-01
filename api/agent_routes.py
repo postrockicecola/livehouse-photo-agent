@@ -52,6 +52,8 @@ class ChatResponse(BaseModel):
     memory_turns: int = 0
     base_dir: str = ""
     error: Optional[str] = None
+    # Per-turn observability: backend / rule_id / rounds / grounding / parse_fail.
+    trace: dict[str, Any] = Field(default_factory=dict)
 
 
 def _resolve_base_dir(previews_dir: Optional[str]) -> str:
@@ -371,11 +373,13 @@ def agent_chat_stream(
                         guardrail_events=events,
                         working_memory=dict(getattr(agent, "working_memory", {}) or {}),
                     )
+                    tr = dict(getattr(agent, "last_trace", {}) or ev.get("trace") or {})
                     ev = {
                         **ev,
                         "base_dir": base_dir,
                         "memory_turns": turns,
                         "user": user,
+                        "trace": tr,
                         "guardrail_events": [
                             {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
                             for e in events if e.triggered
@@ -437,6 +441,7 @@ def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=N
         ],
         memory_turns=turns,
         base_dir=base_dir,
+        trace=dict(getattr(result, "trace", None) or getattr(agent, "last_trace", {}) or {}),
     )
 
 

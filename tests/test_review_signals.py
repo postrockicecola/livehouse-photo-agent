@@ -55,6 +55,19 @@ def test_tool_call_failed() -> None:
     assert "tool_call_failed" in collect_turn_reasons(turn)
 
 
+def test_grounding_and_parse_signals() -> None:
+    turn = {
+        "user_text": "找鼓手",
+        "tool_calls": [{"tool": "gallery_search", "ok": True}],
+        "guardrails": [],
+        "grounding_violations": [{"type": "grounding_violation", "unknown": ["x.jpg"]}],
+        "trace": {"grounding_ok": False, "parse_fail": True},
+    }
+    reasons = collect_turn_reasons(turn)
+    assert "grounding_violation" in reasons
+    assert "parse_fail" in reasons
+
+
 def test_pair_and_collect_conversation() -> None:
     messages = [
         {"role": "user", "content": "帮我选20张照片"},

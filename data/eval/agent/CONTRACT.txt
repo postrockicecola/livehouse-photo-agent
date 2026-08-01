@@ -53,3 +53,22 @@ Metrics: ``pass_at_1``, ``tool_name_acc``, ``route_acc``, ``grounded_rate``,
 ``prompt_hash`` + model metadata. Mock mode is a CI gate; ``--live`` is
 informational (exit 0) until a release threshold is frozen.
 
+## Observability + promotion (Phase 4)
+
+Each turn's ``done`` event / ``ChatResponse.trace`` includes:
+
+``backend``, ``rule_id``, ``rounds_used``, ``grounding_ok``, ``parse_fail``,
+``guardrail_matches``, ``json_leak``.
+
+Weekly loop::
+
+    python -m scripts.agent.export_review_queue --days 7
+    # annotate issue_type / expected_behavior / action
+    python -m scripts.agent.promote_to_fixtures data/review_queue/<day>.jsonl
+    python -m scripts.eval.report_agent_quality_weekly \\
+        --review data/review_queue/<day>.jsonl \\
+        --out data/eval/agent/reports/weekly.md
+
+Promote targets: router fixtures, ``router_paraphrases.v1.jsonl``, and chat
+``cases.v1.jsonl`` stubs (hallucination / grounding / parse).
+
