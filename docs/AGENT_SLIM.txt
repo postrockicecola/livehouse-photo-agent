@@ -37,6 +37,7 @@ API / UI
 
 Eval
   scripts/eval/eval_agent_chat_cases.py
+  scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS
   tests/test_agent_conversation*.py / skills / guardrails / store / …
   quality/ + curated data/eval baselines (not bulk run dumps)
 
@@ -53,6 +54,12 @@ Imperative chat runtime
   Env: LIVEHOUSE_AGENT_RUNTIME=imperative|loop|legacy
   Default is LangGraph; missing langgraph → hard error (no silent fallback).
   Kept for tests + emergency only.
+
+Native OpenAI tools[] on chat (experimental A/B)
+  Env: LIVEHOUSE_AGENT_NATIVE_TOOLS=1
+  build_chat_fn(..., tools=registry.tool_specs()) attaches tools; native tool_calls
+  are bridged back to {"tool","args"} text JSON for the existing decide→act loop.
+  Default off — production stays on text protocol.
 
 ==============================================================================
 REMOVED FROM TREE

@@ -269,19 +269,25 @@ def _persist_turn(
         conn.close()
 
 
-def _build_chat_fn(base_dir: str):
+def _build_chat_fn(base_dir: str, *, tools: Optional[list[dict[str, Any]]] = None):
     """Build the non-streaming ``ChatFn`` from the shared ``model.*`` config.
 
     Returns ``(chat_fn, error)`` — exactly one is non-None. Prefers a dedicated
     instruct model (``model.agent_chat_model``) for reliable tool-calling.
+
+    When ``LIVEHOUSE_AGENT_NATIVE_TOOLS=1`` and ``tools`` is provided (from
+    ``registry.tool_specs()``), the backend attaches native OpenAI-shaped tools.
+    Default remains text-protocol only.
     """
+    _ = base_dir
     try:
-        from services.agent.chat_backend import build_chat_fn
+        from services.agent.chat_backend import build_chat_fn, native_tools_enabled
         from utils.config_loader import ConfigLoader
 
         model_cfg = ConfigLoader.get_model_config(ConfigLoader.load())
         chat_model = str(model_cfg.get("agent_chat_model") or "").strip() or None
-        return build_chat_fn(model_cfg, model_name=chat_model), None
+        use_tools = tools if native_tools_enabled() else None
+        return build_chat_fn(model_cfg, model_name=chat_model, tools=use_tools), None
     except ValueError as exc:
         return None, f"chat model unavailable: {exc} (set model.provider to ollama/vllm/openai)"
     except Exception as exc:
@@ -331,15 +337,15 @@ def agent_chat_stream(
         "Connection": "keep-alive",
     }
 
-    chat_fn, err = _build_chat_fn(base_dir)
+    user = resolve_user(authorization)
+    owner = store.owner_key(user, req.session_id)
+    registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
+    chat_fn, err = _build_chat_fn(base_dir, tools=registry.tool_specs())
     if err is not None:
         def _err_gen():
             yield _sse({"type": "error", "error": err, "base_dir": base_dir})
         return StreamingResponse(_err_gen(), media_type="text/event-stream", headers=headers)
 
-    user = resolve_user(authorization)
-    owner = store.owner_key(user, req.session_id)
-    registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
     # Load history + working memory first so last_files can be injected into the prompt.
     conv_id, memory, working = _load_conversation(owner, req, base_system)
     system_prompt = _augment_system_prompt(base_system, owner, working)
@@ -387,13 +393,13 @@ def agent_chat_stream(
 def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=None)) -> ChatResponse:
     base_dir = _resolve_base_dir(req.previews_dir)
 
-    chat_fn, err = _build_chat_fn(base_dir)
-    if err is not None:
-        return ChatResponse(reply="", base_dir=base_dir, error=err)
-
     user = resolve_user(authorization)
     owner = store.owner_key(user, req.session_id)
     registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
+    chat_fn, err = _build_chat_fn(base_dir, tools=registry.tool_specs())
+    if err is not None:
+        return ChatResponse(reply="", base_dir=base_dir, error=err)
+
     conv_id, memory, working = _load_conversation(owner, req, base_system)
     system_prompt = _augment_system_prompt(base_system, owner, working)
     memory.system_prompt = system_prompt
