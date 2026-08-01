@@ -270,9 +270,12 @@ class ConversationalAgent:
             self.working_memory["last_rag_mode"] = (meta.get("rag") or {}).get("mode")
         self.working_memory = compress_working_memory(self.working_memory)
 
-    def _record_tool_result(self, name: str, result, *, args: Optional[dict[str, Any]] = None) -> None:
-        """Commit ``assistant(tool-call) → tool(result)`` so decide history stays causal."""
-        self.memory.add_assistant_tool_call(name, dict(args or {}))
+    def _record_tool_decision(self, tool: str, args: dict[str, Any]) -> None:
+        """Persist the model's tool-call JSON as an assistant turn (before dispatch)."""
+        self.memory.add_assistant_tool_call(tool, dict(args or {}))
+
+    def _record_tool_observation(self, name: str, result) -> None:
+        """Persist a tool observation (after dispatch). Pair with ``_record_tool_decision``."""
         obs = json.dumps(result.to_observation(), ensure_ascii=False)
         if self._guardrails is not None:
             if self._wrap_tool_output:
@@ -281,6 +284,12 @@ class ConversationalAgent:
                 # Still scan for injection (observability) without the heavy fence.
                 self._guardrails.scan_input(obs, source=f"tool:{name}")
         self.memory.add_tool_result(name, obs, max_chars=self._max_tool_result_chars)
+
+    def _record_tool_result(self, name: str, result, *, args: Optional[dict[str, Any]] = None) -> None:
+        """Commit ``assistant(tool-call) → tool(result)``. Prefer decision-then-dispatch at call sites."""
+        if args is not None:
+            self._record_tool_decision(name, dict(args or {}))
+        self._record_tool_observation(name, result)
 
     def _graph_kwargs(self) -> dict[str, Any]:
         return {
@@ -291,7 +300,8 @@ class ConversationalAgent:
             "wrap_tool_output": self._wrap_tool_output,
             "max_tool_result_chars": self._max_tool_result_chars,
             "update_working_memory": self._update_working_memory,
-            "record_tool_result": self._record_tool_result,
+            "record_tool_decision": self._record_tool_decision,
+            "record_tool_observation": self._record_tool_observation,
             "finalize": self._finalize,
             "force_final_answer": self._force_final_answer,
             "build_final_answer_messages": self._build_final_answer_messages,
@@ -322,9 +332,12 @@ class ConversationalAgent:
     def _dispatch_call(self, tool: str, args: dict[str, Any], *, routed: str | None = None) -> dict[str, Any]:
         """Run one skill, update memory / working memory, emit ``tool_call``."""
         assert self._skills is not None
+        # Causal chain: assistant(decision) lands before dispatch so a crash mid-tool
+        # still leaves a decide-visible anchor for the next round.
+        self._record_tool_decision(tool, args)
         result = self._skills.dispatch(tool, args)
         self._update_working_memory(tool, args, result)
-        self._record_tool_result(tool, result, args=args)
+        self._record_tool_observation(tool, result)
         meta = dict(getattr(result, "metadata", None) or {})
         if routed:
             meta["routed"] = routed
@@ -437,9 +450,10 @@ class ConversationalAgent:
             if key in seen:
                 break
             seen.add(key)
+            self._record_tool_decision(call["tool"], call["args"])
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
             self._update_working_memory(call["tool"], call["args"], result)
-            self._record_tool_result(call["tool"], result, args=call["args"])
+            self._record_tool_observation(call["tool"], result)
             observations.append(f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}")
             tc = {
                 "tool": call["tool"],
@@ -570,9 +584,10 @@ class ConversationalAgent:
             if key in seen:
                 break
             seen.add(key)
+            self._record_tool_decision(call["tool"], call["args"])
             result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
             self._update_working_memory(call["tool"], call["args"], result)
-            self._record_tool_result(call["tool"], result, args=call["args"])
+            self._record_tool_observation(call["tool"], result)
             observations.append(
                 f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
             )

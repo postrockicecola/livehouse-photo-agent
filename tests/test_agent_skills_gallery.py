@@ -11,6 +11,7 @@ from services.agent.skills.gallery import (
     GalleryStatsSkill,
     MarkScoreGapSkill,
     _expand_query_terms,
+    _normalize_category,
     _style_intent,
     gallery_registry,
 )
@@ -294,8 +295,50 @@ def test_search_tag_and_category_filter(tmp_path: Path) -> None:
     files = {r["file"] for r in res.metadata["rows"]}
     assert files == {"a_best.jpg", "c_trash.jpg"}
 
-    res2 = GallerySearchSkill(str(tmp_path)).run({"category": "AI_Best_90+"})
+    # Canonical short name (schema enum) and legacy AI_* folder label are aliases.
+    res2 = GallerySearchSkill(str(tmp_path)).run({"category": "best"})
     assert [r["file"] for r in res2.metadata["rows"]] == ["a_best.jpg"]
+    res3 = GallerySearchSkill(str(tmp_path)).run({"category": "AI_Best_90+"})
+    assert [r["file"] for r in res3.metadata["rows"]] == ["a_best.jpg"]
+
+
+def test_category_aliases_are_same_score_band() -> None:
+    """AI_* folder names ≡ best/keep/trash JSON labels (not a second taxonomy)."""
+    assert _normalize_category("AI_Best_90+") == "best"
+    assert _normalize_category("AI_Keep_60-90") == "keep"
+    assert _normalize_category("AI_Trash_Below60") == "trash"
+    assert _normalize_category("best") == "best"
+    assert GallerySearchSkill.parameters["properties"]["category"]["enum"] == [
+        "best",
+        "keep",
+        "trash",
+    ]
+
+
+def test_search_category_matches_short_labels_in_results(tmp_path: Path) -> None:
+    """Production analysis_results use short labels; AI_* args must still hit them."""
+    rows = [
+        {
+            "file": "x.jpg",
+            "overall_score": 92.0,
+            "scores": {"overall": 92.0, "energy": 8.0, "technical": 8.0, "composition": 8.0},
+            "category": "best",
+            "tags": [],
+            "reason": "ok",
+        },
+        {
+            "file": "y.jpg",
+            "overall_score": 70.0,
+            "scores": {"overall": 70.0, "energy": 7.0, "technical": 7.0, "composition": 7.0},
+            "category": "keep",
+            "tags": [],
+            "reason": "ok",
+        },
+    ]
+    _write_results(tmp_path, rows)
+    skill = GallerySearchSkill(str(tmp_path))
+    assert {r["file"] for r in skill.run({"category": "AI_Best_90+"}).metadata["rows"]} == {"x.jpg"}
+    assert {r["file"] for r in skill.run({"category": "keep"}).metadata["rows"]} == {"y.jpg"}
 
 
 def test_search_limit_clamped(tmp_path: Path) -> None:

@@ -15,7 +15,23 @@ from services.agent.skills.base import SkillRegistry, SkillResult
 
 logger = logging.getLogger(__name__)
 
-_KNOWN_CATEGORIES = ("AI_Best_90+", "AI_Keep_60-90", "AI_Trash_Below60", "best", "keep", "trash")
+# Canonical category labels written into ``analysis_results.json`` by
+# ``gallery_integration`` (keys of ``paths.folders``). Disk folder *names* often
+# look like ``AI_Best_90+`` (see ``configs/livehouse.yaml``), but the JSON field
+# is the short form. Historical rows / tests may still store the AI_* folder name
+# in ``category`` — treat those as aliases, not a second taxonomy.
+_KNOWN_CATEGORIES = ("best", "keep", "trash")
+_CATEGORY_ALIASES = {
+    "best": "best",
+    "keep": "keep",
+    "trash": "trash",
+    "ai_best_90+": "best",
+    "ai_keep_60-90": "keep",
+    "ai_trash_below60": "trash",
+    "ai_best": "best",
+    "ai_keep": "keep",
+    "ai_trash": "trash",
+}
 _SORT_KEYS = (
     "overall",
     "energy",
@@ -427,6 +443,24 @@ def _query_hit_score(blob: str, terms: list[str]) -> int:
     return score
 
 
+def _normalize_category(raw: str) -> str:
+    """Map folder-style / legacy labels onto canonical ``best|keep|trash``.
+
+    ``AI_Best_90+`` / ``AI_Keep_60-90`` / ``AI_Trash_Below60`` are the on-disk folder
+    names from ``paths.folders``; ``best`` / ``keep`` / ``trash`` are the values
+    written into ``analysis_results.json``. Same score-band buckets — not two taxonomies.
+    Unknown strings are returned stripped (filter will fail closed on mismatch).
+    """
+    s = str(raw or "").strip()
+    if not s:
+        return ""
+    return _CATEGORY_ALIASES.get(s.lower(), s)
+
+
+def _is_trash_category(raw: str) -> bool:
+    return _normalize_category(raw) == "trash" or "trash" in str(raw or "").lower()
+
+
 def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[str, Any]]:
     min_score = args.get("min_score")
     max_score = args.get("max_score")
@@ -442,7 +476,7 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
     tag = str(args.get("tag") or "").strip().lower()
     query = str(args.get("query") or "").strip().lower()
     query_terms = _expand_query_terms(query) if query else []
-    category = str(args.get("category") or "").strip()
+    category = _normalize_category(str(args.get("category") or ""))
     exclude_trash = bool(args.get("exclude_trash"))
     exclude_low_quality = bool(args.get("exclude_low_quality"))
 
@@ -460,6 +494,7 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
         atmosphere = _dim(row, "atmosphere_impact")
         moment = _dim(row, "moment_peak")
         cat = str(row.get("category") or "")
+        cat_norm = _normalize_category(cat)
         blob = _text_blob(row)
 
         if min_score is not None and overall < float(min_score):
@@ -485,9 +520,9 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
             continue
         if min_moment_peak is not None and moment > 0 and moment < float(min_moment_peak):
             continue
-        if category and cat != category:
+        if category and cat_norm != category:
             continue
-        if exclude_trash and ("Trash" in cat or cat.lower() == "trash"):
+        if exclude_trash and _is_trash_category(cat):
             continue
         if exclude_low_quality:
             if any(h in blob for h in _TRASH_HINTS) or technical < 5.0 or overall < 55.0:
@@ -585,8 +620,19 @@ class GallerySearchSkill:
                     "Free-text query. Matches tags/caption/reason with Chinese↔English synonyms."
                 ),
             },
-            "category": {"type": "string", "enum": list(_KNOWN_CATEGORIES)},
-            "exclude_trash": {"type": "boolean", "description": "Drop AI_Trash_* categories."},
+            "category": {
+                "type": "string",
+                "enum": list(_KNOWN_CATEGORIES),
+                "description": (
+                    "Score-band bucket from analysis_results: best (>=~90), keep (60–90), "
+                    "trash (<60). Prefer these short names. Legacy AI_Best_90+ / AI_Keep_60-90 / "
+                    "AI_Trash_Below60 folder labels are accepted as aliases of the same buckets."
+                ),
+            },
+            "exclude_trash": {
+                "type": "boolean",
+                "description": "Drop trash-band photos (category trash / AI_Trash_*).",
+            },
             "exclude_low_quality": {
                 "type": "boolean",
                 "description": "Drop blur/overexposure cues and low technical / overall.",

@@ -8,13 +8,23 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from services.agent.conversation import (
     ConversationalAgent,
     ConversationMemory,
     _parse_tool_call,
     approx_tokens,
 )
+from services.agent.conversation_graph import langgraph_available
 from services.agent.skills.base import SkillRegistry, SkillResult
+
+
+@pytest.fixture(autouse=True)
+def _chat_runtime_without_langgraph(monkeypatch):
+    """Default production path needs langgraph; fall back so unit tests stay offline."""
+    if not langgraph_available():
+        monkeypatch.setenv("LIVEHOUSE_AGENT_RUNTIME", "imperative")
 
 
 # ------------------------------------------------------------------------- memory

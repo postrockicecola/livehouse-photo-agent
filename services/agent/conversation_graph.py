@@ -70,7 +70,8 @@ def compile_chat_turn_graph(
     wrap_tool_output: bool,
     max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
-    record_tool_result: Callable[..., None],
+    record_tool_decision: Callable[[str, dict[str, Any]], None],
+    record_tool_observation: Callable[[str, Any], None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
     build_final_answer_messages: Callable[[str, list[str]], list[dict[str, str]]],
@@ -145,10 +146,11 @@ def compile_chat_turn_graph(
         call = state.get("pending_call") or {}
         tool = str(call.get("tool") or "")
         args = dict(call.get("args") or {})
+        # assistant(tool-call) before dispatch → next decide sees a causal chain.
+        record_tool_decision(tool, args)
         result = skills.dispatch(tool, args)
         update_working_memory(tool, args, result)
-        # ConversationalAgent._record_tool_result writes assistant(tool-call) then tool(result).
-        record_tool_result(tool, result, args=args)
+        record_tool_observation(tool, result)
         obs = f"{tool} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
         tc = {
             "tool": tool,
@@ -283,7 +285,8 @@ def run_chat_turn(
     wrap_tool_output: bool,
     max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
-    record_tool_result: Callable[..., None],
+    record_tool_decision: Callable[[str, dict[str, Any]], None],
+    record_tool_observation: Callable[[str, Any], None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
     build_final_answer_messages: Callable[[str, list[str]], list[dict[str, str]]],
@@ -300,7 +303,8 @@ def run_chat_turn(
         wrap_tool_output=wrap_tool_output,
         max_tool_result_chars=max_tool_result_chars,
         update_working_memory=update_working_memory,
-        record_tool_result=record_tool_result,
+        record_tool_decision=record_tool_decision,
+        record_tool_observation=record_tool_observation,
         finalize=finalize,
         force_final_answer=force_final_answer,
         build_final_answer_messages=build_final_answer_messages,
@@ -328,7 +332,8 @@ def iter_chat_turn_updates(
     wrap_tool_output: bool,
     max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
-    record_tool_result: Callable[..., None],
+    record_tool_decision: Callable[[str, dict[str, Any]], None],
+    record_tool_observation: Callable[[str, Any], None],
     finalize: Callable[[str], str],
     force_final_answer: Callable[[str, list[str]], str],
     build_final_answer_messages: Callable[[str, list[str]], list[dict[str, str]]],
@@ -346,7 +351,8 @@ def iter_chat_turn_updates(
         wrap_tool_output=wrap_tool_output,
         max_tool_result_chars=max_tool_result_chars,
         update_working_memory=update_working_memory,
-        record_tool_result=record_tool_result,
+        record_tool_decision=record_tool_decision,
+        record_tool_observation=record_tool_observation,
         finalize=finalize,
         force_final_answer=force_final_answer,
         build_final_answer_messages=build_final_answer_messages,
