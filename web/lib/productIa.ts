@@ -220,8 +220,9 @@ export const LANDING_AI_LAYER = {
     },
   ] satisfies AiPipelineStage[],
   preview: {
-    caption: "歌手特写，表情张力强，舞台灯光层次清晰。",
-    tags: ["peak moment", "front row"],
+    /** Must match ``LANDING_HERO.backgroundSrc`` (/showcase/landing-hero.jpg). */
+    caption: "鼓手近景，鼓棒带拖影，侧后紫光勾出轮廓。",
+    tags: ["drummer", "motion blur", "peak energy"],
     score: "8.7",
     dimensions: "E 9.1 · T 8.4 · C 8.6",
   },

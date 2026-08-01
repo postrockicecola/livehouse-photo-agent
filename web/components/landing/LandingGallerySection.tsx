@@ -61,15 +61,12 @@ export function LandingGallerySection() {
         <div className="mt-14 sm:mt-20">
           {loading ? (
             <div className="landing-gallery-product landing-gallery-product--skeleton min-h-[28rem] rounded-2xl border border-white/[0.06] bg-white/[0.02]" />
-          ) : images.length > 0 ? (
+          ) : (
             <LandingGalleryProductMock
-              images={images.slice(0, 4)}
               buildImageUrl={buildImageUrl}
               activeFeature={activeFeature}
               onFeatureHover={setActiveFeature}
             />
-          ) : (
-            <div className="landing-placeholder min-h-[24rem] rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.015] sm:min-h-[28rem]" />
           )}
         </div>
 

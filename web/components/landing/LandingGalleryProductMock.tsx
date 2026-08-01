@@ -1,15 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import {
   LANDING_GALLERY_FEATURES,
-  LANDING_GALLERY_MOCK_META,
+  LANDING_GALLERY_MOCK_FRAMES,
   LANDING_GALLERY_STYLE_PRESETS,
 } from "./landingConfig";
 
-type GalleryImage = { path: string };
-
 type Props = {
-  images: GalleryImage[];
   buildImageUrl: (path: string) => string;
   activeFeature: string;
   onFeatureHover: (id: string) => void;
@@ -19,12 +17,14 @@ function scoreText(n: number): string {
   return n.toFixed(1);
 }
 
-export function LandingGalleryProductMock({ images, buildImageUrl, activeFeature, onFeatureHover }: Props) {
-  const focus = LANDING_GALLERY_MOCK_META[0];
-  const tiles = LANDING_GALLERY_MOCK_META.map((meta, i) => ({
-    meta,
-    image: images[i]?.path ?? images[0]?.path,
-  }));
+/**
+ * Product mock uses fixed showcase cover paths + matching overlays.
+ * Do not index-align against the landing gallery API list (session order drifts).
+ */
+export function LandingGalleryProductMock({ buildImageUrl, activeFeature, onFeatureHover }: Props) {
+  const tiles = LANDING_GALLERY_MOCK_FRAMES;
+  const [focusPath, setFocusPath] = useState(tiles[0].path);
+  const focus = tiles.find((f) => f.path === focusPath) ?? tiles[0];
 
   return (
     <div className="landing-gallery-product">
@@ -55,24 +55,29 @@ export function LandingGalleryProductMock({ images, buildImageUrl, activeFeature
           <div
             className={`landing-gallery-product-masonry ${activeFeature === "select" ? "highlight-select" : ""} ${activeFeature === "score" ? "highlight-score" : ""}`}
           >
-            {tiles.map(({ meta, image }, i) =>
-              image ? (
-                <article
-                  key={meta.file}
-                  className={`landing-gallery-product-tile ${meta.selected ? "is-selected" : ""} ${i === 1 ? "tile-tall" : ""}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={buildImageUrl(image)} alt="" className="landing-gallery-product-tile-img" loading="lazy" />
-                  <div className="landing-gallery-product-tile-cap">
-                    <span className="truncate text-[10px] text-white/75">{meta.file}</span>
-                    <span className="tabular-nums text-[10px] text-white/50">{scoreText(meta.score)}</span>
-                  </div>
-                  <span className={`landing-gallery-product-tile-pick ${meta.selected ? "is-on" : ""}`}>
-                    {meta.selected ? "已选" : "选择"}
-                  </span>
-                </article>
-              ) : null,
-            )}
+            {tiles.map((frame, i) => (
+              <article
+                key={frame.path}
+                className={`landing-gallery-product-tile ${frame.selected ? "is-selected" : ""} ${i === 1 ? "tile-tall" : ""} ${focus.path === frame.path ? "is-focus" : ""}`}
+                onMouseEnter={() => setFocusPath(frame.path)}
+                onFocus={() => setFocusPath(frame.path)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={buildImageUrl(frame.path)}
+                  alt=""
+                  className="landing-gallery-product-tile-img"
+                  loading="lazy"
+                />
+                <div className="landing-gallery-product-tile-cap">
+                  <span className="truncate text-[10px] text-white/75">{frame.file}</span>
+                  <span className="tabular-nums text-[10px] text-white/50">{scoreText(frame.score)}</span>
+                </div>
+                <span className={`landing-gallery-product-tile-pick ${frame.selected ? "is-on" : ""}`}>
+                  {frame.selected ? "已选" : "选择"}
+                </span>
+              </article>
+            ))}
           </div>
 
           <aside
@@ -96,7 +101,10 @@ export function LandingGalleryProductMock({ images, buildImageUrl, activeFeature
               <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">风格预览</p>
               <div className="landing-gallery-product-style-rail">
                 {LANDING_GALLERY_STYLE_PRESETS.map((s) => (
-                  <span key={s.id} className={`landing-gallery-product-style-chip ${"active" in s && s.active ? "is-active" : ""}`}>
+                  <span
+                    key={s.id}
+                    className={`landing-gallery-product-style-chip ${"active" in s && s.active ? "is-active" : ""}`}
+                  >
                     {s.label}
                   </span>
                 ))}

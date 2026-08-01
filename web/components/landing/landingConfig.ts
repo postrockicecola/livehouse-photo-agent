@@ -22,49 +22,70 @@ export const LANDING_GALLERY_FEATURES: LandingGalleryFeature[] = [
   { id: "export", label: "导出交付", description: "预览与 RAW 批量导出" },
 ];
 
-/** Demo metadata overlaid on showcase tiles (marketing mock). */
-export const LANDING_GALLERY_MOCK_META = [
+/**
+ * Demo frames for the Gallery product mock — path + overlay stay paired.
+ * Paths are bundled showcase covers (see ``web/public/showcase/covers/``);
+ * captions were written against those frames (not index-aligned API covers).
+ */
+export type LandingGalleryMockFrame = {
+  path: string;
+  file: string;
+  score: number;
+  energy: number;
+  technical: number;
+  composition: number;
+  tags: readonly string[];
+  aiLine: string;
+  selected: boolean;
+  exportStyle: string | null;
+};
+
+export const LANDING_GALLERY_MOCK_FRAMES: readonly LandingGalleryMockFrame[] = [
   {
-    file: "DSC05641.jpg",
+    path: "/showcase/covers/session-57.jpg",
+    file: "DSC09945.jpg",
     score: 8.7,
     energy: 9.1,
     technical: 8.4,
     composition: 8.6,
-    tags: ["peak moment", "front row"],
-    aiLine: "歌手特写，表情张力强，舞台灯光层次清晰。",
+    tags: ["duo", "peak energy"],
+    aiLine: "吉他手举拳与主唱同框，青绿薄雾里张力拉满。",
     selected: true,
     exportStyle: "Cinestill 800T",
   },
   {
-    file: "DSC05870.jpg",
+    path: "/showcase/covers/session-56.jpg",
+    file: "DSC07563.jpg",
+    score: 8.3,
+    energy: 8.8,
+    technical: 8.0,
+    composition: 7.9,
+    tags: ["vocalist", "spotlight"],
+    aiLine: "主唱立于蓝雾聚光中，前景观众剪影压住舞台层次。",
+    selected: true,
+    exportStyle: "Portra 400",
+  },
+  {
+    path: "/showcase/covers/session-55.jpg",
+    file: "DSC05257.jpg",
     score: 7.9,
     energy: 8.2,
     technical: 7.6,
     composition: 8.0,
     tags: ["wide", "crowd"],
-    aiLine: "全场氛围，灯海与舞台形成对比。",
+    aiLine: "观众席全景：投影大字与青绿灯束切开舞台。",
     selected: false,
     exportStyle: null,
   },
   {
-    file: "DSC06013.jpg",
-    score: 8.3,
-    energy: 8.8,
-    technical: 8.0,
-    composition: 7.9,
-    tags: ["motion", "backlit"],
-    aiLine: "逆光轮廓，动感模糊恰到好处。",
-    selected: true,
-    exportStyle: "Portra 400",
-  },
-  {
-    file: "DSC06201.jpg",
+    path: "/showcase/covers/session-54.jpg",
+    file: "DSC03267.jpg",
     score: 7.4,
     energy: 7.1,
     technical: 7.8,
     composition: 7.3,
-    tags: ["drummer", "low light"],
-    aiLine: "鼓手局部，低照度仍保留细节。",
+    tags: ["drummer", "silhouette"],
+    aiLine: "紫雾中鼓组与吉他手剪影，顶光灯束落下。",
     selected: false,
     exportStyle: null,
   },
