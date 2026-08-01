@@ -294,7 +294,7 @@ export default function StudioPage() {
   }, []);
 
   return (
-    <div className="studio-grain relative flex min-h-[100dvh] flex-col bg-[#0e0e0e] text-[#e8e8e8]">
+    <div className="studio-grain relative flex min-h-[100dvh] flex-col bg-[var(--luma-bg-elevated)] text-[var(--luma-text)]">
       <StudioAppNav />
       <ShowcaseBanner />
 

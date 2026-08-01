@@ -30,20 +30,19 @@ export function ProductGatePortal() {
   return (
     <section
       id="gate"
-      className="landing-hero product-gate relative flex min-h-[100svh] scroll-mt-24 flex-col px-4 pb-16 pt-28 sm:px-8 sm:pb-20 sm:pt-32"
+      className="studio-grain product-gate relative flex min-h-[100svh] scroll-mt-24 flex-col px-4 pb-16 pt-28 sm:px-8 sm:pb-20 sm:pt-32"
     >
-      <div className="landing-hero-glow pointer-events-none absolute inset-0" />
-      <div className="landing-hero-grid pointer-events-none absolute inset-0 opacity-[0.35]" />
-      <div className="product-gate-grid pointer-events-none absolute inset-0 opacity-[0.22]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_20%,rgba(255,244,230,0.04),transparent_70%)]" />
 
       <header className="relative z-10 mx-auto w-full max-w-3xl text-center">
-        <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-white/30">Luma</p>
-        <h1 className="mt-3 text-3xl font-light tracking-tight text-white/90 sm:text-4xl">
-          Livehouse Photography Agent
+        <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[rgba(255,244,230,0.35)]">
+          Luma
+        </p>
+        <h1 className="mt-3 text-3xl font-light tracking-tight text-[rgba(247,244,240,0.92)] sm:text-4xl">
+          进暗房，打开本场胶卷
         </h1>
-        <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/40">
-          Job-centric 视觉 runtime：入库 → 多阶段分析 → Gallery 选片；Gallery Agent 以
-          LangGraph tool-use 挂在真实作业与画廊之上。
+        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/40">
+          入库与多阶段分析把场次算完；Gallery 里确认样张、试胶片风格、用对话 Agent 选片导出。
         </p>
       </header>
 
@@ -51,46 +50,48 @@ export function ProductGatePortal() {
         <Link
           href="/studio"
           onClick={onEnter}
-          className="product-portal group relative flex min-h-[22rem] flex-col overflow-hidden rounded-2xl border border-amber-500/15 bg-[#0c0908]/90 p-6 transition-all duration-500 hover:border-amber-400/35 hover:shadow-[0_0_48px_rgba(251,191,36,0.08)] sm:min-h-[24rem] sm:p-8"
+          className="product-portal group relative flex min-h-[20rem] flex-col overflow-hidden border border-[var(--luma-matte)] bg-[rgba(12,11,10,0.92)] p-6 transition-[border-color,background-color] duration-400 hover:border-[var(--luma-matte-strong)] hover:bg-[rgba(14,13,12,0.96)] sm:min-h-[22rem] sm:p-8"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(251,191,36,0.08),transparent_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
           <div className="relative flex items-start justify-between gap-3">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber-200/50">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[rgba(255,244,230,0.4)]">
                 Luma Studio
               </p>
-              <h2 className="mt-2 text-2xl font-light tracking-tight text-white/92 sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-light tracking-tight text-[rgba(247,244,240,0.92)] sm:text-3xl">
                 进入工作台
               </h2>
             </div>
-            <span className="shrink-0 rounded-full border border-amber-500/25 bg-amber-950/30 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-amber-200/70">
-              主线
+            <span className="shrink-0 border border-[var(--luma-matte)] px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-[rgba(255,244,230,0.55)]">
+              Darkroom
             </span>
           </div>
 
-          <p className="relative mt-4 max-w-sm text-sm leading-relaxed text-white/45">
-            现场摄影入库、OpenCV + VLM 流水线、Gallery 确认导出，以及带 trace 的
-            Gallery 对话 Agent。
+          <p className="relative mt-4 max-w-sm text-sm leading-relaxed text-white/42">
+            现场摄影入库 → 样张筛选 → Gallery 确认与胶片风格 → 预览 / RAW 导出。
           </p>
 
           <ul className="relative mt-6 flex-1 space-y-2.5">
             {[
-              "Durable jobs · SQLite SSOT · Celery notify",
-              "Stage1→2→3 · 有界推理队列 · model fallback",
-              "LangGraph Gallery chat：decide→act→answer + skills",
-              "Infra：job timeline · model_runs · eval 基线",
+              "场次入库与预览抽取",
+              "多阶段分析 · 可恢复作业",
+              "Gallery 选片 · 胶片预览 · Agent",
+              "Infra 作业时间线（需要时再看）",
             ].map((f) => (
-              <li key={f} className="flex items-start gap-2.5 font-mono text-[11px] text-white/38">
-                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-amber-400/70" />
+              <li
+                key={f}
+                className="flex items-start gap-2.5 font-mono text-[11px] text-white/38"
+              >
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[rgba(255,244,230,0.55)]" />
                 {f}
               </li>
             ))}
           </ul>
 
-          <div className="relative mt-8 flex items-center justify-between border-t border-amber-500/10 pt-5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/28">进入 →</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-200/60 transition-colors group-hover:text-amber-100/90">
+          <div className="relative mt-8 flex items-center justify-between border-t border-[var(--luma-stroke)] pt-5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/28">
+              进入 →
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[rgba(255,244,230,0.5)] transition-colors group-hover:text-[rgba(255,244,230,0.85)]">
               Studio
             </span>
           </div>
@@ -107,7 +108,7 @@ export function ProductGatePortal() {
               setRemember(next);
               saveProductMode("professional", next);
             }}
-            className="h-3 w-3 rounded border-white/20 bg-transparent accent-amber-500"
+            className="h-3 w-3 rounded-sm border-white/20 bg-transparent accent-[rgba(255,236,210,0.85)]"
           />
           记住选择，下次直接进入
         </label>

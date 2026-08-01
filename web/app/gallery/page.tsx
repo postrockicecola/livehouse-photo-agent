@@ -1004,7 +1004,7 @@ export default function HomePage() {
   const showEmptyPanel = !loadingItems && items.length === 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-white">
+    <div className="studio-grain relative flex min-h-screen flex-col bg-[var(--luma-bg)] text-[var(--luma-text)]">
       <StudioAppNav />
       {SHOWCASE ? (
         <div
@@ -1021,7 +1021,7 @@ export default function HomePage() {
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          className="fixed left-1/2 top-2 z-50 flex max-w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-1 text-[11px] text-white/50 backdrop-blur-[2px]"
+          className="fixed left-1/2 top-2 z-50 flex max-w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 items-center gap-1.5 rounded-[2px] border border-[var(--luma-stroke)] bg-black/45 px-2.5 py-1 font-mono text-[11px] text-white/50 backdrop-blur-[2px]"
         >
           <span className="text-white/35" aria-hidden>
             ✔

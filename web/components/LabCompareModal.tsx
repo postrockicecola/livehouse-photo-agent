@@ -437,10 +437,10 @@ function LabInfoPanel({
               aria-pressed={isSelected}
               onClick={() => onToggleSelection(!isSelected)}
               className={[
-                "w-full rounded-[4px] py-2 text-[10px] font-normal tracking-[0.14em] transition-colors",
+                "w-full rounded-[2px] py-2 font-mono text-[10px] font-normal uppercase tracking-[0.14em] transition-colors",
                 isSelected
-                  ? "bg-white/[0.12] text-white/90 ring-1 ring-white/20"
-                  : "bg-white/[0.06] text-white/55 hover:bg-white/[0.09] hover:text-white/75",
+                  ? "bg-[rgba(255,244,230,0.12)] text-[rgba(255,244,230,0.92)] shadow-[inset_0_0_0_1px_rgba(255,244,230,0.28)]"
+                  : "bg-white/[0.05] text-white/55 hover:bg-white/[0.08] hover:text-white/75",
               ].join(" ")}
             >
               {isSelected ? "Picked" : "Pick"}
@@ -794,45 +794,58 @@ function LutStripThumb({
     rootRef.current.scrollIntoView({ behavior: "auto", inline: "center", block: "nearest" });
   }, [selected, entry.id]);
 
+  const edgeLabel = entry.label.replace(/^Film\s*·\s*/i, "").trim() || entry.label;
+
   return (
-    <button
-      ref={rootRef}
-      type="button"
-      data-lut-id={entry.id}
-      disabled={disabled}
-      title={entry.label}
-      onClick={() => !disabled && onSelect()}
-      onMouseEnter={() => onWarmFilmPreview?.()}
-      onFocus={() => onWarmFilmPreview?.()}
-      className={[
-        "group/lut relative h-[4.5rem] w-12 shrink-0 overflow-hidden rounded-[3px] outline-none transition-[box-shadow,filter] duration-200 sm:h-20 sm:w-[3.25rem]",
-        disabled ? "cursor-not-allowed" : "",
-        selected
-          ? "ring-1 ring-inset ring-white/40 shadow-[0_0_14px_rgba(255,255,255,0.08)]"
-          : "ring-1 ring-inset ring-white/[0.06] hover:ring-white/20",
-        exportPicked && !selected ? "ring-emerald-500/30" : "",
-      ].join(" ")}
-    >
-      <div className="relative h-full w-full bg-[#0a0a0a]">
-        {src ? (
-          <img
-            src={src}
-            alt=""
-            className={[
-              "h-full w-full object-cover transition-[filter,opacity] duration-200",
-              selected
-                ? "opacity-100 brightness-100 saturate-100"
-                : "opacity-[0.72] brightness-[0.82] saturate-[0.9] group-hover/lut:opacity-95 group-hover/lut:brightness-95",
-            ].join(" ")}
-            loading="lazy"
-            decoding="async"
-            onError={onImgError}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[8px] text-white/20">—</div>
-        )}
-      </div>
-    </button>
+    <div className="flex w-12 shrink-0 flex-col items-stretch gap-1 sm:w-[3.25rem]">
+      <button
+        ref={rootRef}
+        type="button"
+        data-lut-id={entry.id}
+        disabled={disabled}
+        title={entry.label}
+        onClick={() => !disabled && onSelect()}
+        onMouseEnter={() => onWarmFilmPreview?.()}
+        onFocus={() => onWarmFilmPreview?.()}
+        className={[
+          "group/lut relative h-[4.5rem] w-full overflow-hidden rounded-[1px] outline-none transition-[box-shadow,filter] duration-200 sm:h-20",
+          disabled ? "cursor-not-allowed" : "",
+          selected
+            ? "shadow-[inset_0_0_0_1.5px_rgba(255,244,230,0.42)]"
+            : "shadow-[inset_0_0_0_1px_rgba(255,244,230,0.1)] hover:shadow-[inset_0_0_0_1px_rgba(255,244,230,0.28)]",
+          exportPicked && !selected ? "shadow-[inset_0_0_0_1px_rgba(255,244,230,0.3)]" : "",
+        ].join(" ")}
+      >
+        <div className="relative h-full w-full bg-[var(--luma-bg)]">
+          {src ? (
+            <img
+              src={src}
+              alt=""
+              className={[
+                "h-full w-full object-cover transition-[filter,opacity] duration-200",
+                selected
+                  ? "opacity-100 brightness-100 saturate-100"
+                  : "opacity-[0.72] brightness-[0.82] saturate-[0.9] group-hover/lut:opacity-95 group-hover/lut:brightness-95",
+              ].join(" ")}
+              loading="lazy"
+              decoding="async"
+              onError={onImgError}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[8px] text-white/20">—</div>
+          )}
+        </div>
+      </button>
+      <span
+        className={[
+          "truncate text-center font-mono text-[7px] uppercase tracking-[0.08em]",
+          selected ? "text-[rgba(255,244,230,0.55)]" : "text-white/22",
+        ].join(" ")}
+        title={entry.label}
+      >
+        {edgeLabel}
+      </span>
+    </div>
   );
 }
 
@@ -877,11 +890,14 @@ function StyleSelector({
 
   return (
     <div
-      className="shrink-0 border-t border-white/[0.05] bg-[#030303]"
+      className="lab-film-strip shrink-0 border-t border-[var(--luma-stroke)]"
       data-lut-rail
       aria-label="Film strip"
     >
-      <div ref={scrollRef} className="lab-lut-scroll px-3 py-3 sm:px-4">
+      <span className="lab-film-strip-edge" aria-hidden>
+        Luma · Emulsion
+      </span>
+      <div ref={scrollRef} className="lab-lut-scroll px-8 sm:px-10">
         {entries.map((entry) => {
           const enabled = stripEntryEnabled(entry);
           const selected = entry.id === selectedId && enabled;

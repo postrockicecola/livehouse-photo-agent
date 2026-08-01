@@ -58,7 +58,7 @@ export function LandingNav() {
         <div className="flex items-center gap-2.5 sm:gap-3">
           <Link
             href={LANDING_AGENT_HOME}
-            className={`rounded-full bg-white px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0a0a0a] transition-opacity hover:opacity-90 sm:px-5 ${focusRing}`}
+            className={`rounded-[2px] bg-[rgba(247,244,240,0.94)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0a0908] transition-opacity hover:opacity-90 sm:px-5 ${focusRing}`}
           >
             {LANDING_STUDIO_CTA}
           </Link>

@@ -13,7 +13,7 @@ import { LandingWorkflowSection } from "./LandingWorkflowSection";
  */
 export function LandingPage() {
   return (
-    <div className="landing-shell studio-grain relative min-h-screen bg-[#0a0a0a] text-white">
+    <div className="landing-shell studio-grain relative min-h-screen bg-[var(--luma-bg)] text-[var(--luma-text)]">
       <LandingNav />
       <main>
         <LandingHero />
@@ -33,19 +33,19 @@ export function LandingPage() {
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href={LANDING_AGENT_HOME}
-                className="inline-flex rounded-full bg-white px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[#0a0a0a] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                className="inline-flex rounded-[2px] bg-[rgba(247,244,240,0.94)] px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[#0a0908] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,244,230,0.35)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--luma-bg)]"
               >
                 {LANDING_STUDIO_CTA}
               </Link>
               <Link
                 href="/infra?tour=1"
-                className="inline-flex rounded-full border border-white/20 bg-white/[0.04] px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70 transition-colors hover:border-white/35 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                className="inline-flex rounded-[2px] border border-[var(--luma-matte)] bg-white/[0.03] px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70 transition-colors hover:border-[var(--luma-matte-strong)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,244,230,0.35)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--luma-bg)]"
               >
                 五分钟 walkthrough
               </Link>
               <Link
                 href="/eval"
-                className="inline-flex rounded-full border border-white/10 px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/45 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                className="inline-flex rounded-[2px] border border-[var(--luma-stroke)] px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/45 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(255,244,230,0.35)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--luma-bg)]"
               >
                 Evaluation
               </Link>

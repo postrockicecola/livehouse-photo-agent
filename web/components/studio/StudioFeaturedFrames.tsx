@@ -18,45 +18,55 @@ function frameImageUrl(pathQuoted: string, maxSide = 960): string {
   return `${base}/image?path=${pathQuoted}&max_side=${maxSide}`;
 }
 
-function FeaturedCard({
+function FeaturedFrame({
   frame,
   canGallery,
   priority,
+  index,
 }: {
   frame: StudioFeaturedFrame;
   canGallery: boolean;
   priority?: boolean;
+  index: number;
 }) {
   const imgUrl = frameImageUrl(frame.path_quoted);
-  const badge = `${frame.highlight} ${frame.score_display}`;
+  const frameNo = String(index + 1).padStart(2, "0");
 
-  const inner = (
+  const body = (
     <>
-      <img
-        src={imgUrl}
-        alt=""
-        decoding="async"
-        fetchPriority={priority ? "high" : "auto"}
-        loading={priority ? "eager" : "lazy"}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-      />
-      <div className="absolute bottom-[7px] left-2 z-10 rounded border border-white/[0.12] bg-black/60 px-[7px] py-0.5 text-[10px] text-white/80 backdrop-blur-sm">
-        {badge}
+      <div className="studio-proof-matte">
+        <img
+          src={imgUrl}
+          alt=""
+          decoding="async"
+          fetchPriority={priority ? "high" : "auto"}
+          loading={priority ? "eager" : "lazy"}
+          className="absolute inset-0 h-full w-full object-cover transition-[filter,transform] duration-300 group-hover:brightness-[1.04] group-hover:scale-[1.015]"
+        />
+      </div>
+      <div className="studio-proof-exif">
+        <span className="min-w-0 truncate">
+          FRAME {frameNo} · {frame.highlight}
+        </span>
+        <span className="shrink-0 tabular-nums text-[rgba(255,244,230,0.45)]">
+          {frame.score_display}
+        </span>
       </div>
     </>
   );
 
-  const shellClass = "group relative aspect-[3/2] overflow-hidden rounded-[7px] bg-[#161616]";
-
   if (canGallery) {
     return (
-      <Link href="/gallery" className={`${shellClass} block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30`}>
-        {inner}
+      <Link
+        href="/gallery"
+        className="studio-proof-frame group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[rgba(255,244,230,0.35)]"
+      >
+        {body}
       </Link>
     );
   }
 
-  return <div className={shellClass}>{inner}</div>;
+  return <div className="studio-proof-frame group">{body}</div>;
 }
 
 export function StudioFeaturedFrames({ previewsDir, canGallery }: Props) {
@@ -88,10 +98,10 @@ export function StudioFeaturedFrames({ previewsDir, canGallery }: Props) {
   if (!canGallery && !loading) {
     return (
       <section aria-label="Featured frames">
-        <p className="mb-3 text-[10px] uppercase tracking-[0.1em] text-white/30">
-          Top frames — aesthetic, composition, emotion
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/30">
+          Contact sheet · top frames
         </p>
-        <div className="rounded-lg border border-dashed border-white/[0.07] px-6 py-10 text-center">
+        <div className="border border-dashed border-[var(--luma-stroke)] px-6 py-10 text-center">
           <p className="text-sm text-white/38">
             Waiting for Previews — once files land, Open gallery works even before VLM finishes.
           </p>
@@ -103,11 +113,11 @@ export function StudioFeaturedFrames({ previewsDir, canGallery }: Props) {
   if (loading && frames.length === 0) {
     return (
       <section aria-label="Featured frames loading">
-        <div className="mb-3 h-3 w-48 animate-pulse rounded bg-white/[0.06]" />
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="aspect-[3/2] animate-pulse rounded-[7px] bg-white/[0.04]" />
-          <div className="aspect-[3/2] animate-pulse rounded-[7px] bg-white/[0.04]" />
-          <div className="aspect-[3/2] animate-pulse rounded-[7px] bg-white/[0.04]" />
+        <div className="mb-3 h-3 w-52 animate-pulse rounded-sm bg-white/[0.06]" />
+        <div className="lab-film-strip studio-proof-strip">
+          <div className="aspect-[3/2] animate-pulse bg-white/[0.04]" />
+          <div className="aspect-[3/2] animate-pulse bg-white/[0.04]" />
+          <div className="aspect-[3/2] animate-pulse bg-white/[0.04]" />
         </div>
       </section>
     );
@@ -120,26 +130,30 @@ export function StudioFeaturedFrames({ previewsDir, canGallery }: Props) {
   return (
     <section aria-label="Featured frames">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">
-          Top frames — aesthetic, composition, emotion
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/30">
+          Contact sheet · aesthetic · composition · emotion
         </p>
         {canGallery ? (
           <Link
             href="/gallery"
-            className="shrink-0 text-[10px] uppercase tracking-[0.08em] text-white/20 transition-colors hover:text-white/45"
+            className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-white/22 transition-colors hover:text-white/50"
           >
             Open gallery →
           </Link>
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="lab-film-strip studio-proof-strip">
+        <span className="lab-film-strip-edge" aria-hidden>
+          Proof
+        </span>
         {display.map((frame, i) => (
-          <FeaturedCard
+          <FeaturedFrame
             key={frame.path_quoted}
             frame={frame}
             canGallery={canGallery}
             priority={i === 0}
+            index={i}
           />
         ))}
       </div>

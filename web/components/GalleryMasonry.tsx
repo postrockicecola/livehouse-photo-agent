@@ -187,10 +187,8 @@ export function GalleryMasonry({
         key={reactKey}
         data-orientation={orient}
         className={[
-          "gallery-item group/tile relative block w-full min-w-0 overflow-hidden rounded-[2px] leading-none",
-          checked
-            ? "shadow-[inset_0_0_0_2px_rgba(52,211,153,0.42)]"
-            : "",
+          "gallery-item group/tile relative block w-full min-w-0 overflow-hidden rounded-[1px] leading-none",
+          checked ? "is-selected" : "",
         ].join(" ")}
       >
         <button
@@ -204,14 +202,14 @@ export function GalleryMasonry({
             apiBase={apiBase}
             onMeasured={(w, h) => recordIntrinsic(item, index, w, h)}
           />
-          <div className="gallery-caption-layer pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/55 via-transparent to-transparent px-2.5 pb-2 pt-8 sm:px-3 sm:pb-2.5 sm:pt-10">
+          <div className="gallery-caption-layer pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent px-2.5 pb-2 pt-8 sm:px-3 sm:pb-2.5 sm:pt-10">
             <div className="flex items-end justify-between gap-4 pb-0.5">
-              <p className="min-w-0 flex-1 truncate text-[11px] font-light text-white/88">
+              <p className="min-w-0 flex-1 truncate font-mono text-[10px] font-normal uppercase tracking-[0.08em] text-white/80">
                 {captionFromFile(item.file)}
               </p>
               <span
-                className="shrink-0 tabular-nums text-[10px] font-light tracking-wide text-white/55"
-                title={`Score ${score.toFixed(1)}`}
+                className="shrink-0 font-mono text-[10px] font-normal tabular-nums tracking-[0.12em] text-white/50"
+                title={`SCORE ${score.toFixed(1)}`}
               >
                 {score.toFixed(1)}
               </span>
@@ -225,10 +223,10 @@ export function GalleryMasonry({
           aria-label={checked ? "取消选择" : "选择"}
           title={checked ? "取消选择" : "选择"}
           className={[
-            "absolute right-2 top-2 z-20 rounded-[4px] px-1.5 py-0.5 text-[9px] font-normal tracking-wide backdrop-blur-[2px] motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+            "absolute right-2 top-2 z-20 rounded-[2px] px-1.5 py-0.5 font-mono text-[9px] font-normal uppercase tracking-[0.12em] backdrop-blur-[2px] motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[rgba(255,244,230,0.35)]",
             checked
-              ? "bg-emerald-500/35 text-emerald-50/95 shadow-[inset_0_0_0_0.5px_rgba(110,231,183,0.35)]"
-              : "bg-black/45 text-white/75 hover:bg-black/55 hover:text-white/90",
+              ? "bg-[rgba(255,244,230,0.14)] text-[rgba(255,244,230,0.92)] shadow-[inset_0_0_0_0.5px_rgba(255,244,230,0.35)]"
+              : "bg-black/45 text-white/70 hover:bg-black/55 hover:text-white/90",
           ].join(" ")}
           onClick={(e) => {
             e.preventDefault();
@@ -246,10 +244,10 @@ export function GalleryMasonry({
             aria-label={expanded ? "收起同款" : `展开同款 ${groupSize} 张`}
             title={expanded ? "收起同款" : `同款 ${groupSize} 张，展开查看`}
             className={[
-              "absolute left-2 top-2 z-20 rounded-[4px] px-1.5 py-0.5 text-[9px] font-normal tracking-wide backdrop-blur-[2px] motion-safe:transition-[background-color,color] motion-safe:duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+              "absolute left-2 top-2 z-20 rounded-[2px] px-1.5 py-0.5 font-mono text-[9px] font-normal uppercase tracking-[0.1em] backdrop-blur-[2px] motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[rgba(255,244,230,0.35)]",
               expanded
-                ? "bg-sky-500/35 text-sky-50/95 shadow-[inset_0_0_0_0.5px_rgba(125,211,252,0.35)]"
-                : "bg-black/45 text-white/75 hover:bg-black/55 hover:text-white/90",
+                ? "bg-[rgba(255,244,230,0.12)] text-[rgba(255,244,230,0.88)] shadow-[inset_0_0_0_0.5px_rgba(255,244,230,0.28)]"
+                : "bg-black/45 text-white/70 hover:bg-black/55 hover:text-white/90",
             ].join(" ")}
             onClick={(e) => {
               e.preventDefault();
