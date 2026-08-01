@@ -69,7 +69,12 @@ def _resolve_base_dir(previews_dir: Optional[str]) -> str:
 
 def _tool_catalog(registry) -> str:
     tools = [
-        {"name": s["function"]["name"], "description": s["function"]["description"], "args": s["function"]["parameters"].get("properties", {})}
+        {
+            "name": s["function"]["name"],
+            "description": s["function"]["description"],
+            "args": s["function"]["parameters"].get("properties", {}),
+            "required": s["function"]["parameters"].get("required", []),
+        }
         for s in registry.tool_specs()
     ]
     return json.dumps(tools, ensure_ascii=False)
