@@ -18,20 +18,21 @@ One loop: a livehouse night in → a publish-ready gallery out. Surfaces on top,
 
 ```mermaid
 flowchart TB
-    classDef night fill:#09090b,stroke:#a1a1aa,color:#fafafa
-    classDef ui fill:#0c0a09,stroke:#38bdf8,color:#f0f9ff
-    classDef flow fill:#052e16,stroke:#4ade80,color:#ecfdf5
-    classDef runtime fill:#1e1b4b,stroke:#a78bfa,color:#f5f3ff
-    classDef out fill:#431407,stroke:#fb923c,color:#fff7ed
+    classDef night fill:#FFFFFF,stroke:#93C5FD,color:#1F2937
+    classDef ui fill:#FFFFFF,stroke:#C4B5FD,color:#1F2937
+    classDef flow fill:#6366F1,stroke:#8B5CF6,color:#FFFFFF
+    classDef runtime fill:#0D9488,stroke:#2563EB,color:#FFFFFF
+    classDef out fill:#F0FDFA,stroke:#5EEAD4,color:#1F2937
+    classDef eval fill:#F5F3FF,stroke:#C4B5FD,color:#1F2937
 
-    N["Livehouse night<br/>Previews + sibling RAW"]
+    N["Livehouse night<br/>• Previews + sibling RAW"]
 
     subgraph SURFACES["Product surfaces"]
         direction LR
-        ST["Studio<br/>submit session"]
-        GA["Gallery<br/>review · style · export"]
-        CH["ChatDock<br/>ask over artifacts"]
-        IC["Infra<br/>jobs · cost · health"]
+        ST["Studio<br/>• submit session"]
+        GA["Gallery<br/>• review · style · export"]
+        CH["ChatDock<br/>• ask over artifacts"]
+        IC["Infra<br/>• jobs · cost · health"]
     end
 
     subgraph WORKFLOW["Creative workflow"]
@@ -46,10 +47,10 @@ flowchart TB
 
     subgraph RUNTIME["AI runtime foundation"]
         direction LR
-        R1["Durable jobs<br/>state machine · SSOT"]
-        R2["Vision pipeline<br/>OpenCV → fast score → VLM"]
-        R3["Bounded inference<br/>queue · fallback · ledger"]
-        R4["Evaluation<br/>fixed set · protocol"]
+        R1["Durable jobs<br/>• state machine · SSOT"]
+        R2["Vision pipeline<br/>• OpenCV → fast score → VLM"]
+        R3["Bounded inference<br/>• queue · fallback · ledger"]
+        R4["Evaluation<br/>• fixed set · protocol"]
     end
 
     P["Publish-ready gallery"]
@@ -66,10 +67,16 @@ flowchart TB
     IC -.-> R1
     R4 -.-> R2
 
-    class N,P night
+    class N night
+    class P out
     class ST,GA,CH,IC ui
     class W1,W2,W3,W4,W5 flow
-    class R1,R2,R3,R4 runtime
+    class R1,R2,R3 runtime
+    class R4 eval
+    style SURFACES fill:#FAFAFA,stroke:#E5E7EB,color:#64748B
+    style WORKFLOW fill:#EEF2FF,stroke:#C7D2FE,color:#64748B
+    style RUNTIME fill:#F0FDFA,stroke:#99F6E4,color:#64748B
+    linkStyle default stroke:#64748B,stroke-width:1.5px
 ```
 
 ```text
@@ -107,8 +114,6 @@ flowchart TB
                          │     PUBLISH-READY GALLERY           │
                          └─────────────────────────────────────┘
 ```
-
-Try it: [`/infra?tour=1`](http://127.0.0.1:3000/infra?tour=1) · demo video placeholder `web/public/demo/walkthrough.mp4` · local <http://127.0.0.1:3000>
 
 <details>
 <summary><strong>Reference run</strong> (Showcase Fixture)</summary>
@@ -243,13 +248,13 @@ python scripts/eval/export_preferences.py --labels data/eval/labels.jsonl
 
 ```mermaid
 flowchart TB
-    classDef surface fill:#0f172a,stroke:#38bdf8,color:#e2e8f0
-    classDef api fill:#1e293b,stroke:#94a3b8,color:#f1f5f9
-    classDef core fill:#172554,stroke:#60a5fa,color:#eff6ff,stroke-width:2px
-    classDef pipe fill:#14532d,stroke:#4ade80,color:#ecfdf5
-    classDef infer fill:#3b0764,stroke:#c084fc,color:#faf5ff
-    classDef out fill:#422006,stroke:#fbbf24,color:#fffbeb
-    classDef edge fill:#111827,stroke:#9ca3af,color:#e5e7eb
+    classDef surface fill:#FFFFFF,stroke:#C4B5FD,color:#1F2937
+    classDef api fill:#EFF6FF,stroke:#93C5FD,color:#1F2937
+    classDef core fill:#6366F1,stroke:#8B5CF6,color:#FFFFFF,stroke-width:2px
+    classDef pipe fill:#0D9488,stroke:#2563EB,color:#FFFFFF
+    classDef infer fill:#F5F3FF,stroke:#C4B5FD,color:#1F2937
+    classDef out fill:#F0FDFA,stroke:#5EEAD4,color:#1F2937
+    classDef edge fill:#FFFFFF,stroke:#93C5FD,color:#1F2937
 
     subgraph SURFACES["Product Surfaces  ·  Next.js"]
         direction LR
@@ -336,6 +341,14 @@ flowchart TB
     class Q,RT,P,FB,LD infer
     class AR,AG,OP out
     class GO,CK edge
+    style SURFACES fill:#FAFAFA,stroke:#E5E7EB,color:#64748B
+    style GATEWAY fill:#F8FAFC,stroke:#E2E8F0,color:#64748B
+    style INGEST fill:#EFF6FF,stroke:#BFDBFE,color:#64748B
+    style RUNTIME fill:#EEF2FF,stroke:#C7D2FE,color:#64748B
+    style PIPE fill:#F0FDFA,stroke:#99F6E4,color:#64748B
+    style INFER fill:#FAF5FF,stroke:#E9D5FF,color:#64748B
+    style OUT fill:#F0FDFA,stroke:#99F6E4,color:#64748B
+    linkStyle default stroke:#64748B,stroke-width:1.5px
 ```
 
 **How to read it:** product surfaces hit FastAPI → ingest seeds durable jobs → executor runs Stage1→2→3 → VLM goes through a bounded queue with primary/fallback ledgered in SQLite → Gallery / Infra / Agent consume the same SSOT.
@@ -347,9 +360,9 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    classDef ctrl fill:#0c4a6e,stroke:#7dd3fc,color:#f0f9ff
-    classDef data fill:#365314,stroke:#a3e635,color:#f7fee7
-    classDef ssot fill:#78350f,stroke:#fcd34d,color:#fffbeb,stroke-width:2px
+    classDef ctrl fill:#FFFFFF,stroke:#C4B5FD,color:#1F2937
+    classDef data fill:#F0FDFA,stroke:#5EEAD4,color:#1F2937
+    classDef ssot fill:#6366F1,stroke:#8B5CF6,color:#FFFFFF,stroke-width:2px
 
     subgraph CTRL["Control plane"]
         direction TB
@@ -376,6 +389,9 @@ flowchart LR
     class C1,C2,C3,C4 ctrl
     class D1,D2,D3,D4 data
     class SSOT ssot
+    style CTRL fill:#FAF5FF,stroke:#E9D5FF,color:#64748B
+    style DATA fill:#F0FDFA,stroke:#99F6E4,color:#64748B
+    linkStyle default stroke:#64748B,stroke-width:1.5px
 ```
 
 **Celery never owns truth** — it only wakes a worker with a `job_id`. Claim fences, retries, and model attempts live in SQLite.
