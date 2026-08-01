@@ -276,6 +276,10 @@ def assess_stage2_per_image(
             if max_sf is not None and sf > float(max_sf):
                 ambiguous.append("shadow_crush")
 
+        # Stage1 underexposure salvage lane → keep visible for Stage3 weighting.
+        if bool(debug_info.get("underexposure_salvage")):
+            ambiguous.append("underexposure_salvage")
+
         # Haze / smoke: low contrast + sparse edges — keep, mark for VLM.
         if contrast > 0 and contrast < 12.0 and edges < 0.006:
             ambiguous.append("haze_low_contrast")

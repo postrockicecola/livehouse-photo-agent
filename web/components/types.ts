@@ -71,6 +71,10 @@ export type GalleryItem = {
   reason_bilingual?: { en?: string; zh?: string };
   tags?: string[];
   category?: string;
+  /** Stage1 underexposure salvage — gallery shows EV-lifted ``/image?ev=``. */
+  underexposure_salvage?: boolean;
+  /** Display EV for salvage-normalized thumbs (``2**ev``). */
+  salvage_ev?: number;
   /** Stage4 数值修图建议（曝光/阴影/高光…），驱动「Automated」预览与导出。 */
   editing_adjustments?: Record<string, number> | null;
 };

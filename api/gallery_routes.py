@@ -460,6 +460,13 @@ def get_image(
     path: str = Query(...),
     rotate: int = Query(0),
     max_side: int = Query(1200, ge=256, le=4096),
+    ev: float = Query(
+        0.0,
+        ge=0.0,
+        le=8.0,
+        description="Optional display EV lift (2**ev). Used for underexposure-salvage "
+        "normalized gallery thumbs; 0 = original pixels.",
+    ),
     auto_orient: int = Query(
         1,
         description="When 1 and no explicit rotate is given, auto-upright EXIF-stripped previews "
@@ -477,7 +484,9 @@ def get_image(
     if rotate == 0 and auto_orient:
         eff_rotate = _auto_capture_rotation(img_path_abs)
     image_service = ImageService(Path(_runtime_base_dir()))
-    cached = image_service.build_cached_image(Path(img_path_abs), rotate=eff_rotate, max_side=max_side)
+    cached = image_service.build_cached_image(
+        Path(img_path_abs), rotate=eff_rotate, max_side=max_side, ev=ev
+    )
     if cached and cached.exists():
         return FileResponse(
             str(cached),
@@ -486,7 +495,9 @@ def get_image(
         )
     # Cache write can fail (permissions / full disk). Still apply EXIF + rotate like cache path,
     # otherwise raw FileResponse ignores ``rotate`` and browsers may disagree with EXIF → wrong orientation.
-    blob = image_service.encode_display_thumbnail(Path(img_path_abs), rotate=eff_rotate, max_side=max_side)
+    blob = image_service.encode_display_thumbnail(
+        Path(img_path_abs), rotate=eff_rotate, max_side=max_side, ev=ev
+    )
     if blob is not None:
         return Response(
             content=blob,

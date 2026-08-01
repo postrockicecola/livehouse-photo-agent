@@ -109,6 +109,8 @@ type StyleStripEntry = {
   /** Numeric grade params for ``film_automated`` (sent as ``&adjust=<json>``). */
   adjust?: Record<string, number> | null;
   score?: number;
+  /** Display EV lift for underexposure-salvage Original strip. */
+  salvageEv?: number;
 };
 
 function buildStyleEntries(item: GalleryItem): StyleStripEntry[] {
@@ -118,12 +120,23 @@ function buildStyleEntries(item: GalleryItem): StyleStripEntry[] {
 
   const rows: StyleStripEntry[] = [];
 
+  const salvageEv =
+    item.underexposure_salvage && Number(item.salvage_ev) > 0
+      ? Number(item.salvage_ev)
+      : undefined;
+
   if (originalQ) {
-    rows.push({ id: "original", label: "Original", pathQuoted: originalQ });
+    rows.push({ id: "original", label: "Original", pathQuoted: originalQ, salvageEv });
   }
 
   if (!originalQ && mainQ) {
-    rows.push({ id: "original", label: "Original", pathQuoted: mainQ, score: item.overall_score });
+    rows.push({
+      id: "original",
+      label: "Original",
+      pathQuoted: mainQ,
+      score: item.overall_score,
+      salvageEv,
+    });
   }
 
   const filmSourceQuoted =
@@ -234,10 +247,20 @@ function pickDefaultSelectedId(entries: StyleStripEntry[], sessionFilmVariant?: 
   return entries.find((e) => stripEntryEnabled(e) && e.id !== "original")?.id ?? "";
 }
 
-function buildImageUrl(apiBase: string, pathQuoted: string, maxSide: number, rotateDeg = 0) {
+function buildImageUrl(
+  apiBase: string,
+  pathQuoted: string,
+  maxSide: number,
+  rotateDeg = 0,
+  salvageEv?: number,
+) {
   const path = filmPathQueryValue(pathQuoted);
   const rot = rotateDeg ? `&rotate=${rotateDeg}` : "";
-  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}`;
+  const ev =
+    salvageEv != null && Number(salvageEv) > 0
+      ? `&ev=${Math.min(8, Math.round(Number(salvageEv) * 1000) / 1000)}`
+      : "";
+  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}${ev}`;
 }
 
 /** Normalize ``path`` query segment: single encode layer for FastAPI (works with urllib-quoted + raw paths). */
@@ -284,7 +307,7 @@ function resolveStripImageUrl(
   if (entry.filmVariant) {
     return buildFilmRenderUrl(apiBase, pq, entry.filmVariant, maxSide, rotateDeg, null, entry.adjust ?? null);
   }
-  return buildImageUrl(apiBase, pq, maxSide, rotateDeg);
+  return buildImageUrl(apiBase, pq, maxSide, rotateDeg, entry.salvageEv);
 }
 
 function stripPlainImageUrl(
@@ -295,7 +318,7 @@ function stripPlainImageUrl(
 ): string | null {
   const pq = entry.pathQuoted?.trim();
   if (!pq) return null;
-  return buildImageUrl(apiBase, pq, maxSide, rotateDeg);
+  return buildImageUrl(apiBase, pq, maxSide, rotateDeg, entry.salvageEv);
 }
 
 function stripFilmImageUrl(

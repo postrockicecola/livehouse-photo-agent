@@ -11,6 +11,10 @@ import { LoadingState } from "@/components/ui/states";
 import type { GalleryExportItem, GalleryItem } from "@/components/types";
 import { getApiBase } from "@/lib/apiBase";
 import {
+  buildGalleryPlainImageUrl,
+  GALLERY_PLAIN_THUMB_MAX_SIDE,
+} from "@/lib/galleryDisplayUrl";
+import {
   catalogBasenameForExport,
   defaultFilmExportItem,
   gallerySelectionKey,
@@ -98,9 +102,7 @@ type QueueBacklogLite = {
 };
 
 function buildImageUrl(item: GalleryItem) {
-  if (!item.path_quoted) return "";
-  const r = Number(item.rotate_degrees ?? 0);
-  return `${API_BASE}/image?path=${item.path_quoted}&max_side=900${r ? `&rotate=${r}` : ""}`;
+  return buildGalleryPlainImageUrl(API_BASE, item, GALLERY_PLAIN_THUMB_MAX_SIDE) ?? "";
 }
 
 export default function HomePage() {

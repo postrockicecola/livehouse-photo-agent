@@ -11,6 +11,8 @@
 - **动感模糊** 仅在梯度方向性异常 **且** 边缘密度低于地板时才标为 motion blur，避免
   单向舞台光或线条被误判。
 - **曝光** 用亮度分位数与自适应高光/阴影占比，替代固定 230/30 直方图 bin。
+- **欠曝 salvage**：对带 shadow 惩罚且结构仍在的片子做内存 EV 预览；通过则写入
+  ``underexposure_salvage`` / ``effective_tech_score``，供 Stage2 门槛回补（不改原图像素）。
 - **构图** 用「高亮区域质心 + 与中心/三分点的距离」简化近似主体位置（无专用检测器时的工程折中）。
 
 性能：``assess_image_quality`` / ``fast_aesthetic_assessment`` / ``assess_composition`` 支持
@@ -74,6 +76,9 @@ _STAGE1_FALLBACK: Dict[str, float] = {
     "white_p01_min": 235.0,
     "blank_range_max": 5.0,
     "blank_std_max": 2.0,
+    # Near-black with residual structure → soft-continue (salvage / display EV), not hard reject.
+    "near_black_escape_p_range_min": 12.0,
+    "near_black_escape_edge_min": 0.0012,
     # 边缘丰富度（用于糊/动感联合判断）
     "edge_ratio_min": 0.005,
     "edge_canny_low": 45.0,
@@ -253,6 +258,21 @@ class ImageProcessor:
         return False, ""
 
     @staticmethod
+    def _near_black_structure_escape(
+        *,
+        expo: Mapping[str, float],
+        edge_ratio: float,
+        q: Mapping[str, Any],
+    ) -> str | None:
+        """Residual dynamic range + edges → keep near-black frames for salvage/display."""
+        p_range = float(expo.get("p99", 0.0) or 0.0) - float(expo.get("p01", 0.0) or 0.0)
+        if p_range < _cfg(q, "near_black_escape_p_range_min"):
+            return None
+        if float(edge_ratio) < _cfg(q, "near_black_escape_edge_min"):
+            return None
+        return "near_black_residual_structure"
+
+    @staticmethod
     def _laplacian_var(gray: np.ndarray) -> float:
         return float(cv2.Laplacian(gray, cv2.CV_64F).var())
 
@@ -393,9 +413,18 @@ class ImageProcessor:
             debug_info["brightness"] = mean_brightness
 
             blank, blank_reason = ImageProcessor._is_blank_or_extreme(gray, q)
+            near_black_escape: str | None = None
             if blank:
-                debug_info["reject"] = blank_reason
-                return False, blank_reason, 0.0, debug_info
+                if blank_reason == "Near-black frame":
+                    near_black_escape = ImageProcessor._near_black_structure_escape(
+                        expo=expo, edge_ratio=edge_ratio, q=q
+                    )
+                if not near_black_escape:
+                    debug_info["reject"] = blank_reason
+                    return False, blank_reason, 0.0, debug_info
+                debug_info["stage1_near_black_escape"] = near_black_escape
+                penalties.append("near_black_soft")
+                penalties.append("brightness_low_soft")
 
             severe_lap = _cfg(q, "severe_blur_lap_max")
             severe_edge = _cfg(q, "severe_blur_edge_max")
@@ -413,9 +442,29 @@ class ImageProcessor:
                     q=q,
                 )
                 if stage1_severe_escape is None:
-                    msg = "Severe blur without structure (no usable edges)"
-                    debug_info["reject"] = msg
-                    return False, msg, max(0.0, min(15.0, laplacian_var)), debug_info
+                    # Crushed underexposure looks like "no edges"; EV preview may recover structure.
+                    try:
+                        from engine.operators.underexposure_salvage import (
+                            merge_salvage_config,
+                            try_dark_ev_structure_escape,
+                        )
+
+                        dark_esc = try_dark_ev_structure_escape(
+                            gray=gray,
+                            expo=expo,
+                            edge_ratio=edge_ratio,
+                            cfg=merge_salvage_config(q),
+                        )
+                    except Exception as dark_exc:  # pragma: no cover
+                        logger.warning("dark EV blur escape failed for %s: %s", p, dark_exc)
+                        dark_esc = None
+                    if dark_esc:
+                        stage1_severe_escape = str(dark_esc.get("reason") or "underexposure_ev_structure")
+                        debug_info["stage1_underexposure_blur_escape"] = dark_esc
+                    else:
+                        msg = "Severe blur without structure (no usable edges)"
+                        debug_info["reject"] = msg
+                        return False, msg, max(0.0, min(15.0, laplacian_var)), debug_info
                 debug_info["stage1_severe_blur_escape"] = stage1_severe_escape
 
             is_motion_blur = bool(
@@ -426,7 +475,10 @@ class ImageProcessor:
             # blur_type：供 Stage3 权重 / prompt 使用
             blur_type = "none"
             if laplacian_var < _cfg(q, "laplacian_variance_min"):
-                if stage1_severe_escape in ("artistic_motion_structure", "livehouse_haze"):
+                if stage1_severe_escape == "underexposure_ev_structure":
+                    # Darkness crushed edges — not a focus miss; keep salvage-eligible.
+                    blur_type = "none"
+                elif stage1_severe_escape in ("artistic_motion_structure", "livehouse_haze"):
                     blur_type = "artistic_motion_blur"
                 elif grad_extreme and edge_ratio >= artistic_floor:
                     blur_type = "artistic_motion_blur"
@@ -507,7 +559,10 @@ class ImageProcessor:
             # 亮度 sanity：极暗/极亮但未到 blank 的，轻度减分
             bmin = float(q.get("brightness_min", 5))
             bmax = float(q.get("brightness_max", 250))
-            if mean_brightness < bmin + 8:
+            if near_black_escape:
+                quality_score -= 18.0
+                # brightness_low_soft already queued at escape for salvage gating
+            elif mean_brightness < bmin + 8:
                 quality_score -= 5.0
                 penalties.append("brightness_low_soft")
             elif mean_brightness > bmax - 8:
@@ -518,6 +573,31 @@ class ImageProcessor:
             debug_info["stage1_penalties"] = penalties
             debug_info["livehouse_bias"] = True
             debug_info["tech_score"] = quality_score
+
+            # Underexposure salvage lane: rebate shadow tech penalties when a light
+            # EV preview still shows structure. Does not alter pixels for Stage2/3.
+            try:
+                from engine.operators.underexposure_salvage import (
+                    evaluate_underexposure_salvage,
+                    merge_salvage_config,
+                )
+
+                salvage_cfg = merge_salvage_config(q)
+                salvage = evaluate_underexposure_salvage(
+                    gray=gray,
+                    penalties=penalties,
+                    expo=expo,
+                    edge_ratio=edge_ratio,
+                    contrast=contrast,
+                    blur_type=blur_type,
+                    tech_score=quality_score,
+                    cfg=salvage_cfg,
+                )
+                debug_info.update(salvage)
+            except Exception as salvage_exc:  # pragma: no cover - never block Stage1
+                logger.warning("underexposure salvage failed for %s: %s", p, salvage_exc)
+                debug_info.setdefault("underexposure_salvage", False)
+                debug_info.setdefault("effective_tech_score", quality_score)
 
             return True, None, quality_score, debug_info
 

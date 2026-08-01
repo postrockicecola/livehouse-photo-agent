@@ -121,6 +121,15 @@ def build_analysis_results(
                     row["phash"] = ph
             except (TypeError, ValueError):
                 pass
+            # Underexposure salvage: EV used by gallery ``/image?ev=`` display lift.
+            if dbg.get("underexposure_salvage"):
+                row["underexposure_salvage"] = True
+                try:
+                    sev = float(dbg.get("salvage_ev") or 0.0)
+                    if sev > 0.0:
+                        row["salvage_ev"] = round(sev, 3)
+                except (TypeError, ValueError):
+                    pass
             if dimensions and isinstance(dimensions, dict):
                 dim_snap = {}
                 for dk in STAGE3_DIM_KEYS:

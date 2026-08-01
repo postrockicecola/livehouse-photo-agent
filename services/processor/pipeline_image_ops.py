@@ -244,7 +244,14 @@ def assess_stage1_opencv(
     file_path: str,
 ) -> Tuple[bool, str, float, Dict[str, Any]]:
     """OpenCV gate (blur / exposure / contrast). Returns (passed, reason, tech_score, debug_info)."""
-    quality_cfg = ConfigLoader.get_quality_thresholds(config)
+    quality_cfg = dict(ConfigLoader.get_quality_thresholds(config) or {})
+    # Allow processing.underexposure_salvage to override nested salvage knobs.
+    proc_salvage = (config.get("processing") or {}).get("underexposure_salvage")
+    if isinstance(proc_salvage, dict):
+        quality_cfg["underexposure_salvage"] = {
+            **dict(quality_cfg.get("underexposure_salvage") or {}),
+            **proc_salvage,
+        }
     passes_quality, reason, tech_score, debug_info = ImageProcessor.assess_image_quality(
         file_path,
         quality_cfg,
@@ -256,9 +263,24 @@ def fast_aesthetic_score(file_path: str) -> float:
     return float(ImageProcessor.fast_aesthetic_assessment(file_path))
 
 
-def passes_stage2_thresholds(config: Dict[str, Any], tech_score: float, fast_score: float) -> bool:
+def passes_stage2_thresholds(
+    config: Dict[str, Any],
+    tech_score: float,
+    fast_score: float,
+    *,
+    debug_info: Dict[str, Any] | None = None,
+) -> bool:
+    from engine.operators.underexposure_salvage import stage2_gate_scores
+
     fast_cfg = ConfigLoader.get_fast_aesthetic_thresholds(config)
-    return tech_score >= fast_cfg["tech_score_min"] and fast_score >= fast_cfg["fast_aesthetic_score_min"]
+    tech_used, fast_used, tech_min, fast_min = stage2_gate_scores(
+        tech_score,
+        fast_score,
+        debug_info=debug_info,
+        tech_score_min=float(fast_cfg["tech_score_min"]),
+        fast_aesthetic_score_min=float(fast_cfg["fast_aesthetic_score_min"]),
+    )
+    return tech_used >= tech_min and fast_used >= fast_min
 
 
 def stage2_normalized_score(tech_score: float, fast_score: float) -> float:

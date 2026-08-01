@@ -186,6 +186,29 @@ processing:
     llm_num_predict: 160
     llm_timeout: 90
 
+  # Underexposure salvage lane (Stage1 → Stage2 gating only; VLM still sees original pixels).
+  # Dark + structured frames: in-memory EV preview → tech-score rebate / milder fast floor.
+  underexposure_salvage:
+    enabled: true
+    min_edge_ratio: 0.0015
+    min_contrast: 4.0
+    min_p_range: 12.0
+    max_highlight_frac: 0.22
+    target_p50: 100.0
+    ev_min: 0.35
+    ev_max: 6.5          # extreme near-black (p50≈2) needs ~EV5.6 to reach midtones
+    preview_min_contrast: 4.0
+    preview_min_edge_ratio: 0.0012
+    preview_max_highlight_frac: 0.55
+    dark_blur_escape_p50_max: 12.0   # p50 at/under this → EV escape before severe-blur hard reject
+    dark_blur_escape_min_edge_ratio: 0.00055
+    dark_blur_escape_min_preview_laplacian: 380.0
+    tech_rebate_shadow_soft: 8.0
+    tech_rebate_shadow_heavy: 16.0
+    tech_rebate_brightness_low: 5.0
+    tech_rebate_cap: 22.0
+    fast_aesthetic_score_min: 16.0   # Stage2 fast floor when salvage=true (default 22)
+
   # Stage2 pre-VLM filters (single decode with fast aesthetic).
   # Hard-reject only unstructured severe blur / extreme blowout; ambiguous livehouse frames
   # (motion, haze, no frontal face, dense crowd, weak bright-centroid) pass with ambiguous_tags.

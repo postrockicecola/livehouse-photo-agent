@@ -581,7 +581,9 @@ class PipelineStageRunner:
             fs = s2.fast_score
             merged_dbg = {**debug_info, **s2.debug_extra}
 
-            if not passes_stage2_thresholds(self.config, tech_score, fs):
+            if not passes_stage2_thresholds(
+                self.config, tech_score, fs, debug_info=merged_dbg
+            ):
                 with lock:
                     rejected += 1
                 fak = fake_result_stage2_reject(
