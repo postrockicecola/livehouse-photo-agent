@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/agent_chat_case.schema.json",
+  "title": "Agent Chat Case v1",
+  "description": "One Gallery Copilot utterance for L0 scripted / routed harness (no live LLM required).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "utterance", "split", "expect"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "agent_chat_case.v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "utterance": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Primary user text for this case."
+    },
+    "paraphrases": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Optional same-intent rewrites (L0 may ignore; L1 live should expand)."
+    },
+    "session": {
+      "type": "string",
+      "default": "smoke",
+      "description": "Fixture folder under data/eval/agent/sessions/<session>/."
+    },
+    "model_queue": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Scripted ChatFn outputs. Routed cases usually need one final-prose string."
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "route": {
+          "type": ["string", "null"],
+          "description": "intent_router rule_id, or null when the LLM/tool loop must run."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "tools_ordered": {
+          "type": "boolean",
+          "default": false
+        },
+        "min_files": { "type": "integer", "minimum": 0 },
+        "file_contains": { "type": "string" },
+        "allow_empty": { "type": "boolean" },
+        "max_tool_calls": { "type": "integer", "minimum": 0 },
+        "pref_key": { "type": "string" },
+        "reply_must_not_json": {
+          "type": "boolean",
+          "default": true
+        },
+        "select_after": {
+          "type": "boolean",
+          "description": "When true, gallery_select must appear after a search."
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "routed",
+          "semantic",
+          "memory",
+          "vibe",
+          "export",
+          "control",
+          "negation",
+          "compound",
+          "search",
+          "hard",
+          "smoke"
+        ]
+      }
+    },
+    "split": {
+      "type": "string",
+      "enum": ["smoke", "core", "regression", "hard"]
+    },
+    "notes": { "type": "string" }
+  }
+}

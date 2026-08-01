@@ -1,0 +1,20 @@
+{
+  "schema_version": "agent_chat_case.v1",
+  "id": "search_drummer",
+  "utterance": "找鼓手特写",
+  "paraphrases": ["鼓手近景有吗"],
+  "session": "smoke",
+  "model_queue": [
+    "{\"tool\": \"gallery_search\", \"args\": {\"query\": \"鼓手特写\", \"limit\": 5}}",
+    "推荐 drum_01.jpg。"
+  ],
+  "expect": {
+    "route": null,
+    "tools": ["gallery_search"],
+    "min_files": 1,
+    "file_contains": "drum",
+    "reply_must_not_json": true
+  },
+  "tags": ["semantic", "search", "smoke"],
+  "split": "smoke"
+}

@@ -1,0 +1,432 @@
+[
+  {
+    "file": "drum_01.jpg",
+    "overall_score": 88.0,
+    "scores": {
+      "overall": 88.0,
+      "energy": 9.0,
+      "technical": 8.0,
+      "composition": 8.5,
+      "deliverable_subject": 7.5,
+      "atmosphere_impact": 8.5,
+      "moment_peak": 8.0
+    },
+    "energy": 9.0,
+    "technical": 8.0,
+    "composition": 8.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "drummer",
+      "drums"
+    ],
+    "reason": "Peak drummer hit under red wash."
+  },
+  {
+    "file": "guitar_01.jpg",
+    "overall_score": 92.0,
+    "scores": {
+      "overall": 92.0,
+      "energy": 8.5,
+      "technical": 8.5,
+      "composition": 9.0,
+      "deliverable_subject": 8.5,
+      "atmosphere_impact": 7.5,
+      "moment_peak": 7.0
+    },
+    "energy": 8.5,
+    "technical": 8.5,
+    "composition": 9.0,
+    "category": "AI_Best_90+",
+    "tags": [
+      "guitarist",
+      "guitar"
+    ],
+    "reason": "吉他手特写"
+  },
+  {
+    "file": "blur_01.jpg",
+    "overall_score": 35.0,
+    "scores": {
+      "overall": 35.0,
+      "energy": 3.0,
+      "technical": 2.0,
+      "composition": 3.0,
+      "deliverable_subject": 2.0,
+      "atmosphere_impact": 2.0,
+      "moment_peak": 2.0
+    },
+    "energy": 3.0,
+    "technical": 2.0,
+    "composition": 3.0,
+    "category": "AI_Trash_Below60",
+    "tags": [
+      "blurry",
+      "low_quality"
+    ],
+    "reason": "Out of focus."
+  },
+  {
+    "file": "wide_01.jpg",
+    "overall_score": 85.0,
+    "scores": {
+      "overall": 85.0,
+      "energy": 7.0,
+      "technical": 8.0,
+      "composition": 9.0,
+      "deliverable_subject": 7.0,
+      "atmosphere_impact": 8.0,
+      "moment_peak": 6.5
+    },
+    "energy": 7.0,
+    "technical": 8.0,
+    "composition": 9.0,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "wide stage",
+      "panorama"
+    ],
+    "reason": "舞台全景"
+  },
+  {
+    "file": "stage_00.jpg",
+    "overall_score": 90.0,
+    "scores": {
+      "overall": 90.0,
+      "energy": 6.0,
+      "technical": 7.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.0,
+      "atmosphere_impact": 6.5,
+      "moment_peak": 6.5
+    },
+    "energy": 6.0,
+    "technical": 7.0,
+    "composition": 7.5,
+    "category": "AI_Best_90+",
+    "tags": [
+      "stage",
+      "crowd"
+    ],
+    "reason": "Stage frame 0"
+  },
+  {
+    "file": "stage_01.jpg",
+    "overall_score": 88.5,
+    "scores": {
+      "overall": 88.5,
+      "energy": 6.7,
+      "technical": 7.5,
+      "composition": 7.5,
+      "deliverable_subject": 7.4,
+      "atmosphere_impact": 7.0,
+      "moment_peak": 7.0
+    },
+    "energy": 6.7,
+    "technical": 7.5,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 1"
+  },
+  {
+    "file": "stage_02.jpg",
+    "overall_score": 87.0,
+    "scores": {
+      "overall": 87.0,
+      "energy": 7.4,
+      "technical": 8.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.8,
+      "atmosphere_impact": 7.5,
+      "moment_peak": 7.5
+    },
+    "energy": 7.4,
+    "technical": 8.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 2"
+  },
+  {
+    "file": "stage_03.jpg",
+    "overall_score": 85.5,
+    "scores": {
+      "overall": 85.5,
+      "energy": 8.1,
+      "technical": 7.0,
+      "composition": 7.5,
+      "deliverable_subject": 8.2,
+      "atmosphere_impact": 8.0,
+      "moment_peak": 8.0
+    },
+    "energy": 8.1,
+    "technical": 7.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage",
+      "crowd"
+    ],
+    "reason": "Stage frame 3"
+  },
+  {
+    "file": "stage_04.jpg",
+    "overall_score": 84.0,
+    "scores": {
+      "overall": 84.0,
+      "energy": 8.8,
+      "technical": 7.5,
+      "composition": 7.5,
+      "deliverable_subject": 7.0,
+      "atmosphere_impact": 8.5,
+      "moment_peak": 6.5
+    },
+    "energy": 8.8,
+    "technical": 7.5,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 4"
+  },
+  {
+    "file": "stage_05.jpg",
+    "overall_score": 82.5,
+    "scores": {
+      "overall": 82.5,
+      "energy": 6.0,
+      "technical": 8.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.4,
+      "atmosphere_impact": 6.5,
+      "moment_peak": 7.0
+    },
+    "energy": 6.0,
+    "technical": 8.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 5"
+  },
+  {
+    "file": "stage_06.jpg",
+    "overall_score": 81.0,
+    "scores": {
+      "overall": 81.0,
+      "energy": 6.7,
+      "technical": 7.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.8,
+      "atmosphere_impact": 7.0,
+      "moment_peak": 7.5
+    },
+    "energy": 6.7,
+    "technical": 7.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage",
+      "crowd"
+    ],
+    "reason": "Stage frame 6"
+  },
+  {
+    "file": "stage_07.jpg",
+    "overall_score": 79.5,
+    "scores": {
+      "overall": 79.5,
+      "energy": 7.4,
+      "technical": 7.5,
+      "composition": 7.5,
+      "deliverable_subject": 8.2,
+      "atmosphere_impact": 7.5,
+      "moment_peak": 8.0
+    },
+    "energy": 7.4,
+    "technical": 7.5,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 7"
+  },
+  {
+    "file": "stage_08.jpg",
+    "overall_score": 78.0,
+    "scores": {
+      "overall": 78.0,
+      "energy": 8.1,
+      "technical": 8.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.0,
+      "atmosphere_impact": 8.0,
+      "moment_peak": 6.5
+    },
+    "energy": 8.1,
+    "technical": 8.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 8"
+  },
+  {
+    "file": "stage_09.jpg",
+    "overall_score": 76.5,
+    "scores": {
+      "overall": 76.5,
+      "energy": 8.8,
+      "technical": 7.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.4,
+      "atmosphere_impact": 8.5,
+      "moment_peak": 7.0
+    },
+    "energy": 8.8,
+    "technical": 7.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage",
+      "crowd"
+    ],
+    "reason": "Stage frame 9"
+  },
+  {
+    "file": "stage_10.jpg",
+    "overall_score": 75.0,
+    "scores": {
+      "overall": 75.0,
+      "energy": 6.0,
+      "technical": 7.5,
+      "composition": 7.5,
+      "deliverable_subject": 7.8,
+      "atmosphere_impact": 6.5,
+      "moment_peak": 7.5
+    },
+    "energy": 6.0,
+    "technical": 7.5,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 10"
+  },
+  {
+    "file": "stage_11.jpg",
+    "overall_score": 73.5,
+    "scores": {
+      "overall": 73.5,
+      "energy": 6.7,
+      "technical": 8.0,
+      "composition": 7.5,
+      "deliverable_subject": 8.2,
+      "atmosphere_impact": 7.0,
+      "moment_peak": 8.0
+    },
+    "energy": 6.7,
+    "technical": 8.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 11"
+  },
+  {
+    "file": "stage_12.jpg",
+    "overall_score": 72.0,
+    "scores": {
+      "overall": 72.0,
+      "energy": 7.4,
+      "technical": 7.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.0,
+      "atmosphere_impact": 7.5,
+      "moment_peak": 6.5
+    },
+    "energy": 7.4,
+    "technical": 7.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage",
+      "crowd"
+    ],
+    "reason": "Stage frame 12"
+  },
+  {
+    "file": "stage_13.jpg",
+    "overall_score": 70.5,
+    "scores": {
+      "overall": 70.5,
+      "energy": 8.1,
+      "technical": 7.5,
+      "composition": 7.5,
+      "deliverable_subject": 7.4,
+      "atmosphere_impact": 8.0,
+      "moment_peak": 7.0
+    },
+    "energy": 8.1,
+    "technical": 7.5,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 13"
+  },
+  {
+    "file": "stage_14.jpg",
+    "overall_score": 69.0,
+    "scores": {
+      "overall": 69.0,
+      "energy": 8.8,
+      "technical": 8.0,
+      "composition": 7.5,
+      "deliverable_subject": 7.8,
+      "atmosphere_impact": 8.5,
+      "moment_peak": 7.5
+    },
+    "energy": 8.8,
+    "technical": 8.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage"
+    ],
+    "reason": "Stage frame 14"
+  },
+  {
+    "file": "stage_15.jpg",
+    "overall_score": 67.5,
+    "scores": {
+      "overall": 67.5,
+      "energy": 6.0,
+      "technical": 7.0,
+      "composition": 7.5,
+      "deliverable_subject": 8.2,
+      "atmosphere_impact": 6.5,
+      "moment_peak": 8.0
+    },
+    "energy": 6.0,
+    "technical": 7.0,
+    "composition": 7.5,
+    "category": "AI_Keep_60-90",
+    "tags": [
+      "stage",
+      "crowd"
+    ],
+    "reason": "Stage frame 15"
+  }
+]

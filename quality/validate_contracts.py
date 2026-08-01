@@ -42,6 +42,21 @@ _SUITES = {
     "e2e_gallery_contract",
 }
 
+_AGENT_CASE_SPLITS = {"smoke", "core", "regression", "hard"}
+_AGENT_CASE_TAGS = {
+    "routed",
+    "semantic",
+    "memory",
+    "vibe",
+    "export",
+    "control",
+    "negation",
+    "compound",
+    "search",
+    "hard",
+    "smoke",
+}
+
 
 def _err(path: str, msg: str) -> str:
     return f"{path}: {msg}"
@@ -144,6 +159,28 @@ def validate_version_manifest(doc: dict[str, Any], path: str) -> list[str]:
     return errors
 
 
+def validate_agent_chat_case(doc: dict[str, Any], path: str) -> list[str]:
+    """Phase-0 Gallery agent utterance contract (``agent_chat_case.v1``)."""
+    errors = _require(doc, ["schema_version", "id", "utterance", "split", "expect"], path)
+    if doc.get("schema_version") != "agent_chat_case.v1":
+        errors.append(_err(path, "schema_version must be agent_chat_case.v1"))
+    if doc.get("split") not in _AGENT_CASE_SPLITS:
+        errors.append(_err(path, f"split must be one of {sorted(_AGENT_CASE_SPLITS)}"))
+    expect = doc.get("expect")
+    if not isinstance(expect, dict):
+        errors.append(_err(path, "expect must be object"))
+    elif "route" in expect and expect["route"] is not None and not isinstance(expect["route"], str):
+        errors.append(_err(path, "expect.route must be string or null"))
+    tags = doc.get("tags")
+    if isinstance(tags, list):
+        bad = [t for t in tags if t not in _AGENT_CASE_TAGS]
+        if bad:
+            errors.append(_err(path, f"invalid tags: {bad}"))
+    elif tags is not None:
+        errors.append(_err(path, "tags must be array"))
+    return errors
+
+
 def validate_eval_run(doc: dict[str, Any], path: str) -> list[str]:
     errors = _require(
         doc,
@@ -189,6 +226,7 @@ _VALIDATORS = {
     "golden_item.v1": validate_golden_item,
     "version_manifest.v1": validate_version_manifest,
     "eval_run.v1": validate_eval_run,
+    "agent_chat_case.v1": validate_agent_chat_case,
 }
 
 

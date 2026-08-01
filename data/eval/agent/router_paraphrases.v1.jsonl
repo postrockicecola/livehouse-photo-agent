@@ -1,0 +1,54 @@
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_0", "utterance": "选出10张", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_1", "utterance": "挑选12张", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_2", "utterance": "帮我选20张照片", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_3", "utterance": "找出15张给我", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_4", "utterance": "给我10张精选", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_5", "utterance": "初选一批", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_neg_0", "utterance": "选出20张，但多给我一些全景镜头", "expect_rule": null, "rule_family": "shortlist_select", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_neg_1", "utterance": "找吉他手的照片", "expect_rule": null, "rule_family": "shortlist_select", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "sel_neg_2", "utterance": "修成复古胶片风格看看", "expect_rule": null, "rule_family": "shortlist_select", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_0", "utterance": "帮我挑选10张适合发朋友圈的", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_1", "utterance": "适合法发ins的十张", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_2", "utterance": "选出适合社交媒体的8张", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_3", "utterance": "交片级发朋友圈挑10张", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_4", "utterance": "帮我找适合发 Instagram 的照片", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_neg_0", "utterance": "不要发朋友圈相关的筛选", "expect_rule": null, "rule_family": "shortlist_social", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "soc_neg_1", "utterance": "不要用朋友圈配方", "expect_rule": null, "rule_family": "shortlist_social", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "en_pos_0", "utterance": "帮我选出最炸的10张", "expect_rule": "shortlist_energy", "rule_family": "shortlist_energy", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "en_pos_1", "utterance": "气氛最好的15张", "expect_rule": "shortlist_energy", "rule_family": "shortlist_energy", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "en_pos_2", "utterance": "氛围最好挑8张", "expect_rule": "shortlist_energy", "rule_family": "shortlist_energy", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "en_pos_3", "utterance": "感染力最强的10张", "expect_rule": "shortlist_energy", "rule_family": "shortlist_energy", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "en_pos_4", "utterance": "energy最高列10张", "expect_rule": "shortlist_energy", "rule_family": "shortlist_energy", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "en_neg_0", "utterance": "不要最炸的，要安静的", "expect_rule": null, "rule_family": "shortlist_energy", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "pk_pos_0", "utterance": "高潮瞬间挑5张", "expect_rule": "shortlist_peak", "rule_family": "shortlist_peak", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "pk_pos_1", "utterance": "决定性瞬间10张", "expect_rule": "shortlist_peak", "rule_family": "shortlist_peak", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "pk_pos_2", "utterance": "最抓拍的8张", "expect_rule": "shortlist_peak", "rule_family": "shortlist_peak", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "pk_pos_3", "utterance": "瞬间最好的挑6张", "expect_rule": "shortlist_peak", "rule_family": "shortlist_peak", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "pk_pos_4", "utterance": "moment peak 5张", "expect_rule": "shortlist_peak", "rule_family": "shortlist_peak", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "del_pos_0", "utterance": "帮我选出10张交片", "expect_rule": "shortlist_deliverable", "rule_family": "shortlist_deliverable", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "del_pos_1", "utterance": "交片一批", "expect_rule": "shortlist_deliverable", "rule_family": "shortlist_deliverable", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "del_pos_2", "utterance": "选出交片用的12张", "expect_rule": "shortlist_deliverable", "rule_family": "shortlist_deliverable", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "del_pos_3", "utterance": "给我交片短名单", "expect_rule": "shortlist_deliverable", "rule_family": "shortlist_deliverable", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "del_pos_4", "utterance": "交片挑8张", "expect_rule": "shortlist_deliverable", "rule_family": "shortlist_deliverable", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_pos_0", "utterance": "连拍只留一张", "expect_rule": "dedupe_burst", "rule_family": "dedupe_burst", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_pos_1", "utterance": "连拍去重", "expect_rule": "dedupe_burst", "rule_family": "dedupe_burst", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_pos_2", "utterance": "burst dedup", "expect_rule": "dedupe_burst", "rule_family": "dedupe_burst", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_pos_3", "utterance": "去重一下连拍", "expect_rule": "dedupe_burst", "rule_family": "dedupe_burst", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_pos_4", "utterance": "连拍留一张就行", "expect_rule": "dedupe_burst", "rule_family": "dedupe_burst", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_neg_0", "utterance": "别自动去重", "expect_rule": null, "rule_family": "dedupe_burst", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "dd_neg_1", "utterance": "不要去重，我要看所有连拍", "expect_rule": null, "rule_family": "dedupe_burst", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_pos_0", "utterance": "剔糊", "expect_rule": "exclude_low_quality", "rule_family": "exclude_low_quality", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_pos_1", "utterance": "去糊", "expect_rule": "exclude_low_quality", "rule_family": "exclude_low_quality", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_pos_2", "utterance": "剔糊过曝的图", "expect_rule": "exclude_low_quality", "rule_family": "exclude_low_quality", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_pos_3", "utterance": "排除模糊", "expect_rule": "exclude_low_quality", "rule_family": "exclude_low_quality", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_pos_4", "utterance": "exclude low quality", "expect_rule": "exclude_low_quality", "rule_family": "exclude_low_quality", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_neg_0", "utterance": "不用剔除模糊的", "expect_rule": null, "rule_family": "exclude_low_quality", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "ql_neg_1", "utterance": "不要剔糊", "expect_rule": null, "rule_family": "exclude_low_quality", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "st_pos_0", "utterance": "按分数排序", "expect_rule": "sort_overall", "rule_family": "sort_overall", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "st_pos_1", "utterance": "按得分排序看看", "expect_rule": "sort_overall", "rule_family": "sort_overall", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "st_pos_2", "utterance": "按 overall 排序", "expect_rule": "sort_overall", "rule_family": "sort_overall", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "st_pos_3", "utterance": "按分数排", "expect_rule": "sort_overall", "rule_family": "sort_overall", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "st_pos_4", "utterance": "按分数排序看看", "expect_rule": "sort_overall", "rule_family": "sort_overall", "polarity": "positive"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "st_neg_0", "utterance": "不要按分数排序，我想看原始顺序", "expect_rule": null, "rule_family": "sort_overall", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "cmp_pos_0", "utterance": "去重之后选出20张", "expect_rule": "dedupe_burst", "rule_family": "compound", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "cmp_pos_1", "utterance": "剔糊之后交片", "expect_rule": "exclude_low_quality", "rule_family": "compound", "polarity": "positive", "expect_select_after": true}
