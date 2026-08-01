@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { CostData } from "./CostAttributionPanel";
 import type { InfraSemanticTone } from "@/lib/infraVisualTokens";
@@ -146,7 +147,17 @@ export function ServingThroughputPanel({ inferenceQueue, cost, loading }: Props)
       eyebrow="serving"
       title="GPU Serving Throughput"
       subtitle="VLM tier saturation · decode tokens/sec · batch efficiency — process-local gauges from PrioritizedInferenceQueue + token ledger"
-      right={<LivePulse active={hasLiveServing} />}
+      right={
+        <div className="flex items-center gap-3">
+          <Link
+            href="/infra/gpu"
+            className="font-mono text-[10px] uppercase tracking-[0.12em] text-sky-400/90 hover:text-sky-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+          >
+            Archive →
+          </Link>
+          <LivePulse active={hasLiveServing} />
+        </div>
+      }
       id="serving-throughput"
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">

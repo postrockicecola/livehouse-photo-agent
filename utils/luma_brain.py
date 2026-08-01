@@ -492,7 +492,7 @@ def record_infra_metric_sample(
     *,
     payload: dict[str, Any],
     min_interval_sec: int = 5,
-    retain_sec: int = 86400,
+    retain_sec: int = 7 * 86400,
 ) -> bool:
     """
     Append a compact control-plane time-series sample (best-effort, throttled + pruned).

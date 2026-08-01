@@ -1204,11 +1204,16 @@ _PIPELINE_ACTIVE_STATUSES = frozenset(
 )
 
 
-def _build_metric_sample(metrics: dict[str, Any]) -> dict[str, Any]:
+def _build_metric_sample(
+    metrics: dict[str, Any],
+    *,
+    active_jobs: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """Compact, persistable point derived from a full metrics snapshot (real values only)."""
     by_status = ((metrics.get("jobs") or {}).get("by_status")) or {}
     admission = ((metrics.get("workers") or {}).get("pipeline_admission")) or {}
     latency = ((metrics.get("latency") or {}).get("total_latency_ms")) or {}
+    iq = (metrics.get("inference_queue") or {}) if isinstance(metrics.get("inference_queue"), dict) else {}
 
     inflight = int(admission.get("total_inflight") or 0)
     capacity = int(admission.get("total_capacity") or 0)
@@ -1226,7 +1231,19 @@ def _build_metric_sample(metrics: dict[str, Any]) -> dict[str, Any]:
         + int(by_status.get("FAILED_PERMANENT") or 0)
         + int(by_status.get("DEAD_LETTERED") or 0)
     )
-    return {
+
+    # Prefer real Apple GPU residency; fall back to busy-time estimate for archive continuity.
+    gpu_util = iq.get("gpu_util")
+    if gpu_util is None:
+        gpu_util = iq.get("gpu_util_estimate_30s")
+    try:
+        gpu_util_f = float(gpu_util) if gpu_util is not None else None
+    except (TypeError, ValueError):
+        gpu_util_f = None
+    if gpu_util_f is not None:
+        gpu_util_f = max(0.0, min(1.0, gpu_util_f))
+
+    sample: dict[str, Any] = {
         "queued": int(by_status.get("QUEUED") or 0),
         "running": running,
         "failed_total": failed_total,
@@ -1234,18 +1251,66 @@ def _build_metric_sample(metrics: dict[str, Any]) -> dict[str, Any]:
         "util_pct": util_pct,
         "p50_ms": latency.get("p50"),
         "p95_ms": latency.get("p95"),
+        "gpu_util": gpu_util_f,
+        "gpu_util_source": iq.get("gpu_util_source") or ("estimate" if gpu_util_f is not None else "none"),
+        "gpu_power_w": iq.get("gpu_power_w"),
+        "gpu_freq_mhz": iq.get("gpu_freq_mhz"),
+        "img_per_sec": iq.get("throughput_img_per_sec_30s"),
+        "vlm_active": iq.get("active_workers"),
+        "vlm_max_inflight": iq.get("max_inflight"),
     }
+    if active_jobs:
+        sample["active_jobs"] = active_jobs[:8]
+    return sample
+
+
+def _list_active_pipeline_jobs(conn: Any, *, limit: int = 8) -> list[dict[str, Any]]:
+    """Compact active-job context for GPU archive annotation (best-effort)."""
+    try:
+        rows = conn.execute(
+            """
+            SELECT j.id AS job_id, j.job_type, j.status, j.session_id,
+                   s.session_key, s.previews_dir
+            FROM jobs j
+            LEFT JOIN sessions s ON s.id = j.session_id
+            WHERE j.status IN ('CLAIMED', 'PREPROCESSING', 'INFERENCING', 'POSTPROCESSING')
+            ORDER BY j.id DESC
+            LIMIT ?
+            """,
+            (max(1, min(int(limit), 16)),),
+        ).fetchall()
+    except Exception:
+        return []
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        item: dict[str, Any] = {
+            "job_id": int(r["job_id"]),
+            "job_type": r["job_type"],
+            "status": r["status"],
+        }
+        if r["session_id"] is not None:
+            item["session_id"] = int(r["session_id"])
+        if r["session_key"]:
+            item["session_key"] = str(r["session_key"])
+        if r["previews_dir"]:
+            # Keep basename only — full paths bloat the archive payload.
+            from pathlib import Path
+
+            item["session_label"] = Path(str(r["previews_dir"])).parent.name or str(r["previews_dir"])
+        out.append(item)
+    return out
 
 
 @router.get("/api/infra/metrics/history", response_model=InfraMetricsHistoryResponse)
 def infra_metrics_history(
-    window_sec: int = Query(default=3600, ge=60, le=86400),
+    window_sec: int = Query(default=3600, ge=60, le=604800),
     limit: int = Query(default=240, ge=1, le=2000),
 ):
     """
     Recent persisted control-plane samples (oldest first) with derived ``throughput_per_min``.
 
     Samples are written opportunistically (throttled) by ``GET /api/infra/metrics``.
+    Newer samples also carry ``gpu_util`` / ``gpu_util_source`` for the archived GPU dashboard.
     """
     import time
 
@@ -1272,6 +1337,55 @@ def infra_metrics_history(
     return {"count": len(points), "window_sec": int(window_sec), "points": points}
 
 
+@router.get("/api/infra/metrics/gpu-history", response_model=InfraMetricsHistoryResponse)
+def infra_metrics_gpu_history(
+    window_sec: int = Query(default=86400, ge=60, le=604800),
+    limit: int = Query(default=720, ge=1, le=2000),
+):
+    """
+    Archived GPU / VLM serving curve (oldest first).
+
+    Same underlying samples as ``/metrics/history``, trimmed to GPU-relevant fields plus
+    active-job annotations captured at sample time. Requires the Infra UI (or any client)
+    to keep polling ``GET /api/infra/metrics`` while a session runs so points are written.
+    """
+    import time
+
+    from utils.luma_brain import list_infra_metric_samples
+
+    conn = _with_conn()
+    try:
+        now = int(time.time())
+        rows = list_infra_metric_samples(conn, since_sec=now - int(window_sec), limit=limit)
+    finally:
+        conn.close()
+
+    points: list[dict[str, Any]] = []
+    for r in rows:
+        gpu = r.get("gpu_util")
+        try:
+            gpu_f = float(gpu) if gpu is not None else None
+        except (TypeError, ValueError):
+            gpu_f = None
+        points.append(
+            {
+                "ts": int(r["ts"]),
+                "gpu_util": gpu_f,
+                "gpu_util_source": r.get("gpu_util_source"),
+                "gpu_power_w": r.get("gpu_power_w"),
+                "gpu_freq_mhz": r.get("gpu_freq_mhz"),
+                "img_per_sec": r.get("img_per_sec"),
+                "vlm_active": r.get("vlm_active"),
+                "vlm_max_inflight": r.get("vlm_max_inflight"),
+                "running": r.get("running"),
+                "queued": r.get("queued"),
+                "util_pct": r.get("util_pct"),
+                "active_jobs": r.get("active_jobs") or [],
+            }
+        )
+    return {"count": len(points), "window_sec": int(window_sec), "points": points}
+
+
 @router.get("/api/infra/metrics", response_model=InfraMetricsResponse)
 def infra_metrics(
     namespace: str | None = Query(
@@ -1294,7 +1408,13 @@ def infra_metrics(
             try:
                 from utils.luma_brain import record_infra_metric_sample
 
-                record_infra_metric_sample(conn, payload=_build_metric_sample(metrics))
+                active = _list_active_pipeline_jobs(conn)
+                # 7d retain so a session GPU curve is still reviewable the next day.
+                record_infra_metric_sample(
+                    conn,
+                    payload=_build_metric_sample(metrics, active_jobs=active),
+                    retain_sec=7 * 86400,
+                )
             except Exception:
                 pass
         return metrics

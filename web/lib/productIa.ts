@@ -260,6 +260,7 @@ export const LANDING_FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
     title: "运维",
     links: [
       { label: "Infra 控制台", href: "/infra" },
+      { label: "GPU 归档", href: "/infra/gpu" },
       { label: "五分钟 walkthrough", href: "/infra?tour=1" },
       { label: "Brain", href: "/infra/brain" },
     ],

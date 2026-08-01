@@ -134,6 +134,7 @@ export function fixtureForInfraPath(segments: string[]): FixtureName | null {
   const exact: Record<string, FixtureName> = {
     metrics: "infra-metrics",
     "metrics/history": "infra-metrics-history",
+    "metrics/gpu-history": "infra-metrics-gpu-history",
     workers: "infra-workers",
     providers: "infra-providers",
     cost: "infra-cost",

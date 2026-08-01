@@ -1,0 +1,112 @@
+{
+  "count": 6,
+  "window_sec": 86400,
+  "points": [
+    {
+      "ts": 1784790243,
+      "gpu_util": 0.12,
+      "gpu_util_source": "estimate",
+      "gpu_power_w": null,
+      "img_per_sec": 0.0,
+      "vlm_active": 0,
+      "vlm_max_inflight": 4,
+      "running": 0,
+      "queued": 0,
+      "util_pct": 0,
+      "active_jobs": []
+    },
+    {
+      "ts": 1784790303,
+      "gpu_util": 0.48,
+      "gpu_util_source": "powermetrics",
+      "gpu_power_w": 6.2,
+      "img_per_sec": 0.18,
+      "vlm_active": 2,
+      "vlm_max_inflight": 4,
+      "running": 1,
+      "queued": 2,
+      "util_pct": 50,
+      "active_jobs": [
+        {
+          "job_id": 101,
+          "job_type": "ANALYZE_PATH",
+          "status": "INFERENCING",
+          "session_label": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "ts": 1784790363,
+      "gpu_util": 0.81,
+      "gpu_util_source": "powermetrics",
+      "gpu_power_w": 9.1,
+      "img_per_sec": 0.31,
+      "vlm_active": 4,
+      "vlm_max_inflight": 4,
+      "running": 1,
+      "queued": 0,
+      "util_pct": 100,
+      "active_jobs": [
+        {
+          "job_id": 101,
+          "job_type": "ANALYZE_PATH",
+          "status": "INFERENCING",
+          "session_label": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "ts": 1784790423,
+      "gpu_util": 0.76,
+      "gpu_util_source": "powermetrics",
+      "gpu_power_w": 8.4,
+      "img_per_sec": 0.28,
+      "vlm_active": 3,
+      "vlm_max_inflight": 4,
+      "running": 1,
+      "queued": 0,
+      "util_pct": 75,
+      "active_jobs": [
+        {
+          "job_id": 101,
+          "job_type": "ANALYZE_PATH",
+          "status": "INFERENCING",
+          "session_label": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "ts": 1784790483,
+      "gpu_util": 0.33,
+      "gpu_util_source": "powermetrics",
+      "gpu_power_w": 4.1,
+      "img_per_sec": 0.11,
+      "vlm_active": 1,
+      "vlm_max_inflight": 4,
+      "running": 1,
+      "queued": 0,
+      "util_pct": 25,
+      "active_jobs": [
+        {
+          "job_id": 101,
+          "job_type": "ANALYZE_PATH",
+          "status": "POSTPROCESSING",
+          "session_label": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "ts": 1784790543,
+      "gpu_util": 0.08,
+      "gpu_util_source": "estimate",
+      "gpu_power_w": null,
+      "img_per_sec": 0.0,
+      "vlm_active": 0,
+      "vlm_max_inflight": 4,
+      "running": 0,
+      "queued": 0,
+      "util_pct": 0,
+      "active_jobs": []
+    }
+  ]
+}

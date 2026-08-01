@@ -21,6 +21,7 @@ import studioInfraOverview from "@/fixtures/studio-infra-overview.json";
 import galleryShowcaseResults from "@/fixtures/gallery-showcase-results.json";
 import infraMetrics from "@/fixtures/infra-metrics.json";
 import infraMetricsHistory from "@/fixtures/infra-metrics-history.json";
+import infraMetricsGpuHistory from "@/fixtures/infra-metrics-gpu-history.json";
 import infraWorkers from "@/fixtures/infra-workers.json";
 import infraProviders from "@/fixtures/infra-providers.json";
 import infraCost from "@/fixtures/infra-cost.json";
@@ -59,6 +60,7 @@ const FIXTURES = {
   "gallery-showcase-results": galleryShowcaseResults,
   "infra-metrics": infraMetrics,
   "infra-metrics-history": infraMetricsHistory,
+  "infra-metrics-gpu-history": infraMetricsGpuHistory,
   "infra-workers": infraWorkers,
   "infra-providers": infraProviders,
   "infra-cost": infraCost,
