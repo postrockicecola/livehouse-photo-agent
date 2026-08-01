@@ -78,6 +78,7 @@ def compile_chat_turn_graph(
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
     emit: Optional[TurnHook] = None,
     no_answer_fallback: str,
+    looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
 ):
     """Compile the decide→act→answer turn graph (closures bind one agent instance)."""
     from langgraph.graph import END, START, StateGraph
@@ -89,6 +90,14 @@ def compile_chat_turn_graph(
             emit(ev)
         except Exception:
             logger.exception("chat turn emit failed")
+
+    def _toolish(text: str) -> bool:
+        if looks_like_tool_intent is None:
+            return False
+        try:
+            return bool(looks_like_tool_intent(text))
+        except Exception:
+            return False
 
     def decide(state: ChatTurnState) -> dict[str, Any]:
         max_rounds = int(state.get("max_rounds") or 0)
@@ -115,6 +124,14 @@ def compile_chat_turn_graph(
         raw = chat_fn(memory.messages())
         call = parse_tool_call(raw)
         if call is None:
+            # Broken tool JSON should not leak to the user as prose.
+            if _toolish(raw):
+                return {
+                    "pending_call": None,
+                    "direct_reply": no_answer_fallback if not tool_calls else None,
+                    "force_answer": bool(tool_calls),
+                    "raw_model": raw,
+                }
             return {
                 "pending_call": None,
                 "direct_reply": raw,
@@ -293,6 +310,7 @@ def run_chat_turn(
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
     emit: Optional[TurnHook],
     no_answer_fallback: str,
+    looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     defer_answer: bool = False,
 ) -> ChatTurnState:
     app = compile_chat_turn_graph(
@@ -311,6 +329,7 @@ def run_chat_turn(
         parse_tool_call=parse_tool_call,
         emit=emit,
         no_answer_fallback=no_answer_fallback,
+        looks_like_tool_intent=looks_like_tool_intent,
     )
     init = _initial_chat_state(
         user_text=user_text,
@@ -340,6 +359,7 @@ def iter_chat_turn_updates(
     parse_tool_call: Callable[[str], Optional[dict[str, Any]]],
     emit: Optional[TurnHook],
     no_answer_fallback: str,
+    looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     defer_answer: bool = True,
 ):
     """Yield ``(node_name, partial_state)`` as the chat subgraph runs (for SSE)."""
@@ -359,6 +379,7 @@ def iter_chat_turn_updates(
         parse_tool_call=parse_tool_call,
         emit=emit,
         no_answer_fallback=no_answer_fallback,
+        looks_like_tool_intent=looks_like_tool_intent,
     )
     init = _initial_chat_state(
         user_text=user_text,

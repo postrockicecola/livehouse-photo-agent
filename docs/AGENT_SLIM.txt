@@ -48,6 +48,8 @@ Eval
   scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS
   quality/agent_cases.py + schemas/agent_chat_case.schema.json
   services/agent/groundedness.py           # final-answer file cite gate
+  services/agent/tool_protocol.py          # parse + one-shot JSON repair
+  services/agent/guardrails.py             # observe|soft|hard policy
   services/agent/review_signals.py         # review heuristics (+ grounding/parse)
   tests/test_agent_eval_l0.py / test_agent_live_eval.py / test_agent_turn_trace.py / …
 

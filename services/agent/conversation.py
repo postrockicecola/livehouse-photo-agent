@@ -32,6 +32,11 @@ from services.agent.groundedness import ground_reply
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, route_gallery_intent
 from services.agent.skills.base import SkillRegistry
+from services.agent.tool_protocol import (
+    looks_like_tool_intent,
+    parse_tool_call,
+    parse_tool_call_with_repair,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -140,22 +145,7 @@ class ConversationMemory:
 
 def _parse_tool_call(text: str) -> Optional[dict[str, Any]]:
     """Extract a ``{"tool": name, "args": {...}}`` object from model output, if present."""
-    s = (text or "").strip()
-    if s.startswith("```"):
-        s = s.strip("`")
-        nl = s.find("\n")
-        if nl != -1:
-            s = s[nl + 1:]
-    start, end = s.find("{"), s.rfind("}")
-    if start == -1 or end <= start:
-        return None
-    try:
-        obj = json.loads(s[start:end + 1])
-    except json.JSONDecodeError:
-        return None
-    if isinstance(obj, dict) and isinstance(obj.get("tool"), str):
-        return {"tool": obj["tool"], "args": obj.get("args") or {}}
-    return None
+    return parse_tool_call(text)
 
 
 def _chunk_text(text: str, size: int = 4) -> Iterator[str]:
@@ -249,11 +239,31 @@ class ConversationalAgent:
         self.last_backend: str = "langgraph"
         self.last_trace: dict[str, Any] = {}
         self._turn_parse_fail: bool = False
+        self._turn_parse_repaired: bool = False
 
     def _reset_turn_state(self) -> None:
         self._events = []
         self._turn_parse_fail = False
+        self._turn_parse_repaired = False
         self.last_trace = {}
+
+    def _parse_tool_call_repaired(self, raw: str) -> Optional[dict[str, Any]]:
+        """Parse tool JSON; one repair completion when output looks tool-ish but invalid."""
+        call, _effective, repaired = parse_tool_call_with_repair(
+            self._chat, self.memory.messages(), raw
+        )
+        if repaired:
+            self._turn_parse_repaired = True
+            self._emit(
+                {
+                    "type": "parse_repair",
+                    "ok": call is not None,
+                    "tool": (call or {}).get("tool"),
+                }
+            )
+            if call is None:
+                self._turn_parse_fail = True
+        return call
 
     def _emit(self, event: dict[str, Any]) -> None:
         self._events.append(event)
@@ -314,7 +324,8 @@ class ConversationalAgent:
             "finalize": self._finalize,
             "force_final_answer": self._force_final_answer,
             "build_final_answer_messages": self._build_final_answer_messages,
-            "parse_tool_call": _parse_tool_call,
+            "parse_tool_call": self._parse_tool_call_repaired,
+            "looks_like_tool_intent": looks_like_tool_intent,
             "emit": self._emit,
             "no_answer_fallback": _NO_ANSWER_FALLBACK,
         }
@@ -419,7 +430,18 @@ class ConversationalAgent:
         """Process one user turn: optional tool calls, then a final assistant reply."""
         self._reset_turn_state()
         if self._guardrails is not None:
-            self._guardrails.scan_input(user_text, source="user")
+            user_text, refuse = self._guardrails.mediate_user_input(user_text)
+            if refuse is not None:
+                self.memory.add_user(user_text)
+                reply = self._finalize(refuse)
+                self._done_event(reply, [])
+                return TurnResult(
+                    reply=reply,
+                    tool_calls=[],
+                    working_memory=dict(self.working_memory),
+                    events=list(self._events),
+                    trace=dict(self.last_trace),
+                )
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
@@ -451,9 +473,13 @@ class ConversationalAgent:
         rounds = self._max_tool_rounds if self._skills is not None else 0
         for _ in range(rounds):
             raw = self._chat(self.memory.messages())
-            call = _parse_tool_call(raw)
+            call = self._parse_tool_call_repaired(raw)
             if call is None:
-                reply = self._finalize(raw)
+                if looks_like_tool_intent(raw):
+                    self._turn_parse_fail = True
+                    reply = self._finalize(_NO_ANSWER_FALLBACK)
+                else:
+                    reply = self._finalize(raw)
                 self._done_event(reply, tool_calls)
                 return TurnResult(
                     reply=reply,
@@ -522,7 +548,12 @@ class ConversationalAgent:
         """
         self._reset_turn_state()
         if self._guardrails is not None:
-            self._guardrails.scan_input(user_text, source="user")
+            user_text, refuse = self._guardrails.mediate_user_input(user_text)
+            if refuse is not None:
+                self.memory.add_user(user_text)
+                reply = self._finalize(refuse)
+                yield self._done_event(reply, [])
+                return
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
@@ -712,6 +743,7 @@ class ConversationalAgent:
             "rounds_used": len(tool_calls),
             "grounding_ok": not grounding_hits,
             "parse_fail": bool(self._turn_parse_fail),
+            "parse_repaired": bool(self._turn_parse_repaired),
             "guardrail_matches": guardrail_matches,
             "json_leak": _parse_tool_call(reply or "") is not None,
         }
@@ -829,6 +861,6 @@ class ConversationalAgent:
         else:
             reply = grounded
         if self._guardrails is not None:
-            self._guardrails.check_output(reply)
+            reply = self._guardrails.mediate_output(reply)
         self.memory.add_assistant(reply)
         return reply

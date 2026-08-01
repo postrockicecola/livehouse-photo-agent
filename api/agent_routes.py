@@ -354,7 +354,7 @@ def agent_chat_stream(
     memory.system_prompt = system_prompt
     stream_fn = _build_stream_fn(base_dir)
     events: list[GuardrailEvent] = []
-    guardrails = Guardrails(on_event=events.append)
+    guardrails = Guardrails(on_event=events.append)  # policy: LIVEHOUSE_AGENT_GUARDRAIL_POLICY
     agent = ConversationalAgent(
         chat_fn, memory=memory, skills=registry, guardrails=guardrails,
         wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),

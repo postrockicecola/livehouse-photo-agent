@@ -72,3 +72,11 @@ Weekly loop::
 Promote targets: router fixtures, ``router_paraphrases.v1.jsonl``, and chat
 ``cases.v1.jsonl`` stubs (hallucination / grounding / parse).
 
+## Protocol repair + guardrail policy (Phase 5)
+
+- Broken tool JSON that still *looks* like a tool call gets **one** repair
+  completion (``services/agent/tool_protocol.py``); failures set
+  ``trace.parse_fail`` / emit ``parse_repair``.
+- Guardrail policy via ``LIVEHOUSE_AGENT_GUARDRAIL_POLICY``:
+  ``observe`` (default) | ``soft`` | ``hard``.
+
