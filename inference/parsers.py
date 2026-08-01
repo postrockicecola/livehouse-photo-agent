@@ -359,15 +359,17 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
         recovered = _fallback_parse_truncated_json(json_str)
         return _finalize_regex_recovery(recovered) if recovered else {}
 
+    # Must run before Pydantic: Stage3FullResponse defaults all dims to 5.0, so
+    # {"error":"invalid_output"} would otherwise validate as a neutral scorecard.
+    if _explicit_model_error(data):
+        logger.warning("Model returned explicit invalid_output sentinel")
+        return {}
+
     pydantic_result = _pydantic_validate_full(data)
     if pydantic_result is not None:
         return pydantic_result
 
     try:
-        if _explicit_model_error(data):
-            logger.warning("Model returned explicit invalid_output sentinel")
-            return {}
-
         dimensions = {}
         for dim in STAGE3_DIM_KEYS:
             score = data.get(dim, _DEFAULT_FLOAT)

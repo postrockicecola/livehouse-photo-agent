@@ -114,6 +114,8 @@ def test_photography_workflow_active_at_ai_scored() -> None:
 def test_featured_frames_picks_three_categories(tmp_path: Path) -> None:
     previews = tmp_path / "2026-06-01_band" / "Previews"
     previews.mkdir(parents=True)
+    for name in ("a.jpg", "b.jpg", "c.jpg"):
+        (previews / name).write_bytes(b"x")
     rows = [
         {
             "file": "a.jpg",
