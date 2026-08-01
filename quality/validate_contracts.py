@@ -182,6 +182,52 @@ def validate_agent_chat_case(doc: dict[str, Any], path: str) -> list[str]:
     return errors
 
 
+def validate_agent_rating(doc: dict[str, Any], path: str) -> list[str]:
+    """Phase-6 human/LLM judge rating row (``agent_rating.v1``)."""
+    errors = _require(
+        doc,
+        ["schema_version", "id", "case_id", "utterance", "reply", "scores", "rater"],
+        path,
+    )
+    if doc.get("schema_version") != "agent_rating.v1":
+        errors.append(_err(path, "schema_version must be agent_rating.v1"))
+    for key in ("id", "case_id", "utterance", "reply", "rater"):
+        val = doc.get(key)
+        if key in doc and not (isinstance(val, str) and val.strip()):
+            errors.append(_err(path, f"{key} must be non-empty string"))
+    scores = doc.get("scores")
+    if not isinstance(scores, dict):
+        errors.append(_err(path, "scores must be object"))
+    else:
+        for key in ("useful", "honest", "concise"):
+            if key not in scores:
+                errors.append(_err(path, f"scores.{key} is required"))
+                continue
+            val = scores[key]
+            if not (isinstance(val, int) and not isinstance(val, bool) and 1 <= val <= 5):
+                errors.append(_err(path, f"scores.{key} must be int in [1, 5]"))
+    tool_calls = doc.get("tool_calls")
+    if tool_calls is not None:
+        if not isinstance(tool_calls, list):
+            errors.append(_err(path, "tool_calls must be array"))
+        else:
+            for i, tc in enumerate(tool_calls):
+                if not isinstance(tc, dict):
+                    errors.append(_err(path, f"tool_calls[{i}] must be object"))
+                    continue
+                if "tool" in tc and tc["tool"] is not None and not isinstance(tc["tool"], str):
+                    errors.append(_err(path, f"tool_calls[{i}].tool must be string or null"))
+                if "ok" in tc and tc["ok"] is not None and not isinstance(tc["ok"], bool):
+                    errors.append(_err(path, f"tool_calls[{i}].ok must be bool or null"))
+    if "pass" in doc and doc["pass"] is not None and not isinstance(doc["pass"], bool):
+        errors.append(_err(path, "pass must be bool or null"))
+    if "grounded_ok" in doc and doc["grounded_ok"] is not None and not isinstance(
+        doc["grounded_ok"], bool
+    ):
+        errors.append(_err(path, "grounded_ok must be bool or null"))
+    return errors
+
+
 def validate_eval_run(doc: dict[str, Any], path: str) -> list[str]:
     errors = _require(
         doc,
@@ -228,6 +274,7 @@ _VALIDATORS = {
     "version_manifest.v1": validate_version_manifest,
     "eval_run.v1": validate_eval_run,
     "agent_chat_case.v1": validate_agent_chat_case,
+    "agent_rating.v1": validate_agent_rating,
 }
 
 

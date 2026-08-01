@@ -17,6 +17,15 @@ def test_example_agent_chat_case_contract() -> None:
     assert validate_agent_chat_case(doc) == []
 
 
+def test_example_agent_rating_contract() -> None:
+    from pathlib import Path
+    import json
+
+    path = Path(__file__).resolve().parents[1] / "quality/schemas/examples/agent_rating.example.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    assert validate_document(doc, str(path)) == []
+
+
 def test_load_all_agent_cases() -> None:
     cases = load_agent_cases()
     assert len(cases) >= 25
