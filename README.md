@@ -18,12 +18,14 @@ One loop: a livehouse night in → a publish-ready gallery out. Surfaces on top,
 
 ```mermaid
 flowchart TB
-    classDef night fill:#FFFFFF,stroke:#93C5FD,color:#1F2937
-    classDef ui fill:#FFFFFF,stroke:#C4B5FD,color:#1F2937
-    classDef flow fill:#6366F1,stroke:#8B5CF6,color:#FFFFFF
-    classDef runtime fill:#0D9488,stroke:#2563EB,color:#FFFFFF
-    classDef out fill:#F0FDFA,stroke:#5EEAD4,color:#1F2937
-    classDef eval fill:#F5F3FF,stroke:#C4B5FD,color:#1F2937
+    classDef night fill:#EFF6FF,stroke:#60A5FA,color:#1E3A5F
+    classDef ui fill:#FFFFFF,stroke:#3B82F6,color:#1E3A5F
+    classDef flow fill:#1D4ED8,stroke:#1E40AF,color:#FFFFFF
+    classDef runtimeDeep fill:#047857,stroke:#065F46,color:#FFFFFF
+    classDef runtimeMid fill:#059669,stroke:#047857,color:#FFFFFF
+    classDef runtimeSoft fill:#10B981,stroke:#059669,color:#FFFFFF
+    classDef eval fill:#ECFDF5,stroke:#34D399,color:#064E3B
+    classDef out fill:#D1FAE5,stroke:#10B981,color:#064E3B
 
     N["Livehouse night<br/>• Previews + sibling RAW"]
 
@@ -71,48 +73,14 @@ flowchart TB
     class P out
     class ST,GA,CH,IC ui
     class W1,W2,W3,W4,W5 flow
-    class R1,R2,R3 runtime
+    class R1 runtimeDeep
+    class R2 runtimeMid
+    class R3 runtimeSoft
     class R4 eval
-    style SURFACES fill:#FAFAFA,stroke:#E5E7EB,color:#64748B
-    style WORKFLOW fill:#EEF2FF,stroke:#C7D2FE,color:#64748B
-    style RUNTIME fill:#F0FDFA,stroke:#99F6E4,color:#64748B
+    style SURFACES fill:#F0F9FF,stroke:#BFDBFE,color:#3B82F6
+    style WORKFLOW fill:#EFF6FF,stroke:#93C5FD,color:#1D4ED8
+    style RUNTIME fill:#ECFDF5,stroke:#A7F3D0,color:#047857
     linkStyle default stroke:#64748B,stroke-width:1.5px
-```
-
-```text
-                         ┌─────────────────────────────────────┐
-                         │         LIVEHOUSE NIGHT             │
-                         │     Previews  +  sibling RAW        │
-                         └──────────────────┬──────────────────┘
-                                            │
-          ┌─────────────┬───────────────────┼───────────────────┬─────────────┐
-          ▼             ▼                   ▼                   ▼             ▼
-     ┌─────────┐  ┌──────────┐       ┌──────────┐        ┌──────────┐  ┌─────────┐
-     │ Studio  │  │ Gallery  │       │ ChatDock │        │  Infra   │  │  Eval   │
-     │ submit  │  │  review  │       │  ask on  │        │  observe │  │ measure │
-     └────┬────┘  │  style   │       │ artifacts│        └────┬─────┘  └────┬────┘
-          │       │  export  │       └────┬─────┘             │             │
-          │       └────┬─────┘            │                   │             │
-          │            │                  │                   │             │
-          ▼            ▼                  ▼                   ▼             ▼
-     ╔════╧════════════╧══════════════════╧═══════════════════╧═════════════╧════╗
-     ║                                                                           ║
-     ║   INGEST ──► ANALYZE ──► CURATE ──► STYLE ──► EXPORT                      ║
-     ║                                                                           ║
-     ╚══════════════════════════════╤════════════════════════════════════════════╝
-                                    │
-          ┌─────────────────────────┼─────────────────────────┐
-          ▼                         ▼                         ▼
-   ┌──────────────┐      ┌──────────────────┐      ┌──────────────────┐
-   │ Durable jobs │      │ Vision pipeline  │      │ Bounded VLM      │
-   │ claim·retry  │      │ CV → score → VLM │      │ queue·fallback   │
-   │ SQLite SSOT  │      │                  │      │ model_runs       │
-   └──────────────┘      └──────────────────┘      └──────────────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────────────────────┐
-                         │     PUBLISH-READY GALLERY           │
-                         └─────────────────────────────────────┘
 ```
 
 <details>
