@@ -93,6 +93,8 @@ def validate_agent_chat_case(doc: dict[str, Any], path: str = "case") -> list[st
     mq = doc.get("model_queue")
     if mq is not None and (not isinstance(mq, list) or not all(isinstance(x, str) for x in mq)):
         errors.append(f"{path}: model_queue must be string[]")
+    if "live" in doc and not isinstance(doc.get("live"), bool):
+        errors.append(f"{path}: live must be boolean")
     session = doc.get("session") or "smoke"
     if not session_dir(str(session)).is_dir():
         errors.append(f"{path}: missing session fixture sessions/{session}/")

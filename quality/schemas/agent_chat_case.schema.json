@@ -98,6 +98,10 @@
       "type": "string",
       "enum": ["smoke", "core", "regression", "hard"]
     },
+    "live": {
+      "type": "boolean",
+      "description": "When true, included in L1 eval_agent_live suites (smoke/core)."
+    },
     "notes": { "type": "string" }
   }
 }

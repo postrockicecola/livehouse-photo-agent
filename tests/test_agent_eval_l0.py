@@ -57,3 +57,12 @@ def test_eval_router_paraphrases_all_pass() -> None:
         c for c in report["cases"] if not c["ok"]
     ]
     assert report["micro"]["f1"] >= 0.99
+
+
+def test_eval_agent_live_mock_core_gate() -> None:
+    from scripts.eval.eval_agent_live import evaluate
+
+    report = evaluate(suite="core", mode="mock")
+    assert report["metrics"]["passed"] == report["metrics"]["total"], [
+        c for c in report["cases"] if not c["ok"]
+    ]

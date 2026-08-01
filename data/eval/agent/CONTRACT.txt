@@ -38,3 +38,18 @@ image basenames absent from this turn's tool metadata / working-memory
 ``last_files``. L0 cases may set ``expect.grounded`` and
 ``expect.reply_must_not_contain``.
 
+## L1 live (Phase 3)
+
+Cases with ``"live": true`` enter ``scripts/eval/eval_agent_live.py``.
+
+```bash
+python -m scripts.eval.eval_agent_live --mock --suite smoke   # CI
+python -m scripts.eval.eval_agent_live --mock --suite core
+python -m scripts.eval.eval_agent_live --live --suite smoke   # needs chat model
+```
+
+Metrics: ``pass_at_1``, ``tool_name_acc``, ``route_acc``, ``grounded_rate``,
+``json_leak_rate``, ``empty_honesty_rate``, ``p50/p95_latency_ms``, plus
+``prompt_hash`` + model metadata. Mock mode is a CI gate; ``--live`` is
+informational (exit 0) until a release threshold is frozen.
+

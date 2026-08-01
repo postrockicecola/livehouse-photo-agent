@@ -40,10 +40,12 @@ Eval
   data/eval/agent/sessions/smoke/             # L0 fixture gallery
   scripts/eval/eval_agent_chat_cases.py      # L0 scripted/routed suite
   scripts/eval/eval_agent_router_paraphrases.py
+  scripts/eval/eval_agent_live.py            # L1 mock (CI) / live model suites
+  scripts/eval/agent_case_score.py           # shared L0/L1 scoring metrics
   scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS
   quality/agent_cases.py + schemas/agent_chat_case.schema.json
   services/agent/groundedness.py           # final-answer file cite gate
-  tests/test_agent_eval_l0.py / test_agent_tool_protocol.py / test_agent_groundedness.py / …
+  tests/test_agent_eval_l0.py / test_agent_live_eval.py / test_agent_groundedness.py / …
 
 Docs
   this file
