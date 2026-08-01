@@ -57,13 +57,21 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def _run_l0() -> dict[str, Any]:
+    from scripts.eval import eval_agent_judge as judge_mod
     from scripts.eval.eval_agent_chat_cases import evaluate as eval_chat
-    from scripts.eval.eval_agent_live import evaluate as eval_live
+    from scripts.eval.eval_agent_live import evaluate as eval_live, select_live_cases
     from scripts.eval.eval_agent_router_paraphrases import evaluate as eval_router
 
     chat = eval_chat()
     router = eval_router()
     live_smoke = eval_live(suite="smoke", mode="mock")
+    cases = {c["id"]: c for c in select_live_cases(suite="smoke")}
+    judge_report = judge_mod.judge_with_utterances(
+        live_smoke,
+        cases,
+        judge_fn=judge_mod._scripted_generous_judge,
+        rater="llm_judge_mock",
+    )
     return {
         "chat_cases": {
             "passed": chat["passed"],
@@ -76,6 +84,12 @@ def _run_l0() -> dict[str, Any]:
             "micro_f1": router["micro"]["f1"],
         },
         "live_mock_smoke": live_smoke["metrics"],
+        "judge_mock_smoke": {
+            "passed": judge_report["passed"],
+            "total": judge_report["total"],
+            "pass_rate": judge_report["pass_rate"],
+            "gated_count": judge_report["gated_count"],
+        },
     }
 
 
@@ -97,6 +111,8 @@ def render_markdown(
         f"(micro_f1={l0['router_paraphrases']['micro_f1']})",
         f"- live_mock_smoke pass@1: {l0['live_mock_smoke'].get('pass_at_1')} "
         f"({l0['live_mock_smoke'].get('passed')}/{l0['live_mock_smoke'].get('total')})",
+        f"- judge_mock_smoke: {l0['judge_mock_smoke']['passed']}/{l0['judge_mock_smoke']['total']} "
+        f"(pass_rate={l0['judge_mock_smoke']['pass_rate']}, gated={l0['judge_mock_smoke']['gated_count']})",
         "",
     ]
     if eval_reports:

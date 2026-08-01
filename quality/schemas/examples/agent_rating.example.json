@@ -1,0 +1,11 @@
+{
+  "schema_version": "agent_rating.v1",
+  "id": "search_drummer__human",
+  "case_id": "search_drummer",
+  "utterance": "找鼓手特写",
+  "reply": "推荐 drum_01.jpg。",
+  "tool_calls": [{ "tool": "gallery_search", "ok": true, "metadata": { "files": ["drum_01.jpg"] } }],
+  "scores": { "useful": 4, "honest": 5, "concise": 4 },
+  "notes": "Clear and grounded.",
+  "rater": "human"
+}

@@ -80,3 +80,20 @@ Promote targets: router fixtures, ``router_paraphrases.v1.jsonl``, and chat
 - Guardrail policy via ``LIVEHOUSE_AGENT_GUARDRAIL_POLICY``:
   ``observe`` (default) | ``soft`` | ``hard``.
 
+## Human / LLM judge (Phase 6)
+
+Rubric (1–5 only): ``useful``, ``honest``, ``concise``.
+Hard gate: file cites must be grounded (same rules as production). Ungrounded
+turns fail even if the judge scores 5/5.
+
+```bash
+python -m scripts.eval.eval_agent_judge --mock --suite smoke
+python -m scripts.eval.eval_agent_judge --live --suite smoke
+python -m scripts.eval.eval_agent_judge --human path/to/ratings.jsonl
+python -m scripts.eval.eval_agent_judge --mock --suite smoke \
+  --promote-stubs data/review_queue/judge_fails.jsonl
+```
+
+Human example: ``quality/schemas/examples/agent_rating.example.json``.
+Failing ratings → review stubs → ``promote_to_fixtures``.
+

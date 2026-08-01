@@ -43,6 +43,8 @@ Eval
   scripts/eval/eval_agent_live.py            # L1 mock (CI) / live model suites
   scripts/eval/agent_case_score.py           # shared L0/L1 scoring metrics
   scripts/eval/report_agent_quality_weekly.py
+  scripts/eval/eval_agent_judge.py           # L3 useful/honest/concise + groundedness gate
+  services/agent/quality_judge.py
   scripts/agent/export_review_queue.py       # production→review candidates
   scripts/agent/promote_to_fixtures.py       # review→router/paraphrase/cases
   scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS

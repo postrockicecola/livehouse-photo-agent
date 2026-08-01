@@ -66,3 +66,9 @@ def test_eval_agent_live_mock_core_gate() -> None:
     assert report["metrics"]["passed"] == report["metrics"]["total"], [
         c for c in report["cases"] if not c["ok"]
     ]
+
+
+def test_eval_agent_judge_mock_smoke_gate() -> None:
+    from scripts.eval.eval_agent_judge import main
+
+    assert main(["--mock", "--suite", "smoke"]) == 0
