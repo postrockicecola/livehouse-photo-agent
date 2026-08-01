@@ -18,44 +18,46 @@ One loop: a livehouse night in → a publish-ready gallery out. Surfaces on top,
 
 ```mermaid
 flowchart TB
-    classDef night fill:#EFF6FF,stroke:#60A5FA,color:#1E3A5F
-    classDef ui fill:#FFFFFF,stroke:#3B82F6,color:#1E3A5F
-    classDef flow fill:#1D4ED8,stroke:#1E40AF,color:#FFFFFF
-    classDef runtimeDeep fill:#047857,stroke:#065F46,color:#FFFFFF
-    classDef runtimeMid fill:#059669,stroke:#047857,color:#FFFFFF
-    classDef runtimeSoft fill:#10B981,stroke:#059669,color:#FFFFFF
-    classDef eval fill:#ECFDF5,stroke:#34D399,color:#064E3B
-    classDef out fill:#D1FAE5,stroke:#10B981,color:#064E3B
+    classDef night fill:#B7C2CC,stroke:#7E8C9A,color:#2C3440,rx:14,ry:14
+    classDef ui fill:#C4CCD4,stroke:#8A96A3,color:#2C3440,rx:14,ry:14
+    classDef flowDeep fill:#5E6878,stroke:#4A5362,color:#F0EEEA,rx:14,ry:14
+    classDef flowMid fill:#6D7788,stroke:#586273,color:#F0EEEA,rx:14,ry:14
+    classDef flowSoft fill:#7C8797,stroke:#667183,color:#F0EEEA,rx:14,ry:14
+    classDef runtimeDeep fill:#5A6E66,stroke:#465850,color:#F0EEEA,rx:14,ry:14
+    classDef runtimeMid fill:#6A7F76,stroke:#556960,color:#F0EEEA,rx:14,ry:14
+    classDef runtimeSoft fill:#7A8F85,stroke:#657870,color:#F0EEEA,rx:14,ry:14
+    classDef eval fill:#A3AFA8,stroke:#7A8880,color:#2C3440,rx:14,ry:14
+    classDef out fill:#B0BDB5,stroke:#849188,color:#2C3440,rx:14,ry:14
 
-    N["Livehouse night<br/>• Previews + sibling RAW"]
+    N("Livehouse night<br/>• Previews + sibling RAW")
 
     subgraph SURFACES["Product surfaces"]
         direction LR
-        ST["Studio<br/>• submit session"]
-        GA["Gallery<br/>• review · style · export"]
-        CH["ChatDock<br/>• ask over artifacts"]
-        IC["Infra<br/>• jobs · cost · health"]
+        ST("Studio<br/>• submit session")
+        GA("Gallery<br/>• review · style · export")
+        CH("ChatDock<br/>• ask over artifacts")
+        IC("Infra<br/>• jobs · cost · health")
     end
 
     subgraph WORKFLOW["Creative workflow"]
         direction LR
-        W1["Ingest"]
-        W2["Analyze"]
-        W3["Curate"]
-        W4["Style"]
-        W5["Export"]
+        W1("Ingest")
+        W2("Analyze")
+        W3("Curate")
+        W4("Style")
+        W5("Export")
         W1 --> W2 --> W3 --> W4 --> W5
     end
 
     subgraph RUNTIME["AI runtime foundation"]
         direction LR
-        R1["Durable jobs<br/>• state machine · SSOT"]
-        R2["Vision pipeline<br/>• OpenCV → fast score → VLM"]
-        R3["Bounded inference<br/>• queue · fallback · ledger"]
-        R4["Evaluation<br/>• fixed set · protocol"]
+        R1("Durable jobs<br/>• state machine · SSOT")
+        R2("Vision pipeline<br/>• OpenCV → fast score → VLM")
+        R3("Bounded inference<br/>• queue · fallback · ledger")
+        R4("Evaluation<br/>• fixed set · protocol")
     end
 
-    P["Publish-ready gallery"]
+    P("Publish-ready gallery")
 
     N --> ST
     ST --> W1
@@ -72,15 +74,17 @@ flowchart TB
     class N night
     class P out
     class ST,GA,CH,IC ui
-    class W1,W2,W3,W4,W5 flow
+    class W1,W5 flowDeep
+    class W2,W4 flowMid
+    class W3 flowSoft
     class R1 runtimeDeep
     class R2 runtimeMid
     class R3 runtimeSoft
     class R4 eval
-    style SURFACES fill:#F0F9FF,stroke:#BFDBFE,color:#3B82F6
-    style WORKFLOW fill:#EFF6FF,stroke:#93C5FD,color:#1D4ED8
-    style RUNTIME fill:#ECFDF5,stroke:#A7F3D0,color:#047857
-    linkStyle default stroke:#64748B,stroke-width:1.5px
+    style SURFACES fill:#D5DBE1,stroke:#9AA5B2,color:#4A5563,rx:18,ry:18
+    style WORKFLOW fill:#CDD3DB,stroke:#8E99A8,color:#3F4A58,rx:18,ry:18
+    style RUNTIME fill:#D0D8D4,stroke:#8FA09A,color:#3F4A48,rx:18,ry:18
+    linkStyle default stroke:#8A93A0,stroke-width:1.5px
 ```
 
 <details>
