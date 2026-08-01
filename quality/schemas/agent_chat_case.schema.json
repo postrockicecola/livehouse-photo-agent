@@ -60,6 +60,14 @@
           "type": "boolean",
           "default": true
         },
+        "grounded": {
+          "type": "boolean",
+          "description": "When true (default if omitted for tool turns), reply file cites ⊆ tool/WM files."
+        },
+        "reply_must_not_contain": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "select_after": {
           "type": "boolean",
           "description": "When true, gallery_select must appear after a search."
@@ -81,7 +89,8 @@
           "compound",
           "search",
           "hard",
-          "smoke"
+          "smoke",
+          "regression"
         ]
       }
     },

@@ -24,6 +24,7 @@ _CASE_TAGS = frozenset(
         "search",
         "hard",
         "smoke",
+        "regression",
     }
 )
 

@@ -36,13 +36,14 @@ API / UI
   web/app/gallery                      gallery + chat surface
 
 Eval
-  data/eval/agent/CONTRACT.md + cases.v1.jsonl + router_paraphrases.v1.jsonl
+  data/eval/agent/CONTRACT.txt + cases.v1.jsonl + router_paraphrases.v1.jsonl
   data/eval/agent/sessions/smoke/             # L0 fixture gallery
   scripts/eval/eval_agent_chat_cases.py      # L0 scripted/routed suite
   scripts/eval/eval_agent_router_paraphrases.py
   scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS
   quality/agent_cases.py + schemas/agent_chat_case.schema.json
-  tests/test_agent_eval_l0.py / test_agent_tool_protocol.py / conversation* / …
+  services/agent/groundedness.py           # final-answer file cite gate
+  tests/test_agent_eval_l0.py / test_agent_tool_protocol.py / test_agent_groundedness.py / …
 
 Docs
   this file

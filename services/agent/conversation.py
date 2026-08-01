@@ -28,6 +28,7 @@ from services.agent.context_governance import (
     truncate_tool_observation,
     working_memory_prompt_block,
 )
+from services.agent.groundedness import ground_reply
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, route_gallery_intent
 from services.agent.skills.base import SkillRegistry
@@ -407,6 +408,7 @@ class ConversationalAgent:
 
     def chat(self, user_text: str) -> TurnResult:
         """Process one user turn: optional tool calls, then a final assistant reply."""
+        self._events = []
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
@@ -501,6 +503,7 @@ class ConversationalAgent:
         Tool rounds use the LangGraph chat subgraph when available (``defer_answer``);
         the final answer is streamed afterward so SSE behaviour stays unchanged.
         """
+        self._events = []
         if self._guardrails is not None:
             self._guardrails.scan_input(user_text, source="user")
         self.memory.add_user(user_text)
@@ -724,8 +727,29 @@ class ConversationalAgent:
             return _NO_ANSWER_FALLBACK
         return final
 
+    def _turn_tool_calls(self) -> list[dict[str, Any]]:
+        return [e for e in self._events if e.get("type") == "tool_call"]
+
     def _finalize(self, reply: str) -> str:
-        """Run output guardrails (for observability) and commit the reply to memory."""
+        """Ground file cites, run output guardrails, and commit the reply to memory."""
+        tool_calls = self._turn_tool_calls()
+        grounded, verdict = ground_reply(
+            reply,
+            tool_calls=tool_calls,
+            working_memory=self.working_memory,
+        )
+        if verdict.triggered:
+            self._emit(
+                {
+                    "type": "grounding_violation",
+                    "unknown": list(verdict.unknown),
+                    "cited": list(verdict.cited),
+                    "allowed": list(verdict.allowed),
+                }
+            )
+            reply = grounded
+        else:
+            reply = grounded
         if self._guardrails is not None:
             self._guardrails.check_output(reply)
         self.memory.add_assistant(reply)

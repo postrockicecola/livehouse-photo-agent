@@ -55,6 +55,7 @@ _AGENT_CASE_TAGS = {
     "search",
     "hard",
     "smoke",
+    "regression",
 }
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """L0 badcase / eval harness for the Gallery conversational agent.
 
-Loads ``data/eval/agent/cases.v1.jsonl`` (see ``data/eval/agent/CONTRACT.md``).
+Loads ``data/eval/agent/cases.v1.jsonl`` (see ``data/eval/agent/CONTRACT.txt``).
 No live LLM: a scripted ``chat_fn`` emits planned tool calls, then a final answer.
 Routed utterances exercise ``intent_router`` + one prose completion.
 
@@ -32,6 +32,7 @@ from services.agent.conversation import (  # noqa: E402
     ConversationMemory,
     _parse_tool_call,
 )
+from services.agent.groundedness import extract_file_mentions, normalize_file_key  # noqa: E402
 from services.agent.skills.artifacts import WriteArtifactSkill  # noqa: E402
 from services.agent.skills.gallery import gallery_registry  # noqa: E402
 from services.agent.skills.memory import register_memory_skills  # noqa: E402
@@ -159,6 +160,25 @@ def run_case(case: dict[str, Any], base_dir: Path, prefs: dict[str, str]) -> dic
         ok = False
         reasons.append("reply still looks like tool JSON")
 
+    for needle in exp.get("reply_must_not_contain") or []:
+        if str(needle) and str(needle) in (result.reply or ""):
+            ok = False
+            reasons.append(f"reply contains forbidden {needle!r}")
+
+    # Default-on for tool turns: every cited image basename must be in tool/WM files.
+    check_grounded = exp.get("grounded")
+    if check_grounded is None:
+        check_grounded = bool(result.tool_calls)
+    if check_grounded:
+        allowed = {normalize_file_key(f) for f in files}
+        for f in result.working_memory.get("last_files") or []:
+            allowed.add(normalize_file_key(str(f)))
+        cited = extract_file_mentions(result.reply or "")
+        bad = [c for c in cited if c not in allowed]
+        if bad:
+            ok = False
+            reasons.append(f"ungrounded cites {bad}")
+
     return {
         "id": case["id"],
         "split": case.get("split"),
@@ -171,6 +191,7 @@ def run_case(case: dict[str, Any], base_dir: Path, prefs: dict[str, str]) -> dic
         "elapsed_ms": elapsed_ms,
         "reply": (result.reply or "")[:200],
         "backend": getattr(agent, "last_backend", ""),
+        "grounding_events": sum(1 for e in result.events if e.get("type") == "grounding_violation"),
     }
 
 

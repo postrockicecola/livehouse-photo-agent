@@ -1,0 +1,40 @@
+# Agent eval contract (Phase 0)
+
+Status: **frozen for L0**. Companion schemas live under `quality/schemas/`.
+
+## Assets
+
+| Path | Role |
+|------|------|
+| `cases.v1.jsonl` | L0 scripted / routed Gallery chat cases (`agent_chat_case.v1`) |
+| `router_paraphrases.v1.jsonl` | Intent-router positive / negative paraphrases |
+| `sessions/<name>/analysis_results.json` | Tiny fixture galleries for skills |
+
+Pipeline photo goldens (`data/eval/labels.jsonl`, `quality/schemas/golden_item.schema.json`) stay separate. The `agent_chat` split on media goldens only means “may be referenced by an agent case”, not that the row is an agent utterance.
+
+## Case join keys
+
+| Field | Rule |
+|-------|------|
+| `id` | Stable snake_case; never reuse for a different intent |
+| `session` | Folder name under `sessions/`; default `smoke` |
+| `split` | `smoke` \| `core` \| `regression` \| `hard` |
+| `expect.route` | `intent_router` `rule_id`, or JSON `null` when the tool loop must run |
+
+## L0 runner
+
+```bash
+python -m scripts.eval.eval_agent_chat_cases
+python -m scripts.eval.eval_agent_router_paraphrases
+python quality/validate_contracts.py quality/schemas/examples/agent_chat_case.example.json
+```
+
+CI expectation: both eval scripts exit 0; protocol + router paraphrase tests green.
+
+## Groundedness (Phase 2)
+
+Runtime: ``services/agent/groundedness.py`` rewrites final replies that cite
+image basenames absent from this turn's tool metadata / working-memory
+``last_files``. L0 cases may set ``expect.grounded`` and
+``expect.reply_must_not_contain``.
+
