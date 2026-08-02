@@ -445,6 +445,24 @@ def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=N
     )
 
 
+def _tool_calls_by_assistant_index(events: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """Map chronological ``done`` events → tool_calls lists for successive assistant turns."""
+    out: list[list[dict[str, Any]]] = []
+    for ev in events or []:
+        if str(ev.get("type") or "") != "done":
+            continue
+        raw = ev.get("tool_calls")
+        if not isinstance(raw, list):
+            out.append([])
+            continue
+        cleaned: list[dict[str, Any]] = []
+        for tc in raw:
+            if isinstance(tc, dict) and tc.get("tool"):
+                cleaned.append(tc)
+        out.append(cleaned)
+    return out
+
+
 @router.get("/api/agent/history")
 def agent_history(
     session_id: str,
@@ -455,6 +473,9 @@ def agent_history(
 
     Lets the UI restore a conversation after a reload — the visible proof that memory
     is durable and per-user (a different token sees a different transcript).
+
+    Assistant rows include ``tool_calls`` reconstructed from persisted done events so
+    ChatDock CTAs (e.g. 「打开风格预览」) survive hydrate / reload.
     """
     user = resolve_user(authorization)
     owner = store.owner_key(user, session_id)
@@ -463,10 +484,21 @@ def agent_history(
         conv_id = store.get_or_create_conversation(conn, owner, session_id, mode)
         msgs = store.load_messages(conn, conv_id)
         prefs = store.get_preferences(conn, owner)
+        events = store.load_agent_events(conn, conv_id, limit=500)
     finally:
         conn.close()
+    tool_batches = _tool_calls_by_assistant_index(events)
+    assistant_i = 0
+    messages: list[dict[str, Any]] = []
+    for m in msgs:
+        row: dict[str, Any] = {"role": m["role"], "content": m["content"]}
+        if m["role"] == "assistant":
+            if assistant_i < len(tool_batches) and tool_batches[assistant_i]:
+                row["tool_calls"] = tool_batches[assistant_i]
+            assistant_i += 1
+        messages.append(row)
     return {
-        "messages": [{"role": m["role"], "content": m["content"]} for m in msgs],
+        "messages": messages,
         "memory_turns": len(msgs),
         "preferences": prefs,
     }

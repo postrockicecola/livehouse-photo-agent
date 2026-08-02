@@ -36,6 +36,7 @@ function showChatOnPath(pathname: string | null): boolean {
  */
 export function GlobalChatDock() {
   const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
+  const [previewsDir, setPreviewsDir] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const onStudio = Boolean(pathname?.startsWith("/studio"));
@@ -51,6 +52,20 @@ export function GlobalChatDock() {
       setInitialPrompt(null);
     }
   }, []);
+
+  useEffect(() => {
+    const read = () => {
+      try {
+        const v = sessionStorage.getItem("luma.active_previews_dir");
+        setPreviewsDir(v && v.trim() ? v.trim() : null);
+      } catch {
+        setPreviewsDir(null);
+      }
+    };
+    read();
+    window.addEventListener("focus", read);
+    return () => window.removeEventListener("focus", read);
+  }, [pathname]);
 
   useEffect(() => {
     const onAgentAction = (ev: Event) => {
@@ -81,6 +96,7 @@ export function GlobalChatDock() {
     <ChatDock
       key={onStudio ? "studio" : onGallery ? "gallery" : "landing"}
       apiBase={API_BASE}
+      previewsDir={previewsDir}
       context={onStudio ? "studio" : "gallery"}
       initialPrompt={initialPrompt}
       defaultOpen={onStudio || Boolean(initialPrompt?.trim())}

@@ -123,6 +123,15 @@ if ! has_cmd celery; then
   err "celery CLI not found. Install python deps first."
   exit 1
 fi
+# Production chat runtime defaults to LangGraph; missing package surfaces as a hard agent error.
+if ! python -c "import langgraph" >/dev/null 2>&1; then
+  if [[ "$NO_INSTALL" == "true" ]]; then
+    err "langgraph not installed in this Python env. Run: pip install 'langgraph>=0.2'"
+    exit 1
+  fi
+  log "langgraph missing; installing from requirements (chat runtime)..."
+  python -m pip install 'langgraph>=0.2'
+fi
 if ! has_cmd redis-server; then
   warn "redis-server not found; will try to continue if Redis already running."
 fi

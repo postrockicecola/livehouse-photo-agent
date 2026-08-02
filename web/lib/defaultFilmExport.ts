@@ -56,6 +56,29 @@ export function gallerySelectionKey(item: GalleryItem, fallbackIndex?: number): 
   return "";
 }
 
+/** Absolute FS / static showcase path — must not be joined onto galleryBasePath again. */
+export function isAbsoluteMediaPath(p: string): boolean {
+  const t = (p || "").trim().replace(/\\/g, "/");
+  if (!t) return false;
+  if (t.startsWith("/showcase/") || t.startsWith("/demo/")) return true;
+  if (t.startsWith("http://") || t.startsWith("https://")) return true;
+  return /^(\/|[A-Za-z]:\/)/.test(t);
+}
+
+/**
+ * Join ``root`` + basename/relative ref without doubling when ``fileOrPath`` is already absolute
+ * or already under ``root`` (curation selected_keys are often absolute paths).
+ */
+export function joinGalleryMediaPath(root: string | null | undefined, fileOrPath: string): string {
+  const f = (fileOrPath || "").trim().replace(/\\/g, "/");
+  if (!f) return "";
+  if (isAbsoluteMediaPath(f)) return f;
+  const r = (root || "").trim().replace(/\\/g, "/").replace(/\/$/, "");
+  if (!r) return f;
+  if (f === r || f.startsWith(`${r}/`)) return f;
+  return `${r}/${f.replace(/^\//, "")}`;
+}
+
 /** Same source resolution as Lab ``buildStyleEntries`` film rows (before → main → absolute paths). */
 export function filmSourcePathQuotedForItem(item: GalleryItem): string | null {
   return (

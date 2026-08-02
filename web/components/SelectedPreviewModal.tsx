@@ -9,6 +9,7 @@ import {
   exportPreviewLabel,
   resolvePreviewExportSpec,
 } from "@/lib/exportPreviewUrl";
+import { buildGalleryPlainImageUrl } from "@/lib/galleryDisplayUrl";
 const PREVIEW_MAX_SIDE = 1200;
 
 type Props = {
@@ -30,6 +31,10 @@ type Row = {
   index: number;
 };
 
+function catalogFallbackKey(item: GalleryItem, index: number): string {
+  return item.file?.trim() || item.path?.trim() || `agent-${index}`;
+}
+
 export function SelectedPreviewModal({
   items,
   exportByFile,
@@ -45,6 +50,21 @@ export function SelectedPreviewModal({
     const forceSessionVibe = variant === "vibe";
     for (const item of items) {
       const prefKey = gallerySelectionKey(item);
+      // Search / shortlist preview must stay ungarded — session vibe is sticky on disk
+      // and must not bleed into a fresh "选出吉他手" turn after the user clears chat.
+      if (variant === "agent") {
+        const url = buildGalleryPlainImageUrl(apiBase, item, PREVIEW_MAX_SIDE);
+        if (!url) continue;
+        i += 1;
+        out.push({
+          key: prefKey || catalogFallbackKey(item, i),
+          item,
+          label: "原图",
+          url,
+          index: i,
+        });
+        continue;
+      }
       const stored = prefKey ? exportByFile[prefKey] : undefined;
       const spec = resolvePreviewExportSpec(item, stored, {
         sessionFilmVariant,
@@ -81,18 +101,34 @@ export function SelectedPreviewModal({
     };
   }, []);
 
-  if (rows.length === 0) return null;
-
-  const indexPad = String(rows.length).length;
+  const indexPad = String(Math.max(rows.length, 1)).length;
 
   return (
     <PreviewModalShell onClose={onClose} variant={variant}>
       <div className="mx-auto w-full max-w-[1280px] px-[clamp(14px,3.5vw,44px)] pb-24 pt-6 md:pt-10">
-        <PreviewIntro count={rows.length} variant={variant} />
-        <div className="mt-8 md:mt-12">
-          <PreviewMosaicGrid rows={rows} indexPad={indexPad} />
-        </div>
-        <PreviewFooter onClose={onClose} variant={variant} />
+        {rows.length === 0 ? (
+          <div className="rounded-[8px] border border-white/[0.08] bg-white/[0.03] px-4 py-8 text-center">
+            <p className="text-[14px] text-white/70">暂无可预览照片</p>
+            <p className="mt-2 text-[12px] leading-relaxed text-white/40">
+              当前没有可渲染的图片路径。请先在相册里选出几张，或让助手重新筛选后再打开风格预览。
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-5 rounded-[6px] border border-white/[0.12] px-3 py-1.5 text-[12px] text-white/70 hover:bg-white/[0.06]"
+            >
+              关闭
+            </button>
+          </div>
+        ) : (
+          <>
+            <PreviewIntro count={rows.length} variant={variant} />
+            <div className="mt-8 md:mt-12">
+              <PreviewMosaicGrid rows={rows} indexPad={indexPad} />
+            </div>
+            <PreviewFooter onClose={onClose} variant={variant} />
+          </>
+        )}
       </div>
     </PreviewModalShell>
   );
@@ -123,7 +159,7 @@ function PreviewModalShell({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-[55] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
+      className="fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
       role="dialog"
       aria-modal="false"
       aria-label={title}
@@ -170,7 +206,7 @@ function PreviewIntro({
     variant === "agent" ? "助手筛选" : variant === "vibe" ? "风格预览" : "预览已选";
   const blurb =
     variant === "agent"
-      ? "按检索排序展示命中照片；关闭后可在对话里继续筛选或初选。"
+      ? "按检索排序展示命中原图（不套用会话胶片风格）；关闭后可在对话里继续筛选、初选或改风格。"
       : variant === "vibe"
         ? "已套用会话胶片风格；关闭后可在 Lab 微调，或继续对话改风格。"
         : "双列瀑布无框密铺，完整显示成片效果。";

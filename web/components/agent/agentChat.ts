@@ -182,7 +182,11 @@ export function newSessionId(): string {
   return `sess-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export type AgentHistoryTurn = { role: "user" | "assistant"; text: string };
+export type AgentHistoryTurn = {
+  role: "user" | "assistant";
+  text: string;
+  toolCalls?: AgentToolCall[];
+};
 
 /** Load the persisted transcript for a (session, mode) so the UI can restore it. */
 export async function fetchAgentHistory(
@@ -196,10 +200,16 @@ export async function fetchAgentHistory(
       { headers: { ...authHeader() }, cache: "no-store" },
     );
     if (!res.ok) return [];
-    const data = (await res.json()) as { messages?: { role: string; content: string }[] };
+    const data = (await res.json()) as {
+      messages?: { role: string; content: string; tool_calls?: AgentToolCall[] }[];
+    };
     return (data.messages ?? [])
       .filter((m) => m.role === "user" || m.role === "assistant")
-      .map((m) => ({ role: m.role as "user" | "assistant", text: m.content }));
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        text: m.content,
+        toolCalls: Array.isArray(m.tool_calls) && m.tool_calls.length ? m.tool_calls : undefined,
+      }));
   } catch {
     return [];
   }

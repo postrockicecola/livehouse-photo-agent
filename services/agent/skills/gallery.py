@@ -983,10 +983,22 @@ class ApplyFilmVibeSkill:
         variant = (vibe or {}).get("film_variant") or decision.film_variant
         files: list[str] = []
         try:
+            from pathlib import Path
+
             from utils.gallery_curation import read_gallery_curation
 
             cur = read_gallery_curation(self._base_dir) or {}
-            files = [str(f).strip() for f in (cur.get("selected_keys") or []) if str(f).strip()]
+            # Prefer basenames for ChatDock/Gallery lookup; selected_keys may be absolute paths.
+            seen: set[str] = set()
+            for raw in cur.get("selected_keys") or []:
+                s = str(raw or "").strip()
+                if not s:
+                    continue
+                base = Path(s).name or s
+                if base in seen:
+                    continue
+                seen.add(base)
+                files.append(base)
         except Exception:
             files = []
         summary = (

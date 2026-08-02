@@ -443,6 +443,35 @@ def preferences_prompt_block(prefs: dict[str, str]) -> str:
 # --------------------------------------------------------------- agent event trace
 
 
+def _compact_agent_event(ev: dict[str, Any]) -> dict[str, Any]:
+    """Keep CTA-critical fields; drop bulky working_memory / full trace from done events."""
+    if str(ev.get("type") or "") != "done":
+        return ev
+    tool_calls: list[dict[str, Any]] = []
+    for tc in ev.get("tool_calls") or []:
+        if not isinstance(tc, dict) or not tc.get("tool"):
+            continue
+        meta = dict(tc.get("metadata") or {})
+        # UI CTAs need ui_action / session_vibe / files; drop heavy search rows.
+        meta.pop("rows", None)
+        meta.pop("decision", None)
+        tool_calls.append(
+            {
+                "tool": tc.get("tool"),
+                "args": tc.get("args") or {},
+                "ok": bool(tc.get("ok")),
+                "metadata": meta,
+            }
+        )
+    return {
+        "type": "done",
+        "reply": ev.get("reply"),
+        "tool_calls": tool_calls,
+        "routed": ev.get("routed"),
+        "backend": ev.get("backend") or (ev.get("trace") or {}).get("backend"),
+    }
+
+
 def append_agent_events(
     conn: sqlite3.Connection,
     conversation_id: int,
@@ -454,17 +483,19 @@ def append_agent_events(
     import json
 
     now = time.time()
+    rows = []
+    for ev in events:
+        if not isinstance(ev, dict):
+            continue
+        payload = json.dumps(_compact_agent_event(ev), ensure_ascii=False)
+        if len(payload) > 48000:
+            payload = payload[:48000]
+        rows.append((conversation_id, str(ev.get("type") or "event"), payload, now))
+    if not rows:
+        return
     conn.executemany(
         "INSERT INTO agent_events(conversation_id, event_type, payload, created_at) VALUES(?,?,?,?)",
-        [
-            (
-                conversation_id,
-                str(ev.get("type") or "event"),
-                json.dumps(ev, ensure_ascii=False)[:12000],
-                now,
-            )
-            for ev in events
-        ],
+        rows,
     )
     conn.commit()
 

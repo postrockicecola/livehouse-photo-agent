@@ -46,6 +46,15 @@ _CONTRAST_SEMANTIC_RE = re.compile(
     r"(?:但|不过|但是).*(?:全景|吉他|鼓手|贝斯|胶片|风格|逆光|前排|慢门|特写|歌手|舞台)"
 )
 _PICK_VERB_RE = re.compile(r"(选出|挑选|帮我选|帮我挑|找出|找|给我|初选|标出|交片)")
+# Film / grade apply — skip LLM tool JSON (models often claim success without calling).
+_FILM_VIBE_RE = re.compile(
+    r"(胶片感|复古胶片|复古.{0,8}风格|黑白(?:纪实|风格)|梦核|"
+    r"cinestill|portra|kodak\s*portra|fuji\s*classic|"
+    r"修成.{0,20}风格|修得.{0,12}(?:狠|重|强)|"
+    r"(?:试试|想要|需要).{0,16}(?:复古|胶片|黑白|电影感|暖调).{0,12}风格|"
+    r"(?:套|应用|加上).{0,8}(?:胶片|风格))",
+    re.IGNORECASE,
+)
 
 _NEGATION_WINDOW = 5
 
@@ -194,6 +203,15 @@ def route_gallery_intent(user_text: str) -> Optional[RouteMatch]:
             rule_id="shortlist_deliverable",
             calls=[RoutedCall("gallery_search", defaults.deliverable_search_args(limit=limit))],
             select_after_search=True,
+        )
+
+    # Film grade / 胶片感 — must persist session_vibe (do not leave to prose-only LLM).
+    # Keep behind shortlist verbs so「选出10张复古风格」still shortlists first.
+    film_m = _positive_match(text, _FILM_VIBE_RE)
+    if film_m is not None and not wants_select:
+        return RouteMatch(
+            rule_id="apply_film_vibe",
+            calls=[RoutedCall("apply_film_vibe", {"prompt": text})],
         )
 
     if wants_select:

@@ -138,6 +138,8 @@ _KEYWORDS: dict[str, tuple[str, ...]] = {
         "暖色",
         "黄昏",
         "夕阳",
+        "胶片感",
+        "复古胶片",
         "romantic",
         "retro",
         "vintage",
@@ -210,6 +212,33 @@ def _normalize_prompt(prompt: str) -> str:
     return t
 
 
+def _intensity_from_prompt(prompt: str) -> float:
+    """Boost grade strength for 更狠 / 非常复古 style asks."""
+    t = _normalize_prompt(prompt)
+    if not t:
+        return 1.0
+    if any(k in t for k in ("非常非常", "超狠", "极致", "拉满", "狠狠")):
+        return 1.35
+    if any(k in t for k in ("更狠", "更重", "更强", "狠一些", "重一些", "强一些", "非常复古")):
+        return 1.2
+    return 1.0
+
+
+def _with_intensity(decision: FilmVibeDecision) -> FilmVibeDecision:
+    intensity = _intensity_from_prompt(decision.prompt)
+    if abs(intensity - decision.intensity) < 1e-6:
+        return decision
+    return FilmVibeDecision(
+        film_variant=decision.film_variant,
+        label_zh=decision.label_zh,
+        reason_zh=decision.reason_zh,
+        matched_by=decision.matched_by,
+        prompt=decision.prompt,
+        intensity=intensity,
+        matched=decision.matched,
+    )
+
+
 def _resolve_vibe_from_rules(prompt: str) -> FilmVibeDecision:
     raw = (prompt or "").strip()
     norm = _normalize_prompt(raw)
@@ -262,21 +291,23 @@ def resolve_vibe_from_prompt(prompt: str) -> FilmVibeDecision:
     """Keyword rules first; on ``rules:fallback`` only, optional Ollama text → JSON."""
     rules_dec = _resolve_vibe_from_rules(prompt)
     if rules_dec.matched_by != "rules:fallback":
-        return rules_dec
+        return _with_intensity(rules_dec)
 
     from services.vibe_llm_resolver import try_resolve_vibe_via_llm
 
     llm_dec = try_resolve_vibe_via_llm(rules_dec.prompt)
     if llm_dec is not None:
-        return llm_dec
+        return _with_intensity(llm_dec)
 
-    return FilmVibeDecision(
-        film_variant=rules_dec.film_variant,
-        label_zh=rules_dec.label_zh,
-        reason_zh=f"{rules_dec.reason_zh}；AI 未能解析，未应用默认修图",
-        matched_by="llm:failed",
-        prompt=rules_dec.prompt,
-        matched=False,
+    return _with_intensity(
+        FilmVibeDecision(
+            film_variant=rules_dec.film_variant,
+            label_zh=rules_dec.label_zh,
+            reason_zh=f"{rules_dec.reason_zh}；AI 未能解析，未应用默认修图",
+            matched_by="llm:failed",
+            prompt=rules_dec.prompt,
+            matched=False,
+        )
     )
 
 

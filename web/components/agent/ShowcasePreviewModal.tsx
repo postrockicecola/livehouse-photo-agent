@@ -65,7 +65,7 @@ export function ShowcasePreviewModal({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-[60] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
+      className="fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden text-white outline-none"
       role="dialog"
       aria-modal="false"
       aria-label={title}

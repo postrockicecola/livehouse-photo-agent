@@ -190,9 +190,24 @@
     "expect_rule": null
   },
   {
-    "id": "film_vibe_falls_through",
+    "id": "film_vibe_apply_retro",
     "user": "修成复古胶片风格看看",
-    "expect_rule": null
+    "expect_rule": "apply_film_vibe",
+    "expect_tool": "apply_film_vibe",
+    "expect_args": {
+      "prompt": "修成复古胶片风格看看"
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "film_vibe_intensify_retro",
+    "user": "胶片感更狠一些，非常非常复古的风格需要",
+    "expect_rule": "apply_film_vibe",
+    "expect_tool": "apply_film_vibe",
+    "expect_args": {
+      "prompt": "胶片感更狠一些，非常非常复古的风格需要"
+    },
+    "expect_select_after": false
   },
   {
     "id": "shortlist_plus_panorama_falls_through",

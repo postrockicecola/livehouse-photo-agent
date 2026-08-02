@@ -111,9 +111,9 @@ _TABLE: list[tuple[str, str, Optional[str], Optional[int], Optional[bool]]] = [
     # compound select_after_search
     ("compound_dedupe_select", "去重之后选出20张", "dedupe_burst", 20, True),
     ("compound_quality_jiaopian", "剔糊之后交片", "exclude_low_quality", 20, True),
-    # semantic / compound+semantic → LLM
+    # semantic / compound+semantic → LLM (film vibe is now deterministically routed)
     ("semantic_guitar", "找吉他手的照片", None, None, None),
-    ("semantic_film", "帮我修成复古胶片风格看看", None, None, None),
+    ("semantic_film", "帮我修成复古胶片风格看看", "apply_film_vibe", None, False),
     ("shortlist_plus_panorama", "选出20张，但多给我一些全景镜头", None, None, None),
 ]
 

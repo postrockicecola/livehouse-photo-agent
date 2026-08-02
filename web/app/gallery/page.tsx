@@ -18,6 +18,8 @@ import {
   catalogBasenameForExport,
   defaultFilmExportItem,
   gallerySelectionKey,
+  isAbsoluteMediaPath,
+  joinGalleryMediaPath,
 } from "@/lib/defaultFilmExport";
 import { serializeExportRequestBody } from "@/lib/exportPayload";
 import {
@@ -281,7 +283,14 @@ export default function HomePage() {
           count: boot.count,
         };
         setLoadSource(boot.loadSource);
-        if (boot.activeBaseDir) setGalleryBasePath(boot.activeBaseDir);
+        if (boot.activeBaseDir) {
+          setGalleryBasePath(boot.activeBaseDir);
+          try {
+            sessionStorage.setItem("luma.active_previews_dir", boot.activeBaseDir);
+          } catch {
+            /* ignore */
+          }
+        }
         setBootstrapErr(boot.error);
         if (boot.items.length === 0 && boot.error) {
           setGalleryErr(
@@ -532,12 +541,16 @@ export default function HomePage() {
 
   const openVibeStylePreview = useCallback(
     (sv: SessionVibeState, pool: GalleryItem[]) => {
-      if (!sessionVibeMatched(sv)) {
-        setActionMsg(
-          `助手写入了风格「${sv.label_zh || sv.prompt}」，但未匹配到胶片型号；请换关键词或在 Lab 手动选胶片。`,
-        );
+      if (!sv?.film_variant) {
+        setActionMsg("未找到可预览的胶片风格，请再让助手应用一次。");
         return;
       }
+      // Always surface the modal when we have a variant — matched=false used to
+      // return early and looked like the ChatDock CTA did nothing.
+      setSessionVibe(sv);
+      setVibePrompt(sv.prompt ?? "");
+      const matched = sessionVibeMatched(sv);
+      setUseSessionVibeForExport(matched);
       if (pool.length === 0) {
         pendingVibePreviewRef.current = true;
         setActionMsg(`助手已应用「${sv.label_zh}」，照片加载后将打开风格预览…`);
@@ -545,10 +558,16 @@ export default function HomePage() {
       }
       pendingVibePreviewRef.current = false;
       setAgentPreviewVariant("vibe");
-      // Keep up to a full delivery shortlist so "修刚才选出的 N 张" is visible.
-      setAgentPreviewItems(pool.slice(0, 40));
       setSelectionPreviewOpen(false);
-      setActionMsg(`助手已应用「${sv.label_zh}」，已打开风格预览`);
+      // Remount modal even if the previous vibe preview was still "open" in state.
+      setAgentPreviewItems(null);
+      const next = pool.slice(0, 40);
+      window.setTimeout(() => setAgentPreviewItems(next), 0);
+      setActionMsg(
+        matched
+          ? `助手已应用「${sv.label_zh}」，已打开风格预览`
+          : `已写入「${sv.label_zh}」（匹配较弱），仍已打开风格预览`,
+      );
     },
     [],
   );
@@ -572,19 +591,23 @@ export default function HomePage() {
           setActionMsg("助手未找到匹配照片");
           return;
         }
-        const byBase = new Map<string, GalleryItem>();
+        const byKey = new Map<string, GalleryItem>();
         for (const it of items) {
           const base = catalogBasenameForExport(it);
-          if (base) byBase.set(base, it);
-          if (it.file?.trim()) byBase.set(it.file.trim(), it);
+          if (base) byKey.set(base, it);
+          if (it.file?.trim()) byKey.set(it.file.trim(), it);
+          const sel = gallerySelectionKey(it);
+          if (sel) byKey.set(sel.replace(/\\/g, "/"), it);
+          if (it.path?.trim()) byKey.set(it.path.trim().replace(/\\/g, "/"), it);
         }
         const root = (galleryBasePath || "").replace(/\/$/, "");
         const resolved: GalleryItem[] = [];
         const n = Math.max(files.length, paths.length);
         for (let i = 0; i < n; i++) {
-          const f = files[i] || paths[i]?.split("/").pop() || "";
+          const raw = (files[i] || paths[i] || "").trim().replace(/\\/g, "/");
+          const f = raw.includes("/") ? raw.split("/").pop() || raw : raw;
           const showcasePath = paths[i]?.startsWith("/showcase/") ? paths[i] : "";
-          const hit = f ? byBase.get(f) : undefined;
+          const hit = (raw && byKey.get(raw)) || (f ? byKey.get(f) : undefined);
           if (hit) {
             resolved.push(hit);
             continue;
@@ -597,9 +620,9 @@ export default function HomePage() {
             });
             continue;
           }
-          const abs = root && f ? `${root}/${f}` : f || paths[i] || "";
+          const abs = joinGalleryMediaPath(root, raw || f);
           if (!abs) continue;
-          const isStatic = abs.startsWith("/showcase/") || abs.startsWith("/demo/");
+          const isStatic = isAbsoluteMediaPath(abs) && (abs.startsWith("/showcase/") || abs.startsWith("/demo/"));
           resolved.push({
             file: f || abs.split("/").pop(),
             path: abs,
@@ -614,55 +637,85 @@ export default function HomePage() {
       }
       if (action === "reload_vibe") {
         const raw = meta.session_vibe;
-        const sv =
-          raw && typeof raw === "object" ? (raw as SessionVibeState) : null;
         setReloadNonce((n) => n + 1);
-        if (!sv?.film_variant) {
+        // Explicit clear only when skill sent session_vibe: null (not when metadata omitted).
+        if (raw === null) {
           setSessionVibe(null);
           setUseSessionVibeForExport(false);
           pendingVibePreviewRef.current = false;
           setActionMsg("助手已清除胶片风格");
           return;
         }
-        setSessionVibe(sv);
-        setVibePrompt(sv.prompt ?? "");
-        setUseSessionVibeForExport(sessionVibeMatched(sv));
-        const metaFiles = Array.isArray(meta.files)
-          ? meta.files.map((f) => String(f || "").trim()).filter(Boolean)
-          : [];
-        let fromMeta: GalleryItem[] = [];
-        if (metaFiles.length > 0) {
-          const byBase = new Map<string, GalleryItem>();
-          for (const it of items) {
-            const base = catalogBasenameForExport(it);
-            if (base) byBase.set(base, it);
-            if (it.file?.trim()) byBase.set(it.file.trim(), it);
+
+        const openWith = (sv: SessionVibeState) => {
+          const metaFiles = Array.isArray(meta.files)
+            ? meta.files.map((f) => String(f || "").trim()).filter(Boolean)
+            : [];
+          let fromMeta: GalleryItem[] = [];
+          if (metaFiles.length > 0) {
+            const byKey = new Map<string, GalleryItem>();
+            for (const it of items) {
+              const base = catalogBasenameForExport(it);
+              if (base) byKey.set(base, it);
+              if (it.file?.trim()) byKey.set(it.file.trim(), it);
+              const sel = gallerySelectionKey(it);
+              if (sel) byKey.set(sel.replace(/\\/g, "/"), it);
+              if (it.path?.trim()) byKey.set(it.path.trim().replace(/\\/g, "/"), it);
+            }
+            const root = (galleryBasePath || "").replace(/\/$/, "");
+            fromMeta = metaFiles.map((raw) => {
+              const key = raw.replace(/\\/g, "/");
+              const base = key.includes("/") ? key.split("/").pop() || key : key;
+              const hit = byKey.get(key) || byKey.get(base);
+              if (hit) return hit;
+              const abs = joinGalleryMediaPath(root, key);
+              const isStatic =
+                isAbsoluteMediaPath(abs) && (abs.startsWith("/showcase/") || abs.startsWith("/demo/"));
+              return {
+                file: base,
+                path: abs,
+                path_quoted: isStatic ? abs : encodeURIComponent(abs),
+              };
+            });
           }
-          const root = (galleryBasePath || "").replace(/\/$/, "");
-          fromMeta = metaFiles.map((f) => {
-            const hit = byBase.get(f);
-            if (hit) return hit;
-            const abs = root ? `${root}/${f}` : f;
-            return {
-              file: f,
-              path: abs,
-              path_quoted: encodeURIComponent(abs),
-            };
-          });
+          // Prefer explicit tool files → last agent shortlist → liked → all items.
+          const liked = items.filter((it, idx) =>
+            selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
+          );
+          const pool =
+            fromMeta.length > 0
+              ? fromMeta
+              : agentPreviewItems && agentPreviewItems.length > 0
+                ? agentPreviewItems
+                : liked.length > 0
+                  ? liked
+                  : items;
+          openVibeStylePreview(sv, pool);
+        };
+
+        const sv =
+          raw && typeof raw === "object" ? (raw as SessionVibeState) : null;
+        if (sv?.film_variant) {
+          openWith(sv);
+          return;
         }
-        // Prefer explicit tool files → last agent shortlist → liked → all items.
-        const liked = items.filter((it, idx) =>
-          selectedKeys.has(gallerySelectionKey(it, idx) || `item-${idx}`),
-        );
-        const pool =
-          fromMeta.length > 0
-            ? fromMeta
-            : agentPreviewItems && agentPreviewItems.length > 0
-              ? agentPreviewItems
-              : liked.length > 0
-                ? liked
-                : items;
-        openVibeStylePreview(sv, pool);
+        // CTA fallback / partial tool metadata — fetch persisted vibe then open.
+        pendingVibePreviewRef.current = true;
+        setActionMsg("正在打开风格预览…");
+        void fetchSessionVibe(API_BASE)
+          .then((data) => {
+            const fetched = data.session_vibe;
+            if (!fetched?.film_variant) {
+              pendingVibePreviewRef.current = false;
+              setActionMsg("未找到已应用的胶片风格，请再让助手应用一次。");
+              return;
+            }
+            openWith(fetched);
+          })
+          .catch(() => {
+            pendingVibePreviewRef.current = false;
+            setActionMsg("打开风格预览失败，请稍后重试。");
+          });
         return;
       }
       if (action === "reload_curation" || action === "export_done") {
@@ -673,7 +726,7 @@ export default function HomePage() {
     };
     window.addEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
     return () => window.removeEventListener("luma:gallery-agent-action", onAgentAction as EventListener);
-  }, [items, galleryBasePath, selectedKeys, agentPreviewItems, openVibeStylePreview]);
+  }, [API_BASE, items, galleryBasePath, selectedKeys, agentPreviewItems, openVibeStylePreview]);
 
   // Off-gallery ChatDock → /gallery? open graded vibe preview once items + vibe are ready.
   useEffect(() => {
@@ -682,7 +735,7 @@ export default function HomePage() {
     } catch {
       return;
     }
-    if (!sessionVibeMatched(sessionVibe) || !sessionVibe || items.length === 0) {
+    if (!sessionVibe?.film_variant || items.length === 0) {
       pendingVibePreviewRef.current = true;
       return;
     }
@@ -696,7 +749,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!pendingVibePreviewRef.current) return;
-    if (!sessionVibeMatched(sessionVibe) || !sessionVibe || items.length === 0) return;
+    if (!sessionVibe?.film_variant || items.length === 0) return;
     openVibeStylePreview(sessionVibe, items);
   }, [sessionVibe, items, openVibeStylePreview]);
 
@@ -1410,12 +1463,10 @@ export default function HomePage() {
           variant={agentPreviewVariant}
           onClose={() => setAgentPreviewItems(null)}
           sessionFilmVariant={
-            sessionVibeMatched(sessionVibe) ? sessionVibe?.film_variant ?? null : null
+            agentPreviewVariant === "vibe" ? sessionVibe?.film_variant ?? null : null
           }
           useSessionVibe={
-            agentPreviewVariant === "vibe"
-              ? sessionVibeMatched(sessionVibe)
-              : useSessionVibeForExport && sessionVibeMatched(sessionVibe)
+            agentPreviewVariant === "vibe" ? Boolean(sessionVibe?.film_variant) : false
           }
         />
       ) : null}

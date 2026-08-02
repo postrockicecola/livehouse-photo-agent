@@ -8,6 +8,7 @@ import {
   sendAgentChat,
   streamAgentChat,
   type AgentGuardrailEvent,
+  type AgentHistoryTurn,
   type AgentMode,
   type AgentToolCall,
 } from "@/components/agent/agentChat";
@@ -23,6 +24,7 @@ import {
   ShowcasePreviewModal,
   type ShowcasePreviewItem,
 } from "@/components/agent/ShowcasePreviewModal";
+import { clearSessionVibeApi, fetchSessionVibe, saveSessionVibe } from "@/lib/sessionVibe";
 
 type ChatTurn = {
   role: "user" | "assistant";
@@ -114,12 +116,125 @@ function gradeClassFromVibe(sv: Record<string, unknown> | null | undefined): str
   return typeof sv?.grade_class === "string" ? sv.grade_class : undefined;
 }
 
+function isVibePreviewCall(c: AgentToolCall): boolean {
+  if (!c?.ok) return false;
+  const ui = String(c.metadata?.ui_action || "");
+  // Cleared vibe — no preview CTA.
+  if (ui === "reload_vibe" && c.metadata?.session_vibe == null) return false;
+  const sv =
+    c.metadata?.session_vibe && typeof c.metadata.session_vibe === "object"
+      ? (c.metadata.session_vibe as Record<string, unknown>)
+      : null;
+  if (sv?.film_variant) return ui === "reload_vibe" || c.tool === "apply_film_vibe";
+  // Partial metadata: skill ran, session vibe can be fetched on click.
+  return c.tool === "apply_film_vibe" && ui === "reload_vibe";
+}
+
+function mentionsVibePreviewCta(text: string): boolean {
+  return /打开风格预览/.test(text || "");
+}
+
+function mergeHistoryTurns(prev: ChatTurn[], hist: AgentHistoryTurn[]): ChatTurn[] {
+  // Never clobber an in-flight stream with a text-only hydrate.
+  if (prev.some((t) => t.streaming)) return prev;
+  const next: ChatTurn[] = hist.map((h) => ({
+    role: h.role,
+    text: h.text,
+    toolCalls: h.toolCalls,
+  }));
+  // Preserve richer local toolCalls when history row is text-only (race / old rows).
+  for (let i = 0; i < next.length; i++) {
+    if (next[i].role !== "assistant") continue;
+    if (next[i].toolCalls?.length) continue;
+    const local = prev.find(
+      (p) =>
+        p.role === "assistant" &&
+        (p.text || "").trim() === (next[i].text || "").trim() &&
+        (p.toolCalls?.length ?? 0) > 0,
+    );
+    if (local?.toolCalls?.length) {
+      next[i] = { ...next[i], toolCalls: local.toolCalls, guardrails: local.guardrails };
+    }
+  }
+  // Keep trailing local turns not yet visible in persisted history.
+  if (prev.length > next.length) {
+    return [...next, ...prev.slice(next.length)];
+  }
+  return next;
+}
+
+async function openSessionVibePreview(
+  apiBase: string,
+  fallbackPrompt?: string,
+): Promise<"ok" | "missing" | "error"> {
+  try {
+    let data = await fetchSessionVibe(apiBase);
+    let sv = data.session_vibe;
+    // Model often claims success without calling apply_film_vibe — apply from the
+    // user's style ask so the CTA still opens a real graded preview.
+    if (!sv?.film_variant && fallbackPrompt?.trim()) {
+      data = await saveSessionVibe(apiBase, fallbackPrompt.trim());
+      sv = data.session_vibe;
+    }
+    if (!sv?.film_variant) return "missing";
+    window.dispatchEvent(
+      new CustomEvent("luma:gallery-agent-action", {
+        detail: {
+          action: "reload_vibe",
+          tool: "apply_film_vibe",
+          metadata: { ui_action: "reload_vibe", session_vibe: sv, files: [] },
+        },
+      }),
+    );
+    return "ok";
+  } catch {
+    return "error";
+  }
+}
+
+function VibePreviewFallbackButton({
+  apiBase,
+  fallbackPrompt,
+}: {
+  apiBase: string;
+  fallbackPrompt?: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  return (
+    <div className="mt-2 flex flex-col gap-1">
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            setErr(null);
+            void openSessionVibePreview(apiBase, fallbackPrompt)
+              .then((status) => {
+                if (status === "missing") setErr("未能解析风格，请换个说法再试（如：复古胶片 / 黑白纪实）");
+                if (status === "error") setErr("打开失败，请稍后重试");
+              })
+              .finally(() => setBusy(false));
+          }}
+          className="rounded-[5px] border border-amber-400/35 bg-amber-400/15 px-2.5 py-1.5 text-[12px] font-medium text-amber-100/95 transition-colors hover:bg-amber-400/25 disabled:opacity-50"
+        >
+          {busy ? "应用并打开…" : "打开风格预览"}
+        </button>
+      </div>
+      {err ? <p className="text-[11px] text-rose-300/80">{err}</p> : null}
+    </div>
+  );
+}
+
 function AssistantActionBar({
   calls,
   onOpenShowcase,
+  apiBase,
 }: {
   calls: AgentToolCall[];
   onOpenShowcase: OpenShowcaseFn;
+  apiBase: string;
 }) {
   const searchCall = calls.find(
     (c) =>
@@ -129,14 +244,7 @@ function AssistantActionBar({
       Array.isArray(c.metadata?.files) &&
       (c.metadata?.files as unknown[]).length > 0,
   );
-  const vibeCall = calls.find(
-    (c) =>
-      c.ok &&
-      String(c.metadata?.ui_action || "") === "reload_vibe" &&
-      c.metadata?.session_vibe &&
-      typeof c.metadata.session_vibe === "object" &&
-      Boolean((c.metadata.session_vibe as Record<string, unknown>).film_variant),
-  );
+  const vibeCall = calls.find(isVibePreviewCall);
   if (!searchCall && !vibeCall) return null;
 
   const emitGallery = (call: AgentToolCall, action: string) => {
@@ -163,8 +271,12 @@ function AssistantActionBar({
     emitGallery(searchCall, "search");
   };
 
+  const [vibeErr, setVibeErr] = useState<string | null>(null);
+  const [vibeBusy, setVibeBusy] = useState(false);
+
   const openVibe = () => {
-    if (!vibeCall) return;
+    if (!vibeCall || vibeBusy) return;
+    setVibeErr(null);
     if (isShowcaseCall(vibeCall) || isShowcaseCall(searchCall)) {
       const src = isShowcaseCall(vibeCall) ? vibeCall : searchCall!;
       const sv = vibeCall.metadata?.session_vibe as Record<string, unknown> | undefined;
@@ -175,37 +287,56 @@ function AssistantActionBar({
         : searchCall
           ? previewItemsFromCall(searchCall)
           : [];
-      onOpenShowcase(items, "vibe", label, gradeClassFromVibe(sv));
+      if (items.length) {
+        onOpenShowcase(items, "vibe", label, gradeClassFromVibe(sv));
+        return;
+      }
+    }
+    const sv = vibeCall.metadata?.session_vibe;
+    if (sv && typeof sv === "object" && (sv as Record<string, unknown>).film_variant) {
+      emitGallery(vibeCall, "reload_vibe");
       return;
     }
-    emitGallery(vibeCall, "reload_vibe");
+    setVibeBusy(true);
+    const promptFromArgs =
+      typeof vibeCall.args?.prompt === "string" ? String(vibeCall.args.prompt) : "";
+    void openSessionVibePreview(apiBase, promptFromArgs)
+      .then((status) => {
+        if (status === "missing") setVibeErr("未能解析风格，请换个说法再试（如：复古胶片 / 黑白纪实）");
+        if (status === "error") setVibeErr("打开失败，请稍后重试");
+      })
+      .finally(() => setVibeBusy(false));
   };
 
   return (
-    <div className="mt-2 flex flex-wrap gap-1.5">
-      {searchCall ? (
-        <button
-          type="button"
-          onClick={openSearch}
-          className="rounded-[5px] border border-emerald-400/35 bg-emerald-400/15 px-2.5 py-1.5 text-[12px] font-medium text-emerald-100/95 transition-colors hover:bg-emerald-400/25"
-        >
-          打开预览
-          {Array.isArray(searchCall.metadata?.files) ? (
-            <span className="ml-1 tabular-nums text-emerald-100/55">
-              {(searchCall.metadata.files as unknown[]).length}
-            </span>
-          ) : null}
-        </button>
-      ) : null}
-      {vibeCall ? (
-        <button
-          type="button"
-          onClick={openVibe}
-          className="rounded-[5px] border border-amber-400/35 bg-amber-400/15 px-2.5 py-1.5 text-[12px] font-medium text-amber-100/95 transition-colors hover:bg-amber-400/25"
-        >
-          打开风格预览
-        </button>
-      ) : null}
+    <div className="mt-2 flex flex-col gap-1">
+      <div className="flex flex-wrap gap-1.5">
+        {searchCall ? (
+          <button
+            type="button"
+            onClick={openSearch}
+            className="rounded-[5px] border border-emerald-400/35 bg-emerald-400/15 px-2.5 py-1.5 text-[12px] font-medium text-emerald-100/95 transition-colors hover:bg-emerald-400/25"
+          >
+            打开预览
+            {Array.isArray(searchCall.metadata?.files) ? (
+              <span className="ml-1 tabular-nums text-emerald-100/55">
+                {(searchCall.metadata.files as unknown[]).length}
+              </span>
+            ) : null}
+          </button>
+        ) : null}
+        {vibeCall ? (
+          <button
+            type="button"
+            disabled={vibeBusy}
+            onClick={openVibe}
+            className="rounded-[5px] border border-amber-400/35 bg-amber-400/15 px-2.5 py-1.5 text-[12px] font-medium text-amber-100/95 transition-colors hover:bg-amber-400/25 disabled:opacity-50"
+          >
+            {vibeBusy ? "打开中…" : "打开风格预览"}
+          </button>
+        ) : null}
+      </div>
+      {vibeErr ? <p className="text-[11px] text-rose-300/80">{vibeErr}</p> : null}
     </div>
   );
 }
@@ -491,11 +622,7 @@ function ToolChip({
     call.metadata?.session_vibe && typeof call.metadata.session_vibe === "object"
       ? (call.metadata.session_vibe as Record<string, unknown>)
       : null;
-  const canPreviewVibe =
-    call.ok &&
-    uiAction === "reload_vibe" &&
-    Boolean(vibeMeta?.film_variant) &&
-    (call.tool === "apply_film_vibe" || Boolean(vibeMeta));
+  const canPreviewVibe = isVibePreviewCall(call);
 
   const openSearch = () => {
     if (showcase && onOpenShowcase) {
@@ -812,6 +939,8 @@ export function ChatDock({
   }, [initialPrompt]);
 
   // Restore the persisted transcript when opening, switching mode, or auth changes.
+  // Merge carefully: a naive replace drops toolCalls and removes 「打开风格预览」 CTAs
+  // whenever fetchMe / login refreshes `user`.
   useEffect(() => {
     if (!open) return;
     const sid = persistentSessionId(context, mode);
@@ -819,7 +948,7 @@ export function ChatDock({
     let cancelled = false;
     void fetchAgentHistory(apiBase, sid, mode).then((hist) => {
       if (cancelled) return;
-      setTurns(hist.map((h) => ({ role: h.role, text: h.text })));
+      setTurns((prev) => mergeHistoryTurns(prev, hist));
       const pending = pendingAutoSend.current;
       if (pending) {
         pendingAutoSend.current = null;
@@ -965,7 +1094,24 @@ export function ChatDock({
       setPromptPhase("select");
       writeStoredPromptPhase("select");
     }
-  }, [context, mode, promptStages]);
+    // Chat transcript ≠ session vibe on disk; clearing chat should drop the sticky
+    // grade so the next search preview is not still B&W / Cinestill from last turn.
+    void clearSessionVibeApi(apiBase)
+      .then(() => {
+        window.dispatchEvent(
+          new CustomEvent("luma:gallery-agent-action", {
+            detail: {
+              action: "reload_vibe",
+              tool: "apply_film_vibe",
+              metadata: { ui_action: "reload_vibe", session_vibe: null },
+            },
+          }),
+        );
+      })
+      .catch(() => {
+        /* ignore — search preview no longer reads session vibe anyway */
+      });
+  }, [apiBase, context, mode, promptStages]);
 
   const doAuth = useCallback(
     async (kind: "login" | "register", username: string, password: string) => {
@@ -1003,186 +1149,214 @@ export function ChatDock({
       style={{ bottom: "var(--luma-chat-bottom, 1rem)" }}
     >
       {open ? (
-        <div className="flex h-[min(560px,calc(100vh-5.5rem-var(--luma-chat-bottom,1rem)))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
-          {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
-          <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
-              <span className="text-[12px] text-white/70">策展助手</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {user ? (
+        <div className="relative flex h-[min(560px,calc(100vh-5.5rem-var(--luma-chat-bottom,1rem)))] w-[min(380px,calc(100vw-2rem))]">
+          {/* Left-edge collapse tab — retracts the dock toward the right edge. */}
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="收起策展助手"
+            title="收起"
+            className="group absolute -left-3.5 top-1/2 z-10 flex h-14 w-3.5 -translate-y-1/2 items-center justify-center rounded-l-[8px] border border-r-0 border-white/[0.1] bg-[#121212]/95 text-white/40 shadow-[-2px_0_12px_rgba(0,0,0,0.35)] backdrop-blur-md transition-colors hover:bg-white/[0.07] hover:text-white/75"
+          >
+            <svg
+              className="h-3 w-3 shrink-0 transition-transform duration-200 group-hover:translate-x-px"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
+            {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
+            <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
+                <span className="text-[12px] text-white/70">策展助手</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={() => void doLogout()}
+                    title={`已登录：${user.username}（点击退出）`}
+                    className="max-w-[92px] truncate rounded-[3px] px-1.5 py-0.5 text-[12px] text-emerald-300/70 hover:text-emerald-200"
+                  >
+                    {user.username}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAuthOpen(true)}
+                    title="登录以持久保存对话"
+                    className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
+                  >
+                    登录
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => void doLogout()}
-                  title={`已登录：${user.username}（点击退出）`}
-                  className="max-w-[92px] truncate rounded-[3px] px-1.5 py-0.5 text-[12px] text-emerald-300/70 hover:text-emerald-200"
-                >
-                  {user.username}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setAuthOpen(true)}
-                  title="登录以持久保存对话"
+                  onClick={resetChat}
+                  title="清空对话"
                   className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
                 >
-                  登录
+                  清空
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={resetChat}
-                title="清空对话"
-                className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
-              >
-                清空
-              </button>
+              </div>
             </div>
-          </div>
 
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
-            {turns.length === 0 ? (
-              <div className="space-y-3 pt-2">
-                <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT}</p>
-                {promptStages ? (
-                  <>
-                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
-                      {phaseStepLabel(promptPhase)}
-                    </p>
+            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
+              {turns.length === 0 ? (
+                <div className="space-y-3 pt-2">
+                  <p className="text-[12px] leading-relaxed text-white/35">{MODE_HINT}</p>
+                  {promptStages ? (
+                    <>
+                      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/28">
+                        {phaseStepLabel(promptPhase)}
+                      </p>
+                      <PromptChipList
+                        prompts={promptsForPhase(promptStages, promptPhase)}
+                        onPick={(p) => void send(p)}
+                        eyebrow={phaseChipEyebrow(promptPhase)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      {emptyRotatingPrompts && emptyRotatingPrompts.length > 0 ? (
+                        <RotatingPromptStage
+                          prompts={emptyRotatingPrompts}
+                          onPick={(p) => void send(p)}
+                        />
+                      ) : null}
+                      <div className="flex flex-col gap-1.5">
+                        {SUGGESTIONS.map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => void send(s)}
+                            className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                {turns.map((t, i) => (
+                  <div key={i} className={t.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                    <div
+                      className={[
+                        "max-w-[88%] rounded-[6px] px-2.5 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words",
+                        t.role === "user"
+                          ? "bg-white/[0.1] text-white/85"
+                          : t.error
+                            ? "border border-rose-500/25 bg-rose-500/10 text-rose-100/85"
+                            : "border border-white/[0.06] bg-white/[0.03] text-white/75",
+                      ].join(" ")}
+                    >
+                      {t.streaming && !t.text && !t.toolCalls?.length ? (
+                        <div className="flex items-center gap-1 text-white/40">
+                          <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40" />
+                          思考中…
+                        </div>
+                      ) : (
+                        <div>
+                          {t.role === "assistant" ? (
+                            <LinkifiedText text={scrubAssistantText(t.text)} />
+                          ) : (
+                            t.text
+                          )}
+                          {t.streaming ? (
+                            <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-white/50 align-[-0.15em]" aria-hidden />
+                          ) : null}
+                        </div>
+                      )}
+                      {t.role === "assistant" && t.toolCalls?.length ? (
+                        <AssistantActionBar
+                          calls={t.toolCalls}
+                          onOpenShowcase={openShowcasePreview}
+                          apiBase={apiBase}
+                        />
+                      ) : null}
+                      {t.role === "assistant" &&
+                      !t.streaming &&
+                      !(t.toolCalls ?? []).some(isVibePreviewCall) &&
+                      mentionsVibePreviewCta(t.text) ? (
+                        <VibePreviewFallbackButton
+                          apiBase={apiBase}
+                          fallbackPrompt={
+                            i > 0 && turns[i - 1]?.role === "user" ? turns[i - 1].text : undefined
+                          }
+                        />
+                      ) : null}
+                      {(t.toolCalls?.length || t.guardrails?.length) ? (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {t.toolCalls?.map((c, j) => (
+                            <ToolChip key={`t${j}`} call={c} onOpenShowcase={openShowcasePreview} />
+                          ))}
+                          {t.guardrails?.map((g, j) => <GuardrailChip key={`g${j}`} ev={g} />)}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+                {promptStages && promptPhase !== "select" && !sending ? (
+                  <div className="rounded-[6px] border border-amber-400/20 bg-amber-400/[0.04] px-2.5 py-2.5">
                     <PromptChipList
                       prompts={promptsForPhase(promptStages, promptPhase)}
                       onPick={(p) => void send(p)}
-                      eyebrow={phaseChipEyebrow(promptPhase)}
+                      eyebrow={phaseFollowUpEyebrow(promptPhase)}
                     />
-                  </>
-                ) : (
-                  <>
-                    {emptyRotatingPrompts && emptyRotatingPrompts.length > 0 ? (
-                      <RotatingPromptStage
-                        prompts={emptyRotatingPrompts}
-                        onPick={(p) => void send(p)}
-                      />
-                    ) : null}
-                    <div className="flex flex-col gap-1.5">
-                      {SUGGESTIONS.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => void send(s)}
-                          className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <>
-              {turns.map((t, i) => (
-                <div key={i} className={t.role === "user" ? "flex justify-end" : "flex justify-start"}>
-                  <div
-                    className={[
-                      "max-w-[88%] rounded-[6px] px-2.5 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words",
-                      t.role === "user"
-                        ? "bg-white/[0.1] text-white/85"
-                        : t.error
-                          ? "border border-rose-500/25 bg-rose-500/10 text-rose-100/85"
-                          : "border border-white/[0.06] bg-white/[0.03] text-white/75",
-                    ].join(" ")}
-                  >
-                    {t.streaming && !t.text && !t.toolCalls?.length ? (
-                      <div className="flex items-center gap-1 text-white/40">
-                        <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40" />
-                        思考中…
-                      </div>
-                    ) : (
-                      <div>
-                        {t.role === "assistant" ? (
-                          <LinkifiedText text={scrubAssistantText(t.text)} />
-                        ) : (
-                          t.text
-                        )}
-                        {t.streaming ? (
-                          <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-white/50 align-[-0.15em]" aria-hidden />
-                        ) : null}
-                      </div>
-                    )}
-                    {t.role === "assistant" && t.toolCalls?.length ? (
-                      <AssistantActionBar calls={t.toolCalls} onOpenShowcase={openShowcasePreview} />
-                    ) : null}
-                    {(t.toolCalls?.length || t.guardrails?.length) ? (
-                      <div className="mt-1.5 flex flex-wrap gap-1">
-                        {t.toolCalls?.map((c, j) => (
-                          <ToolChip key={`t${j}`} call={c} onOpenShowcase={openShowcasePreview} />
-                        ))}
-                        {t.guardrails?.map((g, j) => <GuardrailChip key={`g${j}`} ev={g} />)}
-                      </div>
-                    ) : null}
                   </div>
-                </div>
-              ))}
-              {promptStages && promptPhase !== "select" && !sending ? (
-                <div className="rounded-[6px] border border-amber-400/20 bg-amber-400/[0.04] px-2.5 py-2.5">
-                  <PromptChipList
-                    prompts={promptsForPhase(promptStages, promptPhase)}
-                    onPick={(p) => void send(p)}
-                    eyebrow={phaseFollowUpEyebrow(promptPhase)}
-                  />
-                </div>
-              ) : null}
-              </>
-            )}
-          </div>
+                ) : null}
+                </>
+              )}
+            </div>
 
-          <div className="shrink-0 border-t border-white/[0.06] p-2.5">
-            <div className="flex items-end gap-2">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    void send(input);
-                  }
-                }}
-                rows={1}
-                placeholder="问问这个 session 的照片…"
-                className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
-              />
-              <button
-                type="button"
-                disabled={sending || !input.trim()}
-                onClick={() => void send(input)}
-                className="h-[38px] shrink-0 rounded-[5px] border border-white/[0.1] bg-white/[0.08] px-3 text-[13px] text-white/75 transition-colors hover:bg-white/[0.14] disabled:opacity-35"
-              >
-                发送
-              </button>
+            <div className="shrink-0 border-t border-white/[0.06] p-2.5">
+              <div className="flex items-end gap-2">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      void send(input);
+                    }
+                  }}
+                  rows={1}
+                  placeholder="问问这个 session 的照片…"
+                  className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={sending || !input.trim()}
+                  onClick={() => void send(input)}
+                  className="h-[38px] shrink-0 rounded-[5px] border border-white/[0.1] bg-white/[0.08] px-3 text-[13px] text-white/75 transition-colors hover:bg-white/[0.14] disabled:opacity-35"
+                >
+                  发送
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      ) : null}
-
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "收起策展助手" : "打开策展助手"}
-        aria-expanded={open}
-        title={open ? "收起策展助手" : "策展助手"}
-        className={[
-          "flex h-12 w-12 items-center justify-center rounded-[14px] border shadow-lg backdrop-blur-md transition-colors",
-          open
-            ? "border-emerald-400/35 bg-emerald-400/15 text-emerald-100 hover:bg-emerald-400/25"
-            : "border-white/[0.1] bg-white/[0.08] text-white/80 hover:bg-white/[0.14]",
-        ].join(" ")}
-      >
-        {open ? (
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        ) : (
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="打开策展助手"
+          aria-expanded={false}
+          title="策展助手"
+          className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-white/[0.1] bg-white/[0.08] text-white/80 shadow-lg backdrop-blur-md transition-colors hover:bg-white/[0.14]"
+        >
           <img
             src="/brand/luma-icon.png"
             alt=""
@@ -1191,8 +1365,8 @@ export function ChatDock({
             className="h-8 w-8 rounded-[10px] object-cover"
             draggable={false}
           />
-        )}
-      </button>
+        </button>
+      )}
     </div>
     </>
   );
