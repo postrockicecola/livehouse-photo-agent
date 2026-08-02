@@ -151,6 +151,48 @@ def test_expand_query_includes_synonyms() -> None:
     assert "吉他" in joined or "吉他手" in joined
 
 
+def test_expand_query_includes_mood_synonyms() -> None:
+    terms = _expand_query_terms("找一张有孤独感的照片")
+    joined = " ".join(terms)
+    assert "孤独" in joined
+    assert "lonely" in joined or "solitude" in joined
+
+
+def test_search_query_matches_mood_tags(tmp_path: Path) -> None:
+    _write_results(
+        tmp_path,
+        [
+            {
+                "file": "lonely.jpg",
+                "overall_score": 84.0,
+                "scores": {"overall": 84.0, "energy": 4.0, "technical": 8.0, "composition": 8.5},
+                "energy": 4.0,
+                "technical": 8.0,
+                "composition": 8.5,
+                "category": "best",
+                "tags": ["silhouette", "empty stage", "孤独"],
+                "mood_tags": ["孤独", "lonely"],
+                "reason": "solo figure in backlight",
+            },
+            {
+                "file": "crowd.jpg",
+                "overall_score": 90.0,
+                "scores": {"overall": 90.0, "energy": 9.0, "technical": 8.0, "composition": 8.0},
+                "energy": 9.0,
+                "technical": 8.0,
+                "composition": 8.0,
+                "category": "best",
+                "tags": ["crowd", "pit"],
+                "mood_tags": ["热烈"],
+                "reason": "dense pit energy",
+            },
+        ],
+    )
+    res = GallerySearchSkill(str(tmp_path)).run({"query": "找一张有孤独感的照片", "limit": 5})
+    assert res.ok is True
+    assert [r["file"] for r in res.metadata["rows"]] == ["lonely.jpg"]
+
+
 def test_slow_shutter_style_intent_uses_exif(tmp_path: Path, monkeypatch) -> None:
     assert _style_intent("帮我找出十张慢门摄影的照片") == "slow_shutter"
     _write_results(

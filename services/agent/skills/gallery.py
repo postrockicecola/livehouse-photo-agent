@@ -73,6 +73,24 @@ _QUERY_SYNONYMS: tuple[tuple[str, ...], ...] = (
     ("逆光", "剪影", "轮廓光", "backlight", "silhouette", "rim light", "backlit"),
     ("特写", "近景", "close-up", "closeup", "portrait"),
     ("气氛", "氛围", "atmosphere", "energy", "vibe"),
+    (
+        "孤独",
+        "孤独感",
+        "寂寞",
+        "疏离",
+        "落寞",
+        "lonely",
+        "loneliness",
+        "solitude",
+        "solitary",
+        "isolation",
+        "isolated",
+        "alone",
+    ),
+    ("宁静", "安静", "平静", "calm", "quiet", "serene", "peaceful"),
+    ("热烈", "狂欢", "沸腾", "euphoric", "euphoria", "ecstatic", "raucous"),
+    ("忧郁", "忧伤", "melancholy", "melancholic", "somber", "moody"),
+    ("紧张", "紧绷", "tense", "tension", "anxious"),
     ("慢门", "慢快门", "长曝光", "拖影", "光轨", "slow shutter", "long exposure", "light trail", "light trails"),
 )
 
@@ -227,6 +245,9 @@ def _record(row: dict[str, Any], *, extra: dict[str, Any] | None = None) -> dict
         "tags": [t for t in (row.get("tags") or []) if not _is_pipeline_tag(str(t))],
         "caption": _caption(row),
     }
+    mood = [str(t) for t in (row.get("mood_tags") or []) if str(t).strip()]
+    if mood:
+        rec["mood_tags"] = mood
     if extra:
         rec.update(extra)
     return rec
@@ -234,6 +255,7 @@ def _record(row: dict[str, Any], *, extra: dict[str, Any] | None = None) -> dict
 
 def _text_blob(row: dict[str, Any]) -> str:
     tags = " ".join(str(t) for t in (row.get("tags") or []) if not _is_pipeline_tag(str(t)))
+    mood = " ".join(str(t) for t in (row.get("mood_tags") or []) if str(t).strip())
     rb = row.get("reason_bilingual") or {}
     en = ""
     zh = ""
@@ -247,7 +269,7 @@ def _text_blob(row: dict[str, Any]) -> str:
     reason = str(row.get("reason") or "")
     if _is_boilerplate_reason(reason):
         reason = ""
-    return f"{tags} {_caption(row)} {zh} {en} {reason}".lower()
+    return f"{tags} {mood} {_caption(row)} {zh} {en} {reason}".lower()
 
 
 def _resolve_raw_dir(previews_dir: str | Path) -> Path | None:

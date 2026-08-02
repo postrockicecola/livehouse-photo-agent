@@ -8,6 +8,7 @@ import {
   fetchStudioStatus,
   setActiveSession,
   startStudioAnalyze,
+  startStudioAnalyzeBulk,
   type StudioInfraOverview,
   type StudioLifetimeStats,
   type StudioSessionRow,
@@ -59,11 +60,12 @@ export default function StudioPage() {
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [infraLoading, setInfraLoading] = useState(true);
-  const [busy, setBusy] = useState<"activate" | "analyze" | null>(null);
+  const [busy, setBusy] = useState<"activate" | "analyze" | "analyze_all" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [setListSort, setSetListSort] = useState<StudioSessionSortOrder>("desc");
   const analyzeInFlightRef = useRef(false);
+  const analyzeAllInFlightRef = useRef(false);
   const [pendingAnalyzeJobId, setPendingAnalyzeJobId] = useState<number | null>(null);
 
   const refreshStatus = useCallback(async (row: StudioSessionRow | null) => {
@@ -275,6 +277,42 @@ export default function StudioPage() {
     }
   };
 
+  const onAnalyzeAll = async () => {
+    if (analyzeAllInFlightRef.current || sessions.length === 0) return;
+    const n = sessions.filter((s) => (s.preview_count ?? 0) > 0).length;
+    const ok = window.confirm(
+      `将对 ${n || sessions.length} 个场次各排队一个全量分析 job（清除旧 audit / analysis_results 后重跑 Stage1–3）。\n\n` +
+        "已在跑的场次会跳过。确定继续？",
+    );
+    if (!ok) return;
+    analyzeAllInFlightRef.current = true;
+    setBusy("analyze_all");
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await startStudioAnalyzeBulk({
+        forceFullRerun: true,
+        archiveRoot: archiveRoot || undefined,
+      });
+      const parts = [
+        `已排队 ${res.started_count}`,
+        res.already_running_count ? `已在跑 ${res.already_running_count}` : "",
+        res.skipped_count ? `跳过 ${res.skipped_count}` : "",
+        res.error_count ? `失败 ${res.error_count}` : "",
+      ].filter(Boolean);
+      setMessage(`全量重跑：${parts.join(" · ")}（共 ${res.requested} 场）`);
+      const data = await fetchStudioSessions();
+      setSessions(data.sessions);
+      setRecentDeliveries(data.recent_deliveries ?? []);
+      if (selected) await refreshStatus(selected);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "批量分析启动失败");
+    } finally {
+      analyzeAllInFlightRef.current = false;
+      setBusy(null);
+    }
+  };
+
   const previewCount = status?.session?.preview_count ?? selected?.preview_count ?? 0;
   const pipeline = status?.pipeline ?? {
     labels: [...PIPELINE_DISPLAY_LABELS],
@@ -394,6 +432,9 @@ export default function StudioPage() {
           archiveRoot={archiveRoot}
           onSelect={selectSession}
           onToggleSort={toggleSetListSort}
+          onAnalyzeAll={() => void onAnalyzeAll()}
+          analyzeAllBusy={busy === "analyze_all"}
+          analyzeAllDisabled={busy === "analyze"}
         />
       </main>
     </div>

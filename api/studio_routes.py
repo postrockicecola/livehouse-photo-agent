@@ -94,10 +94,105 @@ class AnalyzeBody(BaseModel):
     enable_checkpoint: bool | None = None
 
 
+class AnalyzeBulkBody(BaseModel):
+    """Enqueue one analyze job per session (default: every session under archive_root)."""
+
+    archive_root: str | None = None
+    # Empty → all sessions from list_studio_sessions. Otherwise only these Previews dirs.
+    previews_dirs: list[str] = Field(default_factory=list)
+    config_path: str = Field(default="configs/livehouse.yaml")
+    force_full_rerun: bool = True
+    enable_checkpoint: bool | None = None
+    # Skip sessions with zero JPEG previews.
+    skip_empty: bool = True
+    limit: int = Field(default=500, ge=1, le=500)
+
+
 class IngestConfigPutBody(BaseModel):
     ingest_monitor_path: str | None = None
     archive_root: str | None = None
     session_folder_name: str | None = None
+
+
+def _enqueue_studio_analyze(
+    *,
+    previews: Path,
+    config_path: str,
+    force_full: bool,
+    enable_checkpoint: bool,
+    set_active: bool,
+) -> dict[str, Any]:
+    """Create ANALYZE_* job + Celery dispatch. Shared by single and bulk analyze."""
+    trace_id = new_trace_id("studio_analyze")
+    from services.analyze_dispatch import build_analyze_job_payload
+
+    job_payload: dict = build_analyze_job_payload(
+        config_path=config_path,
+        source_dir=str(previews),
+        enable_checkpoint=enable_checkpoint,
+        force_full_rerun=force_full,
+    )
+
+    conn = brain_connect()
+    try:
+        sid = find_brain_session_id(conn, str(previews))
+        existing_id = find_runnable_analyze_job_id(
+            conn,
+            previews_dir=str(previews),
+            brain_session_id=sid,
+        )
+        if existing_id is not None:
+            return {
+                "ok": True,
+                "job_id": existing_id,
+                "status": "already_running",
+                "trace_id": trace_id,
+                "previews_dir": str(previews),
+                "session_key": previews.parent.name,
+                "message": "analysis already queued or running for this session",
+            }
+        if sid is not None:
+            job_id = create_job(
+                conn,
+                job_type="ANALYZE_SESSION",
+                session_id=sid,
+                trace_id=trace_id,
+                payload=job_payload,
+            )
+        else:
+            job_id = create_analyze_path_job(
+                conn,
+                source_dir=str(previews),
+                config_path=config_path,
+                enable_checkpoint=enable_checkpoint,
+                force_full_rerun=force_full,
+                trace_id=trace_id,
+            )
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).exception("studio create_job failed previews=%s", previews)
+        raise HTTPException(status_code=500, detail="create_job failed") from None
+    finally:
+        conn.close()
+
+    task = _celery.send_task("tasks.run_job", args=[job_id])
+    if set_active:
+        write_latest_session_pointer(previews)
+        _clear_gallery_runtime_cache()
+
+    return {
+        "ok": True,
+        "job_id": job_id,
+        "status": "QUEUED",
+        "trace_id": trace_id,
+        "run_task_id": task.id,
+        "task_name": "tasks.run_job",
+        "previews_dir": str(previews),
+        "session_key": previews.parent.name,
+        "force_full_rerun": force_full,
+        "enable_checkpoint": enable_checkpoint,
+    }
 
 
 @router.get("/api/studio/ingest-config")
@@ -276,74 +371,151 @@ def studio_start_analyze(body: AnalyzeBody):
     if not previews.is_dir():
         raise HTTPException(status_code=400, detail=f"previews_dir is not a directory: {body.previews_dir}")
 
-    trace_id = new_trace_id("studio_analyze")
     config_path = body.config_path or os.getenv("LIVEHOUSE_CONFIG", "configs/livehouse.yaml")
     force_full = bool(body.force_full_rerun)
     enable_checkpoint = False if force_full else (
         True if body.enable_checkpoint is None else bool(body.enable_checkpoint)
     )
-    from services.analyze_dispatch import build_analyze_job_payload
-
-    job_payload: dict = build_analyze_job_payload(
+    return _enqueue_studio_analyze(
+        previews=previews,
         config_path=config_path,
-        source_dir=str(previews),
+        force_full=force_full,
         enable_checkpoint=enable_checkpoint,
-        force_full_rerun=force_full,
+        set_active=True,
     )
 
-    conn = brain_connect()
-    try:
-        sid = find_brain_session_id(conn, str(previews))
-        existing_id = find_runnable_analyze_job_id(
-            conn,
-            previews_dir=str(previews),
-            brain_session_id=sid,
-        )
-        if existing_id is not None:
-            return {
-                "ok": True,
-                "job_id": existing_id,
-                "status": "already_running",
-                "trace_id": trace_id,
-                "message": "analysis already queued or running for this session",
-            }
-        if sid is not None:
-            job_id = create_job(
-                conn,
-                job_type="ANALYZE_SESSION",
-                session_id=sid,
-                trace_id=trace_id,
-                payload=job_payload,
+
+@router.post("/api/studio/analyze-bulk")
+def studio_start_analyze_bulk(body: AnalyzeBulkBody):
+    """Queue a full (or checkpointed) analyze job for every current session.
+
+    Each session remains one ``ANALYZE_SESSION`` / ``ANALYZE_PATH`` job via
+    ``tasks.run_job``. Does **not** flip the active gallery session pointer.
+    """
+    ar = _archive_root(body.archive_root)
+    config_path = body.config_path or os.getenv("LIVEHOUSE_CONFIG", "configs/livehouse.yaml")
+    force_full = bool(body.force_full_rerun)
+    enable_checkpoint = False if force_full else (
+        True if body.enable_checkpoint is None else bool(body.enable_checkpoint)
+    )
+
+    explicit = [str(p).strip() for p in (body.previews_dirs or []) if str(p).strip()]
+    targets: list[dict[str, Any]] = []
+    if explicit:
+        for raw in explicit:
+            previews = Path(raw).expanduser().resolve()
+            if not previews.is_dir():
+                targets.append(
+                    {
+                        "previews_dir": str(previews),
+                        "session_key": previews.parent.name if previews.parent else "",
+                        "preview_count": 0,
+                        "_missing": True,
+                    }
+                )
+                continue
+            targets.append(
+                {
+                    "previews_dir": str(previews),
+                    "session_key": previews.parent.name,
+                    "preview_count": sum(
+                        1
+                        for ent in previews.iterdir()
+                        if ent.is_file() and ent.suffix.lower() in {".jpg", ".jpeg"}
+                    ),
+                }
             )
-        else:
-            job_id = create_analyze_path_job(
-                conn,
-                source_dir=str(previews),
+    else:
+        conn = None
+        try:
+            conn = brain_connect()
+        except Exception:
+            conn = None
+        try:
+            targets = list_studio_sessions(conn, ar, limit=int(body.limit))
+        finally:
+            if conn is not None:
+                conn.close()
+
+    started: list[dict[str, Any]] = []
+    already_running: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+
+    for row in targets:
+        pd = str(row.get("previews_dir") or "").strip()
+        session_key = str(row.get("session_key") or "")
+        if row.get("_missing") or not pd:
+            skipped.append(
+                {
+                    "session_key": session_key,
+                    "previews_dir": pd,
+                    "reason": "previews_dir_missing",
+                }
+            )
+            continue
+        preview_count = int(row.get("preview_count") or 0)
+        if body.skip_empty and preview_count <= 0:
+            skipped.append(
+                {
+                    "session_key": session_key,
+                    "previews_dir": pd,
+                    "reason": "empty_previews",
+                }
+            )
+            continue
+        previews = Path(pd).expanduser().resolve()
+        try:
+            result = _enqueue_studio_analyze(
+                previews=previews,
                 config_path=config_path,
+                force_full=force_full,
                 enable_checkpoint=enable_checkpoint,
-                force_full_rerun=force_full,
-                trace_id=trace_id,
+                set_active=False,
             )
-    except Exception:
-        import logging
+        except HTTPException as exc:
+            errors.append(
+                {
+                    "session_key": session_key,
+                    "previews_dir": pd,
+                    "detail": str(exc.detail),
+                }
+            )
+            continue
+        except Exception as exc:  # noqa: BLE001 — bulk continues on per-session failure
+            errors.append(
+                {
+                    "session_key": session_key,
+                    "previews_dir": pd,
+                    "detail": str(exc)[:240],
+                }
+            )
+            continue
 
-        logging.getLogger(__name__).exception("studio create_job failed previews=%s", previews)
-        raise HTTPException(status_code=500, detail="create_job failed") from None
-    finally:
-        conn.close()
-
-    task = _celery.send_task("tasks.run_job", args=[job_id])
-    write_latest_session_pointer(previews)
-    _clear_gallery_runtime_cache()
+        item = {
+            "session_key": result.get("session_key") or session_key,
+            "previews_dir": result.get("previews_dir") or pd,
+            "job_id": result.get("job_id"),
+            "status": result.get("status"),
+            "trace_id": result.get("trace_id"),
+        }
+        if result.get("status") == "already_running":
+            already_running.append(item)
+        else:
+            started.append(item)
 
     return {
         "ok": True,
-        "job_id": job_id,
-        "status": "QUEUED",
-        "trace_id": trace_id,
-        "run_task_id": task.id,
-        "task_name": "tasks.run_job",
-        "previews_dir": str(previews),
+        "archive_root": str(ar),
         "force_full_rerun": force_full,
         "enable_checkpoint": enable_checkpoint,
+        "requested": len(targets),
+        "started_count": len(started),
+        "already_running_count": len(already_running),
+        "skipped_count": len(skipped),
+        "error_count": len(errors),
+        "started": started,
+        "already_running": already_running,
+        "skipped": skipped,
+        "errors": errors,
     }

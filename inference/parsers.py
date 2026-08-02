@@ -102,12 +102,8 @@ def _fallback_parse_truncated_json(json_str: str) -> Optional[dict[str, Any]]:
     strongest = _regex_bilingual_field(json_str, "strongest_aspect")
     weakest = _regex_bilingual_field(json_str, "weakest_aspect")
 
-    tags: list = []
-    tm = re.search(r'"tags"\s*:\s*\[([^\]]*)\]', json_str, re.DOTALL)
-    if tm:
-        for t in re.findall(r'"([^"]*)"', tm.group(1)):
-            if t.strip():
-                tags.append(t)
+    tags = _regex_string_array(json_str, "tags")
+    mood_tags = _regex_string_array(json_str, "mood_tags")
 
     editing_suggestions: list = []
     es_m = re.search(r'"editing_suggestions"\s*:\s*\[([^\]]*)\]', json_str, re.DOTALL)
@@ -131,9 +127,31 @@ def _fallback_parse_truncated_json(json_str: str) -> Optional[dict[str, Any]]:
         "strongest_aspect": strongest,
         "weakest_aspect": weakest,
         "tags": tags,
+        "mood_tags": mood_tags,
         "dimension_comments": dimension_comments,
         "editing_suggestions": editing_suggestions,
     }
+
+
+def _regex_string_array(json_str: str, key: str) -> list[str]:
+    tm = re.search(rf'"{re.escape(key)}"\s*:\s*\[([^\]]*)\]', json_str, re.DOTALL)
+    if not tm:
+        return []
+    return [t for t in re.findall(r'"([^"]*)"', tm.group(1)) if t.strip()]
+
+
+def _coerce_tag_list(raw: Any, *, max_len: int = 80) -> list[str]:
+    if not isinstance(raw, list):
+        return []
+    out: list[str] = []
+    for t in raw:
+        if isinstance(t, str) and t.strip():
+            out.append(t.strip()[:max_len])
+        elif t is not None:
+            s = str(t).strip()
+            if s:
+                out.append(s[:max_len])
+    return out
 
 
 def _clip_for_log(s: str, max_chars: int = _LOG_CLIP) -> str:
@@ -216,6 +234,7 @@ def default_stage3_parsed() -> dict[str, Any]:
         "strongest_aspect": dict(empty),
         "weakest_aspect": dict(empty),
         "tags": [],
+        "mood_tags": [],
         "dimension_comments": {},
         "editing_suggestions": [],
     }
@@ -250,6 +269,7 @@ def default_fast_stage3_parsed() -> dict[str, Any]:
         "score": 55.0,
         "verdict": {"zh": "解析失败", "en": "Parse failure"},
         "tags": ["unparsed"],
+        "mood_tags": [],
     }
 
 
@@ -313,21 +333,11 @@ def parse_fast_vlm_response(json_str: str, raw_model_text: str | None = None) ->
 
     verdict = _mirror_bilingual_pair(norm_bilingual_text(data.get("verdict", "")))
 
-    tags_raw = data.get("tags", [])
-    tags: list[str] = []
-    if isinstance(tags_raw, list):
-        for t in tags_raw:
-            if isinstance(t, str) and t.strip():
-                tags.append(t.strip()[:80])
-            elif t is not None:
-                s = str(t).strip()
-                if s:
-                    tags.append(s[:80])
-
     return {
         "score": score_f,
         "verdict": verdict,
-        "tags": tags,
+        "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
+        "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
     }
 
 
@@ -400,19 +410,11 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
         sa = _mirror_bilingual_pair(norm_bilingual_text(data.get("strongest_aspect", "")))
         wa = _mirror_bilingual_pair(norm_bilingual_text(data.get("weakest_aspect", "")))
 
-        tags_raw = data.get("tags", [])
-        tags: list[str] = []
-        if isinstance(tags_raw, list):
-            for t in tags_raw:
-                if isinstance(t, str) and t.strip():
-                    tags.append(t.strip())
-                elif t is not None:
-                    tags.append(str(t).strip())
-
         return {
             "dimensions": dimensions,
             "strongest_aspect": sa,
-            "tags": tags,
+            "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
+            "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
             "weakest_aspect": wa,
             "dimension_comments": dimension_comments,
             "editing_suggestions": editing_suggestions,

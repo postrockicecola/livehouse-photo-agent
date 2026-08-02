@@ -77,12 +77,19 @@ class BilingualText(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+def _coerce_str_tags(v: Any, *, max_len: int = 80) -> list[str]:
+    if not isinstance(v, list):
+        return []
+    return [str(t).strip()[:max_len] for t in v if t is not None and str(t).strip()]
+
+
 class Stage3FastResponse(BaseModel):
     """Compact fast-pass VLM output: aggregate score (0–100), bilingual verdict, tags."""
 
     score: float = Field(default=55.0, ge=0.0, le=100.0)
     verdict: BilingualText = Field(default_factory=BilingualText)
     tags: list[str] = Field(default_factory=list)
+    mood_tags: list[str] = Field(default_factory=list)
 
     @field_validator("score", mode="before")
     @classmethod
@@ -97,15 +104,18 @@ class Stage3FastResponse(BaseModel):
     def _coerce_verdict(cls, v: Any) -> Any:
         return v if isinstance(v, BilingualText) else BilingualText.from_any(v)
 
-    @field_validator("tags", mode="before")
+    @field_validator("tags", "mood_tags", mode="before")
     @classmethod
     def _coerce_tags(cls, v: Any) -> list[str]:
-        if not isinstance(v, list):
-            return []
-        return [str(t).strip()[:80] for t in v if t is not None and str(t).strip()]
+        return _coerce_str_tags(v, max_len=80)
 
     def to_parsed_dict(self) -> dict[str, Any]:
-        return {"score": self.score, "verdict": self.verdict.model_dump(), "tags": self.tags}
+        return {
+            "score": self.score,
+            "verdict": self.verdict.model_dump(),
+            "tags": self.tags,
+            "mood_tags": self.mood_tags,
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -133,6 +143,7 @@ class Stage3FullResponse(BaseModel):
     strongest_aspect: BilingualText = Field(default_factory=BilingualText)
     weakest_aspect: BilingualText = Field(default_factory=BilingualText)
     tags: list[str] = Field(default_factory=list)
+    mood_tags: list[str] = Field(default_factory=list)
     # Optional per-dimension text comments (may be absent in fast-model outputs).
     comments: dict[str, Any] = Field(default_factory=dict)
     editing_suggestions: list[BilingualText] = Field(default_factory=list)
@@ -157,12 +168,10 @@ class Stage3FullResponse(BaseModel):
     def _coerce_bilingual(cls, v: Any) -> Any:
         return v if isinstance(v, BilingualText) else BilingualText.from_any(v)
 
-    @field_validator("tags", mode="before")
+    @field_validator("tags", "mood_tags", mode="before")
     @classmethod
     def _coerce_tags(cls, v: Any) -> list[str]:
-        if not isinstance(v, list):
-            return []
-        return [str(t).strip() for t in v if t is not None and str(t).strip()]
+        return _coerce_str_tags(v, max_len=80)
 
     @field_validator("editing_suggestions", mode="before")
     @classmethod
@@ -191,6 +200,7 @@ class Stage3FullResponse(BaseModel):
             "strongest_aspect": self.strongest_aspect.model_dump(),
             "weakest_aspect": self.weakest_aspect.model_dump(),
             "tags": self.tags,
+            "mood_tags": self.mood_tags,
             "dimension_comments": dim_comments,
             "editing_suggestions": [s.model_dump() for s in self.editing_suggestions],
         }

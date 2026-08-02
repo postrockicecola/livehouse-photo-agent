@@ -211,6 +211,54 @@ export async function startStudioAnalyze(
   return res.json();
 }
 
+export type StudioAnalyzeBulkItem = {
+  session_key: string;
+  previews_dir: string;
+  job_id?: number;
+  status?: string;
+  trace_id?: string;
+  reason?: string;
+  detail?: string;
+};
+
+export type StudioAnalyzeBulkResponse = {
+  ok: boolean;
+  archive_root: string;
+  force_full_rerun: boolean;
+  requested: number;
+  started_count: number;
+  already_running_count: number;
+  skipped_count: number;
+  error_count: number;
+  started: StudioAnalyzeBulkItem[];
+  already_running: StudioAnalyzeBulkItem[];
+  skipped: StudioAnalyzeBulkItem[];
+  errors: StudioAnalyzeBulkItem[];
+};
+
+/** Queue one analyze job per current session (full rerun by default). */
+export async function startStudioAnalyzeBulk(opts?: {
+  forceFullRerun?: boolean;
+  archiveRoot?: string;
+  previewsDirs?: string[];
+}): Promise<StudioAnalyzeBulkResponse> {
+  const res = await fetch(`${API_BASE}/api/studio/analyze-bulk`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      force_full_rerun: opts?.forceFullRerun ?? true,
+      archive_root: opts?.archiveRoot || undefined,
+      previews_dirs: opts?.previewsDirs ?? [],
+      skip_empty: true,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(typeof body.detail === "string" ? body.detail : `analyze-bulk ${res.status}`);
+  }
+  return res.json();
+}
+
 export function shortenPath(p: string, max = 52): string {
   if (p.length <= max) return p;
   const head = Math.floor(max * 0.35);

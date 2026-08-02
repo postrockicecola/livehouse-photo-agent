@@ -82,3 +82,14 @@ def test_parse_fast_vlm_response_basic():
     assert out["score"] == 82.0
     assert out["verdict"]["en"] == "Nice moment."
     assert out["tags"] == ["stage", "crowd", "energy"]
+    assert out.get("mood_tags") == []
+
+
+def test_parse_fast_vlm_response_mood_tags():
+    raw = (
+        '{"score": 71, "verdict": "Solo silhouette on empty stage.",'
+        ' "tags": ["silhouette", "empty stage"], "mood_tags": ["孤独", "lonely"]}'
+    )
+    out = parse_fast_vlm_response(raw, raw)
+    assert out["tags"] == ["silhouette", "empty stage"]
+    assert out["mood_tags"] == ["孤独", "lonely"]

@@ -816,7 +816,8 @@ def analyze_stage3_fast(
         if not parsed:
             prompt_retry = (
                 build_stage3_fast_prompt(blur_eff=blur_eff, stage1_features=stage1_features)
-                + '\nEmit only: {"score":<number 0-100>,"verdict":"<one line>","tags":["t1","t2"]}\n'
+                + '\nEmit only: {"score":<number 0-100>,"verdict":"<one line>",'
+                '"tags":["t1","t2"],"mood_tags":["孤独"]}\n'
             )
             retry_md = dict(inference_extra_metadata or {})
             retry_md["num_predict"] = max(int(fast_num_predict), 280)
@@ -846,6 +847,8 @@ def analyze_stage3_fast(
             parsed = default_fast_stage3_parsed()
             used_fallback_defaults = True
             parse_note["used_fallback_defaults"] = True
+        else:
+            parsed = sanitize_stage3_parsed(parsed)
 
         outcome = "fallback_defaults" if used_fallback_defaults else "success"
         src_resp = response
@@ -874,6 +877,7 @@ def analyze_stage3_fast(
             "verdict": verdict_line,
             "verdict_bilingual": verdict_bi,
             "tags": list(parsed.get("tags") or []),
+            "mood_tags": list(parsed.get("mood_tags") or []),
             "dimensions": dims_none,
             "dimensions_raw": {},
             "weakness": "",
@@ -1234,6 +1238,7 @@ def analyze_with_dimensions(
             "reason": sa["zh"] or sa["en"] or "",
             "reason_bilingual": sa,
             "tags": parsed.get("tags", []),
+            "mood_tags": list(parsed.get("mood_tags") or []),
             "dimensions": dimensions_cal,
             "dimensions_raw": dimensions_raw,
             "weakness": wa["zh"] or wa["en"] or "",

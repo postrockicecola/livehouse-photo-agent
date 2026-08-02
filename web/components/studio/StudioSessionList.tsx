@@ -47,6 +47,10 @@ type Props = {
   archiveRoot: string;
   onSelect: (row: StudioSessionRow) => void;
   onToggleSort: () => void;
+  /** Re-queue full analyze for every listed session (one job each). */
+  onAnalyzeAll?: () => void;
+  analyzeAllBusy?: boolean;
+  analyzeAllDisabled?: boolean;
 };
 
 export function StudioSessionList({
@@ -58,6 +62,9 @@ export function StudioSessionList({
   archiveRoot,
   onSelect,
   onToggleSort,
+  onAnalyzeAll,
+  analyzeAllBusy = false,
+  analyzeAllDisabled = false,
 }: Props) {
   const gridRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef(new Map<string, HTMLLIElement>());
@@ -89,16 +96,29 @@ export function StudioSessionList({
   // Cancel main `px-6` equally on both sides, then apply matching gutters.
   return (
     <footer id="sessions" className="-mx-6 scroll-mt-16 px-4 sm:px-5">
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[10px] uppercase tracking-[0.1em] text-white/30">Sessions — recent</p>
-        <button
-          type="button"
-          onClick={onToggleSort}
-          className={`shrink-0 text-[10px] uppercase tracking-[0.08em] text-white/20 transition-colors hover:text-white/45 ${focusRing}`}
-          title="Sort by session date"
-        >
-          {setListSort === "desc" ? "New → Old" : "Old → New"}
-        </button>
+        <div className="flex shrink-0 items-center gap-3">
+          {onAnalyzeAll ? (
+            <button
+              type="button"
+              onClick={onAnalyzeAll}
+              disabled={analyzeAllBusy || analyzeAllDisabled || loading || setList.length === 0}
+              className={`text-[10px] uppercase tracking-[0.08em] text-white/35 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-35 ${focusRing}`}
+              title="Queue a full Stage1–3 re-analyze job for every session (clears stale analysis JSON)"
+            >
+              {analyzeAllBusy ? "Queuing…" : "Re-analyze all"}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onToggleSort}
+            className={`text-[10px] uppercase tracking-[0.08em] text-white/20 transition-colors hover:text-white/45 ${focusRing}`}
+            title="Sort by session date"
+          >
+            {setListSort === "desc" ? "New → Old" : "Old → New"}
+          </button>
+        </div>
       </div>
 
       <ul

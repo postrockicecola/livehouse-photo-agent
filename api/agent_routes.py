@@ -105,9 +105,9 @@ STYLE_PROMPT = (
 SEMANTIC_HINTS = (
     "SEMANTIC TOOL HINTS (fuzzy intents — code already handles 选出N张/初选/交片/朋友圈/"
     "最炸/高潮瞬间/剔糊/连拍去重/按分数排序/发Ins social shortlist):\n"
-    "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光… → "
+    "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光/有孤独感/宁静忧郁… → "
     '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10}} '
-    "(text match on tags/caption/reason; 慢门 uses RAW ExposureTime EXIF; "
+    "(text match on tags/mood_tags/caption/reason; 慢门 uses RAW ExposureTime EXIF; "
     "cite metadata.files; say 已在预览页打开. gallery_select only if they want 初选/导出)\n"
     "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
     "- 技术高构图一般 → mark_score_gap\n"

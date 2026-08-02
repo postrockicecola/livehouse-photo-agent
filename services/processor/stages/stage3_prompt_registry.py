@@ -3,15 +3,15 @@ from __future__ import annotations
 
 from utils.stage3_dimensions import STAGE3_DIM_KEYS, STAGE3_DIM_PROMPT_LINES
 
-PROMPT_VERSION = "stage3_v5"
+PROMPT_VERSION = "stage3_v6"
 
 # Token estimates (~4 chars/token, rough) for prompt budgeting.
 PROMPT_BLOCK_TOKEN_HINTS: dict[str, int] = {
     "domain": 95,
-    "contract": 85,
+    "contract": 95,
     "scoring_behavior": 55,
-    "tags_behavior": 45,
-    "exemplar": 120,
+    "tags_behavior": 70,
+    "exemplar": 140,
     "rubric": 110,
     "retry": 35,
 }
@@ -35,7 +35,9 @@ PROMPT_BLOCKS: dict[str, str] = {
         "Structure:\n"
         "- Include all eight dimension scores as numbers from 0 to 10 (decimals allowed).\n"
         '- "strongest_aspect" and "weakest_aspect": objects with "zh" and "en" strings.\n'
-        '- "tags": JSON array of short strings (3–6 items).\n'
+        '- "tags": JSON array of short scene/object strings (3–6 items).\n'
+        '- "mood_tags": JSON array of 1–3 short atmosphere/emotion labels '
+        "(Chinese and/or English), grounded in what is visible.\n"
         "- Do not include editing_suggestions in this task.\n"
     ),
     # Tier C — soft behavior
@@ -43,7 +45,7 @@ PROMPT_BLOCKS: dict[str, str] = {
         "Style:\n"
         "- Keep bilingual aspect lines concise and specific to this photo.\n"
         "- Prefer actionable wording over generic praise.\n"
-        "- Avoid repeating the same idea across tags and aspects.\n"
+        "- Avoid repeating the same idea across tags, mood_tags, and aspects.\n"
     ),
     # ~55 tokens
     "scoring_behavior": (
@@ -51,11 +53,15 @@ PROMPT_BLOCKS: dict[str, str] = {
         "moment_peak and atmosphere_impact matter for live music; intentional motion blur can still score well.\n"
         "Avoid score compression: differentiate average vs exceptional frames; reserve 8+ for standout moments.\n"
     ),
-    # ~45 tokens
+    # ~70 tokens
     "tags_behavior": (
-        "Tags: prefer visually distinctive, scene-specific phrases (e.g. backlight haze, silhouette, "
-        "peak motion, audience interaction, emotional tension, expressive gel lighting).\n"
-        "Avoid repeating generic triplets like performer / stage lighting / crowd unless nothing else fits.\n"
+        "Tags: visually distinctive scene/object phrases "
+        "(e.g. backlight haze, silhouette, peak motion, audience interaction, expressive gel lighting).\n"
+        "Mood_tags: how the frame feels from visible cues — solitude on an empty stage, dense pit euphoria, "
+        "cool melancholy gel, tense peak, calm afterglow. Prefer short labels such as "
+        "孤独, 疏离, 宁静, 热烈, 忧郁, lonely, euphoric, tense, melancholic.\n"
+        "Ground mood in composition/lighting/subject density; do not invent backstories.\n"
+        "Avoid generic triplets like performer / stage lighting / crowd unless nothing else fits.\n"
     ),
 }
 
@@ -65,7 +71,8 @@ STAGE3_COMPACT_EXEMPLAR = (
     '"atmosphere_impact":8.2,"deliverable_subject":6.9,'
     '"strongest_aspect":{"zh":"红 gel 侧光勾出歌手轮廓","en":"Red gel sidelight sculpts the vocalist silhouette"},'
     '"weakest_aspect":{"zh":"面部高光略过曝","en":"Facial highlights run slightly hot"},'
-    '"tags":["backlight haze","peak motion","crowd silhouettes","expressive gel lighting"]}'
+    '"tags":["backlight haze","peak motion","crowd silhouettes","expressive gel lighting"],'
+    '"mood_tags":["热烈","euphoric"]}'
 )
 
 PROMPT_BLOCKS["retry"] = (
@@ -156,13 +163,16 @@ def compose_stage3_fast_prompt(
 
     exemplar = (
         '{"score":82,"verdict":"Strong peak moment; highlights slightly hot.",'
-        '"tags":["backlight haze","peak motion","expressive stage lighting"]}'
+        '"tags":["backlight haze","peak motion","expressive stage lighting"],'
+        '"mood_tags":["热烈","tense"]}'
     )
     return (
         f"{PROMPT_BLOCKS['domain']}"
         f"{PROMPT_BLOCKS['contract_tier_a']}"
         "Structure: keys score (integer 0-100), verdict (one short English line), "
-        "tags (array of 3-5 scene-specific strings).\n"
+        "tags (array of 3-5 scene/object strings), "
+        "mood_tags (array of 1–3 atmosphere/emotion labels, Chinese and/or English).\n"
+        f"{PROMPT_BLOCKS['tags_behavior']}"
         f"Example:\n{exemplar}\n"
         f"{stage1_line}"
         f"{blur_note}"

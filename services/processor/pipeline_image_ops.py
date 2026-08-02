@@ -187,6 +187,9 @@ def append_aesthetic_audit_line(
             "dimensions": ai_data.get("dimensions", {}),
             "weakness": ai_data.get("weakness", ""),
         }
+        mood_tags = ai_data.get("mood_tags")
+        if isinstance(mood_tags, list) and mood_tags:
+            log_entry["mood_tags"] = mood_tags
         dc = ai_data.get("dimension_comments")
         if dc:
             log_entry["dimension_comments"] = dc

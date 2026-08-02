@@ -12,7 +12,7 @@ type Props = {
   jobRunning: boolean;
   canGallery: boolean;
   analyzeLocked: boolean;
-  busy: "activate" | "analyze" | null;
+  busy: "activate" | "analyze" | "analyze_all" | null;
   onActivate: () => void;
   onAnalyze: () => void;
   /** Rendered over the same hero background image (e.g. workflow timeline + stats). */

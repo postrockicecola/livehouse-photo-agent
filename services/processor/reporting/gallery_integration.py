@@ -193,6 +193,9 @@ def build_analysis_results(
             tags = audit_entry.get("tags")
             if isinstance(tags, list) and tags:
                 row["tags"] = tags
+            mood_tags = audit_entry.get("mood_tags")
+            if isinstance(mood_tags, list) and mood_tags:
+                row["mood_tags"] = mood_tags
 
             results.append(row)
 

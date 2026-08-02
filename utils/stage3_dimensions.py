@@ -53,6 +53,7 @@ STAGE3_JSON_SCHEMA_LINES: tuple[str, ...] = (
     '  "strongest_aspect": {"zh": "<string>", "en": "<string>"},',
     '  "weakest_aspect": {"zh": "<string>", "en": "<string>"},',
     '  "tags": ["<string>", "..."],',
+    '  "mood_tags": ["<string>", "..."],',
     "}",
 )
 STAGE3_JSON_SCHEMA_TEXT = "\n".join(STAGE3_JSON_SCHEMA_LINES)

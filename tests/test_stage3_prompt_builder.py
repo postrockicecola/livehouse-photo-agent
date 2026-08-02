@@ -12,7 +12,7 @@ from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 
 def test_prompt_version_is_explicit() -> None:
-    assert STAGE3_PROMPT_VERSION == "stage3_v5"
+    assert STAGE3_PROMPT_VERSION == "stage3_v6"
 
 
 def test_full_prompt_uses_layered_contract_not_editing_rules() -> None:
@@ -20,6 +20,8 @@ def test_full_prompt_uses_layered_contract_not_editing_rules() -> None:
     assert "editing_suggestions" not in prompt or "Do not include editing_suggestions" in prompt
     assert "NON-NEGOTIABLE" not in prompt
     assert "Example output" in prompt
+    assert "mood_tags" in prompt
+    assert "孤独" in prompt
     assert PROMPT_BLOCKS["domain"][:20] in prompt
 
 
@@ -55,3 +57,17 @@ def test_sanitize_clears_editing_and_dedupes_tags() -> None:
     )
     assert parsed["editing_suggestions"] == []
     assert parsed["tags"] == ["Crowd", "Backlight haze"]
+    assert parsed["mood_tags"] == []
+
+
+def test_sanitize_merges_mood_tags_into_tags() -> None:
+    dims = {k: 7.0 for k in STAGE3_DIM_KEYS}
+    parsed = sanitize_stage3_parsed(
+        {
+            "dimensions": dims,
+            "tags": ["silhouette", "empty stage"],
+            "mood_tags": ["孤独", "lonely", "silhouette"],
+        }
+    )
+    assert parsed["mood_tags"] == ["孤独", "lonely"]
+    assert parsed["tags"] == ["silhouette", "empty stage", "孤独", "lonely"]
