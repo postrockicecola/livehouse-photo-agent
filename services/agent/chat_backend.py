@@ -35,7 +35,10 @@ import requests
 from inference.providers.ollama import resolve_ollama_base_urls
 from inference.providers.vllm import chat_completions_url, resolve_vllm_base_urls
 from services.agent.conversation import ChatFn, StreamChatFn
-from services.agent.openai_adapter import _parse_arguments
+from services.agent.tool_protocol import (  # noqa: F401 — re-export for callers/tests
+    content_from_assistant_message,
+    normalize_native_tool_calls,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,43 +64,6 @@ def native_tools_enabled(explicit: Optional[bool] = None) -> bool:
 def _http_timeout(timeout: int) -> tuple[int, int]:
     t = max(5, int(timeout))
     return (min(30, max(5, t // 4)), t)
-
-
-def normalize_native_tool_calls(message: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """Normalize Ollama/OpenAI ``message.tool_calls`` to ``[{tool, args}, ...]``."""
-    raw_calls = message.get("tool_calls") or []
-    if not isinstance(raw_calls, list):
-        return []
-    out: list[dict[str, Any]] = []
-    for tc in raw_calls:
-        if not isinstance(tc, dict):
-            continue
-        fn = tc.get("function") if isinstance(tc.get("function"), dict) else tc
-        if not isinstance(fn, dict):
-            continue
-        name = str(fn.get("name") or "").strip()
-        if not name:
-            continue
-        args = _parse_arguments(fn.get("arguments") if "arguments" in fn else fn.get("args"))
-        out.append({"tool": name, "args": args})
-    return out
-
-
-def content_from_assistant_message(message: Mapping[str, Any]) -> str:
-    """Bridge native ``tool_calls`` into the text-protocol JSON the agent already parses.
-
-    Priority: first native tool_call → ``{"tool","args"}`` string; else ``content``.
-    """
-    calls = normalize_native_tool_calls(message)
-    if calls:
-        return json.dumps(
-            {"tool": calls[0]["tool"], "args": calls[0].get("args") or {}},
-            ensure_ascii=False,
-        )
-    content = message.get("content")
-    if isinstance(content, list):  # some servers return content parts
-        return "".join(str(p.get("text", "")) for p in content if isinstance(p, dict)).strip()
-    return str(content or "").strip()
 
 
 def _ollama_chat_fn(

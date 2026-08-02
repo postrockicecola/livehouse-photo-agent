@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/agent_turn_trace.schema.json",
+  "title": "Agent Turn Trace v1",
+  "description": "Per-turn observability fields on ChatResponse.trace / done events (shared by UI, weekly reports, judge).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "backend", "rounds_used", "grounding_ok", "parse_fail", "json_leak"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "agent_turn_trace.v1"
+    },
+    "backend": {
+      "type": "string",
+      "minLength": 1,
+      "description": "langgraph | imperative | routed:<rule_id> | unknown"
+    },
+    "rule_id": {
+      "type": ["string", "null"],
+      "description": "intent_router rule_id when the turn was deterministically routed."
+    },
+    "rounds_used": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "grounding_ok": {
+      "type": "boolean"
+    },
+    "parse_fail": {
+      "type": "boolean"
+    },
+    "parse_repaired": {
+      "type": "boolean"
+    },
+    "guardrail_matches": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "json_leak": {
+      "type": "boolean",
+      "description": "True when the final reply still parses as tool JSON."
+    }
+  }
+}

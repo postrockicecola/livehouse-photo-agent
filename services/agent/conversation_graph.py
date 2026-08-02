@@ -9,8 +9,8 @@ This is the **production** path for :class:`ConversationalAgent`. The imperative
 loop in ``conversation.py`` is legacy opt-in only
 (``LIVEHOUSE_AGENT_RUNTIME=imperative``).
 
-The compiled graph is also intended to be mounted as a **subgraph node** on the
-platform graph in :mod:`services.agent.graph` (``gallery_chat``).
+:class:`ConversationalAgent` compiles the graph once per instance and passes the
+compiled app into :func:`run_chat_turn` / :func:`iter_chat_turn_updates`.
 """
 from __future__ import annotations
 
@@ -319,26 +319,28 @@ def run_chat_turn(
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
     defer_answer: bool = False,
+    app: Any = None,
 ) -> ChatTurnState:
-    app = compile_chat_turn_graph(
-        chat_fn=chat_fn,
-        memory=memory,
-        skills=skills,
-        guardrails=guardrails,
-        wrap_tool_output=wrap_tool_output,
-        max_tool_result_chars=max_tool_result_chars,
-        update_working_memory=update_working_memory,
-        record_tool_decision=record_tool_decision,
-        record_tool_observation=record_tool_observation,
-        finalize=finalize,
-        force_final_answer=force_final_answer,
-        build_final_answer_messages=build_final_answer_messages,
-        parse_tool_call=parse_tool_call,
-        emit=emit,
-        no_answer_fallback=no_answer_fallback,
-        looks_like_tool_intent=looks_like_tool_intent,
-        merge_tool_args=merge_tool_args,
-    )
+    if app is None:
+        app = compile_chat_turn_graph(
+            chat_fn=chat_fn,
+            memory=memory,
+            skills=skills,
+            guardrails=guardrails,
+            wrap_tool_output=wrap_tool_output,
+            max_tool_result_chars=max_tool_result_chars,
+            update_working_memory=update_working_memory,
+            record_tool_decision=record_tool_decision,
+            record_tool_observation=record_tool_observation,
+            finalize=finalize,
+            force_final_answer=force_final_answer,
+            build_final_answer_messages=build_final_answer_messages,
+            parse_tool_call=parse_tool_call,
+            emit=emit,
+            no_answer_fallback=no_answer_fallback,
+            looks_like_tool_intent=looks_like_tool_intent,
+            merge_tool_args=merge_tool_args,
+        )
     init = _initial_chat_state(
         user_text=user_text,
         max_tool_rounds=max_tool_rounds,
@@ -370,27 +372,29 @@ def iter_chat_turn_updates(
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
     defer_answer: bool = True,
+    app: Any = None,
 ):
     """Yield ``(node_name, partial_state)`` as the chat subgraph runs (for SSE)."""
-    app = compile_chat_turn_graph(
-        chat_fn=chat_fn,
-        memory=memory,
-        skills=skills,
-        guardrails=guardrails,
-        wrap_tool_output=wrap_tool_output,
-        max_tool_result_chars=max_tool_result_chars,
-        update_working_memory=update_working_memory,
-        record_tool_decision=record_tool_decision,
-        record_tool_observation=record_tool_observation,
-        finalize=finalize,
-        force_final_answer=force_final_answer,
-        build_final_answer_messages=build_final_answer_messages,
-        parse_tool_call=parse_tool_call,
-        emit=emit,
-        no_answer_fallback=no_answer_fallback,
-        looks_like_tool_intent=looks_like_tool_intent,
-        merge_tool_args=merge_tool_args,
-    )
+    if app is None:
+        app = compile_chat_turn_graph(
+            chat_fn=chat_fn,
+            memory=memory,
+            skills=skills,
+            guardrails=guardrails,
+            wrap_tool_output=wrap_tool_output,
+            max_tool_result_chars=max_tool_result_chars,
+            update_working_memory=update_working_memory,
+            record_tool_decision=record_tool_decision,
+            record_tool_observation=record_tool_observation,
+            finalize=finalize,
+            force_final_answer=force_final_answer,
+            build_final_answer_messages=build_final_answer_messages,
+            parse_tool_call=parse_tool_call,
+            emit=emit,
+            no_answer_fallback=no_answer_fallback,
+            looks_like_tool_intent=looks_like_tool_intent,
+            merge_tool_args=merge_tool_args,
+        )
     init = _initial_chat_state(
         user_text=user_text,
         max_tool_rounds=max_tool_rounds,

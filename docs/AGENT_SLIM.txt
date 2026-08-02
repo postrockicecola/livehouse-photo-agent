@@ -1,33 +1,61 @@
 Agent slim checklist — keep the Agent surface sharp
-Updated: 2026-07-28
+Updated: 2026-08-03
 Companion: docs/PROJECT_GUIDE.txt · docs/PLATFORM_SCOPE.txt
 
 Goal: Agent is Gallery chat only; photo scoring stays on the fixed pipeline.
+
+==============================================================================
+RUNTIME MATRIX (who decides what)
+==============================================================================
+
+  Intent path × Model protocol (production defaults in bold)
+
+  ┌──────────────────┬────────────────────────────┬──────────────────────────┐
+  │ Control path     │ Model protocol             │ When                     │
+  ├──────────────────┼────────────────────────────┼──────────────────────────┤
+  │ intent_router    │ (no tool JSON round)       │ High-freq recipe asks    │
+  │ **langgraph**    │ **text {"tool","args"}**   │ Default fuzzy / semantic │
+  │ langgraph        │ native tools[] (bridge)    │ LIVEHOUSE_AGENT_NATIVE_  │
+  │                  │                            │ TOOLS=1 (A/B only)       │
+  │ imperative       │ text {"tool","args"}       │ LIVEHOUSE_AGENT_RUNTIME= │
+  │                  │                            │ imperative (emergency)   │
+  └──────────────────┴────────────────────────────┴──────────────────────────┘
+
+  Missing langgraph → hard error (no silent fallback).
+  Ownership: always anon:<session_id> (login auth removed from product surface).
 
 ==============================================================================
 KEEP (default on)
 ==============================================================================
 
 Runtime
-  services/agent/conversation_graph.py Gallery chat decide→act→answer
+  services/agent/conversation_graph.py Gallery chat decide→act→answer (compile-once)
   services/agent/conversation.py       ConversationalAgent entry
   services/agent/chat_backend.py
   services/agent/guardrails.py
-  services/agent/store.py              prefs / memory durability
+  services/agent/store.py              prefs / memory (session-scoped anon owner)
   services/agent/context_governance.py
   services/agent/prompt_cache.py
   services/agent/openai_adapter.py
   services/agent/intent_router.py      deterministic Gallery ask routing
   services/agent/review_signals.py
-  services/agent/gallery_search_defaults.py
+  services/agent/gallery_search_defaults.py  ← data/agent/search_recipes.json
+  services/agent/tool_protocol.py      parse + repair + native bridge (one exit)
+  services/agent/groundedness.py       final-answer cite gate (strip→template)
 
 Skills (product tools)
-  services/agent/skills/gallery.py
+  services/agent/skills/gallery.py           thin façade / registry
+  services/agent/skills/gallery_common.py    search helpers + synonym/CLIP fallback
+  services/agent/skills/gallery_search.py
+  services/agent/skills/gallery_film.py
+  services/agent/skills/gallery_export.py
   services/agent/skills/artifacts.py
   services/agent/skills/memory.py
   services/agent/skills/database.py
   services/agent/skills/base.py
   services/agent/skills/__init__.py
+  data/agent/query_synonyms.jsonl
+  data/agent/search_recipes.json
 
 Film recommend (P0 thin wedge — NOT a second orchestrator)
   services/film_recommend_service.py   analysis row → closed film_* + reason
@@ -36,7 +64,6 @@ Film recommend (P0 thin wedge — NOT a second orchestrator)
 
 API / UI
   api/agent_routes.py                  /api/agent/chat · stream · trace
-  api/auth_routes.py                   conversation scoping
   web/components/agent/*               ChatDock (Gallery-primary entry)
   web/app/gallery                      gallery + chat surface
 
@@ -49,15 +76,17 @@ Eval
   scripts/eval/agent_case_score.py           # shared L0/L1 scoring metrics
   scripts/eval/report_agent_quality_weekly.py
   scripts/eval/eval_agent_judge.py           # L3 useful/honest/concise + groundedness gate
+  scripts/eval/measure_gallery_search_gaps.py
   services/agent/quality_judge.py
   scripts/agent/export_review_queue.py       # production→review candidates
   scripts/agent/promote_to_fixtures.py       # review→router/paraphrase/cases
   scripts/eval/eval_native_tool_calling.py   # A/B text JSON vs LIVEHOUSE_AGENT_NATIVE_TOOLS
   quality/agent_cases.py + schemas/agent_chat_case.schema.json
-  services/agent/groundedness.py           # final-answer file cite gate
-  services/agent/tool_protocol.py          # parse + one-shot JSON repair
-  services/agent/guardrails.py             # observe|soft|hard policy
-  services/agent/review_signals.py         # review heuristics (+ grounding/parse)
+  quality/schemas/agent_turn_trace.schema.json
+  services/agent/groundedness.py
+  services/agent/tool_protocol.py
+  services/agent/guardrails.py
+  services/agent/review_signals.py
   tests/test_agent_eval_l0.py / test_agent_live_eval.py / test_agent_turn_trace.py / …
 
 Docs
@@ -80,9 +109,18 @@ Native OpenAI tools[] on chat (experimental A/B)
   are bridged back to {"tool","args"} text JSON for the existing decide→act loop.
   Default off — production stays on text protocol.
 
+CLIP semantic search fallback (when text/synonym miss)
+  Env: LIVEHOUSE_AGENT_SEMANTIC_FALLBACK=0 to disable (default on when open-clip present).
+  Slow-shutter stays EXIF-only (never CLIP).
+
 ==============================================================================
 REMOVED FROM TREE
 ==============================================================================
+
+Login / bearer auth for Gallery chat (removed 2026-08-03)
+  api/auth_routes.py · web/components/agent/agentAuth.ts
+  store users / auth_tokens / password hashing
+  Conversation isolation = secrecy of browser session_id (anon:<session_id>).
 
 Curation ReAct agent (removed 2026-07-28)
   services/agent/graph.py · loop.py · planner.py · tools.py · reflection.py

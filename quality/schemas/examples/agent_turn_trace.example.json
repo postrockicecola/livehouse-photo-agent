@@ -1,0 +1,11 @@
+{
+  "schema_version": "agent_turn_trace.v1",
+  "backend": "langgraph",
+  "rule_id": null,
+  "rounds_used": 1,
+  "grounding_ok": true,
+  "parse_fail": false,
+  "parse_repaired": false,
+  "guardrail_matches": [],
+  "json_leak": false
+}

@@ -75,10 +75,19 @@ Promote targets: router fixtures, ``router_paraphrases.v1.jsonl``, and chat
 ## Protocol repair + guardrail policy (Phase 5)
 
 - Broken tool JSON that still *looks* like a tool call gets **one** repair
-  completion (``services/agent/tool_protocol.py``); failures set
-  ``trace.parse_fail`` / emit ``parse_repair``.
+  completion (``services/agent/tool_protocol.py`` / ``resolve_tool_decision``);
+  failures set ``trace.parse_fail`` / emit ``parse_repair``.
+- Native ``tool_calls`` bridge also lives in ``tool_protocol`` (re-exported by
+  ``chat_backend``).
 - Guardrail policy via ``LIVEHOUSE_AGENT_GUARDRAIL_POLICY``:
   ``observe`` (default) | ``soft`` | ``hard``.
+- Turn trace contract: ``quality/schemas/agent_turn_trace.schema.json``
+  (``schema_version: agent_turn_trace.v1`` on ``ChatResponse.trace``).
+- Search data: ``data/agent/query_synonyms.jsonl`` +
+  ``data/agent/search_recipes.json``; CI smoke runs
+  ``measure_gallery_search_gaps`` on the smoke fixture and fails only when
+  *in-table / case* probes regress to ``empty_synonym_gap`` (OOV probes stay
+  informational).
 
 ## Human / LLM judge (Phase 6)
 

@@ -35,7 +35,7 @@ from services.agent.skills.base import SkillRegistry
 from services.agent.tool_protocol import (
     looks_like_tool_intent,
     parse_tool_call,
-    parse_tool_call_with_repair,
+    resolve_tool_decision,
 )
 
 logger = logging.getLogger(__name__)
@@ -247,6 +247,7 @@ class ConversationalAgent:
         self.last_trace: dict[str, Any] = {}
         self._turn_parse_fail: bool = False
         self._turn_parse_repaired: bool = False
+        self._compiled_graph: Any = None
 
     def _merge_turn_context_args(self, tool: str, args: dict[str, Any]) -> dict[str, Any]:
         """Inject Gallery focus into film skills when the model/router omitted them."""
@@ -274,21 +275,19 @@ class ConversationalAgent:
 
     def _parse_tool_call_repaired(self, raw: str) -> Optional[dict[str, Any]]:
         """Parse tool JSON; one repair completion when output looks tool-ish but invalid."""
-        call, _effective, repaired = parse_tool_call_with_repair(
-            self._chat, self.memory.messages(), raw
-        )
-        if repaired:
+        decision = resolve_tool_decision(self._chat, self.memory.messages(), raw)
+        if decision.repaired:
             self._turn_parse_repaired = True
             self._emit(
                 {
                     "type": "parse_repair",
-                    "ok": call is not None,
-                    "tool": (call or {}).get("tool"),
+                    "ok": decision.call is not None,
+                    "tool": (decision.call or {}).get("tool"),
                 }
             )
-            if call is None:
+            if decision.call is None:
                 self._turn_parse_fail = True
-        return call
+        return decision.call
 
     def _emit(self, event: dict[str, Any]) -> None:
         self._events.append(event)
@@ -310,8 +309,6 @@ class ConversationalAgent:
             self.working_memory["last_files"] = list(files)
         if meta.get("citations"):
             self.working_memory["last_citations"] = list(meta.get("citations") or [])
-        if meta.get("rag"):
-            self.working_memory["last_rag_mode"] = (meta.get("rag") or {}).get("mode")
         self.working_memory = compress_working_memory(self.working_memory)
 
     def _record_tool_decision(self, tool: str, args: dict[str, Any]) -> None:
@@ -361,16 +358,28 @@ class ConversationalAgent:
 
         return chat_runtime_preference() == "imperative"
 
-    def _run_langgraph_turn(self, user_text: str, *, defer_answer: bool = False) -> dict[str, Any]:
-        from services.agent.conversation_graph import langgraph_available, run_chat_turn
+    def _get_compiled_graph(self) -> Any:
+        """Compile the decide→act→answer graph once per agent instance."""
+        if self._compiled_graph is None:
+            from services.agent.conversation_graph import (
+                compile_chat_turn_graph,
+                langgraph_available,
+            )
 
-        if not langgraph_available():
-            raise RuntimeError(_LANGGRAPH_REQUIRED)
+            if not langgraph_available():
+                raise RuntimeError(_LANGGRAPH_REQUIRED)
+            self._compiled_graph = compile_chat_turn_graph(**self._graph_kwargs())
+        return self._compiled_graph
+
+    def _run_langgraph_turn(self, user_text: str, *, defer_answer: bool = False) -> dict[str, Any]:
+        from services.agent.conversation_graph import run_chat_turn
+
         return dict(
             run_chat_turn(
                 user_text=user_text,
                 max_tool_rounds=self._max_tool_rounds,
                 defer_answer=defer_answer,
+                app=self._get_compiled_graph(),
                 **self._graph_kwargs(),
             )
         )
@@ -620,6 +629,7 @@ class ConversationalAgent:
             user_text=user_text,
             max_tool_rounds=self._max_tool_rounds,
             defer_answer=True,
+            app=self._get_compiled_graph(),
             **self._graph_kwargs(),
         ):
             if node_name == "act":
@@ -771,6 +781,7 @@ class ConversationalAgent:
                 for m in e.get("matches") or []:
                     guardrail_matches.append(str(m))
         return {
+            "schema_version": "agent_turn_trace.v1",
             "backend": backend or "unknown",
             "rule_id": rule_id,
             "rounds_used": len(tool_calls),

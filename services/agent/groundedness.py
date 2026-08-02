@@ -2,6 +2,9 @@
 
 Cheap basename heuristic — not a full entity linker. Goal: block the common
 failure mode where a weak chat model invents ``DSC_9999.jpg`` after a search.
+
+v1 rewrite prefers *surgical strip* of unknown basenames so honest prose /
+allowed cites survive; falls back to a template only when little remains.
 """
 from __future__ import annotations
 
@@ -15,6 +18,10 @@ _FILE_RE = re.compile(
     r"(?i)\b([A-Za-z0-9][A-Za-z0-9._-]{0,180}\."
     r"(?:jpe?g|png|webp|gif|arw|cr2|nef|dng|heic|tiff?))\b"
 )
+_WS_RE = re.compile(r"[ \t]{2,}")
+_ORPHAN_PUNCT_RE = re.compile(r"\s*([,，、;；])\s*([,，、;；])+")
+_TRAIL_PUNCT_RE = re.compile(r"[\s,，、;；]+$")
+_LEAD_PUNCT_RE = re.compile(r"^[\s,，、;；]+")
 
 
 @dataclass
@@ -23,6 +30,7 @@ class GroundingVerdict:
     cited: list[str] = field(default_factory=list)
     unknown: list[str] = field(default_factory=list)
     allowed: list[str] = field(default_factory=list)
+    rewrite_mode: str = "none"  # none | strip | template
 
     @property
     def triggered(self) -> bool:
@@ -107,15 +115,25 @@ def check_groundedness(
     )
 
 
-def rewrite_ungrounded_reply(
-    allowed: set[str],
-    unknown: list[str],
-) -> str:
-    """Template reply that stays honest when the model invents filenames.
+def strip_ungrounded_mentions(reply: str, unknown: list[str]) -> str:
+    """Remove unknown basenames; keep surrounding prose and allowed cites."""
+    text = str(reply or "")
+    for name in unknown:
+        key = normalize_file_key(name)
+        if not key:
+            continue
+        text = re.sub(rf"(?i)\b{re.escape(key)}\b", "", text)
+    text = _ORPHAN_PUNCT_RE.sub(r"\1", text)
+    text = _WS_RE.sub(" ", text)
+    text = _LEAD_PUNCT_RE.sub("", text)
+    text = _TRAIL_PUNCT_RE.sub("", text)
+    # Collapse leftover "以及 / and / ," after removals.
+    text = re.sub(r"(?i)\b(?:以及|和|and|与)\s*(?=以及|和|and|与|[,，、]|$)", "", text)
+    text = _WS_RE.sub(" ", text).strip()
+    return text
 
-    Deliberately omits ``unknown`` basenames so we do not reinforce hallucinations.
-    """
-    _ = unknown
+
+def _template_reply(allowed: set[str]) -> str:
     if allowed:
         sample = ", ".join(sorted(normalize_file_key(a) for a in allowed)[:15])
         return (
@@ -126,6 +144,29 @@ def rewrite_ungrounded_reply(
         "工具没有返回可引用的文件名，所以我不能列举具体照片。"
         "可以换个关键词或放宽筛选条件再试。"
     )
+
+
+def rewrite_ungrounded_reply(
+    reply: str,
+    allowed: set[str],
+    unknown: list[str],
+) -> tuple[str, str]:
+    """Return ``(rewritten_text, mode)`` where mode is ``strip`` or ``template``.
+
+    Prefer keeping honest prose after stripping invented filenames. Use the
+    template only when the remainder is too thin to stand alone.
+    """
+    _ = unknown  # listed for API clarity; strip uses the same set
+    stripped = strip_ungrounded_mentions(reply, unknown)
+    still_bad = [c for c in extract_file_mentions(stripped) if c not in {
+        normalize_file_key(a) for a in allowed
+    }]
+    # Keep strip when prose remains or allowed cites remain.
+    if stripped and not still_bad and (
+        len(stripped) >= 8 or extract_file_mentions(stripped)
+    ):
+        return stripped, "strip"
+    return _template_reply(allowed), "template"
 
 
 def ground_reply(
@@ -144,4 +185,6 @@ def ground_reply(
     verdict = check_groundedness(reply, allowed)
     if verdict.ok:
         return reply, verdict
-    return rewrite_ungrounded_reply(allowed, verdict.unknown), verdict
+    rewritten, mode = rewrite_ungrounded_reply(reply, allowed, verdict.unknown)
+    verdict.rewrite_mode = mode
+    return rewritten, verdict

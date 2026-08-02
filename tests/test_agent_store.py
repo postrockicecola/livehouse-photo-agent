@@ -1,4 +1,4 @@
-"""Offline tests for the agent persistence store (accounts + conversation memory)."""
+"""Offline tests for the agent persistence store (conversation memory)."""
 from __future__ import annotations
 
 import pytest
@@ -16,57 +16,6 @@ def conn(tmp_path, monkeypatch):
         c.close()
 
 
-# --------------------------------------------------------------------- passwords
-
-
-def test_password_hash_roundtrip():
-    h = store.hash_password("s3cret!")
-    assert h.startswith("pbkdf2_sha256$")
-    assert store.verify_password("s3cret!", h) is True
-    assert store.verify_password("wrong", h) is False
-
-
-def test_verify_password_rejects_malformed():
-    assert store.verify_password("x", "not-a-hash") is False
-    assert store.verify_password("x", "") is False
-
-
-# ------------------------------------------------------------------------- users
-
-
-def test_create_and_authenticate_user(conn):
-    user = store.create_user(conn, "alice", "pw12345")
-    assert user["username"] == "alice" and user["id"] > 0
-    assert store.authenticate(conn, "alice", "pw12345")["id"] == user["id"]
-    assert store.authenticate(conn, "alice", "nope") is None
-    assert store.authenticate(conn, "ghost", "pw12345") is None
-
-
-def test_duplicate_username_rejected(conn):
-    store.create_user(conn, "bob", "pw")
-    with pytest.raises(store.UserExistsError):
-        store.create_user(conn, "bob", "other")
-
-
-# ------------------------------------------------------------------------ tokens
-
-
-def test_token_resolves_to_user(conn):
-    user = store.create_user(conn, "carol", "pw")
-    token = store.create_token(conn, user["id"])
-    assert store.user_for_token(conn, token)["id"] == user["id"]
-    assert store.user_for_token(conn, "bogus") is None
-    store.delete_token(conn, token)
-    assert store.user_for_token(conn, token) is None
-
-
-def test_expired_token_is_invalid(conn):
-    user = store.create_user(conn, "dave", "pw")
-    token = store.create_token(conn, user["id"], ttl=-1)  # already expired
-    assert store.user_for_token(conn, token) is None
-    assert store.purge_expired_tokens(conn) >= 1
-
-
 # ----------------------------------------------------------------- conversations
 
 
@@ -75,8 +24,21 @@ def test_owner_key_isolation():
     assert store.owner_key(None, "sess-abc") == "anon:sess-abc"
 
 
+def test_schema_has_no_auth_tables(conn):
+    names = {
+        str(r[0])
+        for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }
+    assert "users" not in names
+    assert "auth_tokens" not in names
+    assert "conversations" in names
+    assert "preferences" in names
+
+
 def test_conversation_persist_and_load(conn):
-    owner = "user:1"
+    owner = "anon:sess-1"
     cid = store.get_or_create_conversation(conn, owner, "sess-1", "gallery")
     # Idempotent: same key returns the same conversation id.
     assert store.get_or_create_conversation(conn, owner, "sess-1", "gallery") == cid
@@ -91,8 +53,8 @@ def test_conversation_persist_and_load(conn):
 
 
 def test_conversation_owner_isolation(conn):
-    a = store.get_or_create_conversation(conn, "user:1", "s", "gallery")
-    b = store.get_or_create_conversation(conn, "user:2", "s", "gallery")
+    a = store.get_or_create_conversation(conn, "anon:a", "a", "gallery")
+    b = store.get_or_create_conversation(conn, "anon:b", "b", "gallery")
     assert a != b
     store.append_messages(conn, a, [{"role": "user", "content": "secret-a"}])
     assert store.message_count(conn, a) == 1
@@ -100,20 +62,20 @@ def test_conversation_owner_isolation(conn):
 
 
 def test_mode_isolation(conn):
-    g = store.get_or_create_conversation(conn, "user:1", "s", "gallery")
-    n = store.get_or_create_conversation(conn, "user:1", "s", "general")
+    g = store.get_or_create_conversation(conn, "anon:s", "s", "gallery")
+    n = store.get_or_create_conversation(conn, "anon:s", "s", "general")
     assert g != n
 
 
 def test_reset_conversation_clears_messages(conn):
-    cid = store.get_or_create_conversation(conn, "user:1", "s", "gallery")
+    cid = store.get_or_create_conversation(conn, "anon:s", "s", "gallery")
     store.append_messages(conn, cid, [{"role": "user", "content": "a"}])
-    store.reset_conversation(conn, "user:1", "s", "gallery")
+    store.reset_conversation(conn, "anon:s", "s", "gallery")
     assert store.message_count(conn, cid) == 0
 
 
 def test_load_messages_caps_and_orders(conn):
-    cid = store.get_or_create_conversation(conn, "user:1", "s", "gallery")
+    cid = store.get_or_create_conversation(conn, "anon:s", "s", "gallery")
     store.append_messages(conn, cid, [{"role": "user", "content": f"m{i}"} for i in range(60)])
     msgs = store.load_messages(conn, cid, limit=10)
     assert len(msgs) == 10
@@ -122,7 +84,7 @@ def test_load_messages_caps_and_orders(conn):
 
 
 def test_preferences_survive_conversation_reset(conn):
-    owner = "user:9"
+    owner = "anon:9"
     store.set_preference(conn, owner, "avoid_silhouettes", "true")
     store.set_preference(conn, owner, "language", "zh")
     assert store.get_preferences(conn, owner) == {
@@ -138,7 +100,7 @@ def test_preferences_survive_conversation_reset(conn):
 
 
 def test_agent_events_roundtrip(conn):
-    cid = store.get_or_create_conversation(conn, "user:1", "s", "gallery")
+    cid = store.get_or_create_conversation(conn, "anon:1", "s", "gallery")
     store.append_agent_events(
         conn,
         cid,
@@ -153,7 +115,7 @@ def test_agent_events_roundtrip(conn):
 
 
 def test_working_memory_persists_and_clears_on_reset(conn):
-    owner = "user:1"
+    owner = "anon:1"
     cid = store.get_or_create_conversation(conn, owner, "s", "gallery")
     files = [f"keep_{i}.jpg" for i in range(40)]
     store.set_working_memory(

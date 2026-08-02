@@ -165,6 +165,48 @@ def main() -> int:
         if bad:
             return 1
 
+    print("== agent data: synonyms + recipes + gap smoke ==")
+    from services.agent.gallery_search_defaults import load_search_recipes, shortlist_search_args
+    from services.agent.skills.gallery_common import load_query_synonyms
+    from scripts.eval.measure_gallery_search_gaps import run_session
+
+    syns = load_query_synonyms()
+    if len(syns) < 8:
+        print(f"error: expected ≥8 synonym groups, got {len(syns)}", file=sys.stderr)
+        return 1
+    recipes = load_search_recipes()
+    if "shortlist" not in recipes or shortlist_search_args(limit=5).get("min_score") is None:
+        print("error: search_recipes.json missing shortlist / min_score", file=sys.stderr)
+        return 1
+    smoke_session = _REPO / "data" / "eval" / "agent" / "sessions" / "smoke"
+    if (smoke_session / "analysis_results.json").is_file():
+        gap = run_session(session_path=smoke_session, label="smoke", extra_probes=[])
+        summary = gap.get("summary") or {}
+        # Gate only in-table / case probes — OOV paraphrases are intentional gap signals.
+        regressions = [
+            p
+            for p in (gap.get("probes") or [])
+            if p.get("classification") == "empty_synonym_gap"
+            and (
+                str(p.get("notes") or "").startswith("case ")
+                or "in-table" in str(p.get("notes") or "")
+            )
+        ]
+        print(
+            f"gap smoke: probes={summary.get('probes')} hits={summary.get('hits')} "
+            f"synonym_gap={summary.get('empty_synonym_gap')} "
+            f"in_table_regressions={len(regressions)}"
+        )
+        if regressions:
+            print(
+                "error: in-table synonym probes regressed — update "
+                f"data/agent/query_synonyms.jsonl: {[r.get('query') for r in regressions]}",
+                file=sys.stderr,
+            )
+            return 1
+    else:
+        print(f"warn: missing {smoke_session}/analysis_results.json; skipped gap smoke")
+
     print("quality smoke: PASS")
     return 0
 

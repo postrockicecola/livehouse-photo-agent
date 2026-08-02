@@ -6,7 +6,7 @@
 {"schema_version": "agent_router_paraphrase.v1", "id": "sel_pos_5", "utterance": "初选一批", "expect_rule": "shortlist_select", "rule_family": "shortlist_select", "polarity": "positive", "expect_select_after": true}
 {"schema_version": "agent_router_paraphrase.v1", "id": "sel_neg_0", "utterance": "选出20张，但多给我一些全景镜头", "expect_rule": null, "rule_family": "shortlist_select", "polarity": "negative"}
 {"schema_version": "agent_router_paraphrase.v1", "id": "sel_neg_1", "utterance": "找吉他手的照片", "expect_rule": null, "rule_family": "shortlist_select", "polarity": "negative"}
-{"schema_version": "agent_router_paraphrase.v1", "id": "sel_neg_2", "utterance": "修成复古胶片风格看看", "expect_rule": null, "rule_family": "shortlist_select", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "film_vibe_pos_1", "utterance": "修成复古胶片风格看看", "expect_rule": "apply_film_vibe", "rule_family": "apply_film_vibe", "polarity": "positive"}
 {"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_0", "utterance": "帮我挑选10张适合发朋友圈的", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
 {"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_1", "utterance": "适合法发ins的十张", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}
 {"schema_version": "agent_router_paraphrase.v1", "id": "soc_pos_2", "utterance": "选出适合社交媒体的8张", "expect_rule": "shortlist_social", "rule_family": "shortlist_social", "polarity": "positive"}

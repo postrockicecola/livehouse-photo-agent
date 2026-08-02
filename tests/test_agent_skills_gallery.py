@@ -214,7 +214,7 @@ def test_slow_shutter_style_intent_uses_exif(tmp_path: Path, monkeypatch) -> Non
         ],
     )
 
-    from services.agent.skills import gallery as gallery_mod
+    from services.agent.skills import gallery_common as gallery_mod
 
     monkeypatch.setattr(
         gallery_mod,
@@ -260,7 +260,7 @@ def test_slow_shutter_returns_exif_hits(tmp_path: Path, monkeypatch) -> None:
             },
         ],
     )
-    from services.agent.skills import gallery as gallery_mod
+    from services.agent.skills import gallery_common as gallery_mod
 
     monkeypatch.setattr(
         gallery_mod,

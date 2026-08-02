@@ -45,6 +45,19 @@ def test_ground_reply_rewrites_when_ungrounded() -> None:
     assert v.triggered
     assert "ghost.jpg" not in text
     assert "drum_01.jpg" in text
+    assert v.rewrite_mode in ("strip", "template")
+
+
+def test_ground_reply_strips_unknown_keeps_prose() -> None:
+    text, v = ground_reply(
+        "推荐 fake_hallucinated_99.jpg 以及 drum_01.jpg，节奏不错。",
+        tool_calls=[{"metadata": {"files": ["drum_01.jpg"]}}],
+    )
+    assert v.triggered
+    assert "fake_hallucinated_99.jpg" not in text
+    assert "drum_01.jpg" in text
+    assert "节奏不错" in text
+    assert v.rewrite_mode == "strip"
 
 
 def test_ground_reply_skips_without_signal() -> None:
@@ -64,8 +77,10 @@ def test_empty_tool_result_blocks_invented_files() -> None:
 
 
 def test_rewrite_lists_allowed() -> None:
-    out = rewrite_ungrounded_reply({"b.jpg", "a.jpg"}, ["x.jpg"])
-    assert "a.jpg" in out and "b.jpg" in out
+    out, mode = rewrite_ungrounded_reply("看 x.jpg", {"b.jpg", "a.jpg"}, ["x.jpg"])
+    assert mode in ("strip", "template")
+    if mode == "template":
+        assert "a.jpg" in out and "b.jpg" in out
     assert "x.jpg" not in out
 
 

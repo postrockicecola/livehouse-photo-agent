@@ -182,6 +182,42 @@ def validate_agent_chat_case(doc: dict[str, Any], path: str) -> list[str]:
     return errors
 
 
+def validate_agent_turn_trace(doc: dict[str, Any], path: str) -> list[str]:
+    """Per-turn Gallery chat observability (``agent_turn_trace.v1``)."""
+    errors = _require(
+        doc,
+        [
+            "schema_version",
+            "backend",
+            "rounds_used",
+            "grounding_ok",
+            "parse_fail",
+            "json_leak",
+        ],
+        path,
+    )
+    if doc.get("schema_version") != "agent_turn_trace.v1":
+        errors.append(_err(path, "schema_version must be agent_turn_trace.v1"))
+    backend = doc.get("backend")
+    if "backend" in doc and not (isinstance(backend, str) and backend.strip()):
+        errors.append(_err(path, "backend must be non-empty string"))
+    if "rule_id" in doc and doc["rule_id"] is not None and not isinstance(doc["rule_id"], str):
+        errors.append(_err(path, "rule_id must be string or null"))
+    rounds = doc.get("rounds_used")
+    if "rounds_used" in doc and not (
+        isinstance(rounds, int) and not isinstance(rounds, bool) and rounds >= 0
+    ):
+        errors.append(_err(path, "rounds_used must be int >= 0"))
+    for key in ("grounding_ok", "parse_fail", "json_leak", "parse_repaired"):
+        if key in doc and doc[key] is not None and not isinstance(doc[key], bool):
+            errors.append(_err(path, f"{key} must be bool or null"))
+    matches = doc.get("guardrail_matches")
+    if matches is not None:
+        if not isinstance(matches, list) or any(not isinstance(x, str) for x in matches):
+            errors.append(_err(path, "guardrail_matches must be array of strings"))
+    return errors
+
+
 def validate_agent_rating(doc: dict[str, Any], path: str) -> list[str]:
     """Phase-6 human/LLM judge rating row (``agent_rating.v1``)."""
     errors = _require(
@@ -275,6 +311,7 @@ _VALIDATORS = {
     "eval_run.v1": validate_eval_run,
     "agent_chat_case.v1": validate_agent_chat_case,
     "agent_rating.v1": validate_agent_rating,
+    "agent_turn_trace.v1": validate_agent_turn_trace,
 }
 
 
