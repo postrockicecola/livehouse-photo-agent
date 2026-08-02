@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+import uuid
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, Optional
 
@@ -28,6 +29,7 @@ from services.agent.context_governance import (
     truncate_tool_observation,
     working_memory_prompt_block,
 )
+from services.agent.final_answer import FinalAnswer, build_final_answer
 from services.agent.groundedness import ground_reply
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, route_gallery_intent
@@ -37,6 +39,7 @@ from services.agent.tool_protocol import (
     parse_tool_call,
     resolve_tool_decision,
 )
+from services.agent.vision_context import encode_focus_thumbnail, multimodal_user_content
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +164,7 @@ class TurnResult:
     working_memory: dict[str, Any] = field(default_factory=dict)
     events: list[dict[str, Any]] = field(default_factory=list)
     trace: dict[str, Any] = field(default_factory=dict)
+    final_answer: Optional[dict[str, Any]] = None
 
 
 # Clean, minimal context used to force a final answer. Weaker chat models (e.g. llava)
@@ -245,9 +249,41 @@ class ConversationalAgent:
         self._events: list[dict[str, Any]] = []
         self.last_backend: str = "langgraph"
         self.last_trace: dict[str, Any] = {}
+        self.last_final_answer: Optional[dict[str, Any]] = None
         self._turn_parse_fail: bool = False
         self._turn_parse_repaired: bool = False
         self._compiled_graph: Any = None
+        self._run_id: str = ""
+        self._grounding_rewrite_mode: str = "none"
+        self._bind_focus_vision()
+
+    def _bind_focus_vision(self) -> None:
+        """Encode focus_file thumbnail once per agent instance when base_dir is known."""
+        focus = str(self._turn_context.get("focus_file") or "").strip()
+        base = str(self._turn_context.get("base_dir") or "").strip()
+        if not focus or not base or self._turn_context.get("_focus_image"):
+            return
+        img = encode_focus_thumbnail(base, focus)
+        if img:
+            self._turn_context["_focus_image"] = img
+
+    def _chat_messages(self, messages: list[dict[str, Any]]) -> str:
+        """ChatFn wrapper: attach focus thumbnail to the latest user turn when present."""
+        img = self._turn_context.get("_focus_image")
+        if not img or not messages:
+            return self._chat(messages)
+        out: list[dict[str, Any]] = []
+        last_user = max((i for i, m in enumerate(messages) if m.get("role") == "user"), default=-1)
+        for i, m in enumerate(messages):
+            if i == last_user:
+                text = str(m.get("content") or "")
+                if isinstance(m.get("content"), list):
+                    out.append(m)
+                else:
+                    out.append({**m, "content": multimodal_user_content(text, image=img)})
+            else:
+                out.append(m)
+        return self._chat(out)
 
     def _merge_turn_context_args(self, tool: str, args: dict[str, Any]) -> dict[str, Any]:
         """Inject Gallery focus into film skills when the model/router omitted them."""
@@ -272,6 +308,9 @@ class ConversationalAgent:
         self._turn_parse_fail = False
         self._turn_parse_repaired = False
         self.last_trace = {}
+        self.last_final_answer = None
+        self._run_id = uuid.uuid4().hex
+        self._grounding_rewrite_mode = "none"
 
     def _parse_tool_call_repaired(self, raw: str) -> Optional[dict[str, Any]]:
         """Parse tool JSON; one repair completion when output looks tool-ish but invalid."""
@@ -334,7 +373,7 @@ class ConversationalAgent:
 
     def _graph_kwargs(self) -> dict[str, Any]:
         return {
-            "chat_fn": self._chat,
+            "chat_fn": self._chat_messages,
             "memory": self.memory,
             "skills": self._skills,
             "guardrails": self._guardrails,
@@ -446,13 +485,7 @@ class ConversationalAgent:
         final = direct if direct else self._force_final_answer(user_text, observations)
         reply = self._finalize(final)
         self._done_event(reply, tool_calls, routed=match.rule_id)
-        return TurnResult(
-            reply=reply,
-            tool_calls=tool_calls,
-            working_memory=dict(self.working_memory),
-            events=list(self._events),
-            trace=dict(self.last_trace),
-        )
+        return self._make_turn_result(reply, tool_calls)
 
     def _stream_chat_routed(
         self,
@@ -485,13 +518,7 @@ class ConversationalAgent:
                 self.memory.add_user(user_text)
                 reply = self._finalize(refuse)
                 self._done_event(reply, [])
-                return TurnResult(
-                    reply=reply,
-                    tool_calls=[],
-                    working_memory=dict(self.working_memory),
-                    events=list(self._events),
-                    trace=dict(self.last_trace),
-                )
+                return self._make_turn_result(reply, [])
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
@@ -507,13 +534,7 @@ class ConversationalAgent:
         reply = str(state.get("reply") or "")
         tool_calls = list(state.get("tool_calls") or [])
         self._attach_trace_to_done(reply, tool_calls)
-        return TurnResult(
-            reply=reply,
-            tool_calls=tool_calls,
-            working_memory=dict(self.working_memory),
-            events=list(self._events),
-            trace=dict(self.last_trace),
-        )
+        return self._make_turn_result(reply, tool_calls)
 
     def _chat_imperative(self, user_text: str) -> TurnResult:
         tool_calls: list[dict[str, Any]] = []
@@ -531,13 +552,7 @@ class ConversationalAgent:
                 else:
                     reply = self._finalize(raw)
                 self._done_event(reply, tool_calls)
-                return TurnResult(
-                    reply=reply,
-                    tool_calls=tool_calls,
-                    working_memory=dict(self.working_memory),
-                    events=list(self._events),
-                    trace=dict(self.last_trace),
-                )
+                return self._make_turn_result(reply, tool_calls)
             merged = self._merge_turn_context_args(call["tool"], call["args"])
             key = f"{call['tool']}:{json.dumps(merged, sort_keys=True, ensure_ascii=False)}"
             if key in seen:
@@ -556,24 +571,12 @@ class ConversationalAgent:
                 final = _NO_ANSWER_FALLBACK
             reply = self._finalize(final)
             self._done_event(reply, tool_calls)
-            return TurnResult(
-                reply=reply,
-                tool_calls=tool_calls,
-                working_memory=dict(self.working_memory),
-                events=list(self._events),
-                trace=dict(self.last_trace),
-            )
+            return self._make_turn_result(reply, tool_calls)
 
         final = self._force_final_answer(user_text, observations)
         reply = self._finalize(final)
         self._done_event(reply, tool_calls)
-        return TurnResult(
-            reply=reply,
-            tool_calls=tool_calls,
-            working_memory=dict(self.working_memory),
-            events=list(self._events),
-            trace=dict(self.last_trace),
-        )
+        return self._make_turn_result(reply, tool_calls)
 
     def stream_chat(
         self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None
@@ -731,36 +734,24 @@ class ConversationalAgent:
         stream_fn: Optional[StreamChatFn],
         tool_calls: list[dict[str, Any]],
     ) -> Iterator[dict[str, Any]]:
-        """Stream final-answer tokens + a done event, buffering the head so a stray
-        tool-call JSON is never shown (it is replaced with the fallback prose)."""
-        head = ""
-        committed = False
-        toolish = False
+        """Buffer model tokens, ground/finalize, then emit tokens ≡ final reply.
+
+        Users must never see pre-grounding cites that ``done.reply`` later strips.
+        """
         acc = ""
         for piece in self._iter_final_tokens(messages, stream_fn):
             acc += piece
-            if committed:
-                yield {"type": "token", "text": piece}
-                continue
-            head += piece
-            stripped = head.lstrip()
-            if not stripped:
-                continue
-            if stripped[0] == "{" or stripped.startswith("```"):
-                toolish = True  # looks like a tool call; keep buffering silently
-                continue
-            committed = True
-            yield {"type": "token", "text": head}
-
-        if committed:
-            reply = self._finalize(acc)
-        else:
-            if toolish or _parse_tool_call(acc) is not None:
-                reply = _NO_ANSWER_FALLBACK
+        stripped = acc.lstrip()
+        if not stripped or stripped[0] == "{" or stripped.startswith("```") or _parse_tool_call(acc) is not None:
+            if looks_like_tool_intent(acc) or _parse_tool_call(acc) is not None:
+                raw_reply = _NO_ANSWER_FALLBACK
             else:
-                reply = acc.strip() or _NO_ANSWER_FALLBACK
-            reply = self._finalize(reply)
-            yield {"type": "token", "text": reply}
+                raw_reply = acc.strip() or _NO_ANSWER_FALLBACK
+        else:
+            raw_reply = acc.strip() or _NO_ANSWER_FALLBACK
+        reply = self._finalize(raw_reply)
+        for piece in _chunk_text(reply):
+            yield {"type": "token", "text": piece}
         yield self._done_event(reply, tool_calls)
 
     def _build_turn_trace(
@@ -780,16 +771,28 @@ class ConversationalAgent:
             if e.get("type") == "guardrail" and e.get("triggered"):
                 for m in e.get("matches") or []:
                     guardrail_matches.append(str(m))
+        spans = [
+            {
+                "tool": tc.get("tool"),
+                "ok": bool(tc.get("ok")),
+                "files": list((tc.get("metadata") or {}).get("files") or (tc.get("metadata") or {}).get("selected_keys") or [])[:20],
+            }
+            for tc in tool_calls
+            if isinstance(tc, dict) and tc.get("tool")
+        ]
         return {
             "schema_version": "agent_turn_trace.v1",
+            "run_id": self._run_id or None,
             "backend": backend or "unknown",
             "rule_id": rule_id,
             "rounds_used": len(tool_calls),
             "grounding_ok": not grounding_hits,
+            "rewrite_mode": self._grounding_rewrite_mode,
             "parse_fail": bool(self._turn_parse_fail),
             "parse_repaired": bool(self._turn_parse_repaired),
             "guardrail_matches": guardrail_matches,
             "json_leak": _parse_tool_call(reply or "") is not None,
+            "tool_spans": spans,
         }
 
     def _attach_trace_to_done(
@@ -812,6 +815,18 @@ class ConversationalAgent:
                 return e
         return self._done_event(reply, tool_calls, routed=routed, emit=True)
 
+    def _make_turn_result(
+        self, reply: str, tool_calls: list[dict[str, Any]]
+    ) -> TurnResult:
+        return TurnResult(
+            reply=reply,
+            tool_calls=tool_calls,
+            working_memory=dict(self.working_memory),
+            events=list(self._events),
+            trace=dict(self.last_trace),
+            final_answer=self.last_final_answer,
+        )
+
     def _done_event(
         self,
         reply: str,
@@ -828,6 +843,7 @@ class ConversationalAgent:
             "tool_calls": tool_calls,
             "memory_turns": self.memory.turn_count,
             "working_memory": dict(self.working_memory),
+            "final_answer": self.last_final_answer,
             "routed": routed or trace.get("rule_id"),
             "trace": trace,
             **trace,
@@ -893,7 +909,7 @@ class ConversationalAgent:
         if direct:
             return direct
         messages = self._build_final_answer_messages(user_text, observations)
-        final = self._chat(messages)
+        final = self._chat_messages(messages)
         if _parse_tool_call(final) is not None:
             self._turn_parse_fail = True
             return _NO_ANSWER_FALLBACK
@@ -910,6 +926,9 @@ class ConversationalAgent:
             tool_calls=tool_calls,
             working_memory=self.working_memory,
         )
+        self._grounding_rewrite_mode = getattr(verdict, "rewrite_mode", None) or (
+            "template" if verdict.triggered else "none"
+        )
         if verdict.triggered:
             self._emit(
                 {
@@ -917,12 +936,15 @@ class ConversationalAgent:
                     "unknown": list(verdict.unknown),
                     "cited": list(verdict.cited),
                     "allowed": list(verdict.allowed),
+                    "rewrite_mode": self._grounding_rewrite_mode,
                 }
             )
-            reply = grounded
-        else:
-            reply = grounded
+        reply = grounded
         if self._guardrails is not None:
             reply = self._guardrails.mediate_output(reply)
+        fa = build_final_answer(
+            reply, tool_calls=tool_calls, working_memory=self.working_memory
+        )
+        self.last_final_answer = fa.to_dict()
         self.memory.add_assistant(reply)
         return reply

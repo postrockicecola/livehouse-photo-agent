@@ -16,13 +16,17 @@ RUNTIME MATRIX (who decides what)
   │ intent_router    │ (no tool JSON round)       │ High-freq recipe asks    │
   │ **langgraph**    │ **text {"tool","args"}**   │ Default fuzzy / semantic │
   │ langgraph        │ native tools[] (bridge)    │ LIVEHOUSE_AGENT_NATIVE_  │
-  │                  │                            │ TOOLS=1 (A/B only)       │
+  │                  │ multi → __multi__ serial/  │ TOOLS=auto (openai/vllm  │
+  │                  │ parallel read-only         │ on; ollama off) or 1/0   │
   │ imperative       │ text {"tool","args"}       │ LIVEHOUSE_AGENT_RUNTIME= │
   │                  │                            │ imperative (emergency)   │
   └──────────────────┴────────────────────────────┴──────────────────────────┘
 
   Missing langgraph → hard error (no silent fallback).
   Ownership: always anon:<session_id> (login auth removed from product surface).
+  Stream tokens ≡ grounded finalize (buffer then emit).
+  Vision: focus_file thumbnail when LIVEHOUSE_AGENT_VISION=1 (default).
+  Façade: services/agent/runner.py (AgentSession / AgentRunner).
 
 ==============================================================================
 KEEP (default on)
@@ -103,11 +107,10 @@ Imperative chat runtime
   Default is LangGraph; missing langgraph → hard error (no silent fallback).
   Kept for tests + emergency only.
 
-Native OpenAI tools[] on chat (experimental A/B)
-  Env: LIVEHOUSE_AGENT_NATIVE_TOOLS=1
-  build_chat_fn(..., tools=registry.tool_specs()) attaches tools; native tool_calls
-  are bridged back to {"tool","args"} text JSON for the existing decide→act loop.
-  Default off — production stays on text protocol.
+Native OpenAI tools[] on chat
+  Env: LIVEHOUSE_AGENT_NATIVE_TOOLS=auto|1|0
+  auto (default): attach tools for openai/vllm; ollama stays text-protocol.
+  Native tool_calls bridge via tool_protocol (N calls → __multi__).
 
 CLIP semantic search fallback (when text/synonym miss)
   Env: LIVEHOUSE_AGENT_SEMANTIC_FALLBACK=0 to disable (default on when open-clip present).

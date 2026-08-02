@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://livehouse.local/quality/schemas/agent_final_answer.schema.json",
+  "title": "Agent Final Answer v1",
+  "description": "Structured final answer derived from tool results; user-facing prose is summary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "summary", "files", "actions", "ok"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "agent_final_answer.v1" },
+    "summary": { "type": "string" },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "ui_action": { "type": "string" },
+          "tool": { "type": "string" }
+        }
+      }
+    },
+    "ok": { "type": "boolean" }
+  }
+}

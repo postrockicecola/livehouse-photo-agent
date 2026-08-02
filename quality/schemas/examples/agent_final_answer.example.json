@@ -1,0 +1,9 @@
+{
+  "schema_version": "agent_final_answer.v1",
+  "summary": "推荐 drum_01.jpg，节奏与构图都干净。",
+  "files": ["drum_01.jpg"],
+  "actions": [
+    { "ui_action": "search", "tool": "gallery_search", "files": ["drum_01.jpg"] }
+  ],
+  "ok": true
+}

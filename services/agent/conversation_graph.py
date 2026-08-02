@@ -161,34 +161,71 @@ def compile_chat_turn_graph(
         return "answer"
 
     def act(state: ChatTurnState) -> dict[str, Any]:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        from services.agent.tool_protocol import (
+            MULTI_TOOL,
+            all_read_only,
+            expand_tool_calls,
+        )
+
         call = state.get("pending_call") or {}
-        tool = str(call.get("tool") or "")
-        args = dict(call.get("args") or {})
-        if merge_tool_args is not None:
-            try:
-                args = dict(merge_tool_args(tool, args) or args)
-            except Exception:
-                logger.exception("merge_tool_args failed; using raw args")
-        # assistant(tool-call) before dispatch → next decide sees a causal chain.
-        record_tool_decision(tool, args)
-        result = skills.dispatch(tool, args)
-        update_working_memory(tool, args, result)
-        record_tool_observation(tool, result)
-        obs = f"{tool} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
-        tc = {
-            "tool": tool,
-            "args": args,
-            "ok": result.ok,
-            "metadata": getattr(result, "metadata", None) or {},
-        }
+        sub_calls = expand_tool_calls(call)
+        if not sub_calls:
+            return {"pending_call": None}
+
+        def _merge(tool: str, args: dict[str, Any]) -> dict[str, Any]:
+            merged = dict(args)
+            if merge_tool_args is not None:
+                try:
+                    merged = dict(merge_tool_args(tool, merged) or merged)
+                except Exception:
+                    logger.exception("merge_tool_args failed; using raw args")
+            return merged
+
+        def _dispatch(tool: str, merged: dict[str, Any]):
+            return skills.dispatch(tool, merged)
+
+        prepared = [(str(c["tool"]), _merge(str(c["tool"]), dict(c.get("args") or {}))) for c in sub_calls]
+        # Parallel dispatch for multi read-only batches; memory/events stay serial.
+        dispatched: list[tuple[str, dict[str, Any], Any]]
+        if (
+            len(prepared) > 1
+            and all_read_only([{"tool": t, "args": a} for t, a in prepared])
+            and str(call.get("tool") or "") == MULTI_TOOL
+        ):
+            slots: list[tuple[str, dict[str, Any], Any] | None] = [None] * len(prepared)
+            with ThreadPoolExecutor(max_workers=min(4, len(prepared))) as pool:
+                futs = {pool.submit(_dispatch, t, a): i for i, (t, a) in enumerate(prepared)}
+                for fut in as_completed(futs):
+                    i = futs[fut]
+                    t, a = prepared[i]
+                    slots[i] = (t, a, fut.result())
+            dispatched = [s for s in slots if s is not None]
+        else:
+            dispatched = [(t, a, _dispatch(t, a)) for t, a in prepared]
+
         tool_calls = list(state.get("tool_calls") or [])
-        tool_calls.append(tc)
         observations = list(state.get("observations") or [])
-        observations.append(obs)
         seen = list(state.get("seen_keys") or [])
-        key = f"{tool}:{json.dumps(args, sort_keys=True, ensure_ascii=False)}"
-        seen.append(key)
-        _emit({"type": "tool_call", **tc})
+        for tool, merged, result in dispatched:
+            # Causal chain: assistant(decision) before tool observation.
+            record_tool_decision(tool, merged)
+            update_working_memory(tool, merged, result)
+            record_tool_observation(tool, result)
+            tc = {
+                "tool": tool,
+                "args": merged,
+                "ok": result.ok,
+                "metadata": getattr(result, "metadata", None) or {},
+            }
+            obs = f"{tool} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
+            tool_calls.append(tc)
+            observations.append(obs)
+            seen.append(f"{tool}:{json.dumps(merged, sort_keys=True, ensure_ascii=False)}")
+            _emit({"type": "tool_call", **tc})
+
+        # One decide-round budget per model emission (multi batch counts as one).
         return {
             "tool_calls": tool_calls,
             "observations": observations,

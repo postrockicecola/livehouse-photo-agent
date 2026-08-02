@@ -12,11 +12,15 @@ from services.agent.conversation_graph import (
     compile_chat_turn_graph,
     run_chat_turn,
 )
+from services.agent.runner import AgentRunner, AgentSession, RunnerConfig
 
 __all__ = [
+    "AgentRunner",
+    "AgentSession",
     "ConversationalAgent",
     "ConversationMemory",
     "GALLERY_CHAT_MAPPING",
+    "RunnerConfig",
     "compile_chat_turn_graph",
     "run_chat_turn",
 ]

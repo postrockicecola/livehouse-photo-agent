@@ -16,9 +16,15 @@ from services.agent.conversation import _parse_tool_call
 
 def test_native_tools_enabled_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv(NATIVE_TOOLS_ENV, raising=False)
+    # Default auto: off without capable provider, on for openai/vllm.
     assert native_tools_enabled() is False
+    assert native_tools_enabled(provider="ollama") is False
+    assert native_tools_enabled(provider="openai") is True
+    assert native_tools_enabled(provider="vllm") is True
     monkeypatch.setenv(NATIVE_TOOLS_ENV, "1")
-    assert native_tools_enabled() is True
+    assert native_tools_enabled(provider="ollama") is True
+    monkeypatch.setenv(NATIVE_TOOLS_ENV, "0")
+    assert native_tools_enabled(provider="openai") is False
     assert native_tools_enabled(False) is False
     assert native_tools_enabled(True) is True
 
@@ -81,6 +87,23 @@ def test_content_falls_back_to_text_when_no_tool_calls() -> None:
     # Malformed JSON in content is left as-is (parse layer decides).
     raw = content_from_assistant_message({"content": "not a tool"})
     assert _parse_tool_call(raw) is None
+
+
+def test_content_bridge_packs_multiple_native_calls() -> None:
+    from services.agent.tool_protocol import MULTI_TOOL, expand_tool_calls
+
+    msg = {
+        "tool_calls": [
+            {"function": {"name": "gallery_stats", "arguments": {}}},
+            {"function": {"name": "gallery_search", "arguments": {"query": "鼓手", "limit": 3}}},
+        ]
+    }
+    text = content_from_assistant_message(msg)
+    parsed = _parse_tool_call(text)
+    assert parsed is not None
+    assert parsed["tool"] == MULTI_TOOL
+    expanded = expand_tool_calls(parsed)
+    assert [c["tool"] for c in expanded] == ["gallery_stats", "gallery_search"]
 
 
 def test_build_chat_fn_attaches_tools_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:

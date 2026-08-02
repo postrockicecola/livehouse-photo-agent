@@ -23,68 +23,53 @@ from services.agent.skills.gallery_common import (
 )
 
 
+_RECIPE_ENUM = (
+    "shortlist",
+    "social",
+    "energy",
+    "peak",
+    "deliverable",
+    "quality",
+    "dedupe",
+    "sort",
+    "custom",
+)
+
+
 class GallerySearchSkill:
     name = "gallery_search"
     description = (
-        "Search the current session's analyzed photos. Filter by score bands "
-        "(overall / energy / technical / composition) and Stage3 dims "
-        "(deliverable_subject / atmosphere_impact / moment_peak), tag substring, free-text "
-        "query, category, exclude trash/low-quality, and burst dedupe. Sort by overall|energy|"
-        "technical|composition|deliverable_subject|atmosphere_impact|moment_peak. Returns "
-        "top-N with scores, why lines, recipe rationale, tags, and caption."
+        "Search the current session's analyzed photos. Prefer a named recipe "
+        "(social/energy/peak/deliverable/shortlist/quality/dedupe/sort) plus optional "
+        "free-text query and limit. Returns top-N with scores, why lines, tags, caption."
     )
+    # Narrow model-facing schema — rich filters still accepted from intent_router via run().
     parameters = {
         "type": "object",
         "properties": {
-            "min_score": {"type": "number", "description": "Minimum overall score (0-100)."},
-            "max_score": {"type": "number", "description": "Maximum overall score (0-100)."},
-            "min_energy": {"type": "number"},
-            "max_energy": {"type": "number"},
-            "min_technical": {"type": "number"},
-            "max_technical": {"type": "number"},
-            "min_composition": {"type": "number"},
-            "max_composition": {"type": "number"},
-            "min_deliverable": {
-                "type": "number",
-                "description": "Minimum Stage3 deliverable_subject (0-10) when present.",
+            "recipe": {
+                "type": "string",
+                "enum": list(_RECIPE_ENUM),
+                "description": "Named shortlist recipe (preferred over raw score dials).",
             },
-            "min_atmosphere": {
-                "type": "number",
-                "description": "Minimum Stage3 atmosphere_impact (0-10) when present.",
-            },
-            "min_moment_peak": {
-                "type": "number",
-                "description": "Minimum Stage3 moment_peak (0-10) when present.",
-            },
-            "tag": {"type": "string", "description": "Only photos whose tags contain this substring."},
             "query": {
                 "type": "string",
                 "description": (
                     "Free-text query. Matches tags/caption/reason with Chinese↔English synonyms."
                 ),
             },
+            "tag": {"type": "string", "description": "Only photos whose tags contain this substring."},
+            "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "description": "Max rows (default from recipe or 20).",
+            },
             "category": {
                 "type": "string",
                 "enum": list(_KNOWN_CATEGORIES),
-                "description": (
-                    "Score-band bucket from analysis_results: best (>=~90), keep (60–90), "
-                    "trash (<60). Prefer these short names. Legacy AI_Best_90+ / AI_Keep_60-90 / "
-                    "AI_Trash_Below60 folder labels are accepted as aliases of the same buckets."
-                ),
+                "description": "Optional score-band bucket: best / keep / trash.",
             },
-            "exclude_trash": {
-                "type": "boolean",
-                "description": "Drop trash-band photos (category trash / AI_Trash_*).",
-            },
-            "exclude_low_quality": {
-                "type": "boolean",
-                "description": "Drop blur/overexposure cues and low technical / overall.",
-            },
-            "dedupe_burst": {"type": "boolean", "description": "Keep one best frame per near-dup / burst."},
-            "sort_by": {"type": "string", "enum": list(_SORT_KEYS), "description": "Sort key (default overall)."},
-            "recipe": {"type": "string", "description": "Named shortlist recipe id (social/energy/…)."},
-            "rationale": {"type": "string", "description": "Human-readable recipe rationale."},
-            "limit": {"type": "integer", "minimum": 1, "maximum": 100, "description": "Max rows (default 20)."},
         },
         "additionalProperties": False,
     }
@@ -93,6 +78,8 @@ class GallerySearchSkill:
         self._base_dir = base_dir
 
     def run(self, args: dict[str, Any]) -> SkillResult:
+        from services.agent.gallery_search_defaults import load_search_recipes
+
         rows = _load_rows(self._base_dir)
         if not rows:
             return SkillResult(
@@ -101,18 +88,38 @@ class GallerySearchSkill:
                 metadata={"rows": [], "count": 0},
             )
 
-        sort_by = str(args.get("sort_by") or "overall")
+        # Merge named recipe defaults; explicit args (incl. router-rich filters) win.
+        filter_args = dict(args or {})
+        recipe_name = str(filter_args.get("recipe") or "").strip()
+        recipes = load_search_recipes()
+        if recipe_name and recipe_name in recipes and recipe_name != "custom":
+            base = {
+                k: v
+                for k, v in recipes[recipe_name].items()
+                if k not in ("default_limit",)
+            }
+            if filter_args.get("limit") is None and "default_limit" in recipes[recipe_name]:
+                base["limit"] = recipes[recipe_name]["default_limit"]
+            base["recipe"] = recipe_name
+            if "rationale" not in filter_args and recipes[recipe_name].get("rationale"):
+                base["rationale"] = recipes[recipe_name]["rationale"]
+            # Caller/router overrides win over recipe defaults.
+            for k, v in list(filter_args.items()):
+                if v is not None:
+                    base[k] = v
+            filter_args = base
+
+        sort_by = str(filter_args.get("sort_by") or "overall")
         if sort_by not in _SORT_KEYS:
             sort_by = "overall"
         try:
-            limit = int(args.get("limit") or 20)
+            limit = int(filter_args.get("limit") or 20)
         except (TypeError, ValueError):
             limit = 20
         limit = max(1, min(100, limit))
 
-        filter_args = dict(args)
         filter_args["_sort_by"] = sort_by
-        query = str(args.get("query") or "").strip()
+        query = str(filter_args.get("query") or "").strip()
         expanded = _expand_query_terms(query)
 
         if query and _style_intent(query) == "slow_shutter":
@@ -120,10 +127,10 @@ class GallerySearchSkill:
 
         filtered = _filter_rows(rows, filter_args)
         sort_label = sort_by
-        recipe = str(args.get("recipe") or "custom")
-        rationale = str(args.get("rationale") or f"按 {sort_label} 排序")
+        recipe = str(filter_args.get("recipe") or "custom")
+        rationale = str(filter_args.get("rationale") or f"按 {sort_label} 排序")
 
-        filtered = _maybe_dedupe(filtered, self._base_dir, bool(args.get("dedupe_burst")))
+        filtered = _maybe_dedupe(filtered, self._base_dir, bool(filter_args.get("dedupe_burst")))
         clip_meta: dict[str, Any] = {}
         if not filtered and query:
             # Synonym/text miss → optional CLIP text→image (not for 慢门 EXIF path).

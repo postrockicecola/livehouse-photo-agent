@@ -50,8 +50,9 @@ python -m scripts.eval.eval_agent_live --live --suite smoke   # needs chat model
 
 Metrics: ``pass_at_1``, ``tool_name_acc``, ``route_acc``, ``grounded_rate``,
 ``json_leak_rate``, ``empty_honesty_rate``, ``p50/p95_latency_ms``, plus
-``prompt_hash`` + model metadata. Mock mode is a CI gate; ``--live`` is
-informational (exit 0) until a release threshold is frozen.
+``prompt_hash`` + model metadata. Mock mode is a CI gate with frozen thresholds:
+``pass_at_1=1``, ``json_leak_rate=0``, ``grounded_rate=1`` (and all cases pass).
+``--live`` remains informational (exit 0) until a live release threshold is frozen.
 
 ## Observability + promotion (Phase 4)
 

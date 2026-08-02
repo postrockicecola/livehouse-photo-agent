@@ -4,12 +4,16 @@
   "title": "Agent Turn Trace v1",
   "description": "Per-turn observability fields on ChatResponse.trace / done events (shared by UI, weekly reports, judge).",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "required": ["schema_version", "backend", "rounds_used", "grounding_ok", "parse_fail", "json_leak"],
   "properties": {
     "schema_version": {
       "type": "string",
       "const": "agent_turn_trace.v1"
+    },
+    "run_id": {
+      "type": ["string", "null"],
+      "description": "Stable id for this turn (join key for evals / spans)."
     },
     "backend": {
       "type": "string",
@@ -27,6 +31,10 @@
     "grounding_ok": {
       "type": "boolean"
     },
+    "rewrite_mode": {
+      "type": "string",
+      "enum": ["none", "strip", "template"]
+    },
     "parse_fail": {
       "type": "boolean"
     },
@@ -40,6 +48,17 @@
     "json_leak": {
       "type": "boolean",
       "description": "True when the final reply still parses as tool JSON."
+    },
+    "tool_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tool": { "type": "string" },
+          "ok": { "type": "boolean" },
+          "files": { "type": "array", "items": { "type": "string" } }
+        }
+      }
     }
   }
 }

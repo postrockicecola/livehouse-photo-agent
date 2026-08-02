@@ -322,9 +322,22 @@ def main(argv: list[str] | None = None) -> int:
             extra = f" ({', '.join(c['reasons'])})" if c["reasons"] else ""
             print(f"  [{mark}] {c['id']} tools={c['tools']}{extra}")
 
-    # Mock suite is a CI gate; live is informational unless --strict later.
+    # Frozen mock thresholds (release gate). Live stays informational unless --strict.
     if mode == "mock":
-        return 0 if m["passed"] == m["total"] else 1
+        ok = (
+            m["passed"] == m["total"]
+            and float(m.get("pass_at_1") or 0) >= 1.0
+            and float(m.get("json_leak_rate") or 0) <= 0.0
+            and float(m.get("grounded_rate") or 0) >= 1.0
+        )
+        if not ok:
+            print(
+                "mock thresholds failed: "
+                f"pass_at_1={m.get('pass_at_1')} json_leak={m.get('json_leak_rate')} "
+                f"grounded={m.get('grounded_rate')}",
+                file=sys.stderr,
+            )
+        return 0 if ok else 1
     return 0
 
 

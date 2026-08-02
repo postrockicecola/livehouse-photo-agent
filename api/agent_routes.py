@@ -22,8 +22,9 @@ from pydantic import BaseModel, Field
 
 from services.agent import store
 from services.agent.context_governance import working_memory_prompt_block
-from services.agent.conversation import ConversationalAgent, ConversationMemory
+from services.agent.conversation import ConversationMemory
 from services.agent.guardrails import GuardrailEvent, Guardrails
+from services.agent.runner import AgentRunner, AgentSession, RunnerConfig
 from services.agent.skills import agent_workspace_root, safe_session_id
 from services.agent.skills.artifacts import sanitize_artifact_name
 from services.agent.skills.gallery import gallery_registry
@@ -55,6 +56,8 @@ class ChatResponse(BaseModel):
     error: Optional[str] = None
     # Per-turn observability: backend / rule_id / rounds / grounding / parse_fail.
     trace: dict[str, Any] = Field(default_factory=dict)
+    # Structured final answer (summary + files + ui actions); prose is ``reply``.
+    final_answer: Optional[dict[str, Any]] = None
 
 
 def _resolve_base_dir(previews_dir: Optional[str]) -> str:
@@ -167,8 +170,10 @@ def _load_prefs(owner: str) -> dict[str, str]:
         conn.close()
 
 
-def _turn_context_from_request(req: ChatRequest) -> dict[str, Any]:
+def _turn_context_from_request(req: ChatRequest, *, base_dir: str = "") -> dict[str, Any]:
     ctx: dict[str, Any] = {}
+    if base_dir:
+        ctx["base_dir"] = base_dir
     focus = (req.focus_file or "").strip()
     if focus:
         ctx["focus_file"] = focus
@@ -314,19 +319,19 @@ def _build_chat_fn(base_dir: str, *, tools: Optional[list[dict[str, Any]]] = Non
     Returns ``(chat_fn, error)`` — exactly one is non-None. Prefers a dedicated
     instruct model (``model.agent_chat_model``) for reliable tool-calling.
 
-    When ``LIVEHOUSE_AGENT_NATIVE_TOOLS=1`` and ``tools`` is provided (from
-    ``registry.tool_specs()``), the backend attaches native OpenAI-shaped tools.
-    Default remains text-protocol only.
+    When native tools are enabled for the provider (``LIVEHOUSE_AGENT_NATIVE_TOOLS``
+    ``auto`` → openai/vllm on, ollama off; or explicit ``1``/``0``) and ``tools``
+    is provided, the backend attaches OpenAI-shaped tools.
     """
     _ = base_dir
     try:
-        from services.agent.chat_backend import build_chat_fn, native_tools_enabled
+        from services.agent.chat_backend import build_chat_fn
         from utils.config_loader import ConfigLoader
 
         model_cfg = ConfigLoader.get_model_config(ConfigLoader.load())
         chat_model = str(model_cfg.get("agent_chat_model") or "").strip() or None
-        use_tools = tools if native_tools_enabled() else None
-        return build_chat_fn(model_cfg, model_name=chat_model, tools=use_tools), None
+        # Pass tools through; build_chat_fn decides native vs text from provider + env.
+        return build_chat_fn(model_cfg, model_name=chat_model, tools=tools), None
     except ValueError as exc:
         return None, f"chat model unavailable: {exc} (set model.provider to ollama/vllm/openai)"
     except Exception as exc:
@@ -384,22 +389,34 @@ def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
 
     # Load history + working memory first so last_files can be injected into the prompt.
     conv_id, memory, working = _load_conversation(owner, req, base_system)
-    turn_context = _turn_context_from_request(req)
+    turn_context = _turn_context_from_request(req, base_dir=base_dir)
     system_prompt = _augment_system_prompt(base_system, owner, working, turn_context)
     memory.system_prompt = system_prompt
     stream_fn = _build_stream_fn(base_dir)
     events: list[GuardrailEvent] = []
     guardrails = Guardrails(on_event=events.append)  # policy: LIVEHOUSE_AGENT_GUARDRAIL_POLICY
-    agent = ConversationalAgent(
-        chat_fn, memory=memory, skills=registry, guardrails=guardrails,
-        wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
-        working_memory=working,
-        turn_context=turn_context,
+    runner = AgentRunner(
+        chat_fn=chat_fn,
+        skills=registry,
+        session=AgentSession(
+            owner=owner,
+            session_id=req.session_id,
+            mode=req.mode,
+            base_dir=base_dir,
+            conversation_id=conv_id,
+            memory=memory,
+            working_memory=working,
+            turn_context=turn_context,
+        ),
+        guardrails=guardrails,
+        config=RunnerConfig(max_tool_rounds=_max_rounds(req.mode), wrap_tool_output=False),
+        stream_fn=stream_fn,
     )
+    agent = runner.agent
 
     def _gen():
         try:
-            for ev in agent.stream_chat(req.message, stream_fn=stream_fn):
+            for ev in runner.stream(req.message):
                 if ev.get("type") == "done":
                     turns = _persist_turn(
                         conv_id,
@@ -415,6 +432,7 @@ def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
                         "base_dir": base_dir,
                         "memory_turns": turns,
                         "trace": tr,
+                        "final_answer": getattr(agent, "last_final_answer", None) or ev.get("final_answer"),
                         "guardrail_events": [
                             {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
                             for e in events if e.triggered
@@ -439,22 +457,32 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
         return ChatResponse(reply="", base_dir=base_dir, error=err)
 
     conv_id, memory, working = _load_conversation(owner, req, base_system)
-    turn_context = _turn_context_from_request(req)
+    turn_context = _turn_context_from_request(req, base_dir=base_dir)
     system_prompt = _augment_system_prompt(base_system, owner, working, turn_context)
     memory.system_prompt = system_prompt
     events: list[GuardrailEvent] = []
     guardrails = Guardrails(on_event=events.append)
     # Gallery skills read our own DB → trusted; don't fence their output as untrusted
     # (the fence hurts weaker chat models). Injection scanning still runs for observability.
-    agent = ConversationalAgent(
-        chat_fn, memory=memory, skills=registry, guardrails=guardrails,
-        wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
-        working_memory=working,
-        turn_context=turn_context,
+    runner = AgentRunner(
+        chat_fn=chat_fn,
+        skills=registry,
+        session=AgentSession(
+            owner=owner,
+            session_id=req.session_id,
+            mode=req.mode,
+            base_dir=base_dir,
+            conversation_id=conv_id,
+            memory=memory,
+            working_memory=working,
+            turn_context=turn_context,
+        ),
+        guardrails=guardrails,
+        config=RunnerConfig(max_tool_rounds=_max_rounds(req.mode), wrap_tool_output=False),
     )
 
     try:
-        result = agent.chat(req.message)
+        result = runner.chat(req.message)
     except Exception as exc:
         logger.exception("agent chat failed")
         return ChatResponse(reply="", base_dir=base_dir, memory_turns=memory.turn_count,
@@ -471,6 +499,7 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
     return ChatResponse(
         reply=result.reply,
         tool_calls=result.tool_calls,
+        final_answer=result.final_answer,
         guardrail_events=[
             {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
             for e in events if e.triggered

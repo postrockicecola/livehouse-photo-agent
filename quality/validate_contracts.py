@@ -203,6 +203,8 @@ def validate_agent_turn_trace(doc: dict[str, Any], path: str) -> list[str]:
         errors.append(_err(path, "backend must be non-empty string"))
     if "rule_id" in doc and doc["rule_id"] is not None and not isinstance(doc["rule_id"], str):
         errors.append(_err(path, "rule_id must be string or null"))
+    if "run_id" in doc and doc["run_id"] is not None and not isinstance(doc["run_id"], str):
+        errors.append(_err(path, "run_id must be string or null"))
     rounds = doc.get("rounds_used")
     if "rounds_used" in doc and not (
         isinstance(rounds, int) and not isinstance(rounds, bool) and rounds >= 0
@@ -211,10 +213,31 @@ def validate_agent_turn_trace(doc: dict[str, Any], path: str) -> list[str]:
     for key in ("grounding_ok", "parse_fail", "json_leak", "parse_repaired"):
         if key in doc and doc[key] is not None and not isinstance(doc[key], bool):
             errors.append(_err(path, f"{key} must be bool or null"))
+    if "rewrite_mode" in doc and doc["rewrite_mode"] is not None:
+        if doc["rewrite_mode"] not in ("none", "strip", "template"):
+            errors.append(_err(path, "rewrite_mode must be none|strip|template"))
     matches = doc.get("guardrail_matches")
     if matches is not None:
         if not isinstance(matches, list) or any(not isinstance(x, str) for x in matches):
             errors.append(_err(path, "guardrail_matches must be array of strings"))
+    spans = doc.get("tool_spans")
+    if spans is not None and not isinstance(spans, list):
+        errors.append(_err(path, "tool_spans must be array"))
+    return errors
+
+
+def validate_agent_final_answer(doc: dict[str, Any], path: str) -> list[str]:
+    errors = _require(doc, ["schema_version", "summary", "files", "actions", "ok"], path)
+    if doc.get("schema_version") != "agent_final_answer.v1":
+        errors.append(_err(path, "schema_version must be agent_final_answer.v1"))
+    if "summary" in doc and not isinstance(doc.get("summary"), str):
+        errors.append(_err(path, "summary must be string"))
+    if "files" in doc and not isinstance(doc.get("files"), list):
+        errors.append(_err(path, "files must be array"))
+    if "actions" in doc and not isinstance(doc.get("actions"), list):
+        errors.append(_err(path, "actions must be array"))
+    if "ok" in doc and not isinstance(doc.get("ok"), bool):
+        errors.append(_err(path, "ok must be bool"))
     return errors
 
 
@@ -312,6 +335,7 @@ _VALIDATORS = {
     "agent_chat_case.v1": validate_agent_chat_case,
     "agent_rating.v1": validate_agent_rating,
     "agent_turn_trace.v1": validate_agent_turn_trace,
+    "agent_final_answer.v1": validate_agent_final_answer,
 }
 
 

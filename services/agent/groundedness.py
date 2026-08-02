@@ -88,16 +88,37 @@ def collect_allowed_files(
     return allowed
 
 
+_FILE_BEARING_TOOLS = frozenset(
+    {
+        "gallery_search",
+        "gallery_select",
+        "explain_photo",
+        "export_selected",
+        "recommend_film_for_photo",
+        "apply_film_vibe",
+    }
+)
+
+
 def should_enforce_groundedness(
     tool_calls: Iterable[dict[str, Any]] | None,
     *,
     working_memory: Optional[dict[str, Any]] = None,
 ) -> bool:
-    """True when this turn (or WM) has a file-bearing signal to ground against."""
-    if any(True for _ in (tool_calls or [])):
+    """True when there is an allowed-file set to ground against.
+
+    Avoids over-refusal after non-file tools (e.g. gallery_stats) with empty allowed.
+    """
+    allowed = collect_allowed_files(tool_calls, working_memory=working_memory)
+    if allowed:
         return True
-    files = (working_memory or {}).get("last_files") or []
-    return bool(files)
+    for tc in tool_calls or []:
+        if not isinstance(tc, dict):
+            continue
+        if str(tc.get("tool") or "") in _FILE_BEARING_TOOLS:
+            # Search/select ran but returned no files — still block invented cites.
+            return True
+    return False
 
 
 def check_groundedness(

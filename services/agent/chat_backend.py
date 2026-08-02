@@ -37,8 +37,10 @@ from inference.providers.vllm import chat_completions_url, resolve_vllm_base_url
 from services.agent.conversation import ChatFn, StreamChatFn
 from services.agent.tool_protocol import (  # noqa: F401 — re-export for callers/tests
     content_from_assistant_message,
+    native_tools_enabled,
     normalize_native_tool_calls,
 )
+from services.agent.vision_context import flatten_text_content, ollama_images_from_content
 
 logger = logging.getLogger(__name__)
 
@@ -46,24 +48,29 @@ DEFAULT_CHAT_NUM_PREDICT = 512
 DEFAULT_CHAT_TEMPERATURE = 0.3
 DEFAULT_CHAT_TIMEOUT = 90
 
-# Opt-in: attach OpenAI-shaped ``tools`` to chat requests (Ollama / vLLM native FC).
+# Env: 1/on | 0/off | auto (default — openai/vllm on, ollama off).
 NATIVE_TOOLS_ENV = "LIVEHOUSE_AGENT_NATIVE_TOOLS"
-
-
-def native_tools_enabled(explicit: Optional[bool] = None) -> bool:
-    """Return whether native ``tools=[...]`` should be attached to chat requests.
-
-    ``explicit`` wins when not ``None``; otherwise read ``LIVEHOUSE_AGENT_NATIVE_TOOLS``.
-    """
-    if explicit is not None:
-        return bool(explicit)
-    raw = (os.environ.get(NATIVE_TOOLS_ENV) or "").strip().lower()
-    return raw in ("1", "true", "yes", "on")
 
 
 def _http_timeout(timeout: int) -> tuple[int, int]:
     t = max(5, int(timeout))
     return (min(30, max(5, t // 4)), t)
+
+
+def _normalize_ollama_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Flatten multimodal content parts into Ollama ``content`` + ``images``."""
+    out: list[dict[str, Any]] = []
+    for m in messages or []:
+        if not isinstance(m, dict):
+            continue
+        row = {"role": m.get("role") or "user", "content": flatten_text_content(m.get("content"))}
+        if m.get("name"):
+            row["name"] = m["name"]
+        images = ollama_images_from_content(m.get("content"))
+        if images:
+            row["images"] = images
+        out.append(row)
+    return out
 
 
 def _ollama_chat_fn(
@@ -77,10 +84,10 @@ def _ollama_chat_fn(
 ) -> ChatFn:
     url = f"{endpoint.rstrip('/')}/api/chat"
 
-    def _chat(messages: list[dict[str, str]]) -> str:
+    def _chat(messages: list[dict[str, Any]]) -> str:
         payload: dict[str, Any] = {
             "model": model_name,
-            "messages": messages,
+            "messages": _normalize_ollama_messages(messages),
             "stream": False,
             "options": {"temperature": temperature, "num_predict": num_predict},
         }
@@ -109,7 +116,7 @@ def _openai_chat_fn(
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
 
-    def _chat(messages: list[dict[str, str]]) -> str:
+    def _chat(messages: list[dict[str, Any]]) -> str:
         payload: dict[str, Any] = {
             "model": model_name,
             "messages": messages,
@@ -142,18 +149,19 @@ def build_chat_fn(
 ) -> ChatFn:
     """Build a ``ChatFn`` from a model-section dict. Raises ``ValueError`` for ``mock``.
 
-    When native tools are enabled (``native_tools=True`` or ``LIVEHOUSE_AGENT_NATIVE_TOOLS``)
-    and ``tools`` is a non-empty OpenAI-shaped list (from ``SkillRegistry.tool_specs()``),
-    the request includes ``tools``. Native ``tool_calls`` are bridged to text-protocol JSON.
+    Native tools: ``LIVEHOUSE_AGENT_NATIVE_TOOLS=auto`` (default) enables for
+    openai/vllm, keeps ollama on text protocol unless explicitly ``1``.
     """
     provider = str(model_config.get("provider", "ollama") or "ollama").strip().lower()
     model_name = str(model_name or model_config.get("model_name") or "llava").strip()
     eff_timeout = int(timeout if timeout is not None else min(int(model_config.get("timeout", 120) or 120), DEFAULT_CHAT_TIMEOUT))
-    use_tools = list(tools) if (native_tools_enabled(native_tools) and tools) else None
-    if native_tools_enabled(native_tools) and not tools:
+    use_native = native_tools_enabled(native_tools, provider=provider)
+    use_tools = list(tools) if (use_native and tools) else None
+    if use_native and not tools:
         logger.warning(
-            "%s is set but no tools= were passed to build_chat_fn; falling back to text protocol",
+            "%s enabled for provider=%s but no tools= were passed; text protocol only",
             NATIVE_TOOLS_ENV,
+            provider,
         )
 
     if provider == "mock":

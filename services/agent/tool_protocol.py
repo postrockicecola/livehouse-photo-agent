@@ -2,6 +2,7 @@
 
 Covers:
 - text-protocol parse (``{"tool","args"}``)
+- multi native ``tool_calls`` → serial ``__multi__`` batch
 - broken-JSON intent sniff + one-shot repair
 - native OpenAI/Ollama ``tool_calls`` → text-protocol bridge
 
@@ -11,6 +12,7 @@ parse / repair / native bridge stay one exit.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Optional
 
@@ -20,6 +22,20 @@ REPAIR_NUDGE = (
     "Your previous reply was not valid tool JSON. "
     'Reply with ONLY a single JSON object {"tool":"<name>","args":{...}} '
     "or a plain natural-language answer with no JSON."
+)
+
+# Synthetic tool: args.calls = [{tool, args}, ...] — executed serially (or in
+# parallel when all are read-only; see conversation_graph.act).
+MULTI_TOOL = "__multi__"
+
+# Read-only skills safe to run concurrently inside a multi batch.
+READ_ONLY_TOOLS = frozenset(
+    {
+        "gallery_search",
+        "gallery_stats",
+        "explain_photo",
+        "list_preferences",
+    }
 )
 
 
@@ -131,17 +147,57 @@ def normalize_native_tool_calls(message: Mapping[str, Any]) -> list[dict[str, An
     return out
 
 
+def pack_tool_calls(calls: list[dict[str, Any]]) -> Optional[dict[str, Any]]:
+    """Pack one or many calls into the text-protocol shape (multi → ``__multi__``)."""
+    clean: list[dict[str, Any]] = []
+    for c in calls or []:
+        if not isinstance(c, dict):
+            continue
+        name = str(c.get("tool") or "").strip()
+        if not name or name == MULTI_TOOL:
+            continue
+        clean.append({"tool": name, "args": dict(c.get("args") or {})})
+    if not clean:
+        return None
+    if len(clean) == 1:
+        return clean[0]
+    return {"tool": MULTI_TOOL, "args": {"calls": clean}}
+
+
+def expand_tool_calls(call: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """Expand a pending call into a serial list (``__multi__`` → children)."""
+    if not call:
+        return []
+    tool = str(call.get("tool") or "")
+    args = dict(call.get("args") or {})
+    if tool != MULTI_TOOL:
+        return [{"tool": tool, "args": args}]
+    out: list[dict[str, Any]] = []
+    for sub in args.get("calls") or []:
+        if not isinstance(sub, dict):
+            continue
+        name = str(sub.get("tool") or "").strip()
+        if not name or name == MULTI_TOOL:
+            continue
+        out.append({"tool": name, "args": dict(sub.get("args") or {})})
+    return out
+
+
+def all_read_only(calls: list[dict[str, Any]]) -> bool:
+    if not calls:
+        return False
+    return all(str(c.get("tool") or "") in READ_ONLY_TOOLS for c in calls)
+
+
 def content_from_assistant_message(message: Mapping[str, Any]) -> str:
     """Bridge native ``tool_calls`` into the text-protocol JSON the agent already parses.
 
-    Priority: first native tool_call → ``{"tool","args"}`` string; else ``content``.
+    One call → ``{"tool","args"}``; several → ``{"tool":"__multi__","args":{"calls":[...]}}``.
     """
     calls = normalize_native_tool_calls(message)
-    if calls:
-        return json.dumps(
-            {"tool": calls[0]["tool"], "args": calls[0].get("args") or {}},
-            ensure_ascii=False,
-        )
+    packed = pack_tool_calls(calls)
+    if packed is not None:
+        return json.dumps(packed, ensure_ascii=False)
     content = message.get("content")
     if isinstance(content, list):  # some servers return content parts
         return "".join(str(p.get("text", "")) for p in content if isinstance(p, dict)).strip()
@@ -156,4 +212,38 @@ def resolve_tool_decision(
     """Single exit used by decide: parse → optional repair → ToolDecision."""
     call, effective, repaired = parse_tool_call_with_repair(chat_fn, messages, raw)
     source = "repair" if repaired else "text"
+    if call is not None and call.get("tool") == MULTI_TOOL:
+        source = "native" if not repaired else "repair"
     return ToolDecision(call=call, raw=effective, repaired=repaired, source=source)
+
+
+def native_tools_preference(*, provider: str | None = None) -> str:
+    """Return ``on`` | ``off`` | ``auto`` from ``LIVEHOUSE_AGENT_NATIVE_TOOLS``."""
+    raw = (os.environ.get("LIVEHOUSE_AGENT_NATIVE_TOOLS") or "auto").strip().lower()
+    if raw in ("1", "true", "yes", "on"):
+        return "on"
+    if raw in ("0", "false", "no", "off"):
+        return "off"
+    return "auto"
+
+
+def native_tools_enabled(
+    explicit: Optional[bool] = None,
+    *,
+    provider: str | None = None,
+) -> bool:
+    """Whether to attach OpenAI-shaped ``tools`` on chat requests.
+
+    - ``explicit`` wins when not ``None``
+    - env ``1/true`` → on; ``0/false`` → off
+    - default / ``auto``: on for ``openai`` / ``vllm``, off for ``ollama`` (weak local)
+    """
+    if explicit is not None:
+        return bool(explicit)
+    pref = native_tools_preference()
+    if pref == "on":
+        return True
+    if pref == "off":
+        return False
+    prov = (provider or "").strip().lower()
+    return prov in ("openai", "vllm")

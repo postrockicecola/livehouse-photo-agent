@@ -93,7 +93,9 @@ def test_native_bridge_roundtrip_single_call() -> None:
     }
 
 
-def test_native_bridge_prefers_first_tool_call() -> None:
+def test_native_bridge_packs_multiple_tool_calls() -> None:
+    from services.agent.tool_protocol import MULTI_TOOL, expand_tool_calls
+
     msg = {
         "tool_calls": [
             {"function": {"name": "gallery_search", "arguments": "{}"}},
@@ -103,4 +105,8 @@ def test_native_bridge_prefers_first_tool_call() -> None:
     bridged = content_from_assistant_message(msg)
     parsed = _parse_tool_call(bridged)
     assert parsed is not None
-    assert parsed["tool"] == "gallery_search"
+    assert parsed["tool"] == MULTI_TOOL
+    assert [c["tool"] for c in expand_tool_calls(parsed)] == [
+        "gallery_search",
+        "gallery_select",
+    ]
