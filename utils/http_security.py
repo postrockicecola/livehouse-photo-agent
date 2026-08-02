@@ -5,8 +5,6 @@ import ipaddress
 import logging
 import os
 import socket
-import threading
-import time
 from pathlib import Path
 from typing import Iterable, Optional, Sequence
 from urllib.parse import urlparse
@@ -220,36 +218,6 @@ def assert_public_http_url(url: str) -> str:
         ):
             raise ValueError("url resolves to a non-public address")
     return url
-
-
-class _SlidingWindowLimiter:
-    def __init__(self, *, max_events: int, window_s: float) -> None:
-        self._max = max_events
-        self._window = window_s
-        self._lock = threading.Lock()
-        self._events: dict[str, list[float]] = {}
-
-    def allow(self, key: str) -> bool:
-        now = time.monotonic()
-        with self._lock:
-            cutoff = now - self._window
-            kept = [t for t in self._events.get(key, []) if t >= cutoff]
-            if len(kept) >= self._max:
-                self._events[key] = kept
-                return False
-            kept.append(now)
-            self._events[key] = kept
-            return True
-
-
-_auth_limiter = _SlidingWindowLimiter(max_events=20, window_s=60.0)
-
-
-def check_auth_rate_limit(request: Request, *, username: str = "") -> None:
-    host = request.client.host if request.client else "unknown"
-    key = f"{host}|{username.strip().lower()}"
-    if not _auth_limiter.allow(key):
-        raise HTTPException(status_code=429, detail="too many auth attempts; try again later")
 
 
 def client_safe_error(exc: BaseException, *, public: str = "internal server error") -> str:

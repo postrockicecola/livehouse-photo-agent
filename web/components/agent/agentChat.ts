@@ -19,8 +19,6 @@ export type AgentGuardrailEvent = {
   detail?: Record<string, unknown>;
 };
 
-import { authHeader } from "@/components/agent/agentAuth";
-
 export type AgentChatResponse = {
   reply: string;
   tool_calls: AgentToolCall[];
@@ -38,7 +36,63 @@ export type AgentChatRequest = {
   previews_dir?: string | null;
   reset?: boolean;
   mode?: AgentMode;
+  /** Open preview / focused photo basename for per-photo film recommend. */
+  focus_file?: string | null;
+  /** Current liked/selected basenames (used when exactly one). */
+  selected_files?: string[] | null;
 };
+
+const FOCUS_FILE_KEY = "luma.gallery_focus_file";
+const SELECTED_FILES_KEY = "luma.gallery_selected_files";
+
+/** Read Gallery focus written by the gallery page (sessionStorage). */
+export function readGalleryFocusContext(): {
+  focus_file?: string;
+  selected_files?: string[];
+} {
+  if (typeof window === "undefined") return {};
+  try {
+    const focus = (sessionStorage.getItem(FOCUS_FILE_KEY) || "").trim();
+    const raw = sessionStorage.getItem(SELECTED_FILES_KEY) || "";
+    let selected: string[] | undefined;
+    if (raw) {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        selected = parsed.map((x) => String(x || "").trim()).filter(Boolean).slice(0, 50);
+      }
+    }
+    return {
+      ...(focus ? { focus_file: focus } : {}),
+      ...(selected?.length ? { selected_files: selected } : {}),
+    };
+  } catch {
+    return {};
+  }
+}
+
+export function writeGalleryFocusContext(opts: {
+  focusFile?: string | null;
+  selectedFiles?: string[] | null;
+}): void {
+  if (typeof window === "undefined") return;
+  try {
+    if ("focusFile" in opts) {
+      const v = String(opts.focusFile || "").trim();
+      if (v) sessionStorage.setItem(FOCUS_FILE_KEY, v);
+      else sessionStorage.removeItem(FOCUS_FILE_KEY);
+    }
+    if ("selectedFiles" in opts) {
+      const list = (opts.selectedFiles || [])
+        .map((x) => String(x || "").trim())
+        .filter(Boolean)
+        .slice(0, 50);
+      if (list.length) sessionStorage.setItem(SELECTED_FILES_KEY, JSON.stringify(list));
+      else sessionStorage.removeItem(SELECTED_FILES_KEY);
+    }
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
 
 export async function sendAgentChat(
   apiBase: string,
@@ -46,7 +100,7 @@ export async function sendAgentChat(
 ): Promise<AgentChatResponse> {
   const res = await fetch(`${apiBase}/api/agent/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeader() },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
     cache: "no-store",
   });
@@ -94,7 +148,7 @@ export async function streamAgentChat(
 ): Promise<{ receivedToken: boolean }> {
   const res = await fetch(`${apiBase}/api/agent/chat/stream`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream", ...authHeader() },
+    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
     body: JSON.stringify(body),
     cache: "no-store",
   });
@@ -197,7 +251,7 @@ export async function fetchAgentHistory(
   try {
     const res = await fetch(
       `${apiBase}/api/agent/history?session_id=${encodeURIComponent(sessionId)}&mode=${mode}`,
-      { headers: { ...authHeader() }, cache: "no-store" },
+      { cache: "no-store" },
     );
     if (!res.ok) return [];
     const data = (await res.json()) as {

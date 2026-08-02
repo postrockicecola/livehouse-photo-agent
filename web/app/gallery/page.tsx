@@ -48,6 +48,7 @@ import {
   type SessionVibeState,
 } from "@/lib/sessionVibe";
 import { formatApiErrorDetail } from "@/lib/formatApiError";
+import { writeGalleryFocusContext } from "@/components/agent/agentChat";
 import { GALLERY_MASONRY_MAX_CLASS } from "@/lib/galleryLayout";
 import {
   bootstrapGallery,
@@ -873,6 +874,20 @@ export default function HomePage() {
     );
   }, [items, selectedKeys]);
 
+  // Share Gallery focus with ChatDock (per-photo film recommend).
+  useEffect(() => {
+    const focusName = modal
+      ? catalogBasenameForExport(modal) || String(modal.file || "").trim() || null
+      : null;
+    const selectedNames = selectedItems
+      .map((it) => catalogBasenameForExport(it) || String(it.file || "").trim())
+      .filter(Boolean);
+    writeGalleryFocusContext({
+      focusFile: focusName,
+      selectedFiles: selectedNames,
+    });
+  }, [modal, selectedItems]);
+
   // Lift the global Chat FAB above the selection rail so they don't collide.
   useEffect(() => {
     const root = document.documentElement;
@@ -1451,6 +1466,9 @@ export default function HomePage() {
           sessionFilmVariant={
             sessionVibeMatched(sessionVibe) ? sessionVibe?.film_variant ?? null : null
           }
+          sessionFilmIntensity={
+            sessionVibeMatched(sessionVibe) ? sessionVibe?.intensity ?? null : null
+          }
           useSessionVibe={useSessionVibeForExport && sessionVibeMatched(sessionVibe)}
         />
       ) : null}
@@ -1464,6 +1482,9 @@ export default function HomePage() {
           onClose={() => setAgentPreviewItems(null)}
           sessionFilmVariant={
             agentPreviewVariant === "vibe" ? sessionVibe?.film_variant ?? null : null
+          }
+          sessionFilmIntensity={
+            agentPreviewVariant === "vibe" ? sessionVibe?.intensity ?? null : null
           }
           useSessionVibe={
             agentPreviewVariant === "vibe" ? Boolean(sessionVibe?.film_variant) : false

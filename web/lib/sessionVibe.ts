@@ -5,6 +5,8 @@ export type SessionVibeState = {
   reason_zh?: string;
   matched_by?: string;
   matched?: boolean;
+  /** Grade strength vs source (1.0 = full preset; >1 overshoots). */
+  intensity?: number;
   updated_unix?: number;
 };
 

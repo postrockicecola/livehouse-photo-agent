@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchAgentHistory,
   persistentSessionId,
+  readGalleryFocusContext,
   rotateSessionId,
   sendAgentChat,
   streamAgentChat,
@@ -12,14 +13,6 @@ import {
   type AgentMode,
   type AgentToolCall,
 } from "@/components/agent/agentChat";
-import {
-  fetchMe,
-  getStoredUser,
-  loginUser,
-  logoutUser,
-  registerUser,
-  type AuthUser,
-} from "@/components/agent/agentAuth";
 import {
   ShowcasePreviewModal,
   type ShowcasePreviewItem,
@@ -125,9 +118,18 @@ function isVibePreviewCall(c: AgentToolCall): boolean {
     c.metadata?.session_vibe && typeof c.metadata.session_vibe === "object"
       ? (c.metadata.session_vibe as Record<string, unknown>)
       : null;
-  if (sv?.film_variant) return ui === "reload_vibe" || c.tool === "apply_film_vibe";
+  if (sv?.film_variant) {
+    return (
+      ui === "reload_vibe" ||
+      c.tool === "apply_film_vibe" ||
+      c.tool === "recommend_film_for_photo"
+    );
+  }
   // Partial metadata: skill ran, session vibe can be fetched on click.
-  return c.tool === "apply_film_vibe" && ui === "reload_vibe";
+  return (
+    (c.tool === "apply_film_vibe" || c.tool === "recommend_film_for_photo") &&
+    ui === "reload_vibe"
+  );
 }
 
 function mentionsVibePreviewCta(text: string): boolean {
@@ -719,93 +721,6 @@ function GuardrailChip({ ev }: { ev: AgentGuardrailEvent }) {
   );
 }
 
-function AuthPanel({
-  onSubmit,
-  onClose,
-}: {
-  onSubmit: (kind: "login" | "register", username: string, password: string) => Promise<void>;
-  onClose: () => void;
-}) {
-  const [kind, setKind] = useState<"login" | "register">("login");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  const submit = useCallback(async () => {
-    if (busy) return;
-    setErr(null);
-    setBusy(true);
-    try {
-      await onSubmit(kind, username.trim(), password);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "操作失败");
-    } finally {
-      setBusy(false);
-    }
-  }, [busy, kind, username, password, onSubmit]);
-
-  return (
-    <div className="absolute inset-0 z-10 flex flex-col bg-[#0d0d0d]/98 p-4 backdrop-blur-sm">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-[13px] font-medium text-white/80">
-          {kind === "login" ? "登录" : "注册"}
-        </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-[3px] px-1.5 py-0.5 text-[14px] text-white/40 hover:text-white/70"
-          aria-label="关闭"
-        >
-          ×
-        </button>
-      </div>
-      <p className="mb-3 text-[11px] leading-relaxed text-white/35">
-        登录后对话记忆会按账号持久保存、跨设备与刷新恢复；匿名使用则仅在本浏览器会话内保留。
-      </p>
-      <div className="flex flex-col gap-2">
-        <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="用户名（3-32 位）"
-          autoComplete="username"
-          className="rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
-        />
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") void submit();
-          }}
-          type="password"
-          placeholder="密码（≥6 位）"
-          autoComplete={kind === "login" ? "current-password" : "new-password"}
-          className="rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
-        />
-        {err ? <p className="text-[11px] text-rose-300/85">{err}</p> : null}
-        <button
-          type="button"
-          disabled={busy || !username.trim() || !password}
-          onClick={() => void submit()}
-          className="mt-1 rounded-[5px] border border-white/[0.1] bg-white/[0.08] px-3 py-2 text-[13px] text-white/80 transition-colors hover:bg-white/[0.14] disabled:opacity-35"
-        >
-          {busy ? "提交中…" : kind === "login" ? "登录" : "注册并登录"}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setKind((k) => (k === "login" ? "register" : "login"));
-            setErr(null);
-          }}
-          className="text-[11px] text-white/40 hover:text-white/65"
-        >
-          {kind === "login" ? "没有账号？去注册" : "已有账号？去登录"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function ChatDock({
   apiBase,
   previewsDir,
@@ -835,8 +750,6 @@ export function ChatDock({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const mode: AgentMode = "gallery";
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authOpen, setAuthOpen] = useState(false);
   const [promptPhase, setPromptPhase] = useState<PromptPhase>(() =>
     promptStages ? readStoredPromptPhase() : "select",
   );
@@ -923,12 +836,6 @@ export function ChatDock({
     if (node) node.scrollTop = node.scrollHeight;
   }, [turns, open, sending]);
 
-  // Reflect stored session immediately, then validate the token against the server.
-  useEffect(() => {
-    setUser(getStoredUser());
-    void fetchMe(apiBase).then(setUser).catch(() => {});
-  }, [apiBase]);
-
   useEffect(() => {
     const prompt = initialPrompt?.trim();
     if (!prompt || consumedInitialPrompt.current) return;
@@ -938,9 +845,8 @@ export function ChatDock({
     setOpen(true);
   }, [initialPrompt]);
 
-  // Restore the persisted transcript when opening, switching mode, or auth changes.
-  // Merge carefully: a naive replace drops toolCalls and removes 「打开风格预览」 CTAs
-  // whenever fetchMe / login refreshes `user`.
+  // Restore the persisted transcript when opening or switching mode/context.
+  // Merge carefully: a naive replace drops toolCalls and removes 「打开风格预览」 CTAs.
   useEffect(() => {
     if (!open) return;
     const sid = persistentSessionId(context, mode);
@@ -961,7 +867,7 @@ export function ChatDock({
     return () => {
       cancelled = true;
     };
-  }, [open, mode, user, apiBase, context]);
+  }, [open, mode, apiBase, context]);
 
   // Mutate the trailing assistant turn (the one currently streaming) in place.
   const patchLastAssistant = useCallback(
@@ -991,11 +897,14 @@ export function ChatDock({
       ]);
       setSending(true);
 
+      const focusCtx = readGalleryFocusContext();
       const body = {
         session_id: sessionIdRef.current,
         message,
         mode,
         previews_dir: previewsDir ?? undefined,
+        focus_file: focusCtx.focus_file,
+        selected_files: focusCtx.selected_files,
       };
 
       try {
@@ -1113,23 +1022,6 @@ export function ChatDock({
       });
   }, [apiBase, context, mode, promptStages]);
 
-  const doAuth = useCallback(
-    async (kind: "login" | "register", username: string, password: string) => {
-      const u =
-        kind === "login"
-          ? await loginUser(apiBase, username, password)
-          : await registerUser(apiBase, username, password);
-      setUser(u);
-      setAuthOpen(false);
-    },
-    [apiBase],
-  );
-
-  const doLogout = useCallback(async () => {
-    await logoutUser(apiBase);
-    setUser(null);
-  }, [apiBase]);
-
   return (
     <>
     {showcasePreview ? (
@@ -1173,41 +1065,19 @@ export function ChatDock({
           </button>
 
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-white/[0.1] bg-[#0d0d0d]/95 shadow-2xl backdrop-blur-md">
-            {authOpen ? <AuthPanel onSubmit={doAuth} onClose={() => setAuthOpen(false)} /> : null}
             <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_10px_rgba(52,211,153,0.5)]" aria-hidden />
                 <span className="text-[12px] text-white/70">策展助手</span>
               </div>
-              <div className="flex items-center gap-1">
-                {user ? (
-                  <button
-                    type="button"
-                    onClick={() => void doLogout()}
-                    title={`已登录：${user.username}（点击退出）`}
-                    className="max-w-[92px] truncate rounded-[3px] px-1.5 py-0.5 text-[12px] text-emerald-300/70 hover:text-emerald-200"
-                  >
-                    {user.username}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setAuthOpen(true)}
-                    title="登录以持久保存对话"
-                    className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
-                  >
-                    登录
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={resetChat}
-                  title="清空对话"
-                  className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
-                >
-                  清空
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={resetChat}
+                title="清空对话"
+                className="rounded-[3px] px-1.5 py-0.5 text-[12px] text-white/35 hover:text-white/60"
+              >
+                清空
+              </button>
             </div>
 
             <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">

@@ -210,6 +210,66 @@
     "expect_select_after": false
   },
   {
+    "id": "film_recommend_best_for_photo",
+    "user": "修成最适合这张图的胶片感",
+    "expect_rule": "recommend_film_for_photo",
+    "expect_tool": "recommend_film_for_photo",
+    "expect_args": {
+      "prompt": "修成最适合这张图的胶片感"
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "film_recommend_auto",
+    "user": "帮我自动推荐胶片风格",
+    "expect_rule": "recommend_film_for_photo",
+    "expect_tool": "recommend_film_for_photo",
+    "expect_args": {
+      "prompt": "帮我自动推荐胶片风格"
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "film_recommend_what_is_best_typo",
+    "user": "最适合这张茹的胶片风格是什么",
+    "expect_rule": "recommend_film_for_photo",
+    "expect_tool": "recommend_film_for_photo",
+    "expect_args": {
+      "prompt": "最适合这张茹的胶片风格是什么"
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "film_recommend_what_style_question",
+    "user": "这张图最适合什么胶片风格",
+    "expect_rule": "recommend_film_for_photo",
+    "expect_tool": "recommend_film_for_photo",
+    "expect_args": {
+      "prompt": "这张图最适合什么胶片风格"
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "film_vibe_color_more_intense",
+    "user": "颜色再浓烈一些",
+    "expect_rule": "apply_film_vibe",
+    "expect_tool": "apply_film_vibe",
+    "expect_args": {
+      "prompt": "颜色再浓烈一些"
+    },
+    "expect_select_after": false
+  },
+  {
+    "id": "film_vibe_sat_pull",
+    "user": "饱和度拉满",
+    "expect_rule": "apply_film_vibe",
+    "expect_tool": "apply_film_vibe",
+    "expect_args": {
+      "prompt": "饱和度拉满"
+    },
+    "expect_select_after": false
+  },
+  {
     "id": "shortlist_plus_panorama_falls_through",
     "user": "选出20张，但多给我一些全景镜头",
     "expect_rule": null

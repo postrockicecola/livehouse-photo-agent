@@ -5,10 +5,9 @@ to a session's gallery data (read-only skills) with safety guardrails. Tool call
 guardrail triggers are returned alongside the reply so the UI can render the plumbing
 (which tools ran, with what args, and whether a guardrail fired) — the point of the demo.
 
-Conversation memory is **persisted** per owner in :mod:`services.agent.store`
-(``owner = user:<id>`` when logged in, else ``anon:<session_id>``), so history survives a
-server restart and is isolated per user. The chat model + skills are built per request so
-new analyses and the active previews dir are always reflected.
+Conversation memory is **persisted** per browser session in :mod:`services.agent.store`
+(``owner = anon:<session_id>``). The chat model + skills are built per request so new
+analyses and the active previews dir are always reflected.
 """
 from __future__ import annotations
 
@@ -17,11 +16,10 @@ import logging
 import os
 from typing import Any, Optional
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from api.auth_routes import resolve_user
 from services.agent import store
 from services.agent.context_governance import working_memory_prompt_block
 from services.agent.conversation import ConversationalAgent, ConversationMemory
@@ -43,6 +41,9 @@ class ChatRequest(BaseModel):
     reset: bool = False
     # Gallery session copilot (only supported mode).
     mode: str = Field(default="gallery")
+    # Optional UI focus for per-photo skills (recommend_film_for_photo).
+    focus_file: Optional[str] = Field(default=None, max_length=500)
+    selected_files: Optional[list[str]] = Field(default=None, max_length=200)
 
 
 class ChatResponse(BaseModel):
@@ -112,11 +113,16 @@ SEMANTIC_HINTS = (
     "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
     "- 技术高构图一般 → mark_score_gap\n"
     "- 记住我的偏好 / 以后少选剪影 → remember_preference(key, value)\n"
-    "- 复古胶片 / Cinestill / 黑白纪实 / 修成…风格看看 → "
+    "- 最适合这张 / 自动推荐胶片感 / 帮我选胶片 → "
+    '{"tool":"recommend_film_for_photo","args":{"prompt":"<paste the user message>"}} '
+    "(uses analysis tags for the focus photo; pass file/focus_file when known. "
+    "Code also routes this intent. UI 「打开风格预览」.)\n"
+    "- 复古胶片 / Cinestill / 黑白纪实 / 修成…风格看看 / 颜色再浓烈一些 / 胶片感更狠 → "
     '{"tool":"apply_film_vibe","args":{"prompt":"<paste the user message>"}} '
     "(MUST call this tool — never claim the style was applied from prose alone. "
-    "UI shows 「打开风格预览」; say 已应用风格，请点下方「打开风格预览」 only after success. "
-    "NEVER dump Markdown image lists or enumerate dozens of filenames.)\n"
+    "Relative intensify keeps the current film_variant and raises intensity. "
+    "UI shows 「打开风格预览」; final answer = tool output only (1–2 short Chinese sentences). "
+    "NEVER dump Markdown image lists or enumerate filenames.)\n"
     "- 把刚才选出的 / 这些 / 那批 修成…风格 → if WORKING MEMORY has last_files: "
     "gallery_select(files=last_files) then apply_film_vibe(prompt=…). "
     "Do NOT ask for filenames when last_files is present. Final answer 1–2 short sentences.\n"
@@ -161,7 +167,35 @@ def _load_prefs(owner: str) -> dict[str, str]:
         conn.close()
 
 
-def _augment_system_prompt(base: str, owner: str, working: Optional[dict[str, Any]] = None) -> str:
+def _turn_context_from_request(req: ChatRequest) -> dict[str, Any]:
+    ctx: dict[str, Any] = {}
+    focus = (req.focus_file or "").strip()
+    if focus:
+        ctx["focus_file"] = focus
+    selected = [str(x).strip() for x in (req.selected_files or []) if str(x or "").strip()]
+    if selected:
+        ctx["selected_files"] = selected[:50]
+    return ctx
+
+
+def _focus_prompt_block(turn_context: dict[str, Any]) -> str:
+    if not turn_context:
+        return ""
+    lines = ["GALLERY FOCUS (from UI — prefer these for recommend_film_for_photo):"]
+    if turn_context.get("focus_file"):
+        lines.append(f"- focus_file: {turn_context['focus_file']}")
+    sel = turn_context.get("selected_files") or []
+    if sel:
+        lines.append(f"- selected_files: {', '.join(str(x) for x in sel[:12])}")
+    return "\n".join(lines)
+
+
+def _augment_system_prompt(
+    base: str,
+    owner: str,
+    working: Optional[dict[str, Any]] = None,
+    turn_context: Optional[dict[str, Any]] = None,
+) -> str:
     parts = [base]
     prefs = _load_prefs(owner)
     pref_block = store.preferences_prompt_block(prefs)
@@ -170,6 +204,9 @@ def _augment_system_prompt(base: str, owner: str, working: Optional[dict[str, An
     wm_block = working_memory_prompt_block(working or {})
     if wm_block:
         parts.append(wm_block)
+    focus_block = _focus_prompt_block(turn_context or {})
+    if focus_block:
+        parts.append(focus_block)
     return "\n\n".join(parts)
 
 
@@ -323,14 +360,12 @@ def _sse(obj: dict[str, Any]) -> str:
 
 
 @router.post("/api/agent/chat/stream")
-def agent_chat_stream(
-    req: ChatRequest, authorization: Optional[str] = Header(default=None)
-) -> StreamingResponse:
+def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
     """Server-Sent Events variant of :func:`agent_chat`.
 
     Streams ``tool_call`` events as skills run and ``token`` events as the final
     answer is generated, then a terminal ``done`` (with guardrail events + base_dir)
-    or ``error`` event. History is loaded from / persisted to the per-owner store.
+    or ``error`` event. History is loaded from / persisted to the per-session store.
     """
     base_dir = _resolve_base_dir(req.previews_dir)
     headers = {
@@ -339,8 +374,7 @@ def agent_chat_stream(
         "Connection": "keep-alive",
     }
 
-    user = resolve_user(authorization)
-    owner = store.owner_key(user, req.session_id)
+    owner = store.owner_key(None, req.session_id)
     registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
     chat_fn, err = _build_chat_fn(base_dir, tools=registry.tool_specs())
     if err is not None:
@@ -350,7 +384,8 @@ def agent_chat_stream(
 
     # Load history + working memory first so last_files can be injected into the prompt.
     conv_id, memory, working = _load_conversation(owner, req, base_system)
-    system_prompt = _augment_system_prompt(base_system, owner, working)
+    turn_context = _turn_context_from_request(req)
+    system_prompt = _augment_system_prompt(base_system, owner, working, turn_context)
     memory.system_prompt = system_prompt
     stream_fn = _build_stream_fn(base_dir)
     events: list[GuardrailEvent] = []
@@ -359,6 +394,7 @@ def agent_chat_stream(
         chat_fn, memory=memory, skills=registry, guardrails=guardrails,
         wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
         working_memory=working,
+        turn_context=turn_context,
     )
 
     def _gen():
@@ -378,7 +414,6 @@ def agent_chat_stream(
                         **ev,
                         "base_dir": base_dir,
                         "memory_turns": turns,
-                        "user": user,
                         "trace": tr,
                         "guardrail_events": [
                             {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
@@ -394,18 +429,18 @@ def agent_chat_stream(
 
 
 @router.post("/api/agent/chat", response_model=ChatResponse)
-def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=None)) -> ChatResponse:
+def agent_chat(req: ChatRequest) -> ChatResponse:
     base_dir = _resolve_base_dir(req.previews_dir)
 
-    user = resolve_user(authorization)
-    owner = store.owner_key(user, req.session_id)
+    owner = store.owner_key(None, req.session_id)
     registry, base_system = _build_registry(req.mode, req.session_id, base_dir, owner=owner)
     chat_fn, err = _build_chat_fn(base_dir, tools=registry.tool_specs())
     if err is not None:
         return ChatResponse(reply="", base_dir=base_dir, error=err)
 
     conv_id, memory, working = _load_conversation(owner, req, base_system)
-    system_prompt = _augment_system_prompt(base_system, owner, working)
+    turn_context = _turn_context_from_request(req)
+    system_prompt = _augment_system_prompt(base_system, owner, working, turn_context)
     memory.system_prompt = system_prompt
     events: list[GuardrailEvent] = []
     guardrails = Guardrails(on_event=events.append)
@@ -415,6 +450,7 @@ def agent_chat(req: ChatRequest, authorization: Optional[str] = Header(default=N
         chat_fn, memory=memory, skills=registry, guardrails=guardrails,
         wrap_tool_output=False, max_tool_rounds=_max_rounds(req.mode),
         working_memory=working,
+        turn_context=turn_context,
     )
 
     try:
@@ -467,18 +503,13 @@ def _tool_calls_by_assistant_index(events: list[dict[str, Any]]) -> list[list[di
 def agent_history(
     session_id: str,
     mode: str = "gallery",
-    authorization: Optional[str] = Header(default=None),
 ) -> dict[str, Any]:
-    """Return the persisted user/assistant transcript for this owner/session/mode.
-
-    Lets the UI restore a conversation after a reload — the visible proof that memory
-    is durable and per-user (a different token sees a different transcript).
+    """Return the persisted user/assistant transcript for this browser session/mode.
 
     Assistant rows include ``tool_calls`` reconstructed from persisted done events so
     ChatDock CTAs (e.g. 「打开风格预览」) survive hydrate / reload.
     """
-    user = resolve_user(authorization)
-    owner = store.owner_key(user, session_id)
+    owner = store.owner_key(None, session_id)
     conn = store.store_connect()
     try:
         conv_id = store.get_or_create_conversation(conn, owner, session_id, mode)
@@ -509,11 +540,9 @@ def agent_trace(
     session_id: str,
     mode: str = "gallery",
     limit: int = 100,
-    authorization: Optional[str] = Header(default=None),
 ) -> dict[str, Any]:
     """Replay tool-call / done events for this conversation (step-level observability)."""
-    user = resolve_user(authorization)
-    owner = store.owner_key(user, session_id)
+    owner = store.owner_key(None, session_id)
     conn = store.store_connect()
     try:
         conv_id = store.get_or_create_conversation(conn, owner, session_id, mode)

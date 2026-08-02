@@ -29,6 +29,11 @@ Skills (product tools)
   services/agent/skills/base.py
   services/agent/skills/__init__.py
 
+Film recommend (P0 thin wedge — NOT a second orchestrator)
+  services/film_recommend_service.py   analysis row → closed film_* + reason
+  gallery skill recommend_film_for_photo  (intent: 最适合这张 / 自动推荐胶片)
+  apply_film_vibe stays for named styles (复古胶片 / Cinestill)
+
 API / UI
   api/agent_routes.py                  /api/agent/chat · stream · trace
   api/auth_routes.py                   conversation scoping

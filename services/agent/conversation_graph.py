@@ -79,6 +79,7 @@ def compile_chat_turn_graph(
     emit: Optional[TurnHook] = None,
     no_answer_fallback: str,
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
+    merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
 ):
     """Compile the decide→act→answer turn graph (closures bind one agent instance)."""
     from langgraph.graph import END, START, StateGraph
@@ -163,6 +164,11 @@ def compile_chat_turn_graph(
         call = state.get("pending_call") or {}
         tool = str(call.get("tool") or "")
         args = dict(call.get("args") or {})
+        if merge_tool_args is not None:
+            try:
+                args = dict(merge_tool_args(tool, args) or args)
+            except Exception:
+                logger.exception("merge_tool_args failed; using raw args")
         # assistant(tool-call) before dispatch → next decide sees a causal chain.
         record_tool_decision(tool, args)
         result = skills.dispatch(tool, args)
@@ -311,6 +317,7 @@ def run_chat_turn(
     emit: Optional[TurnHook],
     no_answer_fallback: str,
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
+    merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
     defer_answer: bool = False,
 ) -> ChatTurnState:
     app = compile_chat_turn_graph(
@@ -330,6 +337,7 @@ def run_chat_turn(
         emit=emit,
         no_answer_fallback=no_answer_fallback,
         looks_like_tool_intent=looks_like_tool_intent,
+        merge_tool_args=merge_tool_args,
     )
     init = _initial_chat_state(
         user_text=user_text,
@@ -360,6 +368,7 @@ def iter_chat_turn_updates(
     emit: Optional[TurnHook],
     no_answer_fallback: str,
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
+    merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
     defer_answer: bool = True,
 ):
     """Yield ``(node_name, partial_state)`` as the chat subgraph runs (for SSE)."""
@@ -380,6 +389,7 @@ def iter_chat_turn_updates(
         emit=emit,
         no_answer_fallback=no_answer_fallback,
         looks_like_tool_intent=looks_like_tool_intent,
+        merge_tool_args=merge_tool_args,
     )
     init = _initial_chat_state(
         user_text=user_text,

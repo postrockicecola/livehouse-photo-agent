@@ -16,7 +16,6 @@ export async function proxyAgentApi(req: NextRequest, pathSuffix: string): Promi
     headers: {
       "content-type": req.headers.get("content-type") ?? "application/json",
       accept: req.headers.get("accept") ?? "application/json",
-      authorization: req.headers.get("authorization") ?? "",
     },
   };
   if (req.method !== "GET" && req.method !== "HEAD") {

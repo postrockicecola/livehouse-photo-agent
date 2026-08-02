@@ -91,6 +91,41 @@ class VibeFilmPolicyTests(unittest.TestCase):
         )
         self.assertEqual(v, "film_black_mist")
 
+    def test_color_intensify_needs_prior_without_session(self):
+        d = resolve_vibe_from_prompt("颜色再浓烈一些")
+        self.assertFalse(d.matched)
+        self.assertEqual(d.matched_by, "rules:intensity_needs_prior")
+        self.assertNotEqual(d.film_variant, "film_spain_passion")
+
+    def test_relative_intensify_keeps_prior_variant(self):
+        prior = {
+            "film_variant": "film_cold_v2",
+            "label_zh": "暖色 · 浪漫复古",
+            "matched": True,
+            "intensity": 1.0,
+        }
+        d = resolve_vibe_from_prompt("颜色再浓烈一些", prior_session=prior)
+        self.assertEqual(d.film_variant, "film_cold_v2")
+        self.assertEqual(d.matched_by, "rules:intensity_boost")
+        self.assertGreater(d.intensity, 1.0)
+        self.assertTrue(d.matched)
+
+    def test_relative_intensify_steps_up_on_repeat(self):
+        prior = {
+            "film_variant": "film_cold_v2",
+            "label_zh": "暖色 · 浪漫复古",
+            "matched": True,
+            "intensity": 1.2,
+        }
+        d = resolve_vibe_from_prompt("再浓一点", prior_session=prior)
+        self.assertEqual(d.film_variant, "film_cold_v2")
+        self.assertAlmostEqual(d.intensity, 1.35, places=2)
+
+    def test_intensity_keywords_from_prompt(self):
+        d = resolve_vibe_from_prompt("浪漫复古再浓烈一些")
+        self.assertEqual(d.film_variant, "film_cold_v2")
+        self.assertGreaterEqual(d.intensity, 1.2)
+
 
 if __name__ == "__main__":
     unittest.main()

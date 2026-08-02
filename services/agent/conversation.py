@@ -171,13 +171,17 @@ _FINAL_ANSWER_SYSTEM = (
     "results. Do not output JSON and do not mention tools. When metadata includes recipe / "
     "rationale / pick_reasons / why, briefly explain the selection criteria and 1–3 example "
     "photos with their why lines — do not invent scores. When SESSION CONTEXT lists user "
-    "preferences or last_files, honor them in wording and framing — still never invent photo data."
+    "preferences or last_files, honor them in wording and framing — still never invent photo data. "
+    "For apply_film_vibe / recommend_film_for_photo: reply in 1–2 short Chinese sentences from "
+    "metadata.reply_zh or output only — do NOT list filenames."
 )
 _FINAL_ANSWER_NUDGE = (
     "Using ONLY the tool results already shown above, answer my question now in plain, "
     "natural language. Prefer citing metadata.rationale and a few pick_reasons/why lines "
-    "when present. Do NOT output JSON and do NOT call any more tools."
+    "when present. For film-vibe tools, copy metadata.reply_zh (or output) and stop — "
+    "do not enumerate files. Do NOT output JSON and do NOT call any more tools."
 )
+_FILM_GRADE_TOOLS = frozenset({"apply_film_vibe", "recommend_film_for_photo"})
 _PREFS_SECTION_PREFIX = "LONG-TERM USER PREFERENCES"
 
 
@@ -221,6 +225,7 @@ class ConversationalAgent:
         max_tool_result_chars: int = DEFAULT_TOOL_RESULT_CHARS,
         turn_hook: Optional[TurnHook] = None,
         working_memory: Optional[dict[str, Any]] = None,
+        turn_context: Optional[dict[str, Any]] = None,
     ) -> None:
         self._chat = chat_fn
         self.memory = memory or ConversationMemory()
@@ -235,11 +240,31 @@ class ConversationalAgent:
         self._turn_hook = turn_hook
         # Working memory: last tool artifacts for the current dialogue (not durable prefs).
         self.working_memory: dict[str, Any] = dict(working_memory or {})
+        # Per-request UI focus (focus_file / selected_files) — not persisted.
+        self._turn_context: dict[str, Any] = dict(turn_context or {})
         self._events: list[dict[str, Any]] = []
         self.last_backend: str = "langgraph"
         self.last_trace: dict[str, Any] = {}
         self._turn_parse_fail: bool = False
         self._turn_parse_repaired: bool = False
+
+    def _merge_turn_context_args(self, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+        """Inject Gallery focus into film skills when the model/router omitted them."""
+        out = dict(args or {})
+        if tool not in ("recommend_film_for_photo", "apply_film_vibe"):
+            return out
+        focus = str(self._turn_context.get("focus_file") or "").strip()
+        if focus and not str(out.get("file") or "").strip() and not str(out.get("focus_file") or "").strip():
+            out["focus_file"] = focus
+        selected = self._turn_context.get("selected_files")
+        if isinstance(selected, list) and selected and not out.get("selected_files"):
+            out["selected_files"] = [str(x) for x in selected if str(x or "").strip()]
+        # Recent search/select shortlist — recommend_film_for_photo can pick the top file.
+        if tool == "recommend_film_for_photo" and not out.get("last_files"):
+            last = self.working_memory.get("last_files")
+            if isinstance(last, list) and last:
+                out["last_files"] = [str(x) for x in last if str(x or "").strip()]
+        return out
 
     def _reset_turn_state(self) -> None:
         self._events = []
@@ -328,6 +353,7 @@ class ConversationalAgent:
             "looks_like_tool_intent": looks_like_tool_intent,
             "emit": self._emit,
             "no_answer_fallback": _NO_ANSWER_FALLBACK,
+            "merge_tool_args": self._merge_turn_context_args,
         }
 
     def _imperative_requested(self) -> bool:
@@ -352,6 +378,7 @@ class ConversationalAgent:
     def _dispatch_call(self, tool: str, args: dict[str, Any], *, routed: str | None = None) -> dict[str, Any]:
         """Run one skill, update memory / working memory, emit ``tool_call``."""
         assert self._skills is not None
+        args = self._merge_turn_context_args(tool, args)
         # Causal chain: assistant(decision) lands before dispatch so a crash mid-tool
         # still leaves a decide-visible anchor for the next round.
         self._record_tool_decision(tool, args)
@@ -361,6 +388,11 @@ class ConversationalAgent:
         meta = dict(getattr(result, "metadata", None) or {})
         if routed:
             meta["routed"] = routed
+        if not result.ok and result.error:
+            meta.setdefault("error", result.error)
+            meta.setdefault("reply_zh", result.error)
+        elif result.ok and result.output and "reply_zh" not in meta:
+            meta["reply_zh"] = result.output
         tc = {
             "tool": tool,
             "args": args,
@@ -400,7 +432,9 @@ class ConversationalAgent:
         """Deterministic tools + one LLM prose summary (no tool-call generation)."""
         self.last_backend = f"routed:{match.rule_id}"
         tool_calls, observations = self._execute_route_match(match)
-        final = self._force_final_answer(user_text, observations)
+        # Film tools: always use skill Chinese text — never let the model invent a style.
+        direct = self._direct_film_grade_reply(tool_calls)
+        final = direct if direct else self._force_final_answer(user_text, observations)
         reply = self._finalize(final)
         self._done_event(reply, tool_calls, routed=match.rule_id)
         return TurnResult(
@@ -422,6 +456,13 @@ class ConversationalAgent:
         tool_calls, observations = self._execute_route_match(match)
         for tc in tool_calls:
             yield {"type": "tool_call", **tc}
+        direct = self._direct_film_grade_reply(tool_calls)
+        if direct:
+            reply = self._finalize(direct)
+            for piece in _chunk_text(reply):
+                yield {"type": "token", "text": piece}
+            yield self._done_event(reply, tool_calls, routed=match.rule_id)
+            return
         yield from self._stream_answer(
             self._build_final_answer_messages(user_text, observations), stream_fn, tool_calls
         )
@@ -488,23 +529,16 @@ class ConversationalAgent:
                     events=list(self._events),
                     trace=dict(self.last_trace),
                 )
-            key = f"{call['tool']}:{json.dumps(call['args'], sort_keys=True, ensure_ascii=False)}"
+            merged = self._merge_turn_context_args(call["tool"], call["args"])
+            key = f"{call['tool']}:{json.dumps(merged, sort_keys=True, ensure_ascii=False)}"
             if key in seen:
                 break
             seen.add(key)
-            self._record_tool_decision(call["tool"], call["args"])
-            result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
-            self._update_working_memory(call["tool"], call["args"], result)
-            self._record_tool_observation(call["tool"], result)
-            observations.append(f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}")
-            tc = {
-                "tool": call["tool"],
-                "args": call["args"],
-                "ok": result.ok,
-                "metadata": getattr(result, "metadata", None) or {},
-            }
+            tc = self._dispatch_call(call["tool"], merged)
             tool_calls.append(tc)
-            self._emit({"type": "tool_call", **tc})
+            observations.append(
+                f"{call['tool']} -> {json.dumps({'ok': tc['ok'], 'metadata': tc['metadata']}, ensure_ascii=False)}"
+            )
 
         if not tool_calls:
             final = self._chat(self.memory.messages())
@@ -613,6 +647,14 @@ class ConversationalAgent:
             yield self._done_event(reply, tool_calls)
             return
 
+        film_direct = self._direct_film_grade_reply(tool_calls)
+        if film_direct:
+            reply = self._finalize(film_direct)
+            for piece in _chunk_text(reply):
+                yield {"type": "token", "text": piece}
+            yield self._done_event(reply, tool_calls)
+            return
+
         messages = answer_messages or self.memory.messages()
         yield from self._stream_answer(messages, stream_fn, tool_calls)
 
@@ -631,25 +673,16 @@ class ConversationalAgent:
             if call is None:
                 direct_reply = raw
                 break
-            key = f"{call['tool']}:{json.dumps(call['args'], sort_keys=True, ensure_ascii=False)}"
+            merged = self._merge_turn_context_args(call["tool"], call["args"])
+            key = f"{call['tool']}:{json.dumps(merged, sort_keys=True, ensure_ascii=False)}"
             if key in seen:
                 break
             seen.add(key)
-            self._record_tool_decision(call["tool"], call["args"])
-            result = self._skills.dispatch(call["tool"], call["args"])  # type: ignore[union-attr]
-            self._update_working_memory(call["tool"], call["args"], result)
-            self._record_tool_observation(call["tool"], result)
-            observations.append(
-                f"{call['tool']} -> {json.dumps(result.to_observation(), ensure_ascii=False)}"
-            )
-            tc = {
-                "tool": call["tool"],
-                "args": call["args"],
-                "ok": result.ok,
-                "metadata": getattr(result, "metadata", None) or {},
-            }
+            tc = self._dispatch_call(call["tool"], merged)
             tool_calls.append(tc)
-            self._emit({"type": "tool_call", **tc})
+            observations.append(
+                f"{call['tool']} -> {json.dumps({'ok': tc['ok'], 'metadata': tc['metadata']}, ensure_ascii=False)}"
+            )
             yield {"type": "tool_call", **tc}
 
         if direct_reply is not None:
@@ -823,6 +856,21 @@ class ConversationalAgent:
             },
         ]
 
+    def _direct_film_grade_reply(
+        self, tool_calls: list[dict[str, Any]]
+    ) -> Optional[str]:
+        """Skip weak final-answer models for film grade tools (they invent styles from history)."""
+        if not tool_calls:
+            return None
+        if any(tc.get("tool") not in _FILM_GRADE_TOOLS for tc in tool_calls):
+            return None
+        for tc in reversed(tool_calls):
+            meta = tc.get("metadata") or {}
+            reply = meta.get("reply_zh") or meta.get("error")
+            if reply:
+                return str(reply)
+        return None
+
     def _force_final_answer(self, user_text: str, observations: list[str]) -> str:
         """Synthesize the final prose answer from a CLEAN, lean prompt.
 
@@ -830,6 +878,9 @@ class ConversationalAgent:
         models ignore those and answer generically) but keeps a short SESSION CONTEXT
         with durable prefs + working memory so wording still honors user preferences.
         """
+        direct = self._direct_film_grade_reply(self._turn_tool_calls())
+        if direct:
+            return direct
         messages = self._build_final_answer_messages(user_text, observations)
         final = self._chat(messages)
         if _parse_tool_call(final) is not None:

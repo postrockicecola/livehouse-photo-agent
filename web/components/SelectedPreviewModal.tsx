@@ -18,6 +18,7 @@ type Props = {
   apiBase: string;
   onClose: () => void;
   sessionFilmVariant?: string | null;
+  sessionFilmIntensity?: number | null;
   useSessionVibe?: boolean;
   /** ``agent`` = search hits; ``vibe`` = film-grade preview; default = liked selection. */
   variant?: "selection" | "agent" | "vibe";
@@ -41,6 +42,7 @@ export function SelectedPreviewModal({
   apiBase,
   onClose,
   sessionFilmVariant,
+  sessionFilmIntensity,
   useSessionVibe,
   variant = "selection",
 }: Props) {
@@ -48,6 +50,7 @@ export function SelectedPreviewModal({
     const out: Row[] = [];
     let i = 0;
     const forceSessionVibe = variant === "vibe";
+    const applyIntensity = forceSessionVibe || Boolean(useSessionVibe);
     for (const item of items) {
       const prefKey = gallerySelectionKey(item);
       // Search / shortlist preview must stay ungarded — session vibe is sticky on disk
@@ -78,12 +81,22 @@ export function SelectedPreviewModal({
         key,
         item,
         label: exportPreviewLabel(spec),
-        url: buildExportPreviewUrl(apiBase, spec, PREVIEW_MAX_SIDE),
+        url: buildExportPreviewUrl(apiBase, spec, PREVIEW_MAX_SIDE, {
+          intensity: applyIntensity ? sessionFilmIntensity : null,
+        }),
         index: i,
       });
     }
     return out;
-  }, [items, exportByFile, apiBase, sessionFilmVariant, useSessionVibe, variant]);
+  }, [
+    items,
+    exportByFile,
+    apiBase,
+    sessionFilmVariant,
+    sessionFilmIntensity,
+    useSessionVibe,
+    variant,
+  ]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

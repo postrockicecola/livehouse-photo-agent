@@ -10,6 +10,7 @@ from services.agent.skills.gallery import (
     GallerySelectSkill,
     GalleryStatsSkill,
     MarkScoreGapSkill,
+    RecommendFilmForPhotoSkill,
     _expand_query_terms,
     _normalize_category,
     _style_intent,
@@ -67,6 +68,7 @@ def test_registry_has_core_skills(tmp_path: Path) -> None:
         "gallery_stats",
         "explain_photo",
         "gallery_select",
+        "recommend_film_for_photo",
         "apply_film_vibe",
         "export_selected",
         "mark_score_gap",
@@ -456,3 +458,25 @@ def test_mark_score_gap_selects(tmp_path: Path) -> None:
     assert res.ok is True
     assert "b_keep.jpg" in res.metadata["files"]
     assert res.metadata["ui_action"] == "reload_curation"
+
+
+def test_recommend_film_for_photo_writes_vibe(tmp_path: Path) -> None:
+    rows = _sample_rows()
+    rows[0]["tags"] = ["neon", "club", "haze"]
+    rows[0]["mood_tags"] = ["热烈"]
+    _write_results(tmp_path, rows)
+    res = RecommendFilmForPhotoSkill(str(tmp_path)).run(
+        {"file": "a_best.jpg", "prompt": "最适合这张图的胶片感"}
+    )
+    assert res.ok is True
+    assert res.metadata["ui_action"] == "reload_vibe"
+    assert res.metadata["files"] == ["a_best.jpg"]
+    assert res.metadata.get("session_vibe", {}).get("film_variant")
+    assert res.metadata["session_vibe"]["matched"] is True
+
+
+def test_recommend_film_for_photo_needs_target(tmp_path: Path) -> None:
+    _write_results(tmp_path, _sample_rows())
+    res = RecommendFilmForPhotoSkill(str(tmp_path)).run({"prompt": "最适合这张"})
+    assert res.ok is False
+    assert "照片" in (res.error or "")

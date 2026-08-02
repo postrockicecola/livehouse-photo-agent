@@ -513,6 +513,12 @@ def get_film_render(
     variant: str = Query(..., description="film_livehouse | film_cinestill_800t | …"),
     rotate: int = Query(0),
     max_side: int = Query(2200, ge=256, le=4096),
+    intensity: float = Query(
+        1.0,
+        ge=0.0,
+        le=1.75,
+        description="Grade strength vs source (1.0 = full preset; >1 overshoots).",
+    ),
     optical: str | None = Query(
         None,
         description='Optional JSON optical overrides, e.g. {"flow":22,"wear":12,"flow_angle":-15}',
@@ -581,6 +587,7 @@ def get_film_render(
             cache_key_extra=lab_film_cache_extra,
             optical=optical_p1,
             adjustments=adjustments,
+            intensity=float(intensity),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -635,7 +642,13 @@ def put_vibe_session(req: VibeSessionPutRequest):
         _gallery_active_dir_cache = None
         return {"active": False, "session_vibe": None, "previews_dir": base_dir}
 
-    decision = resolve_vibe_from_prompt(req.prompt)
+    prior = read_session_vibe(base_dir)
+    decision = resolve_vibe_from_prompt(req.prompt, prior_session=prior)
+    if decision.matched_by == "rules:intensity_needs_prior":
+        raise HTTPException(
+            status_code=400,
+            detail=decision.reason_zh or "请先选定一种胶片风格，再说「颜色再浓烈一些」",
+        )
     payload = session_vibe_payload_from_decision(decision)
     written = write_session_vibe(base_dir, payload)
     if written is None:
@@ -885,6 +898,7 @@ def _export_images_impl(req: ExportRequest):
         max_side: int,
         cache_tag: str,
         adjustments: EditAdjustments | None = None,
+        intensity: float = 1.0,
     ) -> str | None:
         """Return error message or None on success."""
         if not src.is_file():
@@ -902,11 +916,24 @@ def _export_images_impl(req: ExportRequest):
                 cache_root=film_export_cache,
                 cache_key_extra=cache_tag,
                 adjustments=adjustments,
+                intensity=float(intensity),
             )
             shutil.copy2(cached, dest_dir / dest_basename)
         except Exception as e:
             return str(e)
         return None
+
+    session_intensity = 1.0
+    if session_vibe and session_vibe_is_matched(session_vibe):
+        try:
+            session_intensity = float(session_vibe.get("intensity") or 1.0)
+        except (TypeError, ValueError):
+            session_intensity = 1.0
+    session_variant = (
+        str(session_vibe.get("film_variant") or "").strip()
+        if session_vibe and session_vibe_is_matched(session_vibe)
+        else ""
+    )
 
     success_jpeg = 0
     success_raw = 0
@@ -969,6 +996,11 @@ def _export_images_impl(req: ExportRequest):
                 if key in seen:
                     continue
                 seen.add(key)
+                grade_i = (
+                    session_intensity
+                    if session_variant and vid == session_variant
+                    else 1.0
+                )
                 err = _render_film_to_jpeg(
                     src_p,
                     dest_jpeg_name,
@@ -978,6 +1010,7 @@ def _export_images_impl(req: ExportRequest):
                     max_side=int(export_opts["export_film_jpeg_max_side"]),
                     cache_tag=_EXPORT_FILM_CACHE_TAG,
                     adjustments=spec_adjustments if vid == AUTOMATED_VARIANT_ID else None,
+                    intensity=grade_i,
                 )
                 if err is None:
                     success_jpeg += 1
@@ -1002,6 +1035,11 @@ def _export_images_impl(req: ExportRequest):
             if export_opts["export_film_from_raw"]:
                 raw_film_src = catalog.get("raw")
                 if raw_film_src and raw_film_src.is_file():
+                    grade_i = (
+                        session_intensity
+                        if session_variant and variant_graded == session_variant
+                        else 1.0
+                    )
                     err_g = _render_film_to_jpeg(
                         raw_film_src,
                         dest_jpeg_name,
@@ -1011,6 +1049,7 @@ def _export_images_impl(req: ExportRequest):
                         max_side=int(export_opts["export_film_raw_max_side"]),
                         cache_tag=_EXPORT_RAW_CACHE_TAG,
                         adjustments=spec_adjustments if variant_graded == AUTOMATED_VARIANT_ID else None,
+                        intensity=grade_i,
                     )
                     if err_g is None:
                         success_graded_from_raw += 1

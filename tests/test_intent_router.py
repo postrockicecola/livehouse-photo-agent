@@ -114,6 +114,9 @@ _TABLE: list[tuple[str, str, Optional[str], Optional[int], Optional[bool]]] = [
     # semantic / compound+semantic → LLM (film vibe is now deterministically routed)
     ("semantic_guitar", "找吉他手的照片", None, None, None),
     ("semantic_film", "帮我修成复古胶片风格看看", "apply_film_vibe", None, False),
+    ("film_recommend", "修成最适合这张图的胶片感", "recommend_film_for_photo", None, False),
+    ("film_color_intense", "颜色再浓烈一些", "apply_film_vibe", None, False),
+    ("film_sat_max", "饱和度拉满", "apply_film_vibe", None, False),
     ("shortlist_plus_panorama", "选出20张，但多给我一些全景镜头", None, None, None),
 ]
 

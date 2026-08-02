@@ -36,7 +36,7 @@ class FilmVibeDecision:
 # (score_weight, variant_id, label_zh, reason_zh, tag) — keywords matched case-insensitively.
 _VIBE_RULES: tuple[tuple[int, str, str, str, str], ...] = (
     (11, "film_mexico_sun", "Mexico Sun", "墨西哥/炎热/金黄/沙漠气息", "mexico_sun"),
-    (11, "film_spain_passion", "Spain Passion", "西班牙/热情/红色/浓烈", "spain_passion"),
+    (11, "film_spain_passion", "Spain Passion", "西班牙/热情/红色", "spain_passion"),
     (10, "film_latin_cinema", "Latin Cinema", "老电影/拉美/复古电影感", "latin_cinema"),
     (11, "film_wong_kar_wai", "王家卫", "王家卫/港片/花样年华/重庆森林/暧昧情绪", "wong_kar_wai"),
     (10, "film_retro_literary_portrait", "复古文艺人像", "文艺/人像/复古写真/胶片人像/情绪人像", "literary_portrait"),
@@ -89,7 +89,6 @@ _KEYWORDS: dict[str, tuple[str, ...]] = {
         "spain",
         "马德里",
         "热情",
-        "浓烈",
         "红色",
         "flamenco",
         "almodovar",
@@ -212,14 +211,61 @@ def _normalize_prompt(prompt: str) -> str:
     return t
 
 
+# Relative “make it stronger” asks (not a new named style).
+_RELATIVE_INTENSITY_RE = re.compile(
+    r"(?:"
+    r"(?:颜色|色彩|饱和度?).{0,6}(?:再|更).{0,4}(?:浓|重|艳|饱和|狠|强)|"
+    r"(?:再|更)(?:浓烈|浓郁|浓|重|狠|强|艳).{0,4}(?:一些|一点|点|些)?|"
+    r"(?:胶片感|风格).{0,6}(?:更狠|更重|更强|再浓|更浓)|"
+    r"(?:颜色|饱和度?).{0,4}拉满|拉满(?:颜色|饱和)|"
+    r"(?:超狠|极致|狠狠|非常非常)"
+    r")",
+    re.IGNORECASE,
+)
+_STYLE_SWITCH_RE = re.compile(r"(换成|改成|修成|套上|套成|应用)")
+
+
+def is_relative_intensity_ask(prompt: str) -> bool:
+    """True for「颜色再浓烈一些」/「胶片感更狠」without an explicit style switch verb."""
+    t = (prompt or "").strip()
+    if not t or _RELATIVE_INTENSITY_RE.search(t) is None:
+        return False
+    if _STYLE_SWITCH_RE.search(t) is not None:
+        return False
+    return True
+
+
 def _intensity_from_prompt(prompt: str) -> float:
-    """Boost grade strength for 更狠 / 非常复古 style asks."""
+    """Boost grade strength for 更狠 / 再浓烈 / 非常复古 style asks."""
     t = _normalize_prompt(prompt)
     if not t:
         return 1.0
     if any(k in t for k in ("非常非常", "超狠", "极致", "拉满", "狠狠")):
         return 1.35
-    if any(k in t for k in ("更狠", "更重", "更强", "狠一些", "重一些", "强一些", "非常复古")):
+    if any(
+        k in t
+        for k in (
+            "更狠",
+            "更重",
+            "更强",
+            "狠一些",
+            "重一些",
+            "强一些",
+            "非常复古",
+            "浓烈",
+            "浓郁",
+            "再浓",
+            "更浓",
+            "再浓烈",
+            "更浓烈",
+            "颜色更",
+            "更艳",
+            "更饱和",
+            "饱和度更高",
+            "浓一点",
+            "再重",
+        )
+    ):
         return 1.2
     return 1.0
 
@@ -236,6 +282,72 @@ def _with_intensity(decision: FilmVibeDecision) -> FilmVibeDecision:
         prompt=decision.prompt,
         intensity=intensity,
         matched=decision.matched,
+    )
+
+
+def _strip_intensity_phrases(prompt: str) -> str:
+    """Remove relative-intensity wording so leftover style tokens can be checked."""
+    t = _normalize_prompt(prompt)
+    t = _RELATIVE_INTENSITY_RE.sub(" ", t)
+    for tok in (
+        "胶片感",
+        "颜色",
+        "色彩",
+        "饱和度",
+        "饱和",
+        "风格",
+        "一些",
+        "一点",
+        "点",
+        "些",
+        "再",
+        "更",
+        "更加",
+        "需要",
+        "的",
+        " ",
+    ):
+        t = t.replace(tok, " ")
+    return re.sub(r"\s+", "", t)
+
+
+def _is_intensity_only_prompt(prompt: str, rules_dec: FilmVibeDecision) -> bool:
+    if not is_relative_intensity_ask(prompt):
+        return False
+    if not rules_dec.matched or rules_dec.matched_by in _UNMATCHED_MATCHED_BY:
+        return True
+    return len(_strip_intensity_phrases(prompt)) <= 1
+
+
+def _clamp_intensity(value: float) -> float:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return 1.0
+    if v != v:  # NaN
+        return 1.0
+    return round(max(0.0, min(1.5, v)), 3)
+
+
+def _boost_prior_session(prior: dict[str, Any], prompt: str) -> FilmVibeDecision:
+    """Keep current film_variant; step intensity up for relative「再浓一点」asks."""
+    prior_i = _clamp_intensity(prior.get("intensity") or 1.0)
+    asked = _intensity_from_prompt(prompt)
+    if asked <= 1.0 + 1e-6:
+        asked = 1.2
+    new_i = _clamp_intensity(max(asked, prior_i + 0.15))
+    variant = str(prior.get("film_variant") or _DEFAULT_VARIANT).strip()
+    if variant not in FILM_VARIANT_IDS:
+        variant = _DEFAULT_VARIANT
+    label = str(prior.get("label_zh") or variant).strip() or variant
+    return FilmVibeDecision(
+        film_variant=variant,
+        label_zh=label,
+        reason_zh=f"在当前风格上加强浓度（强度 {new_i:.2f}）",
+        matched_by="rules:intensity_boost",
+        prompt=(prompt or "").strip(),
+        intensity=new_i,
+        matched=True,
     )
 
 
@@ -287,9 +399,35 @@ def _resolve_vibe_from_rules(prompt: str) -> FilmVibeDecision:
     )
 
 
-def resolve_vibe_from_prompt(prompt: str) -> FilmVibeDecision:
-    """Keyword rules first; on ``rules:fallback`` only, optional Ollama text → JSON."""
+def resolve_vibe_from_prompt(
+    prompt: str,
+    *,
+    prior_session: dict[str, Any] | None = None,
+) -> FilmVibeDecision:
+    """Keyword rules first; on ``rules:fallback`` only, optional Ollama text → JSON.
+
+    When ``prior_session`` is a matched vibe and the prompt is a relative intensity
+    ask (e.g. 颜色再浓烈一些), keep the current ``film_variant`` and only raise
+    ``intensity``.
+    """
     rules_dec = _resolve_vibe_from_rules(prompt)
+    prior = prior_session if session_vibe_is_matched(prior_session) else None
+    if is_relative_intensity_ask(prompt) and _is_intensity_only_prompt(prompt, rules_dec):
+        if prior is not None:
+            return _boost_prior_session(prior, prompt)
+        return FilmVibeDecision(
+            film_variant=_DEFAULT_VARIANT,
+            label_zh="默认 · Livehouse",
+            reason_zh="请先选定一种胶片风格，再说「颜色再浓烈一些」",
+            matched_by="rules:intensity_needs_prior",
+            prompt=(prompt or "").strip(),
+            matched=False,
+        )
+    if prior is not None and is_relative_intensity_ask(prompt):
+        same_variant = str(prior.get("film_variant") or "") == rules_dec.film_variant
+        if same_variant:
+            return _boost_prior_session(prior, prompt)
+
     if rules_dec.matched_by != "rules:fallback":
         return _with_intensity(rules_dec)
 

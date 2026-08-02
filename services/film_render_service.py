@@ -374,6 +374,31 @@ def _apply_variant(
     return out
 
 
+def clamp_grade_intensity(intensity: float | None) -> float:
+    try:
+        v = float(intensity if intensity is not None else 1.0)
+    except (TypeError, ValueError):
+        return 1.0
+    if v != v:  # NaN
+        return 1.0
+    return max(0.0, min(1.75, v))
+
+
+def apply_grade_intensity(
+    src_u8: np.ndarray,
+    graded_u8: np.ndarray,
+    intensity: float,
+) -> np.ndarray:
+    """Scale film-grade delta from source. ``1.0`` = full grade; ``>1`` overshoots."""
+    i = clamp_grade_intensity(intensity)
+    if abs(i - 1.0) < 1e-3:
+        return graded_u8
+    src = src_u8.astype(np.float32)
+    graded = graded_u8.astype(np.float32)
+    out = src + (graded - src) * i
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def _cache_file_name(
     src: Path,
     variant_id: str,
@@ -382,17 +407,20 @@ def _cache_file_name(
     cache_key_extra: str = "displayReady1",
     optical_cache_token: str = "",
     adjust_cache_token: str = "",
+    intensity: float = 1.0,
 ) -> str:
+    inten = clamp_grade_intensity(intensity)
     try:
         st = src.stat()
         meta = (
             f"{src.resolve()}|{variant_id}|r={rotate}|m={max_side}|mtime_ns={st.st_mtime_ns}|"
-            f"{cache_key_extra}|opt={optical_cache_token}|adj={adjust_cache_token}|p=filmWorkV15"
+            f"{cache_key_extra}|opt={optical_cache_token}|adj={adjust_cache_token}|"
+            f"i={inten:.3f}|p=filmWorkV16"
         )
     except OSError:
         meta = (
             f"{src}|{variant_id}|r={rotate}|m={max_side}|mtime_ns=0|{cache_key_extra}|"
-            f"opt={optical_cache_token}|adj={adjust_cache_token}|p=filmWorkV15"
+            f"opt={optical_cache_token}|adj={adjust_cache_token}|i={inten:.3f}|p=filmWorkV16"
         )
     return hashlib.sha256(meta.encode()).hexdigest() + ".jpg"
 
@@ -407,8 +435,10 @@ def render_film_to_cache(
     cache_key_extra: str = "displayReady1",
     optical: OpticalConsoleParams | None = None,
     adjustments: EditAdjustments | None = None,
+    intensity: float = 1.0,
 ) -> Path:
     optical = optical or None
+    inten = clamp_grade_intensity(intensity)
     cache_root.mkdir(parents=True, exist_ok=True)
     out = cache_root / _cache_file_name(
         src_path,
@@ -418,12 +448,14 @@ def render_film_to_cache(
         cache_key_extra,
         optical_cache_token=optical.cache_token() if optical else "",
         adjust_cache_token=adjustments.cache_token() if adjustments else "",
+        intensity=inten,
     )
     if out.is_file():
         return out
 
     rgb = _downscale_rgb_for_film_work(load_rgb_u8(src_path), max_side, variant_id)
     processed = _apply_variant(rgb, variant_id, optical=optical, adjustments=adjustments)
+    processed = apply_grade_intensity(rgb, processed, inten)
     im = Image.fromarray(processed)
     jpeg_orient = read_exif_orientation_tag(src_path)
     if rotate and jpeg_orient == 1:
