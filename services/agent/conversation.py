@@ -30,7 +30,15 @@ from services.agent.context_governance import (
     working_memory_prompt_block,
 )
 from services.agent.final_answer import FinalAnswer, build_final_answer
-from services.agent.groundedness import ground_reply
+from services.agent.groundedness import (
+    build_grounding_event,
+    format_ref_index_block,
+    ground_reply,
+    grounding_failure_template,
+    ordered_ref_files,
+    redact_filenames_to_refs,
+    resolve_ref_placeholders,
+)
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, route_gallery_intent
 from services.agent.skills.base import SkillRegistry
@@ -45,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 # A chat backend: a list of {role, content} messages -> assistant text.
 ChatFn = Callable[[list[dict[str, str]]], str]
-# A streaming chat backend: same input, yields the assistant text token-by-token.
+# Backend may yield completion chunks; Gallery SSE still buffers → finalize → typing chunks.
 StreamChatFn = Callable[[list[dict[str, str]]], Iterator[str]]
 # Optional summarizer for evicted turns: old messages -> a short summary string.
 Summarizer = Callable[[list["Message"]], str]
@@ -170,20 +178,27 @@ class TurnResult:
 # Clean, minimal context used to force a final answer. Weaker chat models (e.g. llava)
 # revert to "how can I help?" when the heavy tool-protocol system prompt + role:"tool"
 # messages are present, but answer correctly from a lean prompt that inlines the data.
+#
+# File cites must use {ref_N} placeholders (resolved in code). Models must not emit
+# real filenames — that is how we structurally prevent DSC_xxxx hallucinations.
 _FINAL_ANSWER_SYSTEM = (
     "You are a concise assistant. Answer the user's question using ONLY the provided tool "
     "results. Do not output JSON and do not mention tools. When metadata includes recipe / "
     "rationale / pick_reasons / why, briefly explain the selection criteria and 1–3 example "
     "photos with their why lines — do not invent scores. When SESSION CONTEXT lists user "
     "preferences or last_files, honor them in wording and framing — still never invent photo data. "
+    "PHOTO CITATIONS: when a PHOTO REFS index is present, cite photos ONLY as {ref_0}, "
+    "{ref_1}, … placeholders — never write real filenames (.jpg / .ARW / etc.). "
+    "Example: 这几张照片里 {ref_0} 构图最好，{ref_1} 是抓拍瞬间。 "
     "For apply_film_vibe / recommend_film_for_photo: reply in 1–2 short Chinese sentences from "
-    "metadata.reply_zh or output only — do NOT list filenames."
+    "metadata.reply_zh or output only — do NOT list filenames or ref placeholders."
 )
 _FINAL_ANSWER_NUDGE = (
     "Using ONLY the tool results already shown above, answer my question now in plain, "
     "natural language. Prefer citing metadata.rationale and a few pick_reasons/why lines "
-    "when present. For film-vibe tools, copy metadata.reply_zh (or output) and stop — "
-    "do not enumerate files. Do NOT output JSON and do NOT call any more tools."
+    "when present. If PHOTO REFS are listed, cite photos only as {ref_0}/{ref_1}/… — "
+    "never write real filenames. For film-vibe tools, copy metadata.reply_zh (or output) "
+    "and stop — do not enumerate files. Do NOT output JSON and do NOT call any more tools."
 )
 _FILM_GRADE_TOOLS = frozenset({"apply_film_vibe", "recommend_film_for_photo"})
 _PREFS_SECTION_PREFIX = "LONG-TERM USER PREFERENCES"
@@ -255,6 +270,7 @@ class ConversationalAgent:
         self._compiled_graph: Any = None
         self._run_id: str = ""
         self._grounding_rewrite_mode: str = "none"
+        self._turn_user_text: str = ""
         self._bind_focus_vision()
 
     def _bind_focus_vision(self) -> None:
@@ -311,6 +327,7 @@ class ConversationalAgent:
         self.last_final_answer = None
         self._run_id = uuid.uuid4().hex
         self._grounding_rewrite_mode = "none"
+        self._turn_user_text = ""
 
     def _parse_tool_call_repaired(self, raw: str) -> Optional[dict[str, Any]]:
         """Parse tool JSON; one repair completion when output looks tool-ish but invalid."""
@@ -515,10 +532,12 @@ class ConversationalAgent:
         if self._guardrails is not None:
             user_text, refuse = self._guardrails.mediate_user_input(user_text)
             if refuse is not None:
+                self._turn_user_text = user_text
                 self.memory.add_user(user_text)
                 reply = self._finalize(refuse)
                 self._done_event(reply, [])
                 return self._make_turn_result(reply, [])
+        self._turn_user_text = user_text
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
@@ -586,20 +605,23 @@ class ConversationalAgent:
         Event shapes (all dicts with a ``type`` key):
 
         - ``{"type": "tool_call", "tool", "args", "ok"}`` — a skill just ran
-        - ``{"type": "token", "text"}``                    — a piece of the final answer
+        - ``{"type": "token", "text"}`` — typing-effect chunk of the *finalized* reply
+          (not live model tokens; see :meth:`_stream_answer`)
         - ``{"type": "done", "reply", "tool_calls", "memory_turns"}`` — turn finished
 
-        Tool rounds use the LangGraph chat subgraph when available (``defer_answer``);
-        the final answer is streamed afterward so SSE behaviour stays unchanged.
+        Tool rounds use the LangGraph chat subgraph (``defer_answer``); the final
+        answer is buffered, grounded, then chunk-emitted for ChatDock UX.
         """
         self._reset_turn_state()
         if self._guardrails is not None:
             user_text, refuse = self._guardrails.mediate_user_input(user_text)
             if refuse is not None:
+                self._turn_user_text = user_text
                 self.memory.add_user(user_text)
                 reply = self._finalize(refuse)
                 yield self._done_event(reply, [])
                 return
+        self._turn_user_text = user_text
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
@@ -717,7 +739,11 @@ class ConversationalAgent:
     def _iter_final_tokens(
         self, messages: list[dict[str, str]], stream_fn: Optional[StreamChatFn]
     ) -> Iterator[str]:
-        """Yield the final-answer tokens, real-streamed if possible, else chunked."""
+        """Yield backend completion pieces for buffering (caller must not forward to UI).
+
+        Even when ``stream_fn`` yields model chunks, :meth:`_stream_answer` accumulates
+        them before groundedness — UI tokens are emitted only after finalize.
+        """
         if stream_fn is not None:
             try:
                 for piece in stream_fn(messages):
@@ -734,9 +760,13 @@ class ConversationalAgent:
         stream_fn: Optional[StreamChatFn],
         tool_calls: list[dict[str, Any]],
     ) -> Iterator[dict[str, Any]]:
-        """Buffer model tokens, ground/finalize, then emit tokens ≡ final reply.
+        """Finalize then chunk-emit (typing effect) — not true token streaming.
 
-        Users must never see pre-grounding cites that ``done.reply`` later strips.
+        Groundedness / ``{ref_N}`` resolve need the full model reply, so we always
+        buffer the backend completion first, run :meth:`_finalize`, then split the
+        *already-safe* text via :func:`_chunk_text` for ChatDock typing UX.
+        SSE ``token`` events therefore do **not** imply lower time-to-first-byte than
+        non-stream chat; they are a display animation over the finalized string.
         """
         acc = ""
         for piece in self._iter_final_tokens(messages, stream_fn):
@@ -750,6 +780,7 @@ class ConversationalAgent:
         else:
             raw_reply = acc.strip() or _NO_ANSWER_FALLBACK
         reply = self._finalize(raw_reply)
+        # Typing-effect chunks only — not live model tokens.
         for piece in _chunk_text(reply):
             yield {"type": "token", "text": piece}
         yield self._done_event(reply, tool_calls)
@@ -866,8 +897,17 @@ class ConversationalAgent:
     def _build_final_answer_messages(
         self, user_text: str, observations: list[str]
     ) -> list[dict[str, str]]:
-        """Lean final-answer messages: tool results + prefs/WM, without the tool-call protocol."""
+        """Lean final-answer messages: tool results + prefs/WM, without the tool-call protocol.
+
+        Known filenames in tool results are redacted to ``{ref_N}`` and a PHOTO REFS
+        index is appended so the model cannot copy real basenames into the prose.
+        """
+        ref_files = ordered_ref_files(
+            self._turn_tool_calls(), working_memory=self.working_memory
+        )
         joined = "\n".join(observations) if observations else "(no tool results)"
+        if ref_files:
+            joined = redact_filenames_to_refs(joined, ref_files)
         system = _FINAL_ANSWER_SYSTEM
         ctx = self._lean_session_context()
         if ctx:
@@ -875,12 +915,14 @@ class ConversationalAgent:
                 f"{system}\n\nSESSION CONTEXT (honor when wording; do not invent data "
                 f"beyond tool results):\n{ctx}"
             )
+        ref_block = format_ref_index_block(ref_files)
+        user_parts = [f"Question: {user_text}", f"Tool results:\n{joined}"]
+        if ref_block:
+            user_parts.append(ref_block)
+        user_parts.append(_FINAL_ANSWER_NUDGE)
         return [
             {"role": "system", "content": system},
-            {
-                "role": "user",
-                "content": f"Question: {user_text}\n\nTool results:\n{joined}\n\n{_FINAL_ANSWER_NUDGE}",
-            },
+            {"role": "user", "content": "\n\n".join(user_parts)},
         ]
 
     def _direct_film_grade_reply(
@@ -919,27 +961,51 @@ class ConversationalAgent:
         return [e for e in self._events if e.get("type") == "tool_call"]
 
     def _finalize(self, reply: str) -> str:
-        """Ground file cites, run output guardrails, and commit the reply to memory."""
+        """Resolve ``{ref_N}``, dual-insurance groundedness, guardrails, commit memory.
+
+        Order: placeholder resolve → invented-file gate → output guardrails.
+        Failures discard free text and use :func:`grounding_failure_template`.
+        """
         tool_calls = self._turn_tool_calls()
-        grounded, verdict = ground_reply(
-            reply,
-            tool_calls=tool_calls,
-            working_memory=self.working_memory,
-        )
-        self._grounding_rewrite_mode = getattr(verdict, "rewrite_mode", None) or (
-            "template" if verdict.triggered else "none"
-        )
-        if verdict.triggered:
+        raw_model = str(reply or "")
+        ref_files = ordered_ref_files(tool_calls, working_memory=self.working_memory)
+
+        resolved, ref_verdict = resolve_ref_placeholders(raw_model, ref_files)
+        if ref_verdict.triggered:
+            reply = grounding_failure_template(ref_files)
+            self._grounding_rewrite_mode = "template"
             self._emit(
-                {
-                    "type": "grounding_violation",
-                    "unknown": list(verdict.unknown),
-                    "cited": list(verdict.cited),
-                    "allowed": list(verdict.allowed),
-                    "rewrite_mode": self._grounding_rewrite_mode,
-                }
+                build_grounding_event(
+                    reason="oob_ref",
+                    user_text=self._turn_user_text,
+                    raw_model_output=raw_model,
+                    final_reply=reply,
+                    unresolved_refs=list(ref_verdict.unresolved),
+                )
             )
-        reply = grounded
+        else:
+            grounded, verdict = ground_reply(
+                resolved,
+                tool_calls=tool_calls,
+                working_memory=self.working_memory,
+            )
+            self._grounding_rewrite_mode = getattr(verdict, "rewrite_mode", None) or (
+                "template" if verdict.triggered else "none"
+            )
+            if verdict.triggered:
+                reply = grounded  # always the deterministic template after P3
+                self._emit(
+                    build_grounding_event(
+                        reason=verdict.reason or "invented_file",
+                        user_text=self._turn_user_text,
+                        raw_model_output=raw_model,
+                        final_reply=reply,
+                        verdict=verdict,
+                    )
+                )
+            else:
+                reply = grounded
+
         if self._guardrails is not None:
             reply = self._guardrails.mediate_output(reply)
         fa = build_final_answer(

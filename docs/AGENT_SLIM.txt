@@ -24,7 +24,14 @@ RUNTIME MATRIX (who decides what)
 
   Missing langgraph → hard error (no silent fallback).
   Ownership: always anon:<session_id> (login auth removed from product surface).
-  Stream tokens ≡ grounded finalize (buffer then emit).
+  SSE ``token`` = typing-effect over finalized reply (buffer → {ref_N} resolve /
+  groundedness template gate → chunk). Not true token-level model streaming.
+  Final-answer cites: model emits {ref_N}; code substitutes metadata.files.
+  LangGraph: after file-bearing tools, answer() prefers lean PHOTO REFS prompt
+  (ignores decide-loop prose). No-file tools (echo/stats) still use direct_reply.
+  answer() branches: ANSWER_BRANCH_CHECKLIST in conversation_graph.py — keep in
+  sync with TestAnswerBranch* (@pytest.mark.requires_langgraph). Missing
+  langgraph → those tests FAIL (tests/conftest.py), never silent imperative.
   Vision: focus_file thumbnail when LIVEHOUSE_AGENT_VISION=1 (default).
   Façade: services/agent/runner.py (AgentSession / AgentRunner).
 

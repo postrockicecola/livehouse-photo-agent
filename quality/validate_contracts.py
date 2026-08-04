@@ -215,6 +215,7 @@ def validate_agent_turn_trace(doc: dict[str, Any], path: str) -> list[str]:
             errors.append(_err(path, f"{key} must be bool or null"))
     if "rewrite_mode" in doc and doc["rewrite_mode"] is not None:
         if doc["rewrite_mode"] not in ("none", "strip", "template"):
+            # "strip" kept for historical traces; production groundedness is template-only.
             errors.append(_err(path, "rewrite_mode must be none|strip|template"))
     matches = doc.get("guardrail_matches")
     if matches is not None:

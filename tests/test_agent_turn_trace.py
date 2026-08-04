@@ -51,9 +51,11 @@ def test_grounding_violation_sets_trace_flag() -> None:
 
     reg = SkillRegistry()
     reg.register(_Search())
+    # LangGraph: search returns cite files → lean final (decide prose discarded).
     scripted = iter(
         [
             json.dumps({"tool": "gallery_search", "args": {"query": "x"}}),
+            "ignored decide prose",
             "推荐 ghost.jpg",
         ]
     )

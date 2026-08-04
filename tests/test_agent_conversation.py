@@ -22,7 +22,12 @@ from services.agent.skills.base import SkillRegistry, SkillResult
 
 @pytest.fixture(autouse=True)
 def _chat_runtime_without_langgraph(monkeypatch):
-    """Default production path needs langgraph; fall back so unit tests stay offline."""
+    """Offline dual-path tests only: if langgraph is missing, use imperative.
+
+    This is **not** production-path verification. Tests that must prove LangGraph
+    behavior use ``@pytest.mark.requires_langgraph`` (fail when missing — see
+    ``tests/conftest.py``). Do not add that marker here.
+    """
     if not langgraph_available():
         monkeypatch.setenv("LIVEHOUSE_AGENT_RUNTIME", "imperative")
 
@@ -149,9 +154,11 @@ def test_working_memory_tracks_selected_keys_as_last_files():
 
     reg = SkillRegistry()
     reg.register(_Select())
+    # LangGraph: select returns cite files → lean PHOTO REFS (decide prose discarded).
     scripted = iter(
         [
             '{"tool":"gallery_select","args":{"files":["a.jpg","b.jpg"]}}',
+            "ignored decide prose",
             "已选中 2 张",
         ]
     )

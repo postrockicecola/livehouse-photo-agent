@@ -103,7 +103,8 @@ STYLE_PROMPT = (
     "STYLE: Do NOT narrate plans or say you will search later. Call the tool now, then "
     "give a short final answer. If count=0: report the tool summary honestly "
     "(e.g. metadata.tag_status=not_available, or shutter_stats when style_intent=slow_shutter). "
-    "Keep answers concise; cite real file names/scores from tool metadata.files or rows only."
+    "Keep answers concise. When a PHOTO REFS index is present in the final-answer turn, "
+    "cite photos only as {ref_0}/{ref_1}/… — never invent or paste raw filenames."
 )
 
 SEMANTIC_HINTS = (
@@ -368,9 +369,11 @@ def _sse(obj: dict[str, Any]) -> str:
 def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
     """Server-Sent Events variant of :func:`agent_chat`.
 
-    Streams ``tool_call`` events as skills run and ``token`` events as the final
-    answer is generated, then a terminal ``done`` (with guardrail events + base_dir)
-    or ``error`` event. History is loaded from / persisted to the per-session store.
+    Emits ``tool_call`` as skills run, then ``token`` chunks as a *typing effect*
+    over the already-finalized reply (buffer → ``{ref_N}`` resolve / groundedness →
+    chunk). This is not true token-level streaming of the model; TTFB for answer
+    text matches non-stream chat. Terminal ``done`` (guardrail events + base_dir)
+    or ``error`` follows. History is loaded from / persisted to the session store.
     """
     base_dir = _resolve_base_dir(req.previews_dir)
     headers = {

@@ -44,6 +44,72 @@ class ChatTurnState(TypedDict, total=False):
 
 TurnHook = Callable[[dict[str, Any]], None]
 
+# answer() branch coverage checklist — keep in sync with tests marked
+# ``requires_langgraph`` in ``tests/test_agent_conversation_graph.py``.
+# Each entry's ``id`` must have a dedicated TestAnswerBranch* class / test.
+# When adding a branch: append here, wire ``select_answer_branch``, add a test.
+ANSWER_BRANCH_CHECKLIST: tuple[dict[str, str], ...] = (
+    {
+        "id": "lean_refs",
+        "when": (
+            "tool results expose files/selected_keys (ignores decide prose), "
+            "or force_answer / budget after tools"
+        ),
+        "path": "lean PHOTO REFS prompt → finalize ({ref_N} resolve + groundedness)",
+    },
+    {
+        "id": "direct_no_files",
+        "when": (
+            "decide returned plain text and lean_refs does not apply "
+            "(e.g. echo/stats with no cite files, or first-turn prose)"
+        ),
+        "path": "direct_reply → finalize (text scan only; no placeholder index)",
+    },
+    {
+        "id": "plain_no_tools",
+        "when": "no tool_calls and no direct_reply (skills disabled / max_rounds=0)",
+        "path": "plain chat_fn(memory) → finalize",
+    },
+)
+
+AnswerBranchId = Literal["lean_refs", "direct_no_files", "plain_no_tools"]
+
+
+def tool_calls_have_cite_files(tool_calls: list[dict[str, Any]] | None) -> bool:
+    """True when any tool result exposes files the final answer may cite."""
+    for tc in tool_calls or []:
+        if not isinstance(tc, dict):
+            continue
+        meta = tc.get("metadata") if isinstance(tc.get("metadata"), dict) else {}
+        for key in ("files", "selected_keys"):
+            vals = meta.get(key) or []
+            if isinstance(vals, list) and any(str(x or "").strip() for x in vals):
+                return True
+        args = tc.get("args") if isinstance(tc.get("args"), dict) else {}
+        vals = args.get("files") or []
+        if isinstance(vals, list) and any(str(x or "").strip() for x in vals):
+            return True
+    return False
+
+
+def select_answer_branch(
+    *,
+    has_direct: bool,
+    force: bool,
+    tool_calls: list[dict[str, Any]] | None,
+) -> AnswerBranchId:
+    """Pure branch picker for :func:`answer` — unit-testable without LangGraph runtime.
+
+    Mirrors ``ANSWER_BRANCH_CHECKLIST``. Changing this without updating the
+    checklist + ``requires_langgraph`` tests is a review smell.
+    """
+    prefer_lean_refs = bool(tool_calls) and tool_calls_have_cite_files(tool_calls)
+    if has_direct and not force and not prefer_lean_refs:
+        return "direct_no_files"
+    if not tool_calls and not force:
+        return "plain_no_tools"
+    return "lean_refs"
+
 
 def chat_runtime_preference() -> str:
     raw = (os.environ.get("LIVEHOUSE_AGENT_RUNTIME") or "langgraph").strip().lower()
@@ -235,21 +301,25 @@ def compile_chat_turn_graph(
         }
 
     def answer(state: ChatTurnState) -> dict[str, Any]:
+        """Finalize one turn. Branches: see ``ANSWER_BRANCH_CHECKLIST`` above."""
         user_text = str(state.get("user_text") or "")
         tool_calls = list(state.get("tool_calls") or [])
         observations = list(state.get("observations") or [])
         defer = bool(state.get("defer_answer"))
         direct = state.get("direct_reply")
         force = bool(state.get("force_answer"))
+        branch = select_answer_branch(
+            has_direct=direct is not None,
+            force=force,
+            tool_calls=tool_calls,
+        )
 
-        if direct is not None and not force:
+        if branch == "direct_no_files":
             # In-loop plain answer (may still be tool JSON if model misbehaved).
             if parse_tool_call(str(direct)) is not None:
                 reply_src = no_answer_fallback
-                answer_messages = None
             else:
                 reply_src = str(direct)
-                answer_messages = None
             if defer:
                 return {
                     "reply": None,
@@ -262,7 +332,7 @@ def compile_chat_turn_graph(
             _emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
             return {"reply": reply, "done": True, "backend": "langgraph"}
 
-        if not tool_calls and not force:
+        if branch == "plain_no_tools":
             # No skills / never entered tool path → plain completion.
             if defer:
                 return {
@@ -279,7 +349,7 @@ def compile_chat_turn_graph(
             _emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
             return {"reply": reply, "done": True, "backend": "langgraph"}
 
-        # Tools ran / repeat / budget → forced lean final answer (prefs/WM inlined).
+        # branch == "lean_refs": file-cite / force / budget → lean PHOTO REFS final.
         messages = build_final_answer_messages(user_text, observations)
         if defer:
             return {

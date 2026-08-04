@@ -16,13 +16,38 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt -r requirements-dev.txt
+      # Production Gallery chat runtime — must be present before pytest.
+      # Do not rely on requirements.txt alone; a stale cache can omit langgraph and
+      # silently skew tests onto LIVEHOUSE_AGENT_RUNTIME=imperative.
+      - name: Assert langgraph (production chat runtime)
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import sys
+          spec = importlib.util.find_spec("langgraph")
+          if spec is None:
+              print("langgraph available: no", file=sys.stderr)
+              print("CI requires langgraph for production-path agent tests", file=sys.stderr)
+              sys.exit(1)
+          import langgraph
+          ver = getattr(langgraph, "__version__", "unknown")
+          print(f"langgraph available: yes (version={ver})")
+          from services.agent.conversation_graph import langgraph_available
+          assert langgraph_available(), "langgraph_available() unexpectedly False"
+          print("langgraph_available(): True")
+          PY
       # Critical-rules-only gate: syntax errors and undefined names (F821-class bugs).
       - run: ruff check --select E9,F63,F7,F82 --exclude archive .
       # Quality platform Phase-0: contracts + golden hydrate + pinned stage3_scoring smoke.
       - run: python quality/validate_contracts.py
       - run: python -m quality.smoke
       # External-service tests (Ollama / Redis) are marker-excluded; see pytest.ini.
-      - run: pytest -m "not requires_ollama and not requires_redis" -q
+      # requires_langgraph tests FAIL (not skip) if langgraph is missing — see tests/conftest.py.
+      - name: Pytest (incl. requires_langgraph production path)
+        run: |
+          echo "Collecting requires_langgraph production-path tests:"
+          pytest --collect-only -q -m requires_langgraph | tail -n 20
+          pytest -m "not requires_ollama and not requires_redis" -q
       # Reliability scenarios on an isolated temp SQLite (no broker needed).
       - run: python scripts/chaos_runtime.py --report-dir reports/ci
       - uses: actions/upload-artifact@v4
