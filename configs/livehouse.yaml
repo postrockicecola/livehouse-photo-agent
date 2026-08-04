@@ -77,7 +77,7 @@ model:
   # ``llava`` is a vision model and follows the tool protocol poorly (skips tools / makes
   # up data); point this at a small instruct model on the SAME provider/endpoint. Empty =
   # reuse ``model_name``. This does NOT affect the VLM scoring pipeline.
-  agent_chat_model: "qwen2.5:3b-instruct"
+  agent_chat_model: "qwen2.5:7b-instruct"
   # Read timeout per HTTP attempt (seconds). LLaVA + 512 tokens often needs 180–300s on CPU.
   timeout: 300
   # Parallel Ollama HTTP workers + admission slots (match single-process LLaVA throughput; avoid fake concurrency).
