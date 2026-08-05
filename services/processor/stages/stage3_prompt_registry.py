@@ -69,7 +69,7 @@ STAGE3_COMPACT_EXEMPLAR = (
     '{"focus_sharpness":6.2,"exposure_control":5.8,"noise_cleanliness":7.1,'
     '"composition_framing":7.4,"light_color_character":8.0,"moment_peak":8.6,'
     '"atmosphere_impact":8.2,"deliverable_subject":6.9,'
-    '"strongest_aspect":{"zh":"红 gel 侧光勾出歌手轮廓","en":"Red gel sidelight sculpts the vocalist silhouette"},'
+    '"strongest_aspect":{"zh":"红色侧光勾出歌手轮廓","en":"Red gel sidelight sculpts the vocalist silhouette"},'
     '"weakest_aspect":{"zh":"面部高光略过曝","en":"Facial highlights run slightly hot"},'
     '"tags":["backlight haze","peak motion","crowd silhouettes","expressive gel lighting"],'
     '"mood_tags":["热烈","euphoric"]}'
