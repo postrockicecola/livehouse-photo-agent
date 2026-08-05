@@ -43,8 +43,10 @@ def verify_ollama_connection(base_urls: list[str], model_name: str, *, tags_time
             response = requests.get(f"{base.rstrip('/')}/api/tags", timeout=tags_timeout)
             if response.status_code == 200:
                 models = response.json().get("models", [])
-                model_names = [m.get("name", "").split(":")[0] for m in models]
-                if model_name not in model_names:
+                model_names = [m.get("name", "") for m in models]
+                # Compare full tags first; fall back to base-name match (":latest" omitted client-side).
+                base_names = [n.split(":")[0] for n in model_names]
+                if model_name not in model_names and model_name.split(":")[0] not in base_names:
                     logger.warning(
                         "Model '%s' not found at %s. Available: %s",
                         model_name,
