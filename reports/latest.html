@@ -1,0 +1,632 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Livehouse Agent Evaluation</title><style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--text:#e6edf3;--muted:#8b949e;--blue:#58a6ff;--green:#3fb950;--red:#f85149;--amber:#d29922}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+main{max-width:1280px;margin:auto;padding:28px} header{display:flex;justify-content:space-between;gap:20px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:20px}
+h1{margin:0;font-size:25px} h2{margin:30px 0 12px} h4{margin:12px 0 7px} .muted,small{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:18px 0}
+.card,.panel,details{background:var(--panel);border:1px solid var(--line);border-radius:8px} .card{padding:14px} .card span,.card small{display:block}
+.card strong{display:block;font-size:24px;margin:4px 0} .card.good strong{color:var(--green)} .card.bad strong{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px} .panel{padding:16px}
+.bar-row{display:grid;grid-template-columns:170px 1fr 90px;gap:10px;align-items:center;margin:9px 0} .bar-bg{height:9px;background:#21262d;border-radius:5px;overflow:hidden}
+.bar-bg i{display:block;height:100%;background:var(--blue)} .bar-row b{text-align:right}
+details{margin:10px 0;overflow:hidden} summary{display:grid;grid-template-columns:210px 1fr 250px;gap:12px;cursor:pointer;padding:13px 16px}
+summary em{text-align:right;color:var(--green)} .fail summary em{color:var(--red)} .case-body{border-top:1px solid var(--line);padding:16px}
+.case-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px} pre{white-space:pre-wrap;word-break:break-word;background:#0d1117;padding:10px;border-radius:6px;max-height:320px;overflow:auto;margin:0}
+.decision-trace{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px} .decision-step{min-width:310px;max-width:380px;border:1px solid var(--line);border-radius:7px;padding:12px}
+.decision-step label{display:block;color:var(--muted);font-size:11px;margin:7px 0 3px;text-transform:uppercase} .decision-step pre{max-height:130px;font-size:12px}
+.timeline{display:flex;justify-content:space-between;border-left:3px solid var(--blue);padding:7px 10px;margin:8px 0} .good{color:var(--green)} .bad{color:var(--red)} .warning{color:var(--amber)}
+@media(max-width:800px){.grid,.case-grid{grid-template-columns:1fr} summary{grid-template-columns:1fr} header{display:block}}
+</style></head><body><main>
+<header><div><h1>Livehouse Agent Evaluation</h1><div class="muted">agent-eval-20260805-230949-430f2ca1</div></div>
+<div class="muted">2026-08-05T15:09:49.249174+00:00 · qwen2.5:7b-instruct</div></header>
+
+<h2>Overview</h2>
+<section class="cards">
+<div class="card good"><span>Overall Agent Score</span><strong>89.31</strong><small>0–100 configurable composite</small></div>
+<div class="card good"><span>Release Gate</span><strong>PASS</strong><small>Behavior + score + regression</small></div>
+<div class="card "><span>Behavior Success</span><strong>100.0%</strong><small>3/3 contracts</small></div>
+<div class="card "><span>Quality Score</span><strong>65.77</strong><small>1 golden cases</small></div>
+<div class="card "><span>Trajectory Score</span><strong>97.22</strong><small>steps / tools / loops</small></div>
+<div class="card "><span>Cost Score</span><strong>100.0</strong><small>estimated</small></div>
+</section>
+
+<div class="grid">
+<section class="panel"><h2>Behavior</h2>
+<div class="bar-row"><span>Success rate</span><div class="bar-bg"><i style="width:100.00%"></i></div><b>100.0%</b></div>
+<div class="bar-row"><span>Intent accuracy</span><div class="bar-bg"><i style="width:100.00%"></i></div><b>100.0%</b></div>
+<div class="bar-row"><span>Preferred tool fit</span><div class="bar-bg"><i style="width:100.00%"></i></div><b>100.0%</b></div>
+<p class="muted">Preferred tools are informational; required observable behavior determines workflow pass/fail.</p></section>
+
+<section class="panel"><h2>Trajectory</h2>
+<div class="card "><span>Average steps</span><strong>3.0</strong><small></small></div>
+<div class="card "><span>Average tool calls</span><strong>1.0</strong><small></small></div>
+<div class="card "><span>Loops</span><strong>0</strong><small></small></div>
+<div class="card "><span>Reflections / retries</span><strong>0 / 0</strong><small></small></div></section>
+
+<section class="panel"><h2>Runtime</h2>
+<div class="card "><span>P50 / P95 latency</span><strong>19559 / 26017 ms</strong><small></small></div>
+<div class="card "><span>Average tokens</span><strong>3429.6667</strong><small>estimated</small></div>
+<div class="card "><span>Average LLM / inference calls</span><strong>2.0 / 0.0</strong><small></small></div>
+<div class="bar-row"><span>routed_quality_filter</span><div class="bar-bg"><i style="width:75.18%"></i></div><b>19559.0 ms</b></div><div class="bar-row"><span>semantic_drummer_search</span><div class="bar-bg"><i style="width:100.00%"></i></div><b>26017.3 ms</b></div><div class="bar-row"><span>gallery_statistics</span><div class="bar-bg"><i style="width:49.39%"></i></div><b>12848.7 ms</b></div></section>
+
+<section class="panel"><h2>Photography Quality</h2>
+<div class="card "><span>Precision@K</span><strong>50.0%</strong><small></small></div>
+<div class="card "><span>Recall@K</span><strong>100.0%</strong><small></small></div>
+<div class="card "><span>NDCG</span><strong>63.1%</strong><small></small></div>
+<div class="card "><span>MAP</span><strong>50.0%</strong><small></small></div>
+<p class="muted">Photography quality is reported separately from workflow correctness.</p></section>
+
+<section class="panel"><h2>Failure Analysis</h2>
+<p class="good">No classified failures.</p>
+</section>
+
+<section class="panel"><h2>Regression Gate</h2>
+<p class="good">No blocking regression detected.</p>
+<ul><li>No blocking regression detected.</li></ul>
+<pre>{
+  &quot;categories&quot;: {},
+  &quot;deltas&quot;: {
+    &quot;behavior_success&quot;: 0.0,
+    &quot;quality&quot;: 0.0,
+    &quot;average_steps&quot;: 0.0,
+    &quot;average_tool_calls&quot;: 0.0,
+    &quot;average_tokens&quot;: 0.0008,
+    &quot;average_inference_calls&quot;: 0.0,
+    &quot;p95_latency_ms&quot;: 0.1632
+  },
+  &quot;threshold_failures&quot;: []
+}</pre></section>
+</div>
+
+<h2>Per Case Details</h2>
+
+    <details class="case pass" >
+      <summary>
+        <b>routed_quality_filter</b>
+        <span>Deterministic quality intent selects the search skill.</span>
+        <em>Workflow PASS · Quality not evaluated</em>
+      </summary>
+      <div class="case-body">
+        <section class="case-grid">
+          <div><h4>User Input</h4><pre>剔糊过曝的图</pre></div>
+          <div><h4>Final Answer</h4><pre>这几张照片里 guitar_01.jpg 构图最好，drum_01.jpg 是抓拍瞬间。剔除模糊/过曝等低质量帧后按 overall 排序。</pre></div>
+          <div><h4>Expected Behavior</h4><pre>{
+  &quot;intent&quot;: &quot;exclude_low_quality&quot;,
+  &quot;final_answer&quot;: {
+    &quot;non_empty&quot;: true,
+    &quot;all_tools_ok&quot;: true
+  },
+  &quot;budgets&quot;: {
+    &quot;max_steps&quot;: 4,
+    &quot;max_llm_calls&quot;: 2,
+    &quot;max_inference_calls&quot;: 0,
+    &quot;max_tokens&quot;: 5000,
+    &quot;max_latency_ms&quot;: 45000
+  }
+}</pre></div>
+          <div><h4>Actual Behavior</h4><pre>{
+  &quot;intent&quot;: &quot;exclude_low_quality&quot;,
+  &quot;selected_images_count&quot;: 19,
+  &quot;gallery_selection_updated&quot;: false,
+  &quot;tools&quot;: [
+    &quot;gallery_search&quot;
+  ]
+}</pre></div>
+          <div><h4>Optional Preferences</h4><pre>{
+  &quot;preferred_tools&quot;: [
+    &quot;gallery_search&quot;
+  ]
+}</pre></div>
+          <div><h4>Behavior Checks</h4><pre>{
+  &quot;execution&quot;: true,
+  &quot;intent&quot;: true,
+  &quot;final_answer&quot;: true,
+  &quot;no_loop&quot;: true,
+  &quot;budget.max_steps&quot;: true,
+  &quot;budget.max_llm_calls&quot;: true,
+  &quot;budget.max_inference_calls&quot;: true,
+  &quot;budget.max_tokens&quot;: true,
+  &quot;budget.max_latency_ms&quot;: true
+}</pre></div>
+        </section>
+        <h4>Decision Trace</h4>
+        <div class="decision-trace">
+        <article class="decision-step">
+          <b>Step 1</b>
+          <div><label>Observation</label><pre>{
+  &quot;user_request&quot;: &quot;剔糊过曝的图&quot;,
+  &quot;analyzed_photos_available&quot;: 20,
+  &quot;prior_result&quot;: null
+}</pre></div>
+          <div><label>Decision summary</label><pre>{
+  &quot;summary&quot;: &quot;Retrieve candidates that satisfy the user request.&quot;,
+  &quot;source&quot;: &quot;deterministic_route&quot;,
+  &quot;rule_id&quot;: &quot;exclude_low_quality&quot;
+}</pre></div>
+          <div><label>Action</label><pre>{
+  &quot;tool&quot;: &quot;gallery_search&quot;,
+  &quot;parameters&quot;: {
+    &quot;exclude_low_quality&quot;: true,
+    &quot;exclude_trash&quot;: true,
+    &quot;dedupe_burst&quot;: true,
+    &quot;sort_by&quot;: &quot;overall&quot;,
+    &quot;recipe&quot;: &quot;quality&quot;,
+    &quot;rationale&quot;: &quot;剔除模糊/过曝等低质量帧后按 overall 排序&quot;,
+    &quot;limit&quot;: 20
+  }
+}</pre></div>
+          <div><label>Result</label><pre>{
+  &quot;ok&quot;: true,
+  &quot;summary&quot;: &quot;19 photo(s) matched; showing top 19 by overall. recipe=quality. 剔除模糊/过曝等低质量帧后按 overall 排序&quot;,
+  &quot;result_count&quot;: 19,
+  &quot;files_count&quot;: 19,
+  &quot;state_change&quot;: &quot;search&quot;,
+  &quot;latency_ms&quot;: 12.573
+}</pre></div>
+        </article>
+        <article class="decision-step">
+          <b>Step 2</b>
+          <div><label>Observation</label><pre>{
+  &quot;user_request&quot;: &quot;剔糊过曝的图&quot;,
+  &quot;prior_result&quot;: {
+    &quot;ok&quot;: true,
+    &quot;summary&quot;: &quot;19 photo(s) matched; showing top 19 by overall. recipe=quality. 剔除模糊/过曝等低质量帧后按 overall 排序&quot;,
+    &quot;result_count&quot;: 19,
+    &quot;files_count&quot;: 19,
+    &quot;state_change&quot;: &quot;search&quot;,
+    &quot;latency_ms&quot;: 12.573
+  }
+}</pre></div>
+          <div><label>Decision summary</label><pre>{
+  &quot;summary&quot;: &quot;Return the final user-facing answer from observable results.&quot;,
+  &quot;source&quot;: &quot;answer_node&quot;
+}</pre></div>
+          <div><label>Action</label><pre>{
+  &quot;type&quot;: &quot;respond&quot;
+}</pre></div>
+          <div><label>Result</label><pre>{
+  &quot;reply&quot;: &quot;这几张照片里 guitar_01.jpg 构图最好，drum_01.jpg 是抓拍瞬间。剔除模糊/过曝等低质量帧后按 overall 排序。&quot;
+}</pre></div>
+        </article></div>
+        <section class="case-grid">
+          <div><h4>Tool Timeline</h4><p class="timeline"><b>gallery_search</b><span>13 ms</span></p><p class="timeline"><b>LLM #1</b><span>19545 ms</span></p></div>
+          <div><h4>Metrics</h4><pre>{
+  &quot;passed&quot;: true,
+  &quot;workflow_passed&quot;: true,
+  &quot;behavior_checks&quot;: {
+    &quot;execution&quot;: true,
+    &quot;intent&quot;: true,
+    &quot;final_answer&quot;: true,
+    &quot;no_loop&quot;: true,
+    &quot;budget.max_steps&quot;: true,
+    &quot;budget.max_llm_calls&quot;: true,
+    &quot;budget.max_inference_calls&quot;: true,
+    &quot;budget.max_tokens&quot;: true,
+    &quot;budget.max_latency_ms&quot;: true
+  },
+  &quot;actual_behavior&quot;: {
+    &quot;intent&quot;: &quot;exclude_low_quality&quot;,
+    &quot;selected_images_count&quot;: 19,
+    &quot;gallery_selection_updated&quot;: false,
+    &quot;tools&quot;: [
+      &quot;gallery_search&quot;
+    ]
+  },
+  &quot;actual_intent&quot;: &quot;exclude_low_quality&quot;,
+  &quot;intent_ok&quot;: true,
+  &quot;result_ok&quot;: true,
+  &quot;preferred_tool_score&quot;: 1.0,
+  &quot;selected_images&quot;: [
+    &quot;guitar_01.jpg&quot;,
+    &quot;stage_00.jpg&quot;,
+    &quot;stage_01.jpg&quot;,
+    &quot;drum_01.jpg&quot;,
+    &quot;stage_02.jpg&quot;,
+    &quot;stage_03.jpg&quot;,
+    &quot;wide_01.jpg&quot;,
+    &quot;stage_04.jpg&quot;,
+    &quot;stage_05.jpg&quot;,
+    &quot;stage_06.jpg&quot;,
+    &quot;stage_07.jpg&quot;,
+    &quot;stage_08.jpg&quot;,
+    &quot;stage_09.jpg&quot;,
+    &quot;stage_10.jpg&quot;,
+    &quot;stage_11.jpg&quot;,
+    &quot;stage_12.jpg&quot;,
+    &quot;stage_13.jpg&quot;,
+    &quot;stage_14.jpg&quot;,
+    &quot;stage_15.jpg&quot;
+  ],
+  &quot;steps&quot;: 2,
+  &quot;tool_calls&quot;: 1,
+  &quot;llm_calls&quot;: 1,
+  &quot;inference_calls&quot;: 0,
+  &quot;reflection_count&quot;: 0,
+  &quot;retry_count&quot;: 0,
+  &quot;loop_detected&quot;: false,
+  &quot;max_depth&quot;: 2,
+  &quot;trajectory_score&quot;: 100.0,
+  &quot;cost_score&quot;: 100.0,
+  &quot;quality&quot;: {
+    &quot;eligible&quot;: false,
+    &quot;spearman&quot;: null,
+    &quot;mae&quot;: null
+  },
+  &quot;quality_passed&quot;: null,
+  &quot;failure&quot;: null,
+  &quot;failure_classification&quot;: null
+}</pre></div>
+          <div><h4>Photography Golden</h4><pre>{
+  &quot;eligible&quot;: false,
+  &quot;spearman&quot;: null,
+  &quot;mae&quot;: null
+}</pre></div>
+          <div><h4>Failure Reason</h4><pre>{
+  &quot;status&quot;: &quot;none&quot;
+}</pre></div>
+        </section>
+      </div>
+    </details>
+    <details class="case pass" >
+      <summary>
+        <b>semantic_drummer_search</b>
+        <span>Semantic request is planned through the real LangGraph tool loop.</span>
+        <em>Workflow PASS · Quality PASS</em>
+      </summary>
+      <div class="case-body">
+        <section class="case-grid">
+          <div><h4>User Input</h4><pre>找鼓手特写</pre></div>
+          <div><h4>Final Answer</h4><pre>这张照片里 guitar_01.jpg 构图最好，drum_01.jpg 是抓拍瞬间。guitar_01.jpg 的 overall 评分是 92 分，而 drum_01.jpg 的整体评分为 88 分。guitar_01.jpg 虽然标记为吉他手特写，但鼓手在这里的表现也非常出色。</pre></div>
+          <div><h4>Expected Behavior</h4><pre>{
+  &quot;intent&quot;: &quot;langgraph&quot;,
+  &quot;final_answer&quot;: {
+    &quot;non_empty&quot;: true,
+    &quot;all_tools_ok&quot;: true
+  },
+  &quot;selected_images&quot;: {
+    &quot;min_count&quot;: 1
+  },
+  &quot;budgets&quot;: {
+    &quot;max_steps&quot;: 6,
+    &quot;max_llm_calls&quot;: 4,
+    &quot;max_inference_calls&quot;: 0,
+    &quot;max_tokens&quot;: 6000,
+    &quot;max_latency_ms&quot;: 60000
+  }
+}</pre></div>
+          <div><h4>Actual Behavior</h4><pre>{
+  &quot;intent&quot;: &quot;langgraph&quot;,
+  &quot;selected_images_count&quot;: 2,
+  &quot;gallery_selection_updated&quot;: false,
+  &quot;tools&quot;: [
+    &quot;gallery_search&quot;
+  ]
+}</pre></div>
+          <div><h4>Optional Preferences</h4><pre>{
+  &quot;preferred_tools&quot;: [
+    &quot;gallery_search&quot;
+  ],
+  &quot;target_steps&quot;: 3,
+  &quot;target_tool_calls&quot;: 1
+}</pre></div>
+          <div><h4>Behavior Checks</h4><pre>{
+  &quot;execution&quot;: true,
+  &quot;intent&quot;: true,
+  &quot;final_answer&quot;: true,
+  &quot;selected_images.count&quot;: true,
+  &quot;no_loop&quot;: true,
+  &quot;budget.max_steps&quot;: true,
+  &quot;budget.max_llm_calls&quot;: true,
+  &quot;budget.max_inference_calls&quot;: true,
+  &quot;budget.max_tokens&quot;: true,
+  &quot;budget.max_latency_ms&quot;: true
+}</pre></div>
+        </section>
+        <h4>Decision Trace</h4>
+        <div class="decision-trace">
+        <article class="decision-step">
+          <b>Step 1</b>
+          <div><label>Observation</label><pre>{
+  &quot;user_request&quot;: &quot;找鼓手特写&quot;,
+  &quot;analyzed_photos_available&quot;: 20,
+  &quot;prior_result&quot;: null
+}</pre></div>
+          <div><label>Decision summary</label><pre>{
+  &quot;summary&quot;: &quot;Retrieve candidates that satisfy the user request.&quot;,
+  &quot;source&quot;: &quot;model_tool_decision&quot;,
+  &quot;rule_id&quot;: null
+}</pre></div>
+          <div><label>Action</label><pre>{
+  &quot;tool&quot;: &quot;gallery_search&quot;,
+  &quot;parameters&quot;: {
+    &quot;recipe&quot;: &quot;quality&quot;,
+    &quot;query&quot;: &quot;鼓手特写&quot;,
+    &quot;limit&quot;: 10
+  }
+}</pre></div>
+          <div><label>Result</label><pre>{
+  &quot;ok&quot;: true,
+  &quot;summary&quot;: &quot;2 photo(s) matched; showing top 2 by overall. recipe=quality. 剔除模糊/过曝等低质量帧后按 overall 排序&quot;,
+  &quot;result_count&quot;: 2,
+  &quot;files_count&quot;: 2,
+  &quot;state_change&quot;: &quot;search&quot;,
+  &quot;latency_ms&quot;: 0.495
+}</pre></div>
+        </article>
+        <article class="decision-step">
+          <b>Step 2</b>
+          <div><label>Observation</label><pre>{
+  &quot;user_request&quot;: &quot;找鼓手特写&quot;,
+  &quot;prior_result&quot;: {
+    &quot;ok&quot;: true,
+    &quot;summary&quot;: &quot;2 photo(s) matched; showing top 2 by overall. recipe=quality. 剔除模糊/过曝等低质量帧后按 overall 排序&quot;,
+    &quot;result_count&quot;: 2,
+    &quot;files_count&quot;: 2,
+    &quot;state_change&quot;: &quot;search&quot;,
+    &quot;latency_ms&quot;: 0.495
+  }
+}</pre></div>
+          <div><label>Decision summary</label><pre>{
+  &quot;summary&quot;: &quot;Return the final user-facing answer from observable results.&quot;,
+  &quot;source&quot;: &quot;answer_node&quot;
+}</pre></div>
+          <div><label>Action</label><pre>{
+  &quot;type&quot;: &quot;respond&quot;
+}</pre></div>
+          <div><label>Result</label><pre>{
+  &quot;reply&quot;: &quot;这张照片里 guitar_01.jpg 构图最好，drum_01.jpg 是抓拍瞬间。guitar_01.jpg 的 overall 评分是 92 分，而 drum_01.jpg 的整体评分为 88 分。guitar_01.jpg 虽然标记为吉他手特写，但鼓手在这里的表现也非常出色。&quot;
+}</pre></div>
+        </article></div>
+        <section class="case-grid">
+          <div><h4>Tool Timeline</h4><p class="timeline"><b>LLM #1</b><span>8288 ms</span></p><p class="timeline"><b>gallery_search</b><span>0 ms</span></p><p class="timeline"><b>LLM #2</b><span>8705 ms</span></p><p class="timeline"><b>LLM #3</b><span>8608 ms</span></p></div>
+          <div><h4>Metrics</h4><pre>{
+  &quot;passed&quot;: true,
+  &quot;workflow_passed&quot;: true,
+  &quot;behavior_checks&quot;: {
+    &quot;execution&quot;: true,
+    &quot;intent&quot;: true,
+    &quot;final_answer&quot;: true,
+    &quot;selected_images.count&quot;: true,
+    &quot;no_loop&quot;: true,
+    &quot;budget.max_steps&quot;: true,
+    &quot;budget.max_llm_calls&quot;: true,
+    &quot;budget.max_inference_calls&quot;: true,
+    &quot;budget.max_tokens&quot;: true,
+    &quot;budget.max_latency_ms&quot;: true
+  },
+  &quot;actual_behavior&quot;: {
+    &quot;intent&quot;: &quot;langgraph&quot;,
+    &quot;selected_images_count&quot;: 2,
+    &quot;gallery_selection_updated&quot;: false,
+    &quot;tools&quot;: [
+      &quot;gallery_search&quot;
+    ]
+  },
+  &quot;actual_intent&quot;: &quot;langgraph&quot;,
+  &quot;intent_ok&quot;: true,
+  &quot;result_ok&quot;: true,
+  &quot;preferred_tool_score&quot;: 1.0,
+  &quot;selected_images&quot;: [
+    &quot;guitar_01.jpg&quot;,
+    &quot;drum_01.jpg&quot;
+  ],
+  &quot;steps&quot;: 4,
+  &quot;tool_calls&quot;: 1,
+  &quot;llm_calls&quot;: 3,
+  &quot;inference_calls&quot;: 0,
+  &quot;reflection_count&quot;: 0,
+  &quot;retry_count&quot;: 0,
+  &quot;loop_detected&quot;: false,
+  &quot;max_depth&quot;: 4,
+  &quot;trajectory_score&quot;: 91.6667,
+  &quot;cost_score&quot;: 100.0,
+  &quot;quality&quot;: {
+    &quot;eligible&quot;: true,
+    &quot;expected_images&quot;: [
+      &quot;drum_01.jpg&quot;
+    ],
+    &quot;actual_images&quot;: [
+      &quot;guitar_01.jpg&quot;,
+      &quot;drum_01.jpg&quot;
+    ],
+    &quot;precision_at_k&quot;: 0.5,
+    &quot;recall_at_k&quot;: 1.0,
+    &quot;ndcg&quot;: 0.6309,
+    &quot;average_precision&quot;: 0.5,
+    &quot;passed&quot;: true,
+    &quot;score&quot;: 65.77,
+    &quot;spearman&quot;: null,
+    &quot;mae&quot;: null
+  },
+  &quot;quality_passed&quot;: true,
+  &quot;failure&quot;: null,
+  &quot;failure_classification&quot;: null
+}</pre></div>
+          <div><h4>Photography Golden</h4><pre>{
+  &quot;eligible&quot;: true,
+  &quot;expected_images&quot;: [
+    &quot;drum_01.jpg&quot;
+  ],
+  &quot;actual_images&quot;: [
+    &quot;guitar_01.jpg&quot;,
+    &quot;drum_01.jpg&quot;
+  ],
+  &quot;precision_at_k&quot;: 0.5,
+  &quot;recall_at_k&quot;: 1.0,
+  &quot;ndcg&quot;: 0.6309,
+  &quot;average_precision&quot;: 0.5,
+  &quot;passed&quot;: true,
+  &quot;score&quot;: 65.77,
+  &quot;spearman&quot;: null,
+  &quot;mae&quot;: null
+}</pre></div>
+          <div><h4>Failure Reason</h4><pre>{
+  &quot;status&quot;: &quot;none&quot;
+}</pre></div>
+        </section>
+      </div>
+    </details>
+    <details class="case pass" >
+      <summary>
+        <b>gallery_statistics</b>
+        <span>Agent chooses the gallery statistics skill and explains the result.</span>
+        <em>Workflow PASS · Quality not evaluated</em>
+      </summary>
+      <div class="case-body">
+        <section class="case-grid">
+          <div><h4>User Input</h4><pre>这场大概什么水平</pre></div>
+          <div><h4>Final Answer</h4><pre>根据分析，共有20张照片被评估。平均总体得分为78.0分。评分桶显示有17张照片在60-90分之间，2张在90-100分之间，只有1张低于60分。主要标签包括舞台、人群等。整体来看，大部分照片质量较好。</pre></div>
+          <div><h4>Expected Behavior</h4><pre>{
+  &quot;intent&quot;: &quot;langgraph&quot;,
+  &quot;final_answer&quot;: {
+    &quot;non_empty&quot;: true,
+    &quot;all_tools_ok&quot;: true
+  },
+  &quot;budgets&quot;: {
+    &quot;max_steps&quot;: 6,
+    &quot;max_llm_calls&quot;: 4,
+    &quot;max_inference_calls&quot;: 0,
+    &quot;max_tokens&quot;: 6000,
+    &quot;max_latency_ms&quot;: 60000
+  }
+}</pre></div>
+          <div><h4>Actual Behavior</h4><pre>{
+  &quot;intent&quot;: &quot;langgraph&quot;,
+  &quot;selected_images_count&quot;: 0,
+  &quot;gallery_selection_updated&quot;: false,
+  &quot;tools&quot;: [
+    &quot;gallery_stats&quot;
+  ]
+}</pre></div>
+          <div><h4>Optional Preferences</h4><pre>{
+  &quot;preferred_tools&quot;: [
+    &quot;gallery_stats&quot;
+  ],
+  &quot;target_steps&quot;: 3,
+  &quot;target_tool_calls&quot;: 1
+}</pre></div>
+          <div><h4>Behavior Checks</h4><pre>{
+  &quot;execution&quot;: true,
+  &quot;intent&quot;: true,
+  &quot;final_answer&quot;: true,
+  &quot;no_loop&quot;: true,
+  &quot;budget.max_steps&quot;: true,
+  &quot;budget.max_llm_calls&quot;: true,
+  &quot;budget.max_inference_calls&quot;: true,
+  &quot;budget.max_tokens&quot;: true,
+  &quot;budget.max_latency_ms&quot;: true
+}</pre></div>
+        </section>
+        <h4>Decision Trace</h4>
+        <div class="decision-trace">
+        <article class="decision-step">
+          <b>Step 1</b>
+          <div><label>Observation</label><pre>{
+  &quot;user_request&quot;: &quot;这场大概什么水平&quot;,
+  &quot;analyzed_photos_available&quot;: 20,
+  &quot;prior_result&quot;: null
+}</pre></div>
+          <div><label>Decision summary</label><pre>{
+  &quot;summary&quot;: &quot;Read aggregate statistics for the current photo session.&quot;,
+  &quot;source&quot;: &quot;model_tool_decision&quot;,
+  &quot;rule_id&quot;: null
+}</pre></div>
+          <div><label>Action</label><pre>{
+  &quot;tool&quot;: &quot;gallery_stats&quot;,
+  &quot;parameters&quot;: {}
+}</pre></div>
+          <div><label>Result</label><pre>{
+  &quot;ok&quot;: true,
+  &quot;summary&quot;: &quot;20 analyzed photos; mean overall 78.0. Buckets: {&#x27;0-60&#x27;: 1, &#x27;60-90&#x27;: 17, &#x27;90-100&#x27;: 2}. Categories: {&#x27;AI_Keep_60-90&#x27;: 17, &#x27;AI_Best_90+&#x27;: 2, &#x27;AI_Trash_Below60&#x27;: 1}.&quot;,
+  &quot;result_count&quot;: null,
+  &quot;files_count&quot;: 0,
+  &quot;state_change&quot;: null,
+  &quot;latency_ms&quot;: 0.758
+}</pre></div>
+        </article>
+        <article class="decision-step">
+          <b>Step 2</b>
+          <div><label>Observation</label><pre>{
+  &quot;user_request&quot;: &quot;这场大概什么水平&quot;,
+  &quot;prior_result&quot;: {
+    &quot;ok&quot;: true,
+    &quot;summary&quot;: &quot;20 analyzed photos; mean overall 78.0. Buckets: {&#x27;0-60&#x27;: 1, &#x27;60-90&#x27;: 17, &#x27;90-100&#x27;: 2}. Categories: {&#x27;AI_Keep_60-90&#x27;: 17, &#x27;AI_Best_90+&#x27;: 2, &#x27;AI_Trash_Below60&#x27;: 1}.&quot;,
+    &quot;result_count&quot;: null,
+    &quot;files_count&quot;: 0,
+    &quot;state_change&quot;: null,
+    &quot;latency_ms&quot;: 0.758
+  }
+}</pre></div>
+          <div><label>Decision summary</label><pre>{
+  &quot;summary&quot;: &quot;Return the final user-facing answer from observable results.&quot;,
+  &quot;source&quot;: &quot;answer_node&quot;
+}</pre></div>
+          <div><label>Action</label><pre>{
+  &quot;type&quot;: &quot;respond&quot;
+}</pre></div>
+          <div><label>Result</label><pre>{
+  &quot;reply&quot;: &quot;根据分析，共有20张照片被评估。平均总体得分为78.0分。评分桶显示有17张照片在60-90分之间，2张在90-100分之间，只有1张低于60分。主要标签包括舞台、人群等。整体来看，大部分照片质量较好。&quot;
+}</pre></div>
+        </article></div>
+        <section class="case-grid">
+          <div><h4>Tool Timeline</h4><p class="timeline"><b>LLM #1</b><span>7313 ms</span></p><p class="timeline"><b>gallery_stats</b><span>1 ms</span></p><p class="timeline"><b>LLM #2</b><span>5525 ms</span></p></div>
+          <div><h4>Metrics</h4><pre>{
+  &quot;passed&quot;: true,
+  &quot;workflow_passed&quot;: true,
+  &quot;behavior_checks&quot;: {
+    &quot;execution&quot;: true,
+    &quot;intent&quot;: true,
+    &quot;final_answer&quot;: true,
+    &quot;no_loop&quot;: true,
+    &quot;budget.max_steps&quot;: true,
+    &quot;budget.max_llm_calls&quot;: true,
+    &quot;budget.max_inference_calls&quot;: true,
+    &quot;budget.max_tokens&quot;: true,
+    &quot;budget.max_latency_ms&quot;: true
+  },
+  &quot;actual_behavior&quot;: {
+    &quot;intent&quot;: &quot;langgraph&quot;,
+    &quot;selected_images_count&quot;: 0,
+    &quot;gallery_selection_updated&quot;: false,
+    &quot;tools&quot;: [
+      &quot;gallery_stats&quot;
+    ]
+  },
+  &quot;actual_intent&quot;: &quot;langgraph&quot;,
+  &quot;intent_ok&quot;: true,
+  &quot;result_ok&quot;: true,
+  &quot;preferred_tool_score&quot;: 1.0,
+  &quot;selected_images&quot;: [],
+  &quot;steps&quot;: 3,
+  &quot;tool_calls&quot;: 1,
+  &quot;llm_calls&quot;: 2,
+  &quot;inference_calls&quot;: 0,
+  &quot;reflection_count&quot;: 0,
+  &quot;retry_count&quot;: 0,
+  &quot;loop_detected&quot;: false,
+  &quot;max_depth&quot;: 3,
+  &quot;trajectory_score&quot;: 100.0,
+  &quot;cost_score&quot;: 100.0,
+  &quot;quality&quot;: {
+    &quot;eligible&quot;: false,
+    &quot;spearman&quot;: null,
+    &quot;mae&quot;: null
+  },
+  &quot;quality_passed&quot;: null,
+  &quot;failure&quot;: null,
+  &quot;failure_classification&quot;: null
+}</pre></div>
+          <div><h4>Photography Golden</h4><pre>{
+  &quot;eligible&quot;: false,
+  &quot;spearman&quot;: null,
+  &quot;mae&quot;: null
+}</pre></div>
+          <div><h4>Failure Reason</h4><pre>{
+  &quot;status&quot;: &quot;none&quot;
+}</pre></div>
+        </section>
+      </div>
+    </details>
+</main></body></html>

@@ -1,0 +1,86 @@
+{
+  "schema_version": "agent_evaluation_baseline.v1",
+  "created_at": "2026-08-05T15:09:34.090039+00:00",
+  "run": {
+    "run_id": "agent-eval-20260805-230839-1aa70f40",
+    "started_at": "2026-08-05T15:08:39.572856+00:00",
+    "completed_at": "2026-08-05T15:09:34.082559+00:00",
+    "duration_ms": 54510.309,
+    "model": {
+      "provider": "ollama",
+      "model_name": "qwen2.5:7b-instruct",
+      "native_tools": false
+    },
+    "case_count": 3
+  },
+  "metrics": {
+    "behavior": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 1.0,
+      "intent_accuracy": 1.0,
+      "preferred_tool_score": 1.0
+    },
+    "task": {
+      "total": 3,
+      "passed": 3,
+      "task_success_rate": 1.0,
+      "intent_accuracy": 1.0,
+      "tool_accuracy": 1.0,
+      "precision_at_k": 0.5,
+      "recall_at_k": 1.0
+    },
+    "trajectory": {
+      "average_steps": 3.0,
+      "average_tool_calls": 1.0,
+      "reflection_count": 0,
+      "retry_count": 0,
+      "loop_count": 0,
+      "max_depth": 4,
+      "trajectory_score": 97.2222
+    },
+    "runtime": {
+      "total_latency_ms": 54485.188,
+      "p50_latency_ms": 19169.876,
+      "p95_latency_ms": 22366.093,
+      "average_llm_calls": 2.0,
+      "average_inference_calls": 0.0,
+      "average_tokens": 3427.0,
+      "average_cost_usd": 0.0,
+      "average_queue_wait_ms": 0.0,
+      "cost_score": 100.0,
+      "token_source": "estimated"
+    },
+    "quality": {
+      "eligible_cases": 1,
+      "precision_at_k": 0.5,
+      "recall_at_k": 1.0,
+      "ndcg": 0.6309,
+      "map": 0.5,
+      "spearman": null,
+      "mae": null,
+      "quality_score": 65.77
+    },
+    "failure_counts": {}
+  },
+  "score": {
+    "schema_version": "agent_evaluation_score.v1",
+    "overall_score": 89.31,
+    "task_success": 100.0,
+    "quality": 65.77,
+    "cost": 100.0,
+    "trajectory": 97.22,
+    "configured_weights": {
+      "task_success": 0.4,
+      "quality": 0.3,
+      "cost": 0.15,
+      "trajectory": 0.15
+    },
+    "effective_weights": {
+      "task_success": 0.4,
+      "quality": 0.3,
+      "cost": 0.15,
+      "trajectory": 0.15
+    }
+  }
+}

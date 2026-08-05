@@ -1,0 +1,10 @@
+goldens:
+  - case_id: semantic_drummer_search
+    session_id: smoke
+    user_request: 找鼓手特写
+    expected_images:
+      - drum_01.jpg
+    relevance:
+      drum_01.jpg: 3
+    k: 5
+

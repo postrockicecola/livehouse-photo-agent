@@ -1,0 +1,64 @@
+cases:
+  - id: routed_quality_filter
+    schema_version: agent_behavior_case.v2
+    description: Deterministic quality intent selects the search skill.
+    user_input: 剔糊过曝的图
+    required_behavior:
+      intent: exclude_low_quality
+      final_answer:
+        non_empty: true
+        all_tools_ok: true
+      budgets:
+        max_steps: 4
+        max_llm_calls: 2
+        max_inference_calls: 0
+        max_tokens: 5000
+        max_latency_ms: 45000
+    optional_behavior:
+      preferred_tools: [gallery_search]
+    session: smoke
+
+  - id: semantic_drummer_search
+    schema_version: agent_behavior_case.v2
+    description: Semantic request is planned through the real LangGraph tool loop.
+    user_input: 找鼓手特写
+    required_behavior:
+      intent: langgraph
+      final_answer:
+        non_empty: true
+        all_tools_ok: true
+      selected_images:
+        min_count: 1
+      budgets:
+        max_steps: 6
+        max_llm_calls: 4
+        max_inference_calls: 0
+        max_tokens: 6000
+        max_latency_ms: 60000
+    optional_behavior:
+      preferred_tools: [gallery_search]
+      target_steps: 3
+      target_tool_calls: 1
+    session: smoke
+
+  - id: gallery_statistics
+    schema_version: agent_behavior_case.v2
+    description: Agent chooses the gallery statistics skill and explains the result.
+    user_input: 这场大概什么水平
+    required_behavior:
+      intent: langgraph
+      final_answer:
+        non_empty: true
+        all_tools_ok: true
+      budgets:
+        max_steps: 6
+        max_llm_calls: 4
+        max_inference_calls: 0
+        max_tokens: 6000
+        max_latency_ms: 60000
+    optional_behavior:
+      preferred_tools: [gallery_stats]
+      target_steps: 3
+      target_tool_calls: 1
+    session: smoke
+

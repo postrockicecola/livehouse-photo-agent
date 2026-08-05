@@ -4,7 +4,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from services.agent.conversation import ConversationalAgent
 from services.agent.skills.gallery import (
+    ApplyFilmVibeSkill,
     ExplainPhotoSkill,
     GallerySearchSkill,
     GallerySelectSkill,
@@ -16,6 +18,7 @@ from services.agent.skills.gallery import (
     _style_intent,
     gallery_registry,
 )
+from utils.gallery_curation import write_gallery_curation
 
 
 def _write_results(base: Path, rows: list[dict]) -> None:
@@ -73,6 +76,58 @@ def test_registry_has_core_skills(tmp_path: Path) -> None:
         "export_selected",
         "mark_score_gap",
     } <= names
+
+
+def test_apply_film_vibe_preview_prefers_focus_over_selected_files(
+    tmp_path: Path,
+) -> None:
+    selected = [f"picked_{i}.jpg" for i in range(10)]
+    write_gallery_curation(tmp_path, selected_keys=selected)
+
+    res = ApplyFilmVibeSkill(str(tmp_path)).run(
+        {
+            "prompt": "把这张图修成黑白的",
+            "focus_file": "/session/Previews/focused.jpg",
+            "selected_files": selected,
+        }
+    )
+
+    assert res.ok is True
+    assert res.metadata["files"] == ["focused.jpg"]
+    assert res.metadata["count"] == 1
+    assert res.metadata["focus_file"] == "focused.jpg"
+
+
+def test_apply_film_vibe_preview_uses_turn_selection_without_focus(
+    tmp_path: Path,
+) -> None:
+    selected = ["/session/Previews/a.jpg", "/session/Previews/b.jpg"]
+    res = ApplyFilmVibeSkill(str(tmp_path)).run(
+        {"prompt": "整组选成黑白", "selected_files": selected}
+    )
+
+    assert res.ok is True
+    assert res.metadata["files"] == ["a.jpg", "b.jpg"]
+
+
+def test_focused_vibe_turn_emits_only_focused_preview_file(tmp_path: Path) -> None:
+    selected = [f"picked_{i}.jpg" for i in range(10)]
+    write_gallery_curation(tmp_path, selected_keys=selected)
+    agent = ConversationalAgent(
+        lambda _messages: "已完成。",
+        skills=gallery_registry(str(tmp_path)),
+        wrap_tool_output=False,
+        turn_context={
+            "base_dir": str(tmp_path),
+            "focus_file": "focused.jpg",
+            "selected_files": selected,
+        },
+    )
+
+    result = agent.chat("把这张图修成黑白纪实风格")
+
+    call = next(tc for tc in result.tool_calls if tc["tool"] == "apply_film_vibe")
+    assert call["metadata"]["files"] == ["focused.jpg"]
 
 
 def test_search_empty_session(tmp_path: Path) -> None:

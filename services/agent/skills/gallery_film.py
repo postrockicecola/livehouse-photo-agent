@@ -1,6 +1,7 @@
 """Gallery film recommend / vibe skills."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from services.agent.skills.base import SkillResult
@@ -161,26 +162,37 @@ class ApplyFilmVibeSkill:
             intensity = float((vibe or {}).get("intensity") if vibe else decision.intensity)
         except (TypeError, ValueError):
             intensity = float(decision.intensity)
-        files: list[str] = []
-        try:
-            from pathlib import Path
-
-            from utils.gallery_curation import read_gallery_curation
-
-            cur = read_gallery_curation(self._base_dir) or {}
-            # Prefer basenames for ChatDock/Gallery lookup; selected_keys may be absolute paths.
-            seen: set[str] = set()
-            for raw in cur.get("selected_keys") or []:
-                s = str(raw or "").strip()
-                if not s:
-                    continue
-                base = Path(s).name or s
-                if base in seen:
-                    continue
-                seen.add(base)
-                files.append(base)
-        except Exception:
+        # Preview scope follows the current turn, not stale Gallery curation.
+        # An open photo is more specific than the user's multi-selection.
+        focus = str(args.get("file") or args.get("focus_file") or "").strip()
+        if focus:
+            files = [Path(focus).name or focus]
+        else:
+            selected = args.get("selected_files")
             files = []
+            if isinstance(selected, list):
+                files = list(
+                    dict.fromkeys(
+                        Path(value).name or value
+                        for raw in selected
+                        if (value := str(raw or "").strip())
+                    )
+                )
+            if not files:
+                try:
+                    from utils.gallery_curation import read_gallery_curation
+
+                    cur = read_gallery_curation(self._base_dir) or {}
+                    # Fall back to persisted picks only when this turn has no focus/selection.
+                    files = list(
+                        dict.fromkeys(
+                            Path(value).name or value
+                            for raw in cur.get("selected_keys") or []
+                            if (value := str(raw or "").strip())
+                        )
+                    )
+                except Exception:
+                    files = []
         summary = (
             f"已应用风格「{label}」（{variant}，强度 {intensity:.2f}）。"
             "请点回复下方的「打开风格预览」查看效果（不要罗列文件名）。"
@@ -195,6 +207,7 @@ class ApplyFilmVibeSkill:
                 "reply_zh": summary,
                 "files": files,
                 "count": len(files),
+                "focus_file": files[0] if focus and files else None,
             },
         )
 

@@ -47,10 +47,36 @@ function filesFromToolCalls(calls: AgentToolCall[]): string[] {
   return out;
 }
 
+function focusedFileFromCall(call: AgentToolCall): string {
+  return String(
+    call.args?.focus_file ||
+      call.args?.file ||
+      call.metadata?.focus_file ||
+      "",
+  ).trim();
+}
+
+function vibePreviewMetadata(call: AgentToolCall): Record<string, unknown> {
+  const meta = { ...(call.metadata ?? {}) };
+  const focus = focusedFileFromCall(call);
+  if (!focus) return meta;
+  meta.files = [focus];
+  meta.focus_file = focus;
+  if (Array.isArray(meta.paths)) {
+    const focusedPaths = (meta.paths as unknown[]).filter((value) => {
+      const path = String(value || "").trim();
+      return path.split("/").pop() === focus;
+    });
+    meta.paths = focusedPaths;
+  }
+  return meta;
+}
+
 /** Notify Gallery page to reload curation / vibe after write skills. */
 function emitGalleryUiActions(
   calls: AgentToolCall[],
   turnContext: AgentToolCall[] = calls,
+  focusFile?: string,
 ) {
   if (typeof window === "undefined") return;
   const turnFiles = filesFromToolCalls(turnContext);
@@ -59,11 +85,19 @@ function emitGalleryUiActions(
     const action = String(call.metadata?.ui_action || "");
     if (!action) continue;
     const meta = { ...(call.metadata ?? {}) };
-    // Style preview should prefer this turn's shortlist when the vibe skill itself
-    // has no files (e.g. select+vibe in one turn before curation is reloaded).
-    if (action === "reload_vibe" && turnFiles.length > 0) {
-      const existing = Array.isArray(meta.files) ? meta.files : [];
-      if (existing.length === 0) meta.files = turnFiles;
+    if (action === "reload_vibe") {
+      const focus = String(focusFile || "").trim();
+      // The photo open when this message was sent is the strongest preview scope.
+      // Do not let stale curation/tool metadata expand a focused edit to many photos.
+      if (focus) {
+        meta.files = [focus];
+        meta.focus_file = focus;
+      } else if (turnFiles.length > 0) {
+        // No focused photo: inherit this turn's shortlist only when the vibe skill
+        // itself did not provide an explicit preview set.
+        const existing = Array.isArray(meta.files) ? meta.files : [];
+        if (existing.length === 0) meta.files = turnFiles;
+      }
     }
     window.dispatchEvent(
       new CustomEvent("luma:gallery-agent-action", {
@@ -80,13 +114,15 @@ function scrubAssistantText(text: string): string {
 }
 
 function previewItemsFromCall(call: AgentToolCall): ShowcasePreviewItem[] {
-  const paths = showcasePathsFromCall(call);
-  const files = Array.isArray(call.metadata?.files)
-    ? (call.metadata.files as unknown[]).map((f) => String(f || "").trim())
+  const metadata = isVibePreviewCall(call) ? vibePreviewMetadata(call) : (call.metadata ?? {});
+  const scopedCall = { ...call, metadata };
+  const paths = showcasePathsFromCall(scopedCall);
+  const files = Array.isArray(metadata.files)
+    ? (metadata.files as unknown[]).map((f) => String(f || "").trim())
     : [];
   const scores =
-    call.metadata?.scores && typeof call.metadata.scores === "object"
-      ? (call.metadata.scores as Record<string, number>)
+    metadata.scores && typeof metadata.scores === "object"
+      ? (metadata.scores as Record<string, number>)
       : {};
   return paths.map((path, i) => {
     const file = files[i] || path.split("/").pop() || path;
@@ -250,7 +286,10 @@ function AssistantActionBar({
   if (!searchCall && !vibeCall) return null;
 
   const emitGallery = (call: AgentToolCall, action: string) => {
-    const meta = { ...(call.metadata ?? {}) };
+    const meta =
+      action === "reload_vibe"
+        ? vibePreviewMetadata(call)
+        : { ...(call.metadata ?? {}) };
     if (action === "reload_vibe") {
       const turnFiles = filesFromToolCalls(calls);
       if (turnFiles.length > 0 && (!Array.isArray(meta.files) || meta.files.length === 0)) {
@@ -641,12 +680,19 @@ function ToolChip({
   const openVibe = () => {
     if (showcase && onOpenShowcase) {
       const label = typeof vibeMeta?.label_zh === "string" ? vibeMeta.label_zh : undefined;
-      onOpenShowcase(previewItemsFromCall(call), "vibe", label, gradeClassFromVibe(vibeMeta));
-      return;
+      const items = previewItemsFromCall(call);
+      if (items.length > 0) {
+        onOpenShowcase(items, "vibe", label, gradeClassFromVibe(vibeMeta));
+        return;
+      }
     }
     window.dispatchEvent(
       new CustomEvent("luma:gallery-agent-action", {
-        detail: { action: "reload_vibe", tool: call.tool, metadata: call.metadata ?? {} },
+        detail: {
+          action: "reload_vibe",
+          tool: call.tool,
+          metadata: vibePreviewMetadata(call),
+        },
       }),
     );
   };
@@ -921,7 +967,11 @@ export function ChatDock({
           }
           if (fresh.length === 0) return;
           // Emit only fresh actions; pass whole turn so vibe can inherit search/select files.
-          emitGalleryUiActions(fresh, turnToolCalls.length ? turnToolCalls : fresh);
+          emitGalleryUiActions(
+            fresh,
+            turnToolCalls.length ? turnToolCalls : fresh,
+            focusCtx.focus_file,
+          );
         };
         const { receivedToken } = await streamAgentChat(apiBase, body, {
           onToken: (text) =>
@@ -965,7 +1015,11 @@ export function ChatDock({
             error: Boolean(data.error),
             streaming: false,
           }));
-          emitGalleryUiActions(data.tool_calls ?? []);
+          emitGalleryUiActions(
+            data.tool_calls ?? [],
+            data.tool_calls ?? [],
+            focusCtx.focus_file,
+          );
           if (!data.error) advancePromptPhase(data.tool_calls);
         }
       } catch (streamErr) {
@@ -980,7 +1034,11 @@ export function ChatDock({
             error: Boolean(data.error),
             streaming: false,
           }));
-          emitGalleryUiActions(data.tool_calls ?? []);
+          emitGalleryUiActions(
+            data.tool_calls ?? [],
+            data.tool_calls ?? [],
+            focusCtx.focus_file,
+          );
           if (!data.error) advancePromptPhase(data.tool_calls);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : streamErr instanceof Error ? streamErr.message : "请求失败";

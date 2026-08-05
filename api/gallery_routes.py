@@ -577,11 +577,18 @@ def get_film_render(
         lab_film_cache_extra = "automatedGradeV1"
     else:
         lab_film_cache_extra = "displayReady1"
+    # Match /image orientation semantics. Extracted preview JPEGs often have
+    # Orientation=1 even when the sibling RAW says the capture is portrait.
+    # The film renderer writes fresh JPEG pixels, so it must receive that RAW
+    # fallback rotation instead of relying on browser EXIF handling.
+    eff_rotate = rotate
+    if rotate == 0:
+        eff_rotate = _auto_capture_rotation(str(src_abs))
     try:
         cached = render_film_to_cache(
             src_path=src_abs,
             variant_id=variant,
-            rotate=rotate,
+            rotate=eff_rotate,
             max_side=max_side,
             cache_root=cache_root,
             cache_key_extra=lab_film_cache_extra,

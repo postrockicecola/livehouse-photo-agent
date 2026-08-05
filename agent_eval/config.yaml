@@ -1,0 +1,21 @@
+thresholds:
+  min_behavior_success_rate: 0.80
+  min_intent_accuracy: 0.90
+  min_overall_score: 80
+  max_loop_count: 0
+
+  # Allowed change from agent_eval/baseline.json before CI fails.
+  max_success_drop: 0.05
+  max_quality_drop: 0.05
+  max_steps_increase_pct: 0.20
+  max_tool_calls_increase_pct: 0.20
+  max_token_increase_pct: 0.25
+  max_inference_increase_pct: 0.25
+  max_latency_increase_pct: 0.25
+
+score_weights:
+  task_success: 0.40
+  quality: 0.30
+  cost: 0.15
+  trajectory: 0.15
+

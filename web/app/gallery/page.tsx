@@ -210,6 +210,8 @@ export default function HomePage() {
   const curationHydratedRef = useRef(false);
   const curationSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingVibePreviewRef = useRef(false);
+  /** Single-photo scope attached to the current Agent vibe turn. */
+  const vibePreviewFocusRef = useRef<string | null>(null);
   /** Last observed gallery totals for mid-job progressive refresh. */
   const galleryPollTotalsRef = useRef<{ raw: number | null; count: number | null }>({
     raw: null,
@@ -557,12 +559,35 @@ export default function HomePage() {
         setActionMsg(`助手已应用「${sv.label_zh}」，照片加载后将打开风格预览…`);
         return;
       }
+      const focus = String(vibePreviewFocusRef.current || "").trim();
+      const focusedPool = focus
+        ? pool.filter((it) => {
+            const candidates = [
+              catalogBasenameForExport(it),
+              it.file,
+              gallerySelectionKey(it),
+              it.path,
+            ]
+              .map((value) => String(value || "").replace(/\\/g, "/"))
+              .filter(Boolean);
+            return candidates.some(
+              (value) => value === focus || value.split("/").pop() === focus,
+            );
+          })
+        : pool;
+      if (focus && focusedPool.length === 0) {
+        pendingVibePreviewRef.current = true;
+        setActionMsg(`正在加载当前照片 ${focus} 的风格预览…`);
+        return;
+      }
       pendingVibePreviewRef.current = false;
       setAgentPreviewVariant("vibe");
       setSelectionPreviewOpen(false);
       // Remount modal even if the previous vibe preview was still "open" in state.
       setAgentPreviewItems(null);
-      const next = pool.slice(0, 40);
+      // A focused Agent conversation must never widen back to shortlist/all photos,
+      // including delayed loads and repeated clicks from older chat turns.
+      const next = focus ? focusedPool.slice(0, 1) : focusedPool.slice(0, 40);
       window.setTimeout(() => setAgentPreviewItems(next), 0);
       setActionMsg(
         matched
@@ -638,12 +663,15 @@ export default function HomePage() {
       }
       if (action === "reload_vibe") {
         const raw = meta.session_vibe;
+        const focus = String(meta.focus_file || "").trim();
+        vibePreviewFocusRef.current = focus || null;
         setReloadNonce((n) => n + 1);
         // Explicit clear only when skill sent session_vibe: null (not when metadata omitted).
         if (raw === null) {
           setSessionVibe(null);
           setUseSessionVibeForExport(false);
           pendingVibePreviewRef.current = false;
+          vibePreviewFocusRef.current = null;
           setActionMsg("助手已清除胶片风格");
           return;
         }
