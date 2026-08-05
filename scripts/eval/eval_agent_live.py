@@ -3,11 +3,14 @@
 
 ``--mock`` (CI): scripted ``model_queue`` ChatFn — exercises the live scorer.
 ``--live`` (nightly): real chat backend from ``configs/livehouse.yaml``.
+``--live --strict``: also enforce ``_LIVE_STRICT_THRESHOLDS`` as a release gate
+(deliberately relaxed until a few weeks of real-model baselines land).
 
 Run::
 
     python -m scripts.eval.eval_agent_live --mock --suite smoke
     python -m scripts.eval.eval_agent_live --live --suite smoke --json
+    python -m scripts.eval.eval_agent_live --live --suite smoke --strict
     python -m scripts.eval.eval_agent_live --mock --suite core --out /tmp/agent_live.json
 """
 from __future__ import annotations
@@ -34,6 +37,16 @@ from services.agent.skills.gallery import gallery_registry  # noqa: E402
 from services.agent.skills.memory import register_memory_skills  # noqa: E402
 
 ChatFn = Callable[[list[dict[str, str]]], str]
+
+# Initial real-model release gate (Phase 3.5). Deliberately looser than the
+# frozen mock thresholds below — raise these once a few weeks of --live
+# baselines confirm the real chat model holds the line. Only enforced with
+# --strict; plain --live stays informational.
+_LIVE_STRICT_THRESHOLDS = {
+    "pass_at_1": 0.85,
+    "grounded_rate": 0.95,
+    "json_leak_rate": 0.05,
+}
 
 
 def _scripted_chat(queue: list[str]) -> ChatFn:
@@ -289,6 +302,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-tools", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--out", type=str, default="", help="Write full JSON report")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="With --live, enforce _LIVE_STRICT_THRESHOLDS instead of staying informational",
+    )
     args = parser.parse_args(argv)
 
     mode = "live" if args.live else "mock"
@@ -335,6 +353,23 @@ def main(argv: list[str] | None = None) -> int:
                 "mock thresholds failed: "
                 f"pass_at_1={m.get('pass_at_1')} json_leak={m.get('json_leak_rate')} "
                 f"grounded={m.get('grounded_rate')}",
+                file=sys.stderr,
+            )
+        return 0 if ok else 1
+
+    if args.strict:
+        thr = _LIVE_STRICT_THRESHOLDS
+        ok = (
+            float(m.get("pass_at_1") or 0) >= thr["pass_at_1"]
+            and float(m.get("grounded_rate") or 0) >= thr["grounded_rate"]
+            and float(m.get("json_leak_rate") or 1.0) <= thr["json_leak_rate"]
+        )
+        if not ok:
+            print(
+                "live --strict thresholds failed: "
+                f"pass_at_1={m.get('pass_at_1')} (need >= {thr['pass_at_1']}) "
+                f"grounded_rate={m.get('grounded_rate')} (need >= {thr['grounded_rate']}) "
+                f"json_leak_rate={m.get('json_leak_rate')} (need <= {thr['json_leak_rate']})",
                 file=sys.stderr,
             )
         return 0 if ok else 1

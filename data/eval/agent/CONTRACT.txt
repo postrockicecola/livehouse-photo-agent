@@ -46,13 +46,17 @@ Cases with ``"live": true`` enter ``scripts/eval/eval_agent_live.py``.
 python -m scripts.eval.eval_agent_live --mock --suite smoke   # CI
 python -m scripts.eval.eval_agent_live --mock --suite core
 python -m scripts.eval.eval_agent_live --live --suite smoke   # needs chat model
+python -m scripts.eval.eval_agent_live --live --suite smoke --strict   # nightly release gate
 ```
 
 Metrics: ``pass_at_1``, ``tool_name_acc``, ``route_acc``, ``grounded_rate``,
 ``json_leak_rate``, ``empty_honesty_rate``, ``p50/p95_latency_ms``, plus
 ``prompt_hash`` + model metadata. Mock mode is a CI gate with frozen thresholds:
 ``pass_at_1=1``, ``json_leak_rate=0``, ``grounded_rate=1`` (and all cases pass).
-``--live`` remains informational (exit 0) until a live release threshold is frozen.
+Plain ``--live`` stays informational (exit 0). ``--live --strict`` enforces
+``_LIVE_STRICT_THRESHOLDS`` in ``eval_agent_live.py`` (initial, deliberately
+loose: ``pass_at_1>=0.85``, ``grounded_rate>=0.95``, ``json_leak_rate<=0.05``) —
+raise these once a few weeks of real-model runs confirm the baseline holds.
 
 ## Observability + promotion (Phase 4)
 
@@ -85,10 +89,10 @@ Promote targets: router fixtures, ``router_paraphrases.v1.jsonl``, and chat
 - Turn trace contract: ``quality/schemas/agent_turn_trace.schema.json``
   (``schema_version: agent_turn_trace.v1`` on ``ChatResponse.trace``).
 - Search data: ``data/agent/query_synonyms.jsonl`` +
-  ``data/agent/search_recipes.json``; CI smoke runs
-  ``measure_gallery_search_gaps`` on the smoke fixture and fails only when
-  *in-table / case* probes regress to ``empty_synonym_gap`` (OOV probes stay
-  informational).
+  ``data/agent/search_recipes.json``; ``tests/test_agent_search_gaps.py``
+  runs ``measure_gallery_search_gaps`` on the smoke fixture and fails only
+  when *in-table / case* probes regress to ``empty_synonym_gap`` (OOV probes
+  stay informational).
 
 ## Human / LLM judge (Phase 6)
 

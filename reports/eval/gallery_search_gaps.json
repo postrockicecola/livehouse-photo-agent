@@ -1,0 +1,1323 @@
+{
+  "schema_version": "gallery_search_gaps.v1",
+  "generated_at": "2026-08-02T03:32:36.493460+00:00",
+  "question": "When gallery_search returns empty, is it synonym-table miss or missing VLM text (tags/captions/reasons)?",
+  "sessions": [
+    {
+      "label": "smoke_fixture",
+      "session": {
+        "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/agent/sessions/smoke",
+        "label": "smoke_fixture",
+        "n_rows": 20,
+        "vlm_content_count": 20,
+        "pipeline_only": false,
+        "rows_with_semantic_tags": 20,
+        "rows_with_content_text": 20,
+        "semantic_tag_vocab": [
+          {
+            "tag": "stage",
+            "count": 16
+          },
+          {
+            "tag": "crowd",
+            "count": 6
+          },
+          {
+            "tag": "drummer",
+            "count": 1
+          },
+          {
+            "tag": "drums",
+            "count": 1
+          },
+          {
+            "tag": "guitarist",
+            "count": 1
+          },
+          {
+            "tag": "guitar",
+            "count": 1
+          },
+          {
+            "tag": "blurry",
+            "count": 1
+          },
+          {
+            "tag": "wide stage",
+            "count": 1
+          },
+          {
+            "tag": "panorama",
+            "count": 1
+          }
+        ],
+        "text_token_samples": [
+          "drummer drums peak drummer hit under red wash.",
+          "guitarist guitar 吉他手特写",
+          "blurry out of focus.",
+          "wide stage panorama 舞台全景",
+          "stage crowd stage frame 0",
+          "stage stage frame 1",
+          "stage stage frame 2",
+          "stage crowd stage frame 3"
+        ]
+      },
+      "summary": {
+        "probes": 20,
+        "hits": 12,
+        "empty_total": 8,
+        "empty_vlm_absent": 0,
+        "empty_synonym_gap": 2,
+        "empty_true_negative": 6,
+        "empty_other": 0,
+        "empty_synonym_gap_share_of_empty": 0.25,
+        "empty_vlm_absent_share_of_empty": 0.0,
+        "hit_rate": 0.6,
+        "vlm_content_rate": 1.0
+      },
+      "probes": [
+        {
+          "query": "鼓手特写",
+          "family": "drummer",
+          "notes": "case search_drummer",
+          "hit_count": 2,
+          "top_files": [
+            "drum_01.jpg",
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手特写",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming",
+            "特写",
+            "近景",
+            "close-up",
+            "closeup",
+            "portrait"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "鼓手",
+          "family": "drummer",
+          "notes": "case grounding",
+          "hit_count": 1,
+          "top_files": [
+            "drum_01.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "吉他手",
+          "family": "guitarist",
+          "notes": "case search_guitarist",
+          "hit_count": 1,
+          "top_files": [
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "吉他手",
+            "吉他",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "吉他",
+          "family": "guitarist",
+          "notes": "case repeat_tool",
+          "hit_count": 1,
+          "top_files": [
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "吉他",
+            "吉他手",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "舞台全景",
+          "family": "wide_stage",
+          "notes": "case search_wide_stage",
+          "hit_count": 1,
+          "top_files": [
+            "wide_01.jpg"
+          ],
+          "expanded_terms": [
+            "舞台全景",
+            "全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "全景",
+          "family": "wide_stage",
+          "notes": "case compound panorama",
+          "hit_count": 1,
+          "top_files": [
+            "wide_01.jpg"
+          ],
+          "expanded_terms": [
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "贝斯手",
+          "family": "bassist",
+          "notes": "case json_leak",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "贝斯手",
+            "贝斯",
+            "bass",
+            "bassist"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "萨克斯风",
+          "family": "saxophone",
+          "notes": "case empty_semantic_query (expect absent)",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "萨克斯风"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "架子鼓那哥们",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 1,
+          "top_files": [
+            "drum_01.jpg"
+          ],
+          "expanded_terms": [
+            "架子鼓那哥们",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "打鼓的人",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 1,
+          "top_files": [
+            "drum_01.jpg"
+          ],
+          "expanded_terms": [
+            "打鼓的人",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "percussion",
+          "family": "drummer",
+          "notes": "OOV English; not in synonym table",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "percussion"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "empty_synonym_gap"
+        },
+        {
+          "query": "六弦",
+          "family": "guitarist",
+          "notes": "OOV slang",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "六弦"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "empty_synonym_gap"
+        },
+        {
+          "query": "电吉他手",
+          "family": "guitarist",
+          "notes": "partial OOV",
+          "hit_count": 1,
+          "top_files": [
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "电吉他手",
+            "吉他手",
+            "吉他",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "大场面俯拍",
+          "family": "wide_stage",
+          "notes": "OOV paraphrase",
+          "hit_count": 1,
+          "top_files": [
+            "wide_01.jpg"
+          ],
+          "expanded_terms": [
+            "大场面俯拍",
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "establishing shot",
+          "family": "wide_stage",
+          "notes": "in-table English via 全景 group only if trigger hits",
+          "hit_count": 1,
+          "top_files": [
+            "wide_01.jpg"
+          ],
+          "expanded_terms": [
+            "establishing shot",
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama",
+            "shot"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "主唱剪影",
+          "family": "singer_backlight",
+          "notes": "compound; singer+backlight groups",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "主唱剪影",
+            "歌手",
+            "主唱",
+            "人声",
+            "singer",
+            "vocalist",
+            "vocals",
+            "逆光",
+            "剪影",
+            "轮廓光",
+            "backlight",
+            "silhouette",
+            "rim light",
+            "backlit"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "歌手",
+          "family": "singer",
+          "notes": "in-table",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "歌手",
+            "主唱",
+            "人声",
+            "singer",
+            "vocalist",
+            "vocals"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "观众灯海",
+          "family": "crowd",
+          "notes": "in-table",
+          "hit_count": 6,
+          "top_files": [
+            "stage_00.jpg",
+            "stage_03.jpg",
+            "stage_06.jpg",
+            "stage_09.jpg",
+            "stage_12.jpg"
+          ],
+          "expanded_terms": [
+            "观众灯海",
+            "观众",
+            "灯海",
+            "crowd",
+            "audience",
+            "pit"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 6,
+          "classification": "hit"
+        },
+        {
+          "query": "sax",
+          "family": "saxophone",
+          "notes": "OOV short; expect absent on livehouse sets",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "sax"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "saxophone",
+          "family": "saxophone",
+          "notes": "OOV English; expect absent",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "saxophone"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        }
+      ],
+      "synonym_gap_examples": [
+        {
+          "query": "percussion",
+          "family": "drummer",
+          "notes": "OOV English; not in synonym table",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "percussion"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "empty_synonym_gap"
+        },
+        {
+          "query": "六弦",
+          "family": "guitarist",
+          "notes": "OOV slang",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "六弦"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "empty_synonym_gap"
+        }
+      ],
+      "hit_examples": [
+        {
+          "query": "鼓手特写",
+          "family": "drummer",
+          "notes": "case search_drummer",
+          "hit_count": 2,
+          "top_files": [
+            "drum_01.jpg",
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手特写",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming",
+            "特写",
+            "近景",
+            "close-up",
+            "closeup",
+            "portrait"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "鼓手",
+          "family": "drummer",
+          "notes": "case grounding",
+          "hit_count": 1,
+          "top_files": [
+            "drum_01.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "吉他手",
+          "family": "guitarist",
+          "notes": "case search_guitarist",
+          "hit_count": 1,
+          "top_files": [
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "吉他手",
+            "吉他",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "吉他",
+          "family": "guitarist",
+          "notes": "case repeat_tool",
+          "hit_count": 1,
+          "top_files": [
+            "guitar_01.jpg"
+          ],
+          "expanded_terms": [
+            "吉他",
+            "吉他手",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "舞台全景",
+          "family": "wide_stage",
+          "notes": "case search_wide_stage",
+          "hit_count": 1,
+          "top_files": [
+            "wide_01.jpg"
+          ],
+          "expanded_terms": [
+            "舞台全景",
+            "全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "全景",
+          "family": "wide_stage",
+          "notes": "case compound panorama",
+          "hit_count": 1,
+          "top_files": [
+            "wide_01.jpg"
+          ],
+          "expanded_terms": [
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "架子鼓那哥们",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 1,
+          "top_files": [
+            "drum_01.jpg"
+          ],
+          "expanded_terms": [
+            "架子鼓那哥们",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        },
+        {
+          "query": "打鼓的人",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 1,
+          "top_files": [
+            "drum_01.jpg"
+          ],
+          "expanded_terms": [
+            "打鼓的人",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 1,
+          "classification": "hit"
+        }
+      ]
+    },
+    {
+      "label": "recorded_250",
+      "session": {
+        "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/images",
+        "label": "recorded_250",
+        "n_rows": 250,
+        "vlm_content_count": 240,
+        "pipeline_only": false,
+        "rows_with_semantic_tags": 0,
+        "rows_with_content_text": 240,
+        "semantic_tag_vocab": [],
+        "text_token_samples": [
+          "红色的灯光勾出了歌手的轮廓 red light accentuates the silhouette of the singer 红色的灯光勾出了歌手的轮廓",
+          "红色的灯光在侧面勾出歌手轮廓 red light on the side accentuates the silhouette of the singer 红色的灯光在侧面勾出歌手轮廓",
+          "红色的灯光在侧面勾出歌手轮廓 red light on the side accentuates the singer's silhouette 红色的灯光在侧面勾出歌手轮廓",
+          "红色的灯光勾出了歌手的轮廓 red light accentuates the singer's silhouette 红色的灯光勾出了歌手的轮廓",
+          "红色的灯光勾出了歌手的轮廓 red light accentuates the silhouette of the singer 红色的灯光勾出了歌手的轮廓",
+          "红色的灯光勾出了歌手轮廓 red light accentuates the singer's silhouette 红色的灯光勾出了歌手轮廓",
+          "红色的灯光勾出了歌手的轮廓 red light highlights the singer's silhouette 红色的灯光勾出了歌手的轮廓",
+          "红色的灯光勾出了歌手的轮廓 red light accentuates the silhouette of the singer 红色的灯光勾出了歌手的轮廓"
+        ]
+      },
+      "summary": {
+        "probes": 20,
+        "hits": 6,
+        "empty_total": 14,
+        "empty_vlm_absent": 0,
+        "empty_synonym_gap": 1,
+        "empty_true_negative": 13,
+        "empty_other": 0,
+        "empty_synonym_gap_share_of_empty": 0.071,
+        "empty_vlm_absent_share_of_empty": 0.0,
+        "hit_rate": 0.3,
+        "vlm_content_rate": 0.96
+      },
+      "probes": [
+        {
+          "query": "鼓手特写",
+          "family": "drummer",
+          "notes": "case search_drummer",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手特写",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming",
+            "特写",
+            "近景",
+            "close-up",
+            "closeup",
+            "portrait"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "鼓手",
+          "family": "drummer",
+          "notes": "case grounding",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "吉他手",
+          "family": "guitarist",
+          "notes": "case search_guitarist",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "吉他手",
+            "吉他",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "吉他",
+          "family": "guitarist",
+          "notes": "case repeat_tool",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "吉他",
+            "吉他手",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "舞台全景",
+          "family": "wide_stage",
+          "notes": "case search_wide_stage",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "舞台全景",
+            "全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "全景",
+          "family": "wide_stage",
+          "notes": "case compound panorama",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "贝斯手",
+          "family": "bassist",
+          "notes": "case json_leak",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "贝斯手",
+            "贝斯",
+            "bass",
+            "bassist"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "萨克斯风",
+          "family": "saxophone",
+          "notes": "case empty_semantic_query (expect absent)",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "萨克斯风"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "架子鼓那哥们",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "架子鼓那哥们",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "打鼓的人",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "打鼓的人",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "percussion",
+          "family": "drummer",
+          "notes": "OOV English; not in synonym table",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "percussion"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "empty_synonym_gap"
+        },
+        {
+          "query": "六弦",
+          "family": "guitarist",
+          "notes": "OOV slang",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "六弦"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "电吉他手",
+          "family": "guitarist",
+          "notes": "partial OOV",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "电吉他手",
+            "吉他手",
+            "吉他",
+            "弹琴",
+            "指弹",
+            "guitarist",
+            "guitar",
+            "electric guitar"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "大场面俯拍",
+          "family": "wide_stage",
+          "notes": "OOV paraphrase",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "大场面俯拍",
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "establishing shot",
+          "family": "wide_stage",
+          "notes": "in-table English via 全景 group only if trigger hits",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "establishing shot",
+            "全景",
+            "舞台全景",
+            "大场面",
+            "wide stage",
+            "wide shot",
+            "establishing",
+            "panorama",
+            "shot"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "主唱剪影",
+          "family": "singer_backlight",
+          "notes": "compound; singer+backlight groups",
+          "hit_count": 8,
+          "top_files": [
+            "20260325__DSC08568.jpg",
+            "20260523__DSC08978.jpg",
+            "20260523__DSC09980.jpg",
+            "20260606__DSC05315.jpg",
+            "20260201__DSC03369.jpg"
+          ],
+          "expanded_terms": [
+            "主唱剪影",
+            "歌手",
+            "主唱",
+            "人声",
+            "singer",
+            "vocalist",
+            "vocals",
+            "逆光",
+            "剪影",
+            "轮廓光",
+            "backlight",
+            "silhouette",
+            "rim light",
+            "backlit"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 238,
+          "classification": "hit"
+        },
+        {
+          "query": "歌手",
+          "family": "singer",
+          "notes": "in-table",
+          "hit_count": 8,
+          "top_files": [
+            "20260325__DSC08568.jpg",
+            "20260523__DSC08978.jpg",
+            "20260523__DSC09980.jpg",
+            "20260606__DSC05315.jpg",
+            "20260201__DSC03369.jpg"
+          ],
+          "expanded_terms": [
+            "歌手",
+            "主唱",
+            "人声",
+            "singer",
+            "vocalist",
+            "vocals"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 234,
+          "classification": "hit"
+        },
+        {
+          "query": "观众灯海",
+          "family": "crowd",
+          "notes": "in-table",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "观众灯海",
+            "观众",
+            "灯海",
+            "crowd",
+            "audience",
+            "pit"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "sax",
+          "family": "saxophone",
+          "notes": "OOV short; expect absent on livehouse sets",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "sax"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        },
+        {
+          "query": "saxophone",
+          "family": "saxophone",
+          "notes": "OOV English; expect absent",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "saxophone"
+          ],
+          "concept_present_in_corpus": false,
+          "oracle_hit_count": 0,
+          "classification": "empty_true_negative"
+        }
+      ],
+      "synonym_gap_examples": [
+        {
+          "query": "percussion",
+          "family": "drummer",
+          "notes": "OOV English; not in synonym table",
+          "hit_count": 0,
+          "top_files": [],
+          "expanded_terms": [
+            "percussion"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "empty_synonym_gap"
+        }
+      ],
+      "hit_examples": [
+        {
+          "query": "鼓手特写",
+          "family": "drummer",
+          "notes": "case search_drummer",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手特写",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming",
+            "特写",
+            "近景",
+            "close-up",
+            "closeup",
+            "portrait"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "鼓手",
+          "family": "drummer",
+          "notes": "case grounding",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "架子鼓那哥们",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "架子鼓那哥们",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "打鼓的人",
+          "family": "drummer",
+          "notes": "OOV paraphrase",
+          "hit_count": 5,
+          "top_files": [
+            "20260405__DSC00733.jpg",
+            "20260524Chinesefootball__DSC00285.jpg",
+            "20260308__DSC05873.jpg",
+            "20260424__DSC04160.jpg",
+            "20260326__DSC08569.jpg"
+          ],
+          "expanded_terms": [
+            "打鼓的人",
+            "鼓手",
+            "打鼓",
+            "鼓点",
+            "架子鼓",
+            "drummer",
+            "drums",
+            "drum kit",
+            "drumming"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 5,
+          "classification": "hit"
+        },
+        {
+          "query": "主唱剪影",
+          "family": "singer_backlight",
+          "notes": "compound; singer+backlight groups",
+          "hit_count": 8,
+          "top_files": [
+            "20260325__DSC08568.jpg",
+            "20260523__DSC08978.jpg",
+            "20260523__DSC09980.jpg",
+            "20260606__DSC05315.jpg",
+            "20260201__DSC03369.jpg"
+          ],
+          "expanded_terms": [
+            "主唱剪影",
+            "歌手",
+            "主唱",
+            "人声",
+            "singer",
+            "vocalist",
+            "vocals",
+            "逆光",
+            "剪影",
+            "轮廓光",
+            "backlight",
+            "silhouette",
+            "rim light",
+            "backlit"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 238,
+          "classification": "hit"
+        },
+        {
+          "query": "歌手",
+          "family": "singer",
+          "notes": "in-table",
+          "hit_count": 8,
+          "top_files": [
+            "20260325__DSC08568.jpg",
+            "20260523__DSC08978.jpg",
+            "20260523__DSC09980.jpg",
+            "20260606__DSC05315.jpg",
+            "20260201__DSC03369.jpg"
+          ],
+          "expanded_terms": [
+            "歌手",
+            "主唱",
+            "人声",
+            "singer",
+            "vocalist",
+            "vocals"
+          ],
+          "concept_present_in_corpus": true,
+          "oracle_hit_count": 234,
+          "classification": "hit"
+        }
+      ]
+    }
+  ],
+  "takeaway": [
+    "smoke_fixture: vlm_content_rate=1.0 (tags=20/20, text=20/20); hit_rate=0.6; empty={vlm_absent:0, synonym_gap:2, true_neg:6}",
+    "  → synonym_gap probes: 'percussion'→drummer, '六弦'→guitarist",
+    "recorded_250: vlm_content_rate=0.96 (tags=0/250, text=240/250); hit_rate=0.3; empty={vlm_absent:0, synonym_gap:1, true_neg:13}",
+    "  → synonym_gap probes: 'percussion'→drummer"
+  ]
+}
