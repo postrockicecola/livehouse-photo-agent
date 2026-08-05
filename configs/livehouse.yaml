@@ -72,7 +72,7 @@ model:
   #   api_key: ""                               # only for hosted OpenAI-compatible APIs
   provider: "ollama"
   endpoint: "http://localhost:11434"
-  model_name: "llava"
+  model_name: "qwen2.5vl:7b"
   # Optional: dedicated chat model for the Gallery copilot (text ReAct / tool-calling).
   # ``llava`` is a vision model and follows the tool protocol poorly (skips tools / makes
   # up data); point this at a small instruct model on the SAME provider/endpoint. Empty =
@@ -82,8 +82,12 @@ model:
   timeout: 300
   # Parallel Ollama HTTP workers + admission slots (match single-process LLaVA throughput; avoid fake concurrency).
   # Raise only if Ollama can sustain parallel decodes (e.g. multiple GPU workers / instances).
-  max_concurrent_requests: 4
-  max_inference_queue_size: 4
+  # NOTE: Ollama forces Parallel:1 for vision-capable models (server/sched.go — shared vision-token
+  # buffers aren't safe under concurrent decode; see docs/OLLAMA_INTEGRATION_NOTES.md §5). Confirmed via
+  # server.log for both llava and qwen2.5vl:7b on this box, so >1 here only adds queueing inside Ollama
+  # (latency variance, no real throughput gain) — kept at 1 until we run multiple Ollama instances/vLLM.
+  max_concurrent_requests: 1
+  max_inference_queue_size: 1
   # Optional: per-Ollama-model lanes (lane id must match ``model_name`` on requests, or router primary).
   # Omit for single-lane behavior (defaults to primary ``model_name`` with max_* above).
   # inference_lanes:
@@ -183,6 +187,10 @@ processing:
     # When keyword rules miss (rules:fallback), call Ollama text-only → JSON film_variant.
     # Override: LIVEHOUSE_VIBE_LLM_ON_MISS=0|1
     llm_on_miss: true
+    # Explicit text-only model for this router call. Without this, services/vibe_llm_resolver.py
+    # falls back to model.model_name (the Stage3 VLM) — fine for llava, but qwen2.5vl:7b is a
+    # heavier vision model for what is a pure-text classification call, so pin it explicitly.
+    text_model_name: "qwen2.5:7b-instruct"
     llm_num_predict: 160
     llm_timeout: 90
 

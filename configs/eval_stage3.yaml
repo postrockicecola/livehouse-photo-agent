@@ -52,10 +52,12 @@ fast_aesthetic:
 model:
   provider: "ollama"
   endpoint: "http://localhost:11434"
-  model_name: "llava"
+  model_name: "qwen2.5vl:7b"
   timeout: 300
-  max_concurrent_requests: 4
-  max_inference_queue_size: 4
+  # Ollama forces Parallel:1 for vision models (see docs/OLLAMA_INTEGRATION_NOTES.md §5);
+  # kept in sync with configs/livehouse.yaml so eval concurrency matches production reality.
+  max_concurrent_requests: 1
+  max_inference_queue_size: 1
   inference_batch_size: 1
   queue_wait_timeout_seconds: 120
   fallback_model_name: ""
