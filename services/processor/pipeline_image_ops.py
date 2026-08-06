@@ -176,6 +176,16 @@ def append_aesthetic_audit_line(
 
     def _write() -> None:
         shutil.copy2(image_path, dest_path)
+        # A re-scored image (checkpoint retry) may still sit in the category it landed
+        # in last run; an image must appear in exactly one folder or the gallery
+        # artifacts get two rows for it.
+        for cat_folder in folders.values():
+            if cat_folder == target_folder:
+                continue
+            try:
+                (cat_folder / file_name).unlink(missing_ok=True)
+            except OSError:
+                pass
 
         log_entry: Dict[str, Any] = {
             "image": file_name,

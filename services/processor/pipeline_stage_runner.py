@@ -91,6 +91,10 @@ STAGED_SUBDIR = ".luma_pipeline_staged"
 ELIGIBLE_AFTER_S1 = "eligible_after_stage1.jsonl"
 ELIGIBLE_AFTER_S2 = "eligible_after_stage2.jsonl"
 
+# Audit rows carrying these tags are placeholders written when the VLM was unreachable
+# (429 storm, worker crash), not real scores — checkpoint resume must re-score them.
+RETRYABLE_AUDIT_TAGS = frozenset({"vlm_error", "pipeline_error"})
+
 
 def staged_state_dir(source_dir: Path) -> Path:
     d = source_dir / STAGED_SUBDIR
@@ -128,13 +132,24 @@ def _write_jsonl(path: Path, rows: List[Dict[str, Any]]) -> None:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
-def stats_from_audit_log(log_file: Path) -> Dict[str, int]:
-    """Rebuild pipeline stats dict for preview HTML from the aesthetic audit JSONL."""
-    base = {"processed": 0, "failed": 0, "skipped": 0, "fast_rejected": 0, "vlm_fallback": 0, "fallback_count": 0}
+def audit_entry_is_retryable(entry: Dict[str, Any]) -> bool:
+    """True when an audit row is a VLM-unavailable / crash placeholder instead of a score."""
+    tags = entry.get("tags") or []
+    if not isinstance(tags, list):
+        return False
+    return bool(RETRYABLE_AUDIT_TAGS.intersection(str(t) for t in tags))
+
+
+def _audit_rows_by_image(log_file: Path) -> Dict[str, Dict[str, Any]]:
+    """Latest audit row per image name (a checkpoint retry appends a newer row; last wins).
+
+    Rows without a usable name keep their own slot so malformed lines still count once.
+    """
+    rows: Dict[str, Dict[str, Any]] = {}
     if not log_file.exists():
-        return base
+        return rows
     with open(log_file, "r", encoding="utf-8") as f:
-        for line in f:
+        for i, line in enumerate(f):
             line = line.strip()
             if not line:
                 continue
@@ -142,15 +157,26 @@ def stats_from_audit_log(log_file: Path) -> Dict[str, int]:
                 j = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            tags = j.get("tags") or []
-            if "technical_issue" in tags:
-                base["fast_rejected"] += 1
-            elif "low_quality" in tags:
-                base["fast_rejected"] += 1
-            elif "vlm_error" in tags:
-                base["vlm_fallback"] += 1
-            else:
-                base["processed"] += 1
+            name = j.get("image") or j.get("file_name")
+            rows[str(name) if name else f"__line_{i}"] = j
+    return rows
+
+
+def stats_from_audit_log(log_file: Path) -> Dict[str, int]:
+    """Rebuild pipeline stats dict for preview HTML from the aesthetic audit JSONL."""
+    base = {"processed": 0, "failed": 0, "skipped": 0, "fast_rejected": 0, "vlm_fallback": 0, "fallback_count": 0}
+    if not log_file.exists():
+        return base
+    for j in _audit_rows_by_image(log_file).values():
+        tags = j.get("tags") or []
+        if "technical_issue" in tags:
+            base["fast_rejected"] += 1
+        elif "low_quality" in tags:
+            base["fast_rejected"] += 1
+        elif "vlm_error" in tags:
+            base["vlm_fallback"] += 1
+        else:
+            base["processed"] += 1
     return base
 
 
@@ -374,22 +400,18 @@ class PipelineStageRunner:
         return cleared
 
     def _audit_logged_image_names(self) -> set[str]:
-        """Image basenames already present in the aesthetic audit log (checkpoint / resume)."""
+        """Image basenames whose latest audit row is a real result (checkpoint / resume).
+
+        ``RETRYABLE_AUDIT_TAGS`` rows are excluded so images that only ever got a
+        rate-limit / crash placeholder are re-scored instead of skipped forever.
+        """
         self._ensure_layout()
-        log_file = self.log_paths["log_file"]
-        processed: set[str] = set()
-        if not log_file.exists():
-            return processed
-        with open(log_file, "r", encoding="utf-8") as f:
-            for line in f:
-                try:
-                    entry = json.loads(line)
-                    img = entry.get("image")
-                    if img:
-                        processed.add(str(img))
-                except json.JSONDecodeError:
-                    continue
-        return processed
+        rows = _audit_rows_by_image(self.log_paths["log_file"])
+        return {
+            name
+            for name, entry in rows.items()
+            if entry.get("image") and not audit_entry_is_retryable(entry)
+        }
 
     def _lazy_pipeline_for_vlm(self) -> AestheticPipeline:
         if self._pipe is None:
@@ -828,6 +850,7 @@ class PipelineStageRunner:
         dispatch_policy: DispatchPolicy | None = None,
         stage3_time_budget_seconds: float | None = None,
         estimated_vlm_seconds: float = 45.0,
+        enable_checkpoint: bool = True,
     ) -> Dict[str, Any]:
         t_inf0 = time.perf_counter()
         pipe = self._lazy_pipeline_for_vlm()
@@ -835,6 +858,22 @@ class PipelineStageRunner:
         sd = staged_state_dir(self.source_dir)
         m2 = sd / ELIGIBLE_AFTER_S2
         incoming = _read_jsonl(m2)
+
+        # Retrying STAGE3_VLM alone (e.g. after a 429 storm) must not re-score images
+        # the previous attempt already wrote a real audit row for.
+        skipped_ckpt = 0
+        if enable_checkpoint and incoming:
+            done = self._audit_logged_image_names()
+            if done:
+                kept = [r for r in incoming if str(r.get("file_name")) not in done]
+                skipped_ckpt = len(incoming) - len(kept)
+                incoming = kept
+                if skipped_ckpt:
+                    logger.info(
+                        "stage3 checkpoint: skipped=%s remaining=%s",
+                        skipped_ckpt,
+                        len(incoming),
+                    )
 
         cfg_w = pipe.config.get("processing", {}).get("max_workers")
         mw = _resolve_max_workers(max_workers, cfg_w)
@@ -1071,6 +1110,7 @@ class PipelineStageRunner:
                 "vlm_fallback": 0,
                 "fallback_count": 0,
                 "inference_wall_ms": 0,
+                "checkpoint_skipped": skipped_ckpt,
                 **(
                     {"stage3_vlm_cache": stage3_cache.metrics_dict()}
                     if stage3_cache is not None
@@ -1317,6 +1357,7 @@ class PipelineStageRunner:
             "vlm_fallback": fb,
             "fallback_count": fcb,
             "inference_wall_ms": inference_ms,
+            "checkpoint_skipped": skipped_ckpt,
             "stage3_degrade": {
                 "level": deg_decision.level.value,
                 "run_stage3": deg_decision.run_stage3,

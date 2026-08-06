@@ -158,7 +158,9 @@ class AestheticPipeline:
         runner.run_prepare_input()
         r1 = runner.run_stage1_filter(max_workers=max_workers, enable_checkpoint=enable_checkpoint)
         r2 = runner.run_stage2_fast_score(max_workers=max_workers)
-        r3 = runner.run_stage3_vlm(max_workers=max_workers, conn=None)
+        r3 = runner.run_stage3_vlm(
+            max_workers=max_workers, conn=None, enable_checkpoint=enable_checkpoint
+        )
         wa = runner.run_write_artifact()
         elapsed = time.time() - start_time
         st = wa.get("stats") or {}

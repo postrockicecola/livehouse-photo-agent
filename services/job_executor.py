@@ -230,7 +230,9 @@ class JobExecutor:
                     max_workers=max_workers, enable_checkpoint=enable_checkpoint
                 )
                 runner.run_stage2_fast_score(max_workers=max_workers)
-                runner.run_stage3_vlm(max_workers=max_workers, conn=None)
+                runner.run_stage3_vlm(
+                    max_workers=max_workers, conn=None, enable_checkpoint=enable_checkpoint
+                )
                 write_out = runner.run_write_artifact()
 
             pipeline_result = {"artifact_paths": write_out.get("artifact_paths") or {}}
@@ -420,7 +422,10 @@ class JobExecutor:
                 stage_result = runner.run_stage2_fast_score(max_workers=max_workers)
                 inference_wall = int(stage_result.get("inference_wall_ms") or 0)
             elif stage_name == "STAGE3_VLM":
-                stage_result = runner.run_stage3_vlm(max_workers=max_workers, conn=conn)
+                enable_ckpt = bool(payload.get("enable_checkpoint", True))
+                stage_result = runner.run_stage3_vlm(
+                    max_workers=max_workers, conn=conn, enable_checkpoint=enable_ckpt
+                )
                 inference_wall = int(stage_result.get("inference_wall_ms") or 0)
             elif stage_name == "WRITE_ARTIFACT":
                 stage_result = runner.run_write_artifact()
