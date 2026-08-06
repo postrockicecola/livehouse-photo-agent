@@ -509,7 +509,7 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
         ],
         memory_turns=turns,
         base_dir=base_dir,
-        trace=dict(getattr(result, "trace", None) or getattr(agent, "last_trace", {}) or {}),
+        trace=dict(getattr(result, "trace", None) or {}),
     )
 
 
