@@ -1,0 +1,243 @@
+{
+  "20260424__DSC03910.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "out_of_focus"
+    ],
+    "overall_score": 30.1
+  },
+  "20260425__DSC04214.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 40.6
+  },
+  "20260523__DSC09805.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "out_of_focus",
+      "undeliverable_subject"
+    ],
+    "overall_score": 23.6
+  },
+  "20260523__DSC09863.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 22.5
+  },
+  "20260524Chinesefootball__DSC00669.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 40.9
+  },
+  "20260524Chinesefootball__DSC00733.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 42.6
+  },
+  "20260524Chinesefootball__DSC00810.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "out_of_focus",
+      "undeliverable_subject"
+    ],
+    "overall_score": 34.2
+  },
+  "20260524yewai__DSC01674.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 40.3
+  },
+  "20260524yewai__DSC01834.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 38.0
+  },
+  "20260524yewai__DSC02042.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 27.0
+  },
+  "20260528ruanshizi__DSC02497.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 44.8
+  },
+  "20260528ruanshizi__DSC02501.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "poor_exposure"
+    ],
+    "overall_score": 35.6
+  },
+  "20260612__DSC05916.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 40.8
+  },
+  "20260612__DSC06053.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 39.3
+  },
+  "20260618__DSC02113.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 42.6
+  },
+  "20260619__DSC02440.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 42.9
+  },
+  "20260619__DSC02663.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "out_of_focus",
+      "undeliverable_subject"
+    ],
+    "overall_score": 27.0
+  },
+  "20260619__DSC03047.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 44.1
+  },
+  "20260627__DSC06690.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 36.1
+  },
+  "20260627__DSC08135.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 41.8
+  },
+  "20260627__DSC08315.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "out_of_focus",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 11.5
+  },
+  "20260627__DSC09104.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 44.3
+  },
+  "20260703__DSC00385.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 44.2
+  },
+  "20260703__DSC00874.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 40.1
+  },
+  "20260703__DSC01367.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 38.7
+  },
+  "20260703__DSC09865.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 36.1
+  },
+  "20260708__DSC03620.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score",
+      "out_of_focus",
+      "undeliverable_subject"
+    ],
+    "overall_score": 25.3
+  },
+  "20260710__DSC05164.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 35.5
+  },
+  "20260710__DSC05632.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 44.9
+  },
+  "20260711__DSC05864.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 41.0
+  },
+  "20260711__DSC07524.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 39.8
+  },
+  "20260729__DSC09733.jpg": {
+    "is_defect": true,
+    "reasons": [
+      "low_overall_score"
+    ],
+    "overall_score": 44.3
+  }
+}
