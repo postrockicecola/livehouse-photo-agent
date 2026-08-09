@@ -15,8 +15,11 @@ _STAGE2 = Path("data/eval/_temp0_run/.luma_pipeline_staged/eligible_after_stage2
 def test_two_stage_report_has_both_arms():
     if not _PREDICTIONS.is_file() or not _STAGE2.is_file():
         pytest.skip(
-            "local eval fixtures missing "
-            "(data/eval/images/ and data/eval/_*/ are gitignored)"
+            "local eval fixtures missing (data/eval/images/ and data/eval/_*/ are "
+            "gitignored). The golden_core run that used to supply them was archived "
+            "to data/eval/archive_golden_core/ on 2026-08-07; re-enable by running "
+            "the pipeline over the current data/eval/images/ so predictions and "
+            "stage2 rows match data/eval/labels.jsonl"
         )
     truth = load_truth("data/eval/labels.jsonl")
     predictions = load_predictions(str(_PREDICTIONS))

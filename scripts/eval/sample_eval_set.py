@@ -39,8 +39,6 @@ from pathlib import Path
 from typing import Any
 
 N_BUCKETS = 10
-# Pipeline-generated folders under Previews/ that hold copies/exports, not originals.
-SKIP_DIRS = {"graded_from_raw", "AI_Selected_Final", "manual_selected", "runtime", "Selected"}
 
 
 def _session_tag(session_dir: Path) -> str:
@@ -61,34 +59,32 @@ def _load_records(session_dir: Path) -> list[dict[str, Any]] | None:
 
 
 def _iter_preview_images(session_dir: Path) -> dict[str, Path]:
-    """Unique basename -> path under Previews/, skipping export/copy folders."""
+    """Basename -> path for the ORIGINAL previews of a session.
+
+    Deliberately non-recursive. Everything nested under ``Previews/`` is either a
+    pipeline copy (``AI_Keep_60-90``, ``AI_Trash_Below60``, ``AI_Best_90+``, whose
+    basenames all exist in the root) or a rendered derivative (``runtime/`` and
+    ``.runtime/`` caches, ~123k files across 2026-04..07). Recursing pulls in
+    renders instead of originals and lets the pipeline's own verdict decide which
+    frames an eval set can even contain.
+    """
     previews = session_dir / "Previews"
-    out: dict[str, Path] = {}
     if not previews.is_dir():
-        return out
-    for f in previews.rglob("*.jpg"):
-        rel_parts = f.relative_to(previews).parts[:-1]
-        if any(p in SKIP_DIRS for p in rel_parts):
-            continue
-        out.setdefault(f.name, f)
-    return out
+        return {}
+    return {f.name: f for f in previews.glob("*.jpg") if f.is_file()}
 
 
 def _resolve_image(session_dir: Path, rec: dict[str, Any]) -> Path | None:
-    p = rec.get("path")
-    if p:
-        cand = Path(str(p))
-        if cand.is_file():
-            return cand
-    name = rec.get("file")
+    """Resolve a result row to the original preview, never a pipeline copy.
+
+    ``rec["path"]`` in archived results points into the AI_* classification folders
+    or at a stale archive root, so only its basename is trusted.
+    """
+    name = Path(str(rec.get("path") or rec.get("file") or "")).name
     if not name:
         return None
-    previews = session_dir / "Previews"
-    direct = previews / str(name)
-    if direct.is_file():
-        return direct
-    hits = list(previews.rglob(str(name)))
-    return hits[0] if hits else None
+    direct = session_dir / "Previews" / name
+    return direct if direct.is_file() else None
 
 
 def _sha256(path: Path) -> str:
@@ -186,6 +182,12 @@ def main() -> int:
         default=[],
         help="substring/regex matched against session folder name; repeatable",
     )
+    ap.add_argument(
+        "--include-session",
+        action="append",
+        default=[],
+        help="keep only sessions matching one of these regexes; applied before --exclude-session",
+    )
     ap.add_argument("--target", type=int, default=250)
     ap.add_argument("--out", default="data/eval/images")
     ap.add_argument("--manifest", default="data/eval/manifest.json")
@@ -194,8 +196,11 @@ def main() -> int:
 
     rng = random.Random(args.seed)
     excludes = [re.compile(p) for p in args.exclude_session]
+    includes = [re.compile(p) for p in args.include_session]
 
     def excluded(name: str) -> bool:
+        if includes and not any(p.search(name) for p in includes):
+            return True
         return any(p.search(name) for p in excludes)
 
     sessions: list[Path] = []

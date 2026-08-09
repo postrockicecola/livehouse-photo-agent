@@ -13,8 +13,10 @@ from services.agent.skills.base import SkillResult
 
 logger = logging.getLogger(__name__)
 
-# Opt-out: LIVEHOUSE_AGENT_SEMANTIC_FALLBACK=0 disables CLIP text→image fallback.
+# Opt-out: LIVEHOUSE_AGENT_SEMANTIC_FALLBACK=0 disables CLIP text→image paths.
 _SEMANTIC_FALLBACK_ENV = "LIVEHOUSE_AGENT_SEMANTIC_FALLBACK"
+# Opt-out: LIVEHOUSE_AGENT_SEMANTIC_HYBRID=0 → CLIP only when text search is empty (legacy).
+_SEMANTIC_HYBRID_ENV = "LIVEHOUSE_AGENT_SEMANTIC_HYBRID"
 _SEMANTIC_MIN_SIM = 0.22
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
@@ -245,24 +247,54 @@ def _dim(row: dict[str, Any], key: str) -> float:
     return 0.0
 
 
-def _pick_why(row: dict[str, Any], *, sort_by: str, recipe: str) -> str:
+def _matched_query_terms(row: dict[str, Any], terms: list[str]) -> list[str]:
+    """Expanded query terms that hit this row's tag/caption blob (for why lines)."""
+    if not terms:
+        return []
+    blob = _text_blob(row)
+    out: list[str] = []
+    seen: set[str] = set()
+    for t in terms:
+        tok = str(t or "").strip().lower()
+        if not tok or tok in seen or tok not in blob:
+            continue
+        seen.add(tok)
+        out.append(tok)
+        if len(out) >= 5:
+            break
+    return out
+
+
+def _pick_why(
+    row: dict[str, Any],
+    *,
+    sort_by: str,
+    recipe: str,
+    clip_sim: float | None = None,
+    matched_terms: list[str] | None = None,
+) -> str:
     """One-line explainability for a shortlisted frame."""
     overall = _dim(row, "overall")
     parts = [f"overall {overall:.0f}"]
-    if recipe == "social" or sort_by == "deliverable_subject":
+    recipe_base = str(recipe or "").split("+", 1)[0]
+    if recipe_base == "social" or sort_by == "deliverable_subject":
         parts.append(f"deliverable {_dim(row, 'deliverable_subject'):.1f}")
         parts.append(f"tech {_dim(row, 'technical'):.1f}")
-    elif recipe == "energy" or sort_by == "atmosphere_impact":
+    elif recipe_base == "energy" or sort_by == "atmosphere_impact":
         parts.append(f"atmosphere {_dim(row, 'atmosphere_impact'):.1f}")
         if _dim(row, "energy") > 0:
             parts.append(f"energy {_dim(row, 'energy'):.1f}")
-    elif recipe == "peak" or sort_by == "moment_peak":
+    elif recipe_base == "peak" or sort_by == "moment_peak":
         parts.append(f"moment {_dim(row, 'moment_peak'):.1f}")
-    elif recipe == "deliverable":
+    elif recipe_base == "deliverable":
         parts.append(f"deliverable {_dim(row, 'deliverable_subject'):.1f}")
     else:
         if _dim(row, sort_by) and sort_by != "overall":
             parts.append(f"{sort_by} {_dim(row, sort_by):.1f}")
+    if matched_terms:
+        parts.append("match " + "/".join(matched_terms[:3]))
+    if clip_sim is not None and float(clip_sim) > 0:
+        parts.append(f"clip {float(clip_sim):.2f}")
     cap = _caption(row)
     if cap:
         parts.append(cap[:40])
@@ -642,8 +674,16 @@ def _maybe_dedupe(rows: list[dict[str, Any]], base_dir: str, enabled: bool) -> l
 
 
 def semantic_fallback_enabled() -> bool:
-    """CLIP text→image fallback when synonym/text search is empty (default on)."""
+    """Master switch for CLIP text→image (hybrid + legacy fallback). Default on."""
     raw = (os.environ.get(_SEMANTIC_FALLBACK_ENV) or "1").strip().lower()
+    return raw not in ("0", "false", "no", "off")
+
+
+def semantic_hybrid_enabled() -> bool:
+    """When on (default), CLIP runs alongside tag search and results are merged."""
+    if not semantic_fallback_enabled():
+        return False
+    raw = (os.environ.get(_SEMANTIC_HYBRID_ENV) or "1").strip().lower()
     return raw not in ("0", "false", "no", "off")
 
 
@@ -662,32 +702,33 @@ def _preview_path_for_row(base_dir: str, row: dict[str, Any]) -> Path | None:
     return None
 
 
-def semantic_fallback_rows(
+def clip_rank_rows(
     rows: list[dict[str, Any]],
     *,
     base_dir: str,
     query: str,
-    limit: int,
-    min_sim: float = _SEMANTIC_MIN_SIM,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Rank preview images by CLIP text similarity when tag search misses.
+    top_k: int,
+    min_sim: float = 0.0,
+) -> tuple[list[dict[str, Any]], dict[str, float], dict[str, Any]]:
+    """Rank preview images by CLIP text similarity.
 
-    Returns ``(matched_rows, meta)``. Empty when CLIP unavailable or no previews.
+    Returns ``(rows_in_rank_order, file→similarity, meta)``.
     Slow-shutter / EXIF paths must NOT call this.
     """
     meta: dict[str, Any] = {"retrieval": "clip_text", "attempted": True}
+    sims_by_file: dict[str, float] = {}
     q = (query or "").strip()
     if not q or not semantic_fallback_enabled():
         meta["attempted"] = False
-        return [], meta
+        return [], sims_by_file, meta
     try:
         from services.embedding_service import EmbeddingService
     except Exception:
         meta["available"] = False
-        return [], meta
+        return [], sims_by_file, meta
     if not EmbeddingService.is_available():
         meta["available"] = False
-        return [], meta
+        return [], sims_by_file, meta
     meta["available"] = True
 
     paths: list[Path] = []
@@ -700,17 +741,17 @@ def semantic_fallback_rows(
         by_name[path.name.lower()] = row
     if not paths:
         meta["n_previews"] = 0
-        return [], meta
+        return [], sims_by_file, meta
 
     cache_dir = Path(base_dir).expanduser().resolve() / ".clip_text_cache"
     hits = EmbeddingService.find_similar_to_text(
         q,
         paths,
-        top_k=max(1, int(limit)),
+        top_k=max(1, int(top_k)),
         cache_dir=cache_dir,
     )
     out: list[dict[str, Any]] = []
-    sims: list[float] = []
+    hit_sims: list[float] = []
     for hit in hits:
         sim = float(hit.get("similarity") or 0.0)
         if sim < float(min_sim):
@@ -718,12 +759,79 @@ def semantic_fallback_rows(
         row = by_name.get(str(hit.get("file_name") or "").lower())
         if row is None:
             continue
+        fname = str(row.get("file") or "").strip()
+        if not fname:
+            continue
+        sims_by_file[fname] = sim
         out.append(row)
-        sims.append(sim)
+        hit_sims.append(sim)
     meta["n_previews"] = len(paths)
     meta["min_sim"] = float(min_sim)
-    meta["hit_sims"] = sims[:12]
-    return out, meta
+    meta["hit_sims"] = hit_sims[:12]
+    return out, sims_by_file, meta
+
+
+def semantic_fallback_rows(
+    rows: list[dict[str, Any]],
+    *,
+    base_dir: str,
+    query: str,
+    limit: int,
+    min_sim: float = _SEMANTIC_MIN_SIM,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Legacy: CLIP-only recall when tag search misses (thresholded)."""
+    ranked, _sims, meta = clip_rank_rows(
+        rows,
+        base_dir=base_dir,
+        query=query,
+        top_k=max(1, int(limit)),
+        min_sim=min_sim,
+    )
+    return ranked, meta
+
+
+def hybrid_merge_rows(
+    *,
+    rows: list[dict[str, Any]],
+    text_hits: list[dict[str, Any]],
+    text_scores: dict[str, int],
+    clip_sims: dict[str, float],
+    pool_files: set[str],
+    sort_by: str,
+    min_sim: float = _SEMANTIC_MIN_SIM,
+) -> list[dict[str, Any]]:
+    """Union tag hits + CLIP hits (above *min_sim*), re-rank with score dims."""
+    row_by_file = {str(r.get("file") or ""): r for r in rows if str(r.get("file") or "").strip()}
+    cand: dict[str, dict[str, Any]] = {}
+    for r in text_hits:
+        f = str(r.get("file") or "").strip()
+        if f:
+            cand[f] = r
+    for f, sim in clip_sims.items():
+        if float(sim) < float(min_sim):
+            continue
+        if pool_files and f not in pool_files:
+            continue
+        if f not in cand and f in row_by_file:
+            cand[f] = row_by_file[f]
+    if not cand:
+        return []
+
+    def _rank_key(r: dict[str, Any]) -> tuple[float, float, float, float]:
+        f = str(r.get("file") or "")
+        t = float(text_scores.get(f, 0))
+        c = float(clip_sims.get(f, 0.0))
+        aes = _dim(r, sort_by)
+        overall = _dim(r, "overall")
+        text_boost = 1.25 if t > 0 else 0.0
+        return (
+            text_boost + c * 2.0 + aes / 50.0 + min(t, 24.0) / 24.0 + overall / 200.0,
+            c,
+            aes,
+            overall,
+        )
+
+    return sorted(cand.values(), key=_rank_key, reverse=True)
 
 
 def _basename(path_or_name: str) -> str:

@@ -119,8 +119,9 @@ Native OpenAI tools[] on chat
   auto (default): attach tools for openai/vllm; ollama stays text-protocol.
   Native tool_calls bridge via tool_protocol (N calls → __multi__).
 
-CLIP semantic search fallback (when text/synonym miss)
-  Env: LIVEHOUSE_AGENT_SEMANTIC_FALLBACK=0 to disable (default on when open-clip present).
+CLIP hybrid search (tag/caption ∪ text→image, score re-rank)
+  Env: LIVEHOUSE_AGENT_SEMANTIC_FALLBACK=0 disables CLIP; LIVEHOUSE_AGENT_SEMANTIC_HYBRID=0
+  → legacy fallback-only. Index-on-analyze: LIVEHOUSE_EMBED_INDEX_ON_ANALYZE=0 to disable.
   Slow-shutter stays EXIF-only (never CLIP).
 
 ==============================================================================

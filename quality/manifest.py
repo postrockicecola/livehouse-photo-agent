@@ -26,8 +26,8 @@ _REPO = Path(__file__).resolve().parents[1]
 _EVAL_PROTOCOL = "quality_protocol_v1"
 _WORKFLOW_ID = "pipeline_stage3"
 _WORKFLOW_VERSION = "0.1.0"
-_DEFAULT_DATASET_NAME = "golden_core"
-_DEFAULT_DATASET_VERSION = "0.1.0"
+DEFAULT_DATASET_NAME = "golden_apr_jul_2026"
+DEFAULT_DATASET_VERSION = "0.2.0"
 
 
 def canonical_json_bytes(obj: Any) -> bytes:
@@ -188,8 +188,8 @@ def build_version_manifest(
     config_path: str | Path = "configs/eval_stage3.yaml",
     labels_path: str | Path | None = None,
     dataset_manifest_path: str | Path | None = None,
-    dataset_name: str = _DEFAULT_DATASET_NAME,
-    dataset_version: str = _DEFAULT_DATASET_VERSION,
+    dataset_name: str = DEFAULT_DATASET_NAME,
+    dataset_version: str = DEFAULT_DATASET_VERSION,
     manifest_id: str | None = None,
     workflow_id: str = _WORKFLOW_ID,
     workflow_version: str = _WORKFLOW_VERSION,
@@ -348,8 +348,8 @@ def main(argv: list[str] | None = None) -> int:
         dest="dataset_manifest",
         help="dataset manifest.json (default: sibling of --labels)",
     )
-    parser.add_argument("--dataset-name", default=_DEFAULT_DATASET_NAME)
-    parser.add_argument("--dataset-version", default=_DEFAULT_DATASET_VERSION)
+    parser.add_argument("--dataset-name", default=DEFAULT_DATASET_NAME)
+    parser.add_argument("--dataset-version", default=DEFAULT_DATASET_VERSION)
     parser.add_argument("--manifest-id", default=None, dest="manifest_id")
     parser.add_argument(
         "--out",

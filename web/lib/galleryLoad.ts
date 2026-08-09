@@ -25,6 +25,8 @@ export type GalleryBootstrap = {
   activeBaseDir: string | null;
   error: string | null;
   loadSource: GalleryLoadSource;
+  analysisRunning: boolean;
+  effectiveSort: GallerySort | "default";
 };
 
 function num(v: unknown, d = 0): number {
@@ -140,6 +142,13 @@ function bootstrapFromResultsPayload(
     activeBaseDir,
     error: null,
     loadSource: "results_api",
+    analysisRunning: Boolean(data.analysis_running),
+    effectiveSort:
+      data.effective_sort === "default" ||
+      data.effective_sort === "personalized" ||
+      data.effective_sort === "diverse"
+        ? data.effective_sort
+        : "overall",
   };
 }
 
@@ -168,6 +177,8 @@ async function bootstrapFromAnalysisJson(
       activeBaseDir,
       error: apiError,
       loadSource: "analysis_json",
+      analysisRunning: false,
+      effectiveSort: "overall",
     };
   } catch {
     return null;
@@ -220,6 +231,8 @@ export async function bootstrapGallery(
     activeBaseDir,
     error: apiError ?? (aborted ? "请求已取消或超时" : null),
     loadSource: "none",
+    analysisRunning: false,
+    effectiveSort: "overall",
   };
 }
 
@@ -236,6 +249,8 @@ export async function fetchGalleryResultsPage(
   has_more: boolean;
   count?: number;
   total_raw?: number;
+  analysis_running?: boolean;
+  effective_sort?: GallerySort | "default";
 }> {
   return fetchJson(galleryResultsUrl(apiBase, offset, limit, true, dedupe, sort), signal);
 }

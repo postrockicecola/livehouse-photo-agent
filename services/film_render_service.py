@@ -213,13 +213,18 @@ def resolve_film_sources_for_export(
     return out
 
 
-def load_rgb_u8(image_path: Path) -> np.ndarray:
+def load_rgb_u8(image_path: Path, *, raw_half_size: bool = False) -> np.ndarray:
     ext = image_path.suffix.lower()
     if ext in _RAW_EXT:
         import rawpy  # type: ignore
 
         with rawpy.imread(str(image_path)) as raw:
-            return raw.postprocess(use_camera_wb=True, no_auto_bright=False)
+            return raw.postprocess(
+                use_camera_wb=True,
+                no_auto_bright=False,
+                half_size=raw_half_size,
+                output_bps=8,
+            )
 
     from services.jpeg_exif_orientation import open_display_ready_image
 
@@ -408,6 +413,7 @@ def _cache_file_name(
     optical_cache_token: str = "",
     adjust_cache_token: str = "",
     intensity: float = 1.0,
+    raw_half_size: bool = False,
 ) -> str:
     inten = clamp_grade_intensity(intensity)
     try:
@@ -415,12 +421,13 @@ def _cache_file_name(
         meta = (
             f"{src.resolve()}|{variant_id}|r={rotate}|m={max_side}|mtime_ns={st.st_mtime_ns}|"
             f"{cache_key_extra}|opt={optical_cache_token}|adj={adjust_cache_token}|"
-            f"i={inten:.3f}|p=filmWorkV16"
+            f"i={inten:.3f}|raw_half={int(raw_half_size)}|p=filmWorkV16"
         )
     except OSError:
         meta = (
             f"{src}|{variant_id}|r={rotate}|m={max_side}|mtime_ns=0|{cache_key_extra}|"
-            f"opt={optical_cache_token}|adj={adjust_cache_token}|i={inten:.3f}|p=filmWorkV16"
+            f"opt={optical_cache_token}|adj={adjust_cache_token}|i={inten:.3f}|"
+            f"raw_half={int(raw_half_size)}|p=filmWorkV16"
         )
     return hashlib.sha256(meta.encode()).hexdigest() + ".jpg"
 
@@ -436,6 +443,7 @@ def render_film_to_cache(
     optical: OpticalConsoleParams | None = None,
     adjustments: EditAdjustments | None = None,
     intensity: float = 1.0,
+    raw_half_size: bool = False,
 ) -> Path:
     optical = optical or None
     inten = clamp_grade_intensity(intensity)
@@ -449,11 +457,16 @@ def render_film_to_cache(
         optical_cache_token=optical.cache_token() if optical else "",
         adjust_cache_token=adjustments.cache_token() if adjustments else "",
         intensity=inten,
+        raw_half_size=raw_half_size,
     )
     if out.is_file():
         return out
 
-    rgb = _downscale_rgb_for_film_work(load_rgb_u8(src_path), max_side, variant_id)
+    rgb = _downscale_rgb_for_film_work(
+        load_rgb_u8(src_path, raw_half_size=raw_half_size),
+        max_side,
+        variant_id,
+    )
     processed = _apply_variant(rgb, variant_id, optical=optical, adjustments=adjustments)
     processed = apply_grade_intensity(rgb, processed, inten)
     im = Image.fromarray(processed)

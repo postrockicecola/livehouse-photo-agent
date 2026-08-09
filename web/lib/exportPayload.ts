@@ -4,7 +4,7 @@ import type { GalleryExportItem } from "@/components/types";
 export function serializeExportRequestBody(
   rows: GalleryExportItem[],
   category = "best",
-  options?: { useSessionVibe?: boolean },
+  options?: { useSessionVibe?: boolean; background?: boolean },
 ): string {
   const items = rows.map((row, idx) => {
     const file = String(row.file ?? "").trim();
@@ -33,6 +33,9 @@ export function serializeExportRequestBody(
   };
   if (options?.useSessionVibe) {
     body.use_session_vibe = true;
+  }
+  if (options?.background) {
+    body.background = true;
   }
   return JSON.stringify(body);
 }

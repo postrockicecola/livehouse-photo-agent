@@ -259,7 +259,11 @@ def cmd_run(args: argparse.Namespace) -> int:
         artifact_root = str(Path(args.json).parent / "runs")
     if artifact_root and not getattr(args, "no_eval_run", False):
         from quality.eval_run import emit_from_stage3_report, item_scores_from_joined
-        from quality.manifest import build_version_manifest
+        from quality.manifest import (
+            DEFAULT_DATASET_NAME,
+            DEFAULT_DATASET_VERSION,
+            build_version_manifest,
+        )
 
         if manifest_out and Path(manifest_out).is_file():
             version_manifest = json.loads(Path(manifest_out).read_text(encoding="utf-8"))
@@ -285,8 +289,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             rep,
             artifact_root=artifact_root,
             version_manifest=version_manifest,
-            dataset_name=getattr(args, "dataset_name", None) or "golden_core",
-            dataset_version=getattr(args, "dataset_version", None) or "0.1.0",
+            dataset_name=getattr(args, "dataset_name", None) or DEFAULT_DATASET_NAME,
+            dataset_version=getattr(args, "dataset_version", None) or DEFAULT_DATASET_VERSION,
             suite="stage3_scoring",
             baseline_path=getattr(args, "baseline", None),
             item_scores=item_scores_from_joined(joined.pairs),

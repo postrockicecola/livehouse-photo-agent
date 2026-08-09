@@ -112,8 +112,10 @@ SEMANTIC_HINTS = (
     "最炸/高潮瞬间/剔糊/连拍去重/按分数排序/发Ins social shortlist):\n"
     "- 找出吉他手/鼓手/全景舞台/逆光/前排/慢门长曝光/有孤独感/宁静忧郁… → "
     '{"tool":"gallery_search","args":{"query":"<paste the user message>","limit":10}} '
-    "(text match on tags/mood_tags/caption/reason; 慢门 uses RAW ExposureTime EXIF; "
-    "cite metadata.files; say 已在预览页打开. gallery_select only if they want 初选/导出)\n"
+    "(tag/caption synonyms hybrid-merged with CLIP text→image, then score re-rank; "
+    "慢门 uses RAW ExposureTime EXIF — never CLIP; cite metadata.files / why; "
+    "say 已在预览页打开. gallery_select only if they want 初选/导出)\n"
+    "- 最炸的吉他手 / 高潮+主体 → recipe (energy/peak) + query in the same gallery_search\n"
     "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
     "- 技术高构图一般 → mark_score_gap\n"
     "- 记住我的偏好 / 以后少选剪影 → remember_preference(key, value)\n"

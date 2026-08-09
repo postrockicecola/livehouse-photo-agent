@@ -1,0 +1,261 @@
+2026-08-08 12:27:03 [INFO] [__main__] pipeline init | status=starting
+2026-08-08 12:27:03 [INFO] [__main__] stage start | status=running
+2026-08-08 12:27:03 [INFO] [inference.client] Inference round-robin across 2 Ollama endpoints: ['http://127.0.0.1:11434', 'http://127.0.0.1:11435']
+2026-08-08 12:27:03 [INFO] [inference.queue] Inference queue started | lanes=['qwen2.5vl:7b'] total_workers=2 total_max_inflight=2 hard_timeout=120 batch=1 window_ms=0.0
+2026-08-08 12:27:03 [INFO] [services.processor.aesthetic_pipeline] Pipeline initialized | Source: /Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/images
+2026-08-08 12:27:03 [INFO] [__main__] stage done | status=success
+2026-08-08 12:27:03 [INFO] [__main__] stage start | status=running
+2026-08-08 12:27:08 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=0 pending=0
+2026-08-08 12:27:11 [INFO] [engine.operators.stage2_prefilter] stage1_filter | {'pipeline_metrics': True, 'stage': 'stage1_filter', 'count_in': 250, 'count_out': 236, 'reduction_ratio': 0.056, 'retention_ratio': 0.944, 'stage1_reject': 14}
+2026-08-08 12:27:11 [INFO] [services.processor.pipeline_stage_runner] stage2 parallel scoring begin | images=236 workers=6 source=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/images
+2026-08-08 12:27:12 [INFO] [engine.operators.stage2_prefilter] stage2_after_score_prefilter | {'pipeline_metrics': True, 'stage': 'stage2_after_score_prefilter', 'count_in': 236, 'count_out': 236, 'reduction_ratio': 0.0, 'retention_ratio': 1.0, 'stage2_reject': 0}
+2026-08-08 12:27:12 [INFO] [engine.operators.stage2_prefilter] stage3_admission | {'pipeline_metrics': True, 'stage': 'stage3_admission', 'count_in': 236, 'count_out': 236, 'reduction_ratio': 0.0, 'retention_ratio': 1.0, 'stage3_gating': {'stage3_threshold': None, 'stage3_threshold_effective': None, 'top_k_ratio': None, 'top_k_ratio_effective': None, 'pipeline_mode': None, 'gating_source': 'yaml_legacy', 'admission_percentile': None, 'stage3_inferences_saved': None, 'estimated_gpu_seconds_saved': None, 'ambiguous_reserve': None, 'ambiguous_admitted': None}, 'images_entering_stage3': 236}
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] [Stage3 admission] saved_inferences=None est_gpu_sec_saved=0.0 admission_pct=n/a eff_thresh=0.0000 eff_top_k=0.0000 batch_scale_n=None
+2026-08-08 12:27:12 [INFO] [inference.client] Inference round-robin across 2 Ollama endpoints: ['http://127.0.0.1:11434', 'http://127.0.0.1:11435']
+2026-08-08 12:27:12 [INFO] [inference.queue] Inference queue started | lanes=['qwen2.5vl:7b'] total_workers=2 total_max_inflight=2 hard_timeout=120 batch=1 window_ms=0.0
+2026-08-08 12:27:12 [INFO] [services.processor.aesthetic_pipeline] Pipeline initialized | Source: /Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/images
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3_pipeline: top 10 tasks by Stage2 score (highest first)
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   1. score=90.590717 path=20260524Chinesefootball__DSC00669.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   2. score=90.163779 path=20260524yewai__DSC01674.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   3. score=88.965956 path=20260426__DSC04543.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   4. score=87.738001 path=20260524Chinesefootball__DSC00810.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   5. score=87.430048 path=20260619__DSC03047.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   6. score=85.813274 path=20260406__DSC00956.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   7. score=85.451581 path=20260405__DSC00569.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   8. score=84.403899 path=20260626__DSC03752.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   9. score=84.030976 path=20260627__DSC07585.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner]   10. score=83.945533 path=20260524Chinesefootball__DSC00503.jpg
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260524Chinesefootball__DSC00669.jpg status=INFERENCING
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260524yewai__DSC01674.jpg status=INFERENCING
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260426__DSC04543.jpg status=INFERENCING
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260524Chinesefootball__DSC00810.jpg status=INFERENCING
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260619__DSC03047.jpg status=INFERENCING
+2026-08-08 12:27:12 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260406__DSC00956.jpg status=INFERENCING
+2026-08-08 12:27:13 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:17 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:18 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:23 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:23 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:28 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:28 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:33 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:33 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:48 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:48 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:54 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:54 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:59 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:27:59 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:05 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:05 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:13 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:12 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:40 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:50 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:50 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:56 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:28:56 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:02 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:02 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:07 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:07 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:15 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:15 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:17 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260406__DSC00956.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:29:17 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260619__DSC03047.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:29:17 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260524Chinesefootball__DSC00810.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:29:17 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260426__DSC04543.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:29:23 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:23 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:29 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:29 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:48 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:48 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:55 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:29:55 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:30:01 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:30:01 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:30:06 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:30:06 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:30:13 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:30:13 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:18 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:20 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260406__DSC00956.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:31:20 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260426__DSC04543.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:31:20 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260619__DSC03047.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:31:20 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260524Chinesefootball__DSC00810.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:31:20 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:25 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:25 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:44 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:44 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:56 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:31:56 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:01 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:01 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:09 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:09 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:26 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:26 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:32 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:32 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:41 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:42 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:47 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:48 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:54 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:32:57 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:02 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:02 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:11 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:11 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:17 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:17 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:24 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:24 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:24 [WARNING] [services.processor.pipeline_stage_runner] [3/236] ❌ 20260426__DSC04543.jpg | Score: 42.1 | TRASH
+   → Verdict: API Error: inference admission timeout
+   📍 Route: ⚠️ Stage 3: API Error: inference admission timeout
+2026-08-08 12:33:24 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260405__DSC00569.jpg status=INFERENCING
+2026-08-08 12:33:24 [WARNING] [services.processor.pipeline_stage_runner] [4/236] ❌ 20260524Chinesefootball__DSC00810.jpg | Score: 43.8 | TRASH
+   → Verdict: API Error: inference admission timeout
+   📍 Route: ⚠️ Stage 3: API Error: inference admission timeout
+2026-08-08 12:33:24 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260626__DSC03752.jpg status=INFERENCING
+2026-08-08 12:33:24 [WARNING] [services.processor.pipeline_stage_runner] [5/236] ❌ 20260619__DSC03047.jpg | Score: 42.1 | TRASH
+   → Verdict: API Error: inference admission timeout
+   📍 Route: ⚠️ Stage 3: API Error: inference admission timeout
+2026-08-08 12:33:25 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260627__DSC07585.jpg status=INFERENCING
+2026-08-08 12:33:25 [WARNING] [services.processor.pipeline_stage_runner] [6/236] ❌ 20260406__DSC00956.jpg | Score: 43.8 | TRASH
+   → Verdict: API Error: inference admission timeout
+   📍 Route: ⚠️ Stage 3: API Error: inference admission timeout
+2026-08-08 12:33:25 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260524Chinesefootball__DSC00503.jpg status=INFERENCING
+2026-08-08 12:33:30 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:30 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:45 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:45 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:51 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:51 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:58 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:33:58 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:04 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:04 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:10 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:10 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:16 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:16 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:22 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:22 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:29 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:29 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:44 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:44 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:50 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:50 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:56 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:34:56 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:35:02 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:35:02 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2
+2026-08-08 12:35:04 [INFO] [inference.queue] inference queue backpressure: waited 99.36s for inflight slot (lane=qwen2.5vl:7b max_inflight=2) | worker_id=0 provider=ollama model=qwen2.5vl:7b status=BACKPRESSURE
+2026-08-08 12:35:04 [INFO] [inference.queue] inference queue batch degraded=0 | worker_id=1 status=BATCH queue_wait_ms=0 batch_id=ibatch_0000000002 batch_size=1 queue_size=0 inflight=1 pending=1 throughput_img_per_sec=0.0021 p95_queue_wait_ms=0 avg_latency_ms=471278 p95_latency_ms=471278 gpu_busy_sec=471.2841 cache_hit_rate=0.0 total_processed=1
+2026-08-08 12:35:11 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:10 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+python(69306) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+2026-08-08 12:35:16 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:16 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:31 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260626__DSC03752.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:35:31 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260524Chinesefootball__DSC00503.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:35:31 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260627__DSC07585.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:35:33 [WARNING] [inference.queue] inference request failed | worker_id=0 provider=ollama model=qwen2.5vl:7b status=FAILED latency_ms=501092 queue_wait_ms=0 error_code=HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out
+2026-08-08 12:35:33 [INFO] [inference.queue] inference queue batch degraded=0 | worker_id=0 status=BATCH queue_wait_ms=0 batch_id=ibatch_0000000001 batch_size=1 queue_size=0 inflight=1 pending=1 throughput_img_per_sec=0.002 p95_queue_wait_ms=0 avg_latency_ms=501092 p95_latency_ms=501092 gpu_busy_sec=501.1458 total_processed=1
+2026-08-08 12:35:33 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260524yewai__DSC01674.jpg attempt=0 err=HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=120)
+2026-08-08 12:35:34 [WARNING] [inference.queue] inference queue batch failures=1 batch_id=ibatch_0000000001 | worker_id=0 status=BATCH_PARTIAL_FAIL batch_id=ibatch_0000000001 batch_size=1 total_processed=1
+python(69340) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+python(69342) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+python(69347) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+2026-08-08 12:35:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:38 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:38 [INFO] [services.processor.pipeline_stage_runner] [Stage3] image=20260524Chinesefootball__DSC00669.jpg total=505.32s queue_wait=0.00s model_infer=471.24s postprocess=34.09s fallback=False
+2026-08-08 12:35:38 [INFO] [services.processor.pipeline_stage_runner] [1/236] ✅ 20260524Chinesefootball__DSC00669.jpg | Score: 75.8 | KEEP
+   → Verdict: performers on stage
+   📐 Dimensions:
+      · 对焦与清晰度 6.0/10
+      · 曝光与光比 7.0/10
+      · 噪点与干净度 6.0/10
+      · 构图与取景 8.0/10
+      · 光影与色彩 8.0/10
+      · 瞬间与张力 7.0/10
+      · 氛围与感染力 8.0/10
+      · 主体可用性 7.0/10
+   ✨ Highlight: performers on stage
+   ⚠️ Gap: blurry audience details
+   · Tags: 蓝色灯光, 乐队表演, 舞台文字, 观众互动, 现场氛围, 热烈, 动感, 现场感
+2026-08-08 12:35:38 [INFO] [services.processor.pipeline_stage_runner] stage3 inference start | worker_id=0 provider=ollama model=qwen2.5vl:7b image_trace_id=unknown#img:20260406__DSC01070.jpg status=INFERENCING
+2026-08-08 12:35:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:49 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:49 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:54 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:35:54 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:00 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:00 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:05 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:05 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:22 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:22 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:28 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:28 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:34 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:34 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:40 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:40 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:46 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:46 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:52 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:36:52 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:00 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:00 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:05 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:05 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:12 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:12 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:17 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:17 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:22 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:22 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:29 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:29 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:37 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260627__DSC07585.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:37:37 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260524yewai__DSC01674.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:37:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:37 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:37 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260626__DSC03752.jpg attempt=1 err=inference admission timeout
+2026-08-08 12:37:38 [WARNING] [services.processor.stages.deep_analysis] VLM non-success (retryable) image=20260406__DSC01070.jpg attempt=0 err=inference admission timeout
+2026-08-08 12:37:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:43 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:49 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:49 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:57 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:37:57 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:03 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:03 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:08 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:08 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:15 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:15 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:24 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0
+2026-08-08 12:38:24 [INFO] [inference.queue] inference queue periodic | pool_workers=2 max_inflight=2 window_sec=5.0 | status=PERIODIC queue_size=0 inflight=2 pending=2 p95_queue_wait_ms=0 inference_per_sec=0.2 gpu_util=1.0

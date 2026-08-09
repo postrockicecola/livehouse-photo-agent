@@ -364,6 +364,39 @@ class EmbeddingService:
         }
 
 
+def maybe_index_session_after_analyze(
+    conn: "sqlite3.Connection",
+    session_id: int | None,
+    *,
+    force_reindex: bool = False,
+) -> dict[str, Any] | None:
+    """Best-effort CLIP index after analyze succeeds (opt-out via env).
+
+    ``LIVEHOUSE_EMBED_INDEX_ON_ANALYZE=0`` disables. Failures are logged and ignored
+    so embedding gaps never fail the job.
+    """
+    import os
+
+    if session_id is None:
+        return None
+    raw = (os.environ.get("LIVEHOUSE_EMBED_INDEX_ON_ANALYZE") or "1").strip().lower()
+    if raw in ("0", "false", "no", "off"):
+        return None
+    try:
+        if not EmbeddingService.is_available():
+            return {"ok": False, "skipped": True, "reason": "unavailable"}
+        return EmbeddingService.index_session(
+            conn, int(session_id), force_reindex=force_reindex
+        )
+    except Exception as exc:
+        logger.warning(
+            "maybe_index_session_after_analyze session=%s failed: %s",
+            session_id,
+            exc,
+        )
+        return {"ok": False, "error": str(exc)}
+
+
 # ------------------------------------------------------------------
 # File-cache helpers (gallery RAG without luma_brain)
 # ------------------------------------------------------------------

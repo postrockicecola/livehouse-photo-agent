@@ -7,6 +7,7 @@ from services.diversity_selector import (
     _cluster_by_affinity,
     _cluster_clip_centroids,
     _mmr_order_reps,
+    apply_diversity_selection,
     diversity_settings,
 )
 
@@ -17,6 +18,20 @@ def test_diversity_settings_default_threshold_stricter():
     assert s["max_cluster_size"] == 20
     assert s["fallback_phash_hamming"] == 8
     assert s["mmr_lambda"] == 0.65
+    assert s["clip_on_demand"] is False
+    assert s["max_sync_rows"] == 1500
+
+
+def test_large_session_skips_synchronous_diversity_work():
+    rows = [{"overall_score": score} for score in (20, 80, 50)]
+    order, members, group_ids = apply_diversity_selection(
+        rows,
+        {"max_sync_rows": 2},
+        order_key_fn=lambda row: float(row["overall_score"]),
+    )
+    assert order == [1, 2, 0]
+    assert members == {}
+    assert group_ids == {1: 1, 2: 2, 0: 3}
 
 
 def test_cluster_by_affinity_respects_max_size():

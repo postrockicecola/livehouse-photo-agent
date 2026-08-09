@@ -12,17 +12,38 @@ from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 
 def test_prompt_version_is_explicit() -> None:
-    assert STAGE3_PROMPT_VERSION == "stage3_v6"
+    assert STAGE3_PROMPT_VERSION == "stage3_v7"
 
 
 def test_full_prompt_uses_layered_contract_not_editing_rules() -> None:
     prompt = build_stage3_prompt(blur_eff=None, stage1_features=None, strict_retry=False)
     assert "editing_suggestions" not in prompt or "Do not include editing_suggestions" in prompt
     assert "NON-NEGOTIABLE" not in prompt
-    assert "Example output" in prompt
+    assert "Emit exactly this shape" in prompt
     assert "mood_tags" in prompt
     assert "孤独" in prompt
     assert PROMPT_BLOCKS["domain"][:20] in prompt
+
+
+def test_output_schema_carries_no_concrete_scores() -> None:
+    """A filled example gets copied, not read as shape.
+
+    v6 shipped concrete dimension values and 60% of eval frames echoed at least six of
+    them back bit-identically, which flattened every dimension except focus_sharpness.
+    Keep the schema slots empty so the numbers have to come from the image.
+    """
+    prompt = build_stage3_prompt(blur_eff=None, stage1_features=None, strict_retry=False)
+    for key in STAGE3_DIM_KEYS:
+        slot = prompt.split(f'"{key}":', 1)[1][:24]
+        assert slot.startswith("<"), f"{key} carries a literal value in the prompt: {slot!r}"
+    assert "面部高光略过曝" not in prompt
+    assert "红色侧光勾出歌手轮廓" not in prompt
+
+
+def test_scoring_guide_anchors_the_low_end() -> None:
+    prompt = build_stage3_prompt(blur_eff=None, stage1_features=None, strict_retry=False)
+    assert "0–2" in prompt and "3–4" in prompt
+    assert "Refusing to go below 5" in prompt
 
 
 def test_retry_prompt_is_calmer() -> None:

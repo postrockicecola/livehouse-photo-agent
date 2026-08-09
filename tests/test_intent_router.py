@@ -117,7 +117,8 @@ _TABLE: list[tuple[str, str, Optional[str], Optional[int], Optional[bool]]] = [
     ("film_recommend", "修成最适合这张图的胶片感", "recommend_film_for_photo", None, False),
     ("film_color_intense", "颜色再浓烈一些", "apply_film_vibe", None, False),
     ("film_sat_max", "饱和度拉满", "apply_film_vibe", None, False),
-    ("shortlist_plus_panorama", "选出20张，但多给我一些全景镜头", None, None, None),
+    # Compound select + semantic residue → shortlist with query (hybrid path).
+    ("shortlist_plus_panorama", "选出20张，但多给我一些全景镜头", "shortlist_select", 20, True),
 ]
 
 
@@ -160,6 +161,26 @@ def test_social_and_energy_recipes_single_source() -> None:
     assert energy is not None
     assert energy.rule_id == "shortlist_energy"
     assert energy.calls[0].args == energy_search_args(limit=10)
+
+
+def test_compound_energy_attaches_semantic_query() -> None:
+    from services.agent.intent_router import semantic_residue
+
+    assert semantic_residue("帮我选出最炸的10张") == ""
+    assert semantic_residue("最炸的吉他手") == "吉他手"
+    m = route_gallery_intent("最炸的吉他手")
+    assert m is not None
+    assert m.rule_id == "shortlist_energy"
+    assert m.calls[0].args.get("query") == "吉他手"
+    assert m.calls[0].args.get("recipe") == "energy"
+
+
+def test_contrast_shortlist_attaches_panorama_query() -> None:
+    m = route_gallery_intent("选出20张，但多给我一些全景镜头")
+    assert m is not None
+    assert m.rule_id == "shortlist_select"
+    assert m.calls[0].args.get("query") == "全景"
+    assert m.select_after_search is True
 
 
 def test_count_prefix_shared_constant() -> None:

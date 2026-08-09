@@ -270,8 +270,15 @@
     "expect_select_after": false
   },
   {
-    "id": "shortlist_plus_panorama_falls_through",
+    "id": "shortlist_plus_panorama_hybrid_query",
     "user": "选出20张，但多给我一些全景镜头",
-    "expect_rule": null
+    "expect_rule": "shortlist_select",
+    "expect_tool": "gallery_search",
+    "expect_args": {
+      "recipe": "shortlist",
+      "limit": 20,
+      "query": "全景"
+    },
+    "expect_select_after": true
   }
 ]

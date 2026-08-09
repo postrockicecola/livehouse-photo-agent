@@ -3,15 +3,15 @@ from __future__ import annotations
 
 from utils.stage3_dimensions import STAGE3_DIM_KEYS, STAGE3_DIM_PROMPT_LINES
 
-PROMPT_VERSION = "stage3_v6"
+PROMPT_VERSION = "stage3_v7"
 
 # Token estimates (~4 chars/token, rough) for prompt budgeting.
 PROMPT_BLOCK_TOKEN_HINTS: dict[str, int] = {
     "domain": 95,
     "contract": 95,
-    "scoring_behavior": 55,
+    "scoring_behavior": 130,
     "tags_behavior": 70,
-    "exemplar": 140,
+    "exemplar": 150,
     "rubric": 110,
     "retry": 35,
 }
@@ -47,11 +47,25 @@ PROMPT_BLOCKS: dict[str, str] = {
         "- Prefer actionable wording over generic praise.\n"
         "- Avoid repeating the same idea across tags, mood_tags, and aspects.\n"
     ),
-    # ~55 tokens
+    # ~130 tokens. v6 anchored only 4-10, which left the model no licence to go low:
+    # across 236 eval frames not one scored below 50 overall, and the bottom human
+    # quintile came back +21 points high. The bottom of the scale has to be named.
     "scoring_behavior": (
-        "Scoring guide: 4–5 acceptable, 6–7 good, 8–9 strong, 10 rare.\n"
+        "Scoring guide — the whole 0–10 range is in use:\n"
+        "  0–2  unusable: no recovery path\n"
+        "  3–4  weak: a visible defect a client would reject\n"
+        "  5–6  usable: fine in a bulk gallery, not a highlight\n"
+        "  7–8  strong: would ship as a selected frame\n"
+        "  9–10 exceptional: rare, portfolio-grade\n"
+        "A real shoot reaches the bottom of that scale: missed focus, the subject buried, "
+        "nothing happening. When this frame is one of those, score it in the 1–4 band and "
+        "let the total fall with it. Refusing to go below 5 is the worst failure here, "
+        "because it makes the frames worth discarding indistinguishable from the keepers.\n"
+        "Being generous is not being fair: a 7 handed out for free costs a genuinely "
+        "strong frame the distance it earned. Reserve 8+ for standout moments.\n"
+        "Do not give all eight dimensions the same value — a frame is normally strong on "
+        "some axes and weak on others. Vary the decimal; do not emit only .0 and .5.\n"
         "moment_peak and atmosphere_impact matter for live music; intentional motion blur can still score well.\n"
-        "Avoid score compression: differentiate average vs exceptional frames; reserve 8+ for standout moments.\n"
     ),
     # ~70 tokens
     "tags_behavior": (
@@ -65,14 +79,24 @@ PROMPT_BLOCKS: dict[str, str] = {
     ),
 }
 
+# v6 shipped a filled example -- concrete scores plus concrete Chinese aspect text --
+# and the model copied it instead of reading it as shape. Measured over 236 eval
+# frames: 60% reproduced at least 6 of the 8 numbers bit-identically, 78% returned the
+# example's "面部高光略过曝" verbatim as their own weakness, and 41% echoed all four of
+# its tags. Per-dimension adherence to the example correlated -0.85 with agreement
+# against human labels, and the only dimension that escaped it (focus_sharpness, 22%
+# adherence) was the only one with real signal (Spearman 0.45 vs ~0 for the rest).
+# A placeholder schema gives up the tone hint; that hint was costing the whole score
+# range. Keep every value a slot the model must fill from the image in front of it.
 STAGE3_COMPACT_EXEMPLAR = (
-    '{"focus_sharpness":6.2,"exposure_control":5.8,"noise_cleanliness":7.1,'
-    '"composition_framing":7.4,"light_color_character":8.0,"moment_peak":8.6,'
-    '"atmosphere_impact":8.2,"deliverable_subject":6.9,'
-    '"strongest_aspect":{"zh":"红色侧光勾出歌手轮廓","en":"Red gel sidelight sculpts the vocalist silhouette"},'
-    '"weakest_aspect":{"zh":"面部高光略过曝","en":"Facial highlights run slightly hot"},'
-    '"tags":["backlight haze","peak motion","crowd silhouettes","expressive gel lighting"],'
-    '"mood_tags":["热烈","euphoric"]}'
+    '{"focus_sharpness":<0-10, one decimal>,"exposure_control":<0-10, one decimal>,'
+    '"noise_cleanliness":<0-10, one decimal>,"composition_framing":<0-10, one decimal>,'
+    '"light_color_character":<0-10, one decimal>,"moment_peak":<0-10, one decimal>,'
+    '"atmosphere_impact":<0-10, one decimal>,"deliverable_subject":<0-10, one decimal>,'
+    '"strongest_aspect":{"zh":"<这一张最强的地方，简短具体>","en":"<same, English>"},'
+    '"weakest_aspect":{"zh":"<这一张最弱的地方，简短具体>","en":"<same, English>"},'
+    '"tags":["<visible scene/object phrase>","..."],'
+    '"mood_tags":["<atmosphere label>","..."]}'
 )
 
 PROMPT_BLOCKS["retry"] = (
@@ -98,7 +122,9 @@ def build_system_core(*, include_exemplar: bool = True) -> str:
     ]
     if include_exemplar:
         parts.append(
-            "Example output (shape and tone only; scores must match the image you see):\n"
+            "Emit exactly this shape. Every <...> is a slot you must fill by reading "
+            "THIS image -- the placeholders are not example values, and echoing them "
+            "back is a failed response:\n"
             f"{STAGE3_COMPACT_EXEMPLAR}\n"
         )
     return "\n".join(parts)
@@ -161,10 +187,12 @@ def compose_stage3_fast_prompt(
     elif blur_eff in ("motion_blur", "slight_blur"):
         blur_note = "Note: possible motion blur.\n"
 
-    exemplar = (
-        '{"score":82,"verdict":"Strong peak moment; highlights slightly hot.",'
-        '"tags":["backlight haze","peak motion","expressive stage lighting"],'
-        '"mood_tags":["热烈","tense"]}'
+    # Same placeholder-only rule as the full pass: a filled example here showed a
+    # concrete 82 and got echoed back as the model's own score.
+    schema = (
+        '{"score":<integer 0-100>,"verdict":"<one short English line about THIS frame>",'
+        '"tags":["<visible scene/object phrase>","..."],'
+        '"mood_tags":["<atmosphere label>","..."]}'
     )
     return (
         f"{PROMPT_BLOCKS['domain']}"
@@ -172,8 +200,11 @@ def compose_stage3_fast_prompt(
         "Structure: keys score (integer 0-100), verdict (one short English line), "
         "tags (array of 3-5 scene/object strings), "
         "mood_tags (array of 1–3 atmosphere/emotion labels, Chinese and/or English).\n"
+        "Score bands: 0–25 unusable, 26–45 weak, 46–65 usable, 66–85 strong, 86–100 rare. "
+        "A real shoot produces frames in the bottom two bands; score them there rather "
+        "than compressing everything into 70–85.\n"
         f"{PROMPT_BLOCKS['tags_behavior']}"
-        f"Example:\n{exemplar}\n"
+        f"Emit exactly this shape, filling every <...> from the image:\n{schema}\n"
         f"{stage1_line}"
         f"{blur_note}"
     )

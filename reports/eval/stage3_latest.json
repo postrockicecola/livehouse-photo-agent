@@ -1,0 +1,187 @@
+{
+  "matched": 250,
+  "labels_unmatched": [],
+  "predictions_unmatched_count": 0,
+  "overall": {
+    "n": 250,
+    "spearman": 0.5369656474978086,
+    "pearson": 0.5319656866783042,
+    "mae": 12.044400000000001,
+    "rmse": 16.575288836095737
+  },
+  "per_dimension": {
+    "focus_sharpness": {
+      "n": 236,
+      "mae": 1.8539830508474575,
+      "spearman": 0.5831178007396747
+    },
+    "exposure_control": {
+      "n": 236,
+      "mae": 1.3016949152542374,
+      "spearman": 0.06982314010963867
+    },
+    "noise_cleanliness": {
+      "n": 236,
+      "mae": 1.059322033898305,
+      "spearman": 0.45842717734263405
+    },
+    "composition_framing": {
+      "n": 236,
+      "mae": 1.5927966101694915,
+      "spearman": -0.026846199520409904
+    },
+    "light_color_character": {
+      "n": 236,
+      "mae": 1.6707627118644068,
+      "spearman": 0.15416207898122877
+    },
+    "moment_peak": {
+      "n": 236,
+      "mae": 1.3516949152542372,
+      "spearman": 0.493117710242367
+    },
+    "atmosphere_impact": {
+      "n": 236,
+      "mae": 1.3915254237288135,
+      "spearman": 0.21446409454709964
+    },
+    "deliverable_subject": {
+      "n": 236,
+      "mae": 1.4578813559322037,
+      "spearman": 0.48132894958825156
+    }
+  },
+  "macro_dim_mae": 1.459957627118644,
+  "calibration": {},
+  "selection": {
+    "n": 250,
+    "n_positives": 64,
+    "mean_pred_keep": 77.6484375,
+    "mean_pred_discard": 67.20268817204301,
+    "score_gap": 10.445749327956989,
+    "at_k": [
+      {
+        "k": 3,
+        "precision": 1.0,
+        "recall": 0.046875,
+        "overlap": 3
+      },
+      {
+        "k": 5,
+        "precision": 0.6,
+        "recall": 0.046875,
+        "overlap": 3
+      },
+      {
+        "k": 10,
+        "precision": 0.5,
+        "recall": 0.078125,
+        "overlap": 5
+      }
+    ]
+  },
+  "bias": {
+    "n": 250,
+    "mean_bias": 5.766,
+    "std_bias": 15.540059330646072,
+    "median_bias": 6.399999999999999,
+    "pct_overscored": 73.6,
+    "pct_underscored": 26.0
+  },
+  "quintile_calibration": [
+    {
+      "quintile": 1,
+      "range": "12–53",
+      "n": 49,
+      "human_mean": 41.518367346938774,
+      "model_mean": 56.153061224489804,
+      "bias_mean": 14.63469387755102,
+      "bias_std": 22.035820106441058
+    },
+    {
+      "quintile": 2,
+      "range": "53–64",
+      "n": 49,
+      "human_mean": 58.71632653061224,
+      "model_mean": 69.00204081632651,
+      "bias_mean": 10.285714285714288,
+      "bias_std": 16.81234968827428
+    },
+    {
+      "quintile": 3,
+      "range": "64–69",
+      "n": 52,
+      "human_mean": 66.57115384615385,
+      "model_mean": 71.24615384615385,
+      "bias_mean": 4.675000000000002,
+      "bias_std": 14.685142609506334
+    },
+    {
+      "quintile": 4,
+      "range": "69–76",
+      "n": 50,
+      "human_mean": 72.524,
+      "model_mean": 74.898,
+      "bias_mean": 2.3740000000000006,
+      "bias_std": 4.478964612496955
+    },
+    {
+      "quintile": 5,
+      "range": "76–91",
+      "n": 50,
+      "human_mean": 80.566,
+      "model_mean": 77.738,
+      "bias_mean": -2.8280000000000016,
+      "bias_std": 5.153485810594611
+    }
+  ],
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-08-08T06:23:32.618594+00:00",
+    "git_sha": "ab53680",
+    "seed": null,
+    "hardware": {
+      "platform": "macOS-15.3.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.12",
+      "cpu_count": 10,
+      "torch": null,
+      "cuda_available": false,
+      "system": "Darwin"
+    },
+    "model": {
+      "config_path": "configs/eval_stage3.yaml",
+      "config_sha256_prefix": "1f83ec6b2594bf4e",
+      "provider": "ollama",
+      "model_name": "qwen2.5vl:7b",
+      "temperature": 0.0,
+      "num_predict": 512,
+      "fallback_model_name": null
+    },
+    "inputs": {
+      "labels": {
+        "path": "data/eval/labels.jsonl",
+        "sha256_prefix": "86587c3fc2de6369"
+      },
+      "predictions": {
+        "path": "reports/eval/predictions/stage3_v7_qwen25vl7b_analysis_results.json",
+        "sha256_prefix": "0547c1813ba0635d"
+      }
+    },
+    "extra": {
+      "version_manifest": {
+        "manifest_id": "pipeline_stage3_stage3_v7_qwen2.5vl_7b",
+        "version_manifest_hash": "4f486e30aff78f371d0e90c02fca041ab4ae907fb933e26a4e633f48e884d3bb"
+      },
+      "prompt_version": "stage3_v7",
+      "prompt_content_hash": "e8a0d8c930d4ec53eab466ff43729a5c11d9cf1eb0f9f51c7e5932012b96b72a",
+      "workflow_config_hash": "7d5206e94719f2bdd4f47c42ae6471af3dadfc8412f9ac1e8a39ce9b1ce408af",
+      "manifest_path": "reports/eval/version_manifest.json"
+    }
+  },
+  "version_manifest": {
+    "manifest_id": "pipeline_stage3_stage3_v7_qwen2.5vl_7b",
+    "version_manifest_hash": "4f486e30aff78f371d0e90c02fca041ab4ae907fb933e26a4e633f48e884d3bb"
+  }
+}

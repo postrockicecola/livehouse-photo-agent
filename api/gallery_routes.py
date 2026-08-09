@@ -12,6 +12,9 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
@@ -98,6 +101,8 @@ class ExportRequest(BaseModel):
     category: str = "unknown"
     # When true, images without an explicit ``film_variant`` use persisted session vibe.
     use_session_vibe: bool = False
+    # Gallery uses a Celery task so the HTTP request does not hold the whole export open.
+    background: bool = False
 
 
 class VibeResolveRequest(BaseModel):
@@ -195,6 +200,25 @@ def _export_specs_list(req: ExportRequest) -> list[ExportImageSpec]:
     if req.images:
         return [ExportImageSpec(file=f) for f in req.images]
     return []
+
+
+def _copy_raw_with_apfs_clone(src: Path, dest: Path) -> str:
+    """Clone on APFS when available, falling back to a normal metadata-preserving copy."""
+    try:
+        subprocess.run(
+            ["/bin/cp", "-c", "-p", str(src), str(dest)],
+            check=True,
+            capture_output=True,
+            timeout=120,
+        )
+        return "clone"
+    except (OSError, subprocess.SubprocessError):
+        try:
+            dest.unlink(missing_ok=True)
+        except OSError:
+            pass
+        shutil.copy2(src, dest)
+        return "copy"
 
 
 @lru_cache(maxsize=8)
@@ -319,6 +343,59 @@ def _runtime_base_dir() -> str:
 
         logging.getLogger(__name__).exception("gallery runtime base dir resolve failed; using BASE_DIR")
     return base
+
+
+def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | None]:
+    """Return whether the active gallery still has queued/running analysis work."""
+    from utils.studio_sessions import (
+        RUNNABLE_ANALYZE_STATUSES,
+        find_brain_session_id,
+        find_runnable_analyze_job_id,
+    )
+
+    conn = None
+    try:
+        conn = brain_connect()
+        session_id = find_brain_session_id(conn, previews_dir)
+        job_id = find_runnable_analyze_job_id(
+            conn,
+            previews_dir=previews_dir,
+            brain_session_id=session_id,
+        )
+        if job_id is not None:
+            row = conn.execute("SELECT status FROM jobs WHERE id = ?", (job_id,)).fetchone()
+            return True, job_id, str(row["status"]) if row is not None else None
+
+        # Staged pipelines use one PIPELINE_STAGE row per step. Any runnable row
+        # means the complete gallery score order is not final yet.
+        if session_id is not None:
+            placeholders = ",".join("?" * len(RUNNABLE_ANALYZE_STATUSES))
+            row = conn.execute(
+                f"""
+                SELECT id, status
+                FROM jobs
+                WHERE session_id = ?
+                  AND job_type = 'PIPELINE_STAGE'
+                  AND status IN ({placeholders})
+                ORDER BY COALESCE(stage_order, 0) ASC, id ASC
+                LIMIT 1
+                """,
+                (session_id, *RUNNABLE_ANALYZE_STATUSES),
+            ).fetchone()
+            if row is not None:
+                return True, int(row["id"]), str(row["status"])
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).debug(
+            "gallery analysis state lookup failed previews_dir=%s",
+            previews_dir,
+            exc_info=True,
+        )
+    finally:
+        if conn is not None:
+            conn.close()
+    return False, None, None
 
 
 def _gallery_path_roots() -> list[Path]:
@@ -846,6 +923,29 @@ def post_gallery_pairwise_preferences(req: PairwisePreferencesPostRequest):
 def export_images(req: ExportRequest):
     from utils.json_safe import json_safe
 
+    specs = _export_specs_list(req)
+    if not specs:
+        return JSONResponse({"success": False, "error": "没有选择图片"}, status_code=400)
+    if req.background:
+        base_dir = _runtime_base_dir()
+        task = celery_client.send_task(
+            "tasks.export_gallery_images",
+            kwargs={
+                "request_payload": req.model_dump(mode="json"),
+                "base_dir": base_dir,
+            },
+        )
+        return JSONResponse(
+            status_code=202,
+            content={
+                "success": True,
+                "background": True,
+                "task_id": task.id,
+                "state": "PENDING",
+                "total": len(specs),
+            },
+        )
+
     try:
         return _export_images_impl(req)
     except Exception:
@@ -864,11 +964,42 @@ def export_images(req: ExportRequest):
         )
 
 
-def _export_images_impl(req: ExportRequest):
+@router.post("/api/export-images/prewarm")
+def prewarm_export_images(req: ExportRequest):
+    """Warm exact export-size film caches without creating an export folder."""
     specs = _export_specs_list(req)
     if not specs:
         return JSONResponse({"success": False, "error": "没有选择图片"}, status_code=400)
     base_dir = _runtime_base_dir()
+    task = celery_client.send_task(
+        "tasks.prewarm_gallery_export",
+        kwargs={
+            "request_payload": req.model_dump(mode="json"),
+            "base_dir": base_dir,
+        },
+    )
+    return JSONResponse(
+        status_code=202,
+        content={
+            "success": True,
+            "background": True,
+            "task_id": task.id,
+            "total": len(specs),
+        },
+    )
+
+
+def _export_images_impl(
+    req: ExportRequest,
+    *,
+    base_dir: str | None = None,
+    progress_callback: Callable[[int, int, str], None] | None = None,
+    prewarm_only: bool = False,
+):
+    specs = _export_specs_list(req)
+    if not specs:
+        return JSONResponse({"success": False, "error": "没有选择图片"}, status_code=400)
+    base_dir = base_dir or _runtime_base_dir()
     resolver = _path_resolver(base_dir)
     session_dir, raw_hint = resolver.session_and_raw_hint()
     export_opts = _export_processing_opts()
@@ -878,15 +1009,20 @@ def _export_images_impl(req: ExportRequest):
     session_vibe = read_session_vibe(base_dir) if req.use_session_vibe else None
     # 与 Previews 同级：…/session/exported_images/export_*（不再放在 Previews 下）
     export_base = Path(base_dir).parent / "exported_images"
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    export_root = export_base / f"export_{timestamp}"
-    jpeg_dir = export_root / EXPORT_DIR_JPEG
-    raw_out = export_root / EXPORT_DIR_RAW_COPY
-    graded_dir = export_root / EXPORT_DIR_GRADED_FROM_RAW
-    jpeg_dir.mkdir(parents=True, exist_ok=True)
-    raw_out.mkdir(parents=True, exist_ok=True)
-    if export_opts["export_film_from_raw"]:
-        graded_dir.mkdir(parents=True, exist_ok=True)
+    export_root: Path | None = None
+    jpeg_dir: Path | None = None
+    raw_out: Path | None = None
+    graded_dir: Path | None = None
+    if not prewarm_only:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        export_root = export_base / f"export_{timestamp}"
+        jpeg_dir = export_root / EXPORT_DIR_JPEG
+        raw_out = export_root / EXPORT_DIR_RAW_COPY
+        graded_dir = export_root / EXPORT_DIR_GRADED_FROM_RAW
+        jpeg_dir.mkdir(parents=True, exist_ok=True)
+        raw_out.mkdir(parents=True, exist_ok=True)
+        if export_opts["export_film_from_raw"]:
+            graded_dir.mkdir(parents=True, exist_ok=True)
 
     # 与 Lab 浏览器缓存隔离；cache_key_extra 避免命中旧版/错误缓存条目。
     from utils.runtime_paths import runtime_dir as previews_runtime_dir
@@ -901,11 +1037,12 @@ def _export_images_impl(req: ExportRequest):
         variant_id: str,
         rotate_deg: int,
         *,
-        dest_dir: Path,
+        dest_dir: Path | None,
         max_side: int,
         cache_tag: str,
         adjustments: EditAdjustments | None = None,
         intensity: float = 1.0,
+        raw_half_size: bool = False,
     ) -> str | None:
         """Return error message or None on success."""
         if not src.is_file():
@@ -924,8 +1061,10 @@ def _export_images_impl(req: ExportRequest):
                 cache_key_extra=cache_tag,
                 adjustments=adjustments,
                 intensity=float(intensity),
+                raw_half_size=raw_half_size,
             )
-            shutil.copy2(cached, dest_dir / dest_basename)
+            if dest_dir is not None:
+                shutil.copy2(cached, dest_dir / dest_basename)
         except Exception as e:
             return str(e)
         return None
@@ -947,7 +1086,8 @@ def _export_images_impl(req: ExportRequest):
     success_graded_from_raw = 0
     errors = []
     export_feedback_items: list[dict[str, object]] = []
-    for spec in specs:
+    export_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="gallery-export")
+    for completed_index, spec in enumerate(specs, start=1):
         image_name = spec.file
         dest_jpeg_name = Path(PathResolver._strip_resource_fork_name(image_name)).name
         try:
@@ -997,84 +1137,101 @@ def _export_images_impl(req: ExportRequest):
                 vid = variant_user if tag == "film_source" and variant_user else variant_preview
                 attempts.append((src_p, vid, tag))
 
-            seen: set[str] = set()
-            for src_p, vid, tag in attempts:
-                key = str(src_p.resolve())
-                if key in seen:
-                    continue
-                seen.add(key)
-                grade_i = (
-                    session_intensity
-                    if session_variant and vid == session_variant
-                    else 1.0
-                )
-                err = _render_film_to_jpeg(
-                    src_p,
-                    dest_jpeg_name,
-                    vid,
-                    spec.rotate,
-                    dest_dir=jpeg_dir,
-                    max_side=int(export_opts["export_film_jpeg_max_side"]),
-                    cache_tag=_EXPORT_FILM_CACHE_TAG,
-                    adjustments=spec_adjustments if vid == AUTOMATED_VARIANT_ID else None,
-                    intensity=grade_i,
-                )
-                if err is None:
-                    success_jpeg += 1
-                    jpeg_done = True
-                    break
-                errors.append(f"{image_name} [{tag}]: {err}")
+            def _render_preview_track() -> tuple[bool, list[str]]:
+                track_errors: list[str] = []
+                seen: set[str] = set()
+                for src_p, vid, tag in attempts:
+                    key = str(src_p.resolve())
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    grade_i = (
+                        session_intensity
+                        if session_variant and vid == session_variant
+                        else 1.0
+                    )
+                    err = _render_film_to_jpeg(
+                        src_p,
+                        dest_jpeg_name,
+                        vid,
+                        spec.rotate,
+                        dest_dir=jpeg_dir,
+                        max_side=int(export_opts["export_film_jpeg_max_side"]),
+                        cache_tag=_EXPORT_FILM_CACHE_TAG,
+                        adjustments=spec_adjustments if vid == AUTOMATED_VARIANT_ID else None,
+                        intensity=grade_i,
+                    )
+                    if err is None:
+                        return True, track_errors
+                    track_errors.append(f"{image_name} [{tag}]: {err}")
 
-            if not jpeg_done:
                 if not attempts:
-                    errors.append(f"{image_name}: 无可用于胶片导出的源图（无预览 / 无有效路径）")
+                    track_errors.append(f"{image_name}: 无可用于胶片导出的源图（无预览 / 无有效路径）")
                 elif (
                     spec.film_variant
                     and spec.film_variant not in FILM_VARIANT_IDS
                     and spec.film_variant != "session_vibe"
                 ):
-                    errors.append(
-                        f"{image_name}: 未知胶片型号 {spec.film_variant}，且所有候选源均未成功导出",
+                    track_errors.append(
+                        f"{image_name}: 未知胶片型号 {spec.film_variant}，且所有候选源均未成功导出"
                     )
                 else:
-                    errors.append(f"{image_name}: 胶片导出失败（已尝试全部候选源）")
+                    track_errors.append(f"{image_name}: 胶片导出失败（已尝试全部候选源）")
+                return False, track_errors
 
-            if export_opts["export_film_from_raw"]:
+            def _render_raw_track() -> tuple[bool, list[str]]:
                 raw_film_src = catalog.get("raw")
-                if raw_film_src and raw_film_src.is_file():
-                    grade_i = (
-                        session_intensity
-                        if session_variant and variant_graded == session_variant
-                        else 1.0
-                    )
-                    err_g = _render_film_to_jpeg(
-                        raw_film_src,
-                        dest_jpeg_name,
-                        variant_graded,
-                        spec.rotate,
-                        dest_dir=graded_dir,
-                        max_side=int(export_opts["export_film_raw_max_side"]),
-                        cache_tag=_EXPORT_RAW_CACHE_TAG,
-                        adjustments=spec_adjustments if variant_graded == AUTOMATED_VARIANT_ID else None,
-                        intensity=grade_i,
-                    )
-                    if err_g is None:
-                        success_graded_from_raw += 1
-                        graded_done = True
-                    else:
-                        errors.append(f"{image_name} [graded_from_raw]: {err_g}")
-                else:
+                if not raw_film_src or not raw_film_src.is_file():
                     stem = Path(PathResolver._strip_resource_fork_name(image_name)).stem
                     hint = f"raw_dir={raw_hint}" if raw_hint else "无 raw_dir 提示"
-                    errors.append(
-                        f"{image_name}: graded_from_raw 跳过（RAW 未找到 session={session_dir} {hint} stem={stem}）",
-                    )
+                    return False, [
+                        f"{image_name}: graded_from_raw 跳过（RAW 未找到 session={session_dir} {hint} stem={stem}）"
+                    ]
+                grade_i = (
+                    session_intensity
+                    if session_variant and variant_graded == session_variant
+                    else 1.0
+                )
+                err_g = _render_film_to_jpeg(
+                    raw_film_src,
+                    dest_jpeg_name,
+                    variant_graded,
+                    spec.rotate,
+                    dest_dir=graded_dir,
+                    max_side=int(export_opts["export_film_raw_max_side"]),
+                    cache_tag=_EXPORT_RAW_CACHE_TAG,
+                    adjustments=spec_adjustments if variant_graded == AUTOMATED_VARIANT_ID else None,
+                    intensity=grade_i,
+                    raw_half_size=True,
+                )
+                return (
+                    (True, [])
+                    if err_g is None
+                    else (False, [f"{image_name} [graded_from_raw]: {err_g}"])
+                )
+
+            preview_future = export_pool.submit(_render_preview_track)
+            raw_future = (
+                export_pool.submit(_render_raw_track)
+                if export_opts["export_film_from_raw"]
+                else None
+            )
+            jpeg_done, preview_errors = preview_future.result()
+            errors.extend(preview_errors)
+            if jpeg_done:
+                success_jpeg += 1
+            if raw_future is not None:
+                graded_done, raw_errors = raw_future.result()
+                errors.extend(raw_errors)
+                if graded_done:
+                    success_graded_from_raw += 1
 
             raw_src = catalog.get("raw")
             if raw_src and raw_src.is_file():
-                shutil.copy2(raw_src, raw_out / raw_src.name)
-                success_raw += 1
-                raw_done = True
+                if not prewarm_only and raw_out is not None:
+                    _copy_raw_with_apfs_clone(raw_src, raw_out / raw_src.name)
+                    success_raw += 1
+                    raw_done = True
             else:
                 stem = Path(PathResolver._strip_resource_fork_name(image_name)).stem
                 hint = f"raw_dir={raw_hint}" if raw_hint else "无 raw_dir 提示"
@@ -1108,8 +1265,18 @@ def _export_images_impl(req: ExportRequest):
                 export_feedback_items.append(row)
         except Exception as e:
             errors.append(f"{image_name}: {e}")
+        if progress_callback is not None:
+            try:
+                progress_callback(
+                    completed_index,
+                    len(specs),
+                    image_name,
+                )
+            except Exception:
+                pass
+    export_pool.shutdown(wait=True)
     ok = success_jpeg > 0 or success_raw > 0 or success_graded_from_raw > 0
-    if ok and export_feedback_items:
+    if ok and export_feedback_items and not prewarm_only and export_root is not None:
         from utils.export_feedback import append_export_feedback_event
 
         sv_film: str | None = None
@@ -1139,12 +1306,14 @@ def _export_images_impl(req: ExportRequest):
         "export_film_from_raw": bool(export_opts["export_film_from_raw"]),
         "use_session_vibe": bool(req.use_session_vibe),
         "session_vibe": session_vibe if req.use_session_vibe else None,
-        "export_path": str(export_root),
-        "jpeg_folder": str(jpeg_dir),
-        "raw_folder": str(raw_out),
+        "prewarm_only": prewarm_only,
         "errors": errors or None,
     }
-    if export_opts["export_film_from_raw"]:
+    if export_root is not None and jpeg_dir is not None and raw_out is not None:
+        resp["export_path"] = str(export_root)
+        resp["jpeg_folder"] = str(jpeg_dir)
+        resp["raw_folder"] = str(raw_out)
+    if export_opts["export_film_from_raw"] and graded_dir is not None:
         resp["graded_from_raw_folder"] = str(graded_dir)
     from utils.json_safe import json_safe
 
@@ -1334,12 +1503,19 @@ def enqueue_luma_workflow(
 
 @router.get("/api/tasks/{task_id}")
 def get_task_status(task_id: str):
+    from utils.json_safe import json_safe
+
     async_result = celery_client.AsyncResult(task_id)
-    return {
+    state = str(async_result.state)
+    info = async_result.info
+    result = async_result.result if async_result.ready() else None
+    return json_safe({
         "task_id": task_id,
-        "state": async_result.state,
-        "result": async_result.result if async_result.ready() else None,
-    }
+        "state": state,
+        "progress": info if state == "PROGRESS" and isinstance(info, dict) else None,
+        "result": result if state == "SUCCESS" and isinstance(result, dict) else None,
+        "error": str(result) if state == "FAILURE" else None,
+    })
 
 
 @router.get("/api/gallery/results")
@@ -1357,23 +1533,34 @@ def get_gallery_results(
     ),
 ):
     active = _runtime_base_dir()
+    analysis_running, analysis_job_id, analysis_job_status = _gallery_analysis_state(active)
+    effective_sort = "default" if analysis_running else sort
     items, total, start, end, has_more, total_raw = load_gallery_page(
-        active, sort, offset, limit, lite=lite, dedupe=dedupe
+        active,
+        effective_sort,
+        offset,
+        limit,
+        lite=lite,
+        dedupe=dedupe if not analysis_running else False,
     )
     film_prewarm_task_id = None
     if offset == 0 and total > 0:
         film_prewarm_task_id = try_enqueue_gallery_cinestill_prewarm(source_dir=active)
     from services.taste_profile import read_taste_profile
 
-    taste_active = sort == "personalized" and read_taste_profile(active) is not None
-    grouped = sort == "diverse"
+    taste_active = effective_sort == "personalized" and read_taste_profile(active) is not None
+    grouped = effective_sort == "diverse"
     return {
         "count": total,
         "total_raw": total_raw,
         "dedupe_hidden": max(0, total_raw - total) if (dedupe or grouped) else 0,
-        "dedupe_enabled": dedupe,
+        "dedupe_enabled": dedupe if not analysis_running else False,
         "grouped": grouped,
         "sort": sort,
+        "effective_sort": effective_sort,
+        "analysis_running": analysis_running,
+        "analysis_job_id": analysis_job_id,
+        "analysis_job_status": analysis_job_status,
         "taste_personalized": taste_active,
         "offset": start,
         "limit": limit,

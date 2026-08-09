@@ -5,7 +5,7 @@ Usage::
     python -m quality.dataset \\
         --labels data/eval/labels.jsonl \\
         --manifest data/eval/manifest.json \\
-        --out quality/store/datasets/golden_core@0.1.0/items.jsonl
+        --out quality/store/datasets/golden_apr_jul_2026@0.2.0/items.jsonl
 
     from quality.dataset import hydrate_golden_items, load_dataset_registry
 """
@@ -44,8 +44,8 @@ def load_dataset_registry(path: str | Path | None = None) -> dict[str, Any]:
     reg_path = _resolve(path) if path else _DEFAULT_REGISTRY
     if reg_path is None or not reg_path.is_file():
         return {
-            "name": "golden_core",
-            "version": "0.1.0",
+            "name": "golden_apr_jul_2026",
+            "version": "0.2.0",
             "labels": "data/eval/labels.jsonl",
             "manifest": "data/eval/manifest.json",
             "default_splits": list(_DEFAULT_SPLITS),
@@ -323,8 +323,8 @@ def main(argv: list[str] | None = None) -> int:
         else int(reg.get("smoke_limit") or 16)
     )
     out = args.out or (
-        f"quality/store/datasets/{reg.get('name', 'golden_core')}@"
-        f"{reg.get('version', '0.1.0')}/items.jsonl"
+        f"quality/store/datasets/{reg.get('name', 'golden_apr_jul_2026')}@"
+        f"{reg.get('version', '0.2.0')}/items.jsonl"
     )
 
     try:

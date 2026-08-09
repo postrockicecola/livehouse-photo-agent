@@ -226,6 +226,13 @@ def _sort_metric(entry: dict, sort: str) -> float:
     return 0.0
 
 
+def _default_order_key(entry: dict) -> tuple[str, str]:
+    """Stable capture/default order for a gallery whose analysis is still running."""
+    name = _row_basename(entry)
+    path = str(entry.get("path") or "")
+    return (name.casefold(), path.casefold())
+
+
 def normalize_scores(entry: dict) -> dict:
     scores = entry.get("scores") or {}
     entry["energy"] = _f(scores.get("energy", entry.get("energy", 0)))
@@ -445,7 +452,12 @@ def load_gallery_page(
     members_by_rep: dict[int, list[int]] = {}
     group_id_by_rep: dict[int, int] = {}
     max_members = 0
-    if sort == "diverse":
+    if sort == "default":
+        # Do not let partial scores reorder the grid while analysis is in flight.
+        # Filename order is stable even as JSON rows replace pending disk rows.
+        indices = sorted(range(total_raw), key=lambda i: _default_order_key(rows_ro[i]))
+        total = total_raw
+    elif sort == "diverse":
         from services.diversity_selector import apply_diversity_selection, diversity_settings
 
         div_settings = diversity_settings(ConfigLoader.load())

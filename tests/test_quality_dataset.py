@@ -21,7 +21,7 @@ _MANIFEST = _REPO / "data" / "eval" / "manifest.json"
 
 def test_load_registry_defaults():
     reg = load_dataset_registry()
-    assert reg["name"] == "golden_core"
+    assert reg["name"] == "golden_apr_jul_2026"
     assert reg["version"]
     assert int(reg.get("smoke_limit") or 0) >= 1
 
@@ -42,8 +42,10 @@ def test_hydrate_smoke_fixture():
         assert item["label"].get("overall") is not None
 
 
-@pytest.mark.skipif(not _LABELS.is_file() or not _MANIFEST.is_file(), reason="golden_core missing")
-def test_hydrate_golden_core_sample():
+@pytest.mark.skipif(
+    not _LABELS.is_file() or not _MANIFEST.is_file(), reason="registered dataset missing"
+)
+def test_hydrate_registered_dataset_sample():
     index = load_media_index(_MANIFEST)
     assert len(index) >= 10
     items, errors = hydrate_golden_items(

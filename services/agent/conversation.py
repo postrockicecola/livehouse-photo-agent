@@ -302,11 +302,14 @@ class ConversationalAgent:
         return self._chat(out)
 
     def _merge_turn_context_args(self, tool: str, args: dict[str, Any]) -> dict[str, Any]:
-        """Inject Gallery focus into film skills when the model/router omitted them."""
+        """Inject Gallery focus into per-photo skills when the model/router omitted them."""
         out = dict(args or {})
+        focus = str(self._turn_context.get("focus_file") or "").strip()
+        if tool == "explain_photo" and focus and not str(out.get("file") or "").strip():
+            out["file"] = focus
+            return out
         if tool not in ("recommend_film_for_photo", "apply_film_vibe"):
             return out
-        focus = str(self._turn_context.get("focus_file") or "").strip()
         if focus and not str(out.get("file") or "").strip() and not str(out.get("focus_file") or "").strip():
             out["focus_file"] = focus
         selected = self._turn_context.get("selected_files")

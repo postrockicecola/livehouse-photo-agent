@@ -18,7 +18,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
-from quality.manifest import compact_manifest_ref, write_version_manifest
+from quality.manifest import (
+    DEFAULT_DATASET_NAME,
+    DEFAULT_DATASET_VERSION,
+    compact_manifest_ref,
+    write_version_manifest,
+)
 from quality.validate_contracts import validate_document
 
 _REPO = Path(__file__).resolve().parents[1]
@@ -328,8 +333,8 @@ def emit_from_stage3_report(
     *,
     artifact_root: str | Path,
     version_manifest: Mapping[str, Any],
-    dataset_name: str = "golden_core",
-    dataset_version: str = "0.1.0",
+    dataset_name: str = DEFAULT_DATASET_NAME,
+    dataset_version: str = DEFAULT_DATASET_VERSION,
     suite: str = "stage3_scoring",
     baseline_path: str | Path | None = None,
     item_scores: list[Mapping[str, Any]] | None = None,

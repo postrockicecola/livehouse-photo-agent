@@ -54,9 +54,30 @@ export const STUDIO_STYLE_PROMPTS = [
 /** Phase 3: after a style has been applied — single verified subject search. */
 export const STUDIO_FIND_PROMPTS = ["找出吉他手弹琴的特写"] as const;
 
+/**
+ * Gallery ChatDock recipe chips — prompts are phrased to hit ``intent_router``
+ * (or clear SEMANTIC_HINTS) so users discover the real curation contract.
+ */
+export const GALLERY_RECIPE_CHIPS = [
+  { id: "deliverable", label: "交片 10 张", prompt: "选出10张交片" },
+  { id: "social", label: "朋友圈", prompt: "适合发朋友圈的10张" },
+  { id: "energy", label: "最炸", prompt: "选出最炸的10张" },
+  { id: "peak", label: "高潮瞬间", prompt: "高潮瞬间最好的10张" },
+  { id: "slow", label: "慢门", prompt: "找慢门长曝光" },
+  { id: "quality", label: "剔糊", prompt: "把糊的、过曝的先剔掉" },
+] as const;
+
+/** Longer freeform examples under the recipe chips (fuzzy / film path). */
+export const GALLERY_SEMANTIC_SUGGESTIONS = [
+  "找出吉他手弹琴的特写",
+  "有孤独感的照片",
+  "试试修成 Cinestill 800T 风格",
+] as const;
+
 /** Landing hero rotator — broader demo copy (not the Studio three-step ladder). */
 export const LANDING_HERO_PROMPTS = [
-  "帮我选出得分最高的 10 张",
+  "选出10张交片",
+  "选出最炸的10张",
   "试试修成 Cinestill 800T 风格",
   "找出吉他手弹琴的特写",
   "把糊的、过曝的先剔掉",

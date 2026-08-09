@@ -89,6 +89,8 @@ export function writeGalleryFocusContext(opts: {
       if (list.length) sessionStorage.setItem(SELECTED_FILES_KEY, JSON.stringify(list));
       else sessionStorage.removeItem(SELECTED_FILES_KEY);
     }
+    // Same-tab listeners (ChatDock) — ``storage`` only fires across tabs.
+    window.dispatchEvent(new CustomEvent("luma:gallery-focus-changed"));
   } catch {
     /* ignore quota / private mode */
   }

@@ -1,0 +1,45 @@
+{
+  "schema_version": "version_manifest.v1",
+  "manifest_id": "pipeline_stage3_stage3_v7_qwen2.5vl_7b",
+  "created_at": "2026-08-08T06:23:32.955094+00:00",
+  "prompt": {
+    "prompt_id": "stage3",
+    "version": "stage3_v7",
+    "content_hash": "e8a0d8c930d4ec53eab466ff43729a5c11d9cf1eb0f9f51c7e5932012b96b72a",
+    "profile": "stage3_v7"
+  },
+  "model": {
+    "provider": "ollama",
+    "model_name": "qwen2.5vl:7b",
+    "temperature": 0.0,
+    "num_predict": 512,
+    "fallback_model_name": null,
+    "endpoint_class": "local_ollama",
+    "agent_chat_model": null,
+    "digest": null
+  },
+  "workflow": {
+    "workflow_id": "pipeline_stage3",
+    "version": "0.1.0",
+    "config_hash": "7d5206e94719f2bdd4f47c42ae6471af3dadfc8412f9ac1e8a39ce9b1ce408af",
+    "stage3_strategy": "full_only",
+    "gating": false,
+    "planner": null
+  },
+  "dataset": {
+    "name": "golden_apr_jul_2026",
+    "version": "0.2.0",
+    "labels_sha256": "86587c3fc2de6369e7bf07b8ea349f2b8b23e795e528f213d655b8b0108daf48",
+    "manifest_sha256": "0b207c2e7228be679e04b076d97e967fc8be0cd377dafbae7494f02d2d3f71c5"
+  },
+  "code": {
+    "git_sha": "ab536807295b0e4ea574ca740c85495051776730",
+    "dirty": true,
+    "ref": "HEAD"
+  },
+  "eval_protocol": "quality_protocol_v1",
+  "tags": [
+    "config:configs/eval_stage3.yaml"
+  ],
+  "version_manifest_hash": "4f486e30aff78f371d0e90c02fca041ab4ae907fb933e26a4e633f48e884d3bb"
+}

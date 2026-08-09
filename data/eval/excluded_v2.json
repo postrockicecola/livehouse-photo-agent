@@ -1,0 +1,26 @@
+{
+ "note": "Frames dropped from golden_apr_jul_2026 for being outside the livehouse domain (commute snapshots stored in the same Previews folder). Stage2's OpenCV aesthetic score cannot separate these -- one scored 72.7 -- so they survived stratified sampling and were only caught by human review. Replacements come from the same session, the same stage2 decile, and inside the performance window (20:10-21:48 by EXIF capture time).",
+ "swaps": [
+  {
+   "removed": "20260528ruanshizi__DSC02153.jpg",
+   "reason": "车窗外白天街景，非 livehouse",
+   "removed_stage2": 72.7,
+   "replacement": "20260528ruanshizi__DSC02397.jpg",
+   "replacement_stage2": 72.7
+  },
+  {
+   "removed": "20260528ruanshizi__DSC02172.jpg",
+   "reason": "地铁车厢内部，非 livehouse",
+   "removed_stage2": 2.6,
+   "replacement": "20260528ruanshizi__DSC02501.jpg",
+   "replacement_stage2": 2.6
+  },
+  {
+   "removed": "20260528ruanshizi__DSC03135.jpg",
+   "reason": "夜间路牌，散场后拍摄，非 livehouse",
+   "removed_stage2": 69.5,
+   "replacement": "20260528ruanshizi__DSC02332.jpg",
+   "replacement_stage2": 69.5
+  }
+ ]
+}

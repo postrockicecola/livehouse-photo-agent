@@ -161,9 +161,10 @@ fi
 if [[ -f "$PID_FILE" ]]; then
   warn "Found existing PID file. Stopping old processes first."
   stop_from_pid_file
-else
-  stop_livehouse_celery_workers
 fi
+# The pid file only tracks the latest Celery parent. Always sweep older orphan
+# worker trees too, otherwise they may consume newly added tasks with stale code.
+stop_livehouse_celery_workers
 
 if [[ "$FORCE_RESTART" == "true" ]]; then
   kill_port_listeners "$FASTAPI_PORT"

@@ -76,9 +76,16 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
         max_cluster_size = int(raw.get("max_cluster_size", 20) or 20)
     except (TypeError, ValueError):
         max_cluster_size = 20
+    try:
+        max_sync_rows = int(raw.get("max_sync_rows", 1500) or 1500)
+    except (TypeError, ValueError):
+        max_sync_rows = 1500
 
     return {
         "enabled": bool(raw.get("enabled", True)),
+        # Never run CLIP over an entire gallery inside an HTTP request by default.
+        # Use the pHash path unless an operator explicitly accepts that latency.
+        "clip_on_demand": bool(raw.get("clip_on_demand", False)),
         "similarity_threshold": max(0.0, min(1.0, thr)),
         "representative_dims": dims,
         # Tighter than gallery_view_dedupe: diversity groups should stay burst-sized.
@@ -86,6 +93,8 @@ def diversity_settings(config: Mapping[str, Any] | None) -> dict[str, Any]:
         "max_members_returned": int(raw.get("max_members_returned", 40) or 40),
         # Hard cap so same-stage CLIP chaining cannot produce 「同款 ×354」.
         "max_cluster_size": max(2, min(64, max_cluster_size)),
+        # Gallery routes are synchronous. Avoid quadratic clustering on event-sized sessions.
+        "max_sync_rows": max(100, max_sync_rows),
         # Display order of representatives: blend quality vs distance-to-already-shown.
         "mmr_lambda": max(0.0, min(1.0, mmr_lambda)),
     }
@@ -238,6 +247,16 @@ def apply_diversity_selection(
     if n == 0:
         return [], {}, {}
 
+    max_sync_rows = int(settings.get("max_sync_rows", 1500) or 1500)
+    if n > max_sync_rows:
+        logger.warning(
+            "diversity_selection: %d rows exceeds synchronous limit %d; returning score order",
+            n,
+            max_sync_rows,
+        )
+        order = sorted(range(n), key=lambda i: order_key_fn(rows[i]), reverse=True)
+        return order, {}, {idx: group_id for group_id, idx in enumerate(order, start=1)}
+
     dim_weights = settings.get("representative_dims") or _DEFAULT_REPRESENTATIVE_DIMS
     max_cluster_size = int(settings.get("max_cluster_size", 20) or 20)
 
@@ -246,7 +265,11 @@ def apply_diversity_selection(
 
     from services.embedding_service import EmbeddingService
 
-    use_clip = bool(settings.get("enabled", True)) and EmbeddingService.is_available()
+    use_clip = (
+        bool(settings.get("enabled", True))
+        and bool(settings.get("clip_on_demand", False))
+        and EmbeddingService.is_available()
+    )
     sim_fn: Callable[[int, int], float] | None = None
     clusters: list[list[int]]
 

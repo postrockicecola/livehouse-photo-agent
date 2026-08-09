@@ -51,9 +51,12 @@ data/review_queue/*.jsonl
 # Data layout: data/raw is local-only; data/eval (labels) and data/fixtures (small samples) are tracked
 data/raw/
 data/eval/images/
+data/eval/images_*/
 data/eval/irr_*/
 data/eval/_*/
 data/eval/*.log
+data/eval/archive_golden_core/
+data/eval/relabel/
 models/eval/
 *.ARW
 

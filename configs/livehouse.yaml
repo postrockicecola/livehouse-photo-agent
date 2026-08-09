@@ -85,7 +85,8 @@ model:
   # NOTE: Ollama forces Parallel:1 for vision-capable models (server/sched.go — shared vision-token
   # buffers aren't safe under concurrent decode; see docs/OLLAMA_INTEGRATION_NOTES.md §5). Confirmed via
   # server.log for both llava and qwen2.5vl:7b on this box, so >1 here only adds queueing inside Ollama
-  # (latency variance, no real throughput gain) — kept at 1 until we run multiple Ollama instances/vLLM.
+  # (latency variance, no real throughput gain). Dual qwen2.5vl:7b on 24GB unified memory OOM-rebooted
+  # this machine (2026-08-08) — do not re-enable ollama_ports until RAM headroom is verified.
   max_concurrent_requests: 1
   max_inference_queue_size: 1
   # Optional: per-Ollama-model lanes (lane id must match ``model_name`` on requests, or router primary).
@@ -100,11 +101,12 @@ model:
   # Future: batch multi-image prompts when backend supports it (currently 1 image per call).
   inference_batch_size: 1
   # Optional: multiple Ollama listeners — requests round-robin across instances (see RoundRobinInferenceRouter).
+  # Unsafe on 24GB with qwen2.5vl:7b (~13GB/instance); left disabled after OOM reboot.
   # ollama_endpoints:
   #   - "http://localhost:11434"
   #   - "http://localhost:11435"
   # Shorthand (same host):
-  # ollama_ports: [11434, 11435, 11436]
+  # ollama_ports: [11434, 11435]
   # ollama_host: "http://127.0.0.1"
   # If a job waits longer than this (seconds) before a worker *starts* it, degrade (see below).
   queue_wait_timeout_seconds: 120
@@ -251,11 +253,14 @@ processing:
   # keeps one representative per group, folds the rest as expandable group_members.
   diversity_selection:
     enabled: true
+    # Never embed the full gallery inside a request; use pHash unless CLIP is pre-indexed.
+    clip_on_demand: false
     # Higher CLIP cosine = harder to merge = smaller clusters (true near-dups / short bursts).
     # 0.85 + single-link previously chained whole stage looks into 「同款 ×300+」.
     similarity_threshold: 0.92
     fallback_phash_hamming: 8         # used only when CLIP embeddings are unavailable
     max_cluster_size: 20              # hard cap ≈ typical burst; opens a new group when full
+    max_sync_rows: 1500               # larger sessions fall back to score order; avoids O(n²) request stalls
     max_members_returned: 40          # cap folded frames returned per group (payload guard)
     mmr_lambda: 0.65                  # display order: quality vs spread (1=pure score, 0=max spread)
     representative_dims:              # in-cluster rep pick uses dims that vary within a burst

@@ -280,6 +280,29 @@ class ResultServiceTests(unittest.TestCase):
         self.assertEqual(merged[0]["overall_score"], 90)
         self.assertEqual(merged[1]["file"], "b.jpg")
 
+    def test_load_gallery_page_default_order_ignores_partial_scores(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            previews = Path(tmp)
+            for name in ("003.jpg", "001.jpg", "002.jpg"):
+                (previews / name).write_bytes(b"jpeg")
+            (previews / "analysis_results.json").write_text(
+                json.dumps(
+                    [
+                        {"file": "003.jpg", "path": "003.jpg", "overall_score": 99},
+                        {"file": "001.jpg", "path": "001.jpg", "overall_score": 20},
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            sliced, total, _s, _e, _more, total_raw = load_gallery_page(
+                str(previews), "default", 0, 50, lite=True, dedupe=False
+            )
+
+            self.assertEqual(total, 3)
+            self.assertEqual(total_raw, 3)
+            self.assertEqual([row["file"] for row in sliced], ["001.jpg", "002.jpg", "003.jpg"])
+
 
 @unittest.skipUnless(
     importlib.util.find_spec("fastapi") is not None,

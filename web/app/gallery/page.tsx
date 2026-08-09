@@ -104,6 +104,22 @@ type QueueBacklogLite = {
   celery_unavailable?: boolean;
 };
 
+type ExportResult = {
+  success?: boolean;
+  error?: string;
+  errors?: string[];
+  detail?: string;
+  task_id?: string;
+  background?: boolean;
+  export_path?: string;
+  count_jpeg?: number;
+  count?: number;
+  count_raw?: number;
+  count_graded_from_raw?: number;
+  graded_from_raw_folder?: string;
+  export_film_from_raw?: boolean;
+};
+
 function buildImageUrl(item: GalleryItem) {
   return buildGalleryPlainImageUrl(API_BASE, item, GALLERY_PLAIN_THUMB_MAX_SIDE) ?? "";
 }
@@ -119,6 +135,8 @@ export default function HomePage() {
   const [galleryErr, setGalleryErr] = useState<string | null>(null);
   const [bootstrapErr, setBootstrapErr] = useState<string | null>(null);
   const [loadSource, setLoadSource] = useState<GalleryLoadSource>("none");
+  const [analysisRunning, setAnalysisRunning] = useState(false);
+  const [effectiveGallerySort, setEffectiveGallerySort] = useState<GallerySort | "default">("overall");
   const [reloadNonce, setReloadNonce] = useState(0);
   const [toolsOpen, setToolsOpen] = useState(false);
 
@@ -210,6 +228,7 @@ export default function HomePage() {
   const curationHydratedRef = useRef(false);
   const curationSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingVibePreviewRef = useRef(false);
+  const exportPrewarmKeysRef = useRef<Set<string>>(new Set());
   /** Single-photo scope attached to the current Agent vibe turn. */
   const vibePreviewFocusRef = useRef<string | null>(null);
   /** Last observed gallery totals for mid-job progressive refresh. */
@@ -217,6 +236,7 @@ export default function HomePage() {
     raw: null,
     count: null,
   });
+  const galleryPollRunningRef = useRef<boolean | null>(null);
   const [curationSaveState, setCurationSaveState] = useState<"idle" | "saving" | "saved" | "err">("idle");
 
   const paginated = loadSource === "results_api";
@@ -281,6 +301,9 @@ export default function HomePage() {
         setHasMore(Boolean(boot.hasMore));
         setDatasetTotal(boot.count);
         setDatasetTotalRaw(boot.totalRaw);
+        setAnalysisRunning(boot.analysisRunning);
+        setEffectiveGallerySort(boot.effectiveSort);
+        galleryPollRunningRef.current = boot.analysisRunning;
         galleryPollTotalsRef.current = {
           raw: boot.totalRaw,
           count: boot.count,
@@ -314,6 +337,8 @@ export default function HomePage() {
         setItems([]);
         setDatasetTotal(0);
         setLoadSource("none");
+        setAnalysisRunning(false);
+        setEffectiveGallerySort("overall");
       } finally {
         if (!dead) setLoadingItems(false);
       }
@@ -342,15 +367,25 @@ export default function HomePage() {
         if (cancelled || !data) return;
         const raw = Number(data.total_raw ?? data.count ?? 0);
         const count = Number(data.count ?? 0);
+        const running = Boolean(data.analysis_running);
         const prev = galleryPollTotalsRef.current;
+        const wasRunning = galleryPollRunningRef.current;
         const grew =
           (prev.raw != null && raw > prev.raw) ||
           (prev.count != null && count > prev.count) ||
           ((prev.raw == null || prev.raw === 0) && raw > 0);
         galleryPollTotalsRef.current = { raw, count };
+        galleryPollRunningRef.current = running;
+        setAnalysisRunning(running);
+        setEffectiveGallerySort(data.effective_sort ?? "overall");
+        const runStateChanged = wasRunning != null && wasRunning !== running;
         // Avoid reload loops when totals are unchanged after bootstrap.
-        if (grew && (prev.raw !== raw || prev.count !== count)) {
-          setActionMsg(`会话进行中：已发现 ${raw} 张预览，正在刷新画廊…`);
+        if ((grew && (prev.raw !== raw || prev.count !== count)) || runStateChanged) {
+          setActionMsg(
+            running
+              ? `会话进行中：已发现 ${raw} 张预览，正在刷新画廊…`
+              : "分析完成：正在按最终分数重新排序…",
+          );
           setReloadNonce((n) => n + 1);
         }
       } catch {
@@ -942,6 +977,32 @@ export default function HomePage() {
     return ent.like_reasons ?? [];
   }, [feedbackByKey, modalSelectionKey]);
 
+  const enqueueExportPrewarm = useCallback(
+    (spec: GalleryExportItem) => {
+      const useVibe = useSessionVibeForExport && sessionVibeMatched(sessionVibe);
+      const key = JSON.stringify({ spec, useVibe });
+      if (exportPrewarmKeysRef.current.has(key)) return;
+      exportPrewarmKeysRef.current.add(key);
+      let body: string;
+      try {
+        body = serializeExportRequestBody([spec], "best", { useSessionVibe: useVibe });
+      } catch {
+        exportPrewarmKeysRef.current.delete(key);
+        return;
+      }
+      void fetch(`${API_BASE}/api/export-images/prewarm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      })
+        .then((res) => {
+          if (!res.ok) exportPrewarmKeysRef.current.delete(key);
+        })
+        .catch(() => exportPrewarmKeysRef.current.delete(key));
+    },
+    [useSessionVibeForExport, sessionVibe],
+  );
+
   const onToggleSelect = (item: GalleryItem, checked: boolean) => {
     const idx = items.indexOf(item);
     const key = gallerySelectionKey(item, idx >= 0 ? idx : undefined);
@@ -963,6 +1024,9 @@ export default function HomePage() {
     } else {
       const prefKey = gallerySelectionKey(item);
       if (!prefKey) return;
+      const warmSpec = exportByFile[prefKey] ?? defaultFilmExportItem(item);
+      const warmFile = catalogBasenameForExport(item);
+      if (warmSpec && warmFile) enqueueExportPrewarm({ ...warmSpec, file: warmFile });
       setExportByFile((prev) => {
         if (prev[prefKey]) return prev;
         const spec = defaultFilmExportItem(item);
@@ -1009,6 +1073,7 @@ export default function HomePage() {
     try {
       body = serializeExportRequestBody(itemsPayload, "best", {
         useSessionVibe: useSessionVibeForExport && sessionVibeMatched(sessionVibe),
+        background: true,
       });
     } catch (e: unknown) {
       setActionMsg(`导出失败: ${e instanceof Error ? e.message : "unknown"}`);
@@ -1022,19 +1087,7 @@ export default function HomePage() {
         body,
       });
       const rawText = await res.text();
-      let data: {
-        success?: boolean;
-        error?: string;
-        errors?: string[];
-        detail?: string;
-        export_path?: string;
-        count_jpeg?: number;
-        count?: number;
-        count_raw?: number;
-        count_graded_from_raw?: number;
-        graded_from_raw_folder?: string;
-        export_film_from_raw?: boolean;
-      };
+      let data: ExportResult;
       try {
         data = rawText ? JSON.parse(rawText) : {};
       } catch {
@@ -1058,6 +1111,45 @@ export default function HomePage() {
         const errList = Array.isArray(data.errors) ? data.errors.filter(Boolean).slice(0, 5).join("；") : "";
         throw new Error(
           [data.error ?? "导出失败（未写入任何 JPEG/RAW）", errList].filter(Boolean).join(" — "),
+        );
+      }
+      if (data.background && data.task_id) {
+        const taskId = data.task_id;
+        setActionMsg(`后台导出已开始：0 / ${itemsPayload.length}`);
+        for (;;) {
+          await new Promise((resolve) => globalThis.setTimeout(resolve, 1200));
+          const statusRes = await fetch(`${API_BASE}/api/tasks/${encodeURIComponent(taskId)}`, {
+            cache: "no-store",
+          });
+          if (!statusRes.ok) {
+            throw new Error(`无法读取导出进度（HTTP ${statusRes.status}）`);
+          }
+          const status = (await statusRes.json()) as {
+            state?: string;
+            progress?: { done?: number; total?: number; file?: string; percent?: number };
+            result?: ExportResult;
+            error?: string;
+          };
+          if (status.state === "PROGRESS") {
+            const done = Number(status.progress?.done ?? 0);
+            const total = Number(status.progress?.total ?? itemsPayload.length);
+            const file = status.progress?.file ? ` · ${status.progress.file}` : "";
+            setActionMsg(`后台导出中：${done} / ${total}${file}`);
+            continue;
+          }
+          if (status.state === "SUCCESS") {
+            data = status.result ?? {};
+            break;
+          }
+          if (status.state === "FAILURE" || status.state === "REVOKED") {
+            throw new Error(status.error || `后台任务 ${status.state}`);
+          }
+        }
+      }
+      if (!data?.success) {
+        const errList = Array.isArray(data.errors) ? data.errors.filter(Boolean).slice(0, 5).join("；") : "";
+        throw new Error(
+          [data.error ?? "后台导出失败（未写入任何 JPEG/RAW）", errList].filter(Boolean).join(" — "),
         );
       }
       const j = data.count_jpeg ?? data.count ?? 0;
@@ -1157,7 +1249,9 @@ export default function HomePage() {
               </p>
             ) : null}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] text-white/30">排序</span>
+              <span className="text-[10px] text-white/30">
+                {analysisRunning || effectiveGallerySort === "default" ? "处理中 · 默认顺序" : "排序"}
+              </span>
               <div
                 className="inline-flex rounded-[4px] border border-white/[0.08] p-0.5"
                 role="group"
@@ -1166,12 +1260,13 @@ export default function HomePage() {
                 <button
                   type="button"
                   aria-pressed={gallerySort === "overall"}
+                  disabled={analysisRunning}
                   onClick={() => {
                     setGalleryDiversePref(false);
                     setGallerySortPersonalizedPref(false);
                   }}
                   className={[
-                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors disabled:opacity-35",
                     gallerySort === "overall"
                       ? "bg-white/[0.12] text-white/85"
                       : "text-white/45 hover:text-white/65",
@@ -1182,10 +1277,11 @@ export default function HomePage() {
                 <button
                   type="button"
                   aria-pressed={gallerySort === "diverse"}
+                  disabled={analysisRunning}
                   onClick={() => setGalleryDiversePref(true)}
                   title="按画面相似度聚类，每组只展示一张代表帧，可展开同款"
                   className={[
-                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                    "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors disabled:opacity-35",
                     gallerySort === "diverse"
                       ? "bg-white/[0.12] text-white/85"
                       : "text-white/45 hover:text-white/65",
@@ -1197,7 +1293,7 @@ export default function HomePage() {
                   type="button"
                   aria-pressed={gallerySort === "personalized"}
                   onClick={() => setGallerySortPersonalizedPref(true)}
-                  disabled={!tasteProfile}
+                  disabled={analysisRunning || !tasteProfile}
                   title={!tasteProfile ? "需先勾选≥5张并保存以学习口味" : undefined}
                   className={[
                     "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors disabled:opacity-35",
@@ -1403,6 +1499,7 @@ export default function HomePage() {
               <GalleryMasonry
                 items={items}
                 apiBase={API_BASE}
+                preserveOrder={analysisRunning || effectiveGallerySort === "default"}
                 onOpenLab={setModal}
                 selectedKeys={selectedKeys}
                 onToggleSelect={onToggleSelect}
@@ -1542,6 +1639,7 @@ export default function HomePage() {
             if (!prefKey) return;
             const file = catalogBasenameForExport(modal) ?? spec.file?.trim();
             if (!file) return;
+            enqueueExportPrewarm({ ...spec, file });
             setExportByFile((prev) => ({ ...prev, [prefKey]: { ...spec, file } }));
             setFeedbackByKey((prev) => setFeedbackVerdict(prev, prefKey, "liked"));
             setSelectedKeys((prev) => {

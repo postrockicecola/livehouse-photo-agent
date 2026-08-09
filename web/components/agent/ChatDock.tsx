@@ -17,6 +17,10 @@ import {
   ShowcasePreviewModal,
   type ShowcasePreviewItem,
 } from "@/components/agent/ShowcasePreviewModal";
+import {
+  GALLERY_RECIPE_CHIPS,
+  GALLERY_SEMANTIC_SUGGESTIONS,
+} from "@/lib/productIa";
 import { clearSessionVibeApi, fetchSessionVibe, saveSessionVibe } from "@/lib/sessionVibe";
 
 type ChatTurn = {
@@ -382,15 +386,152 @@ function AssistantActionBar({
   );
 }
 
-const SUGGESTIONS: string[] = [
-  "帮我选出得分最高的 10 张",
-  "试试修成 Cinestill 800T 风格",
-  "试试修成 Kodak Portra 暖调风格",
-  "试试修成梦核式修图风格",
-  "找出吉他手弹琴的特写",
-];
-
 type PromptPhase = "select" | "style" | "find";
+
+function RecipeChipRow({
+  onPick,
+  disabled,
+}: {
+  onPick: (prompt: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {GALLERY_RECIPE_CHIPS.map((chip) => (
+        <button
+          key={chip.id}
+          type="button"
+          disabled={disabled}
+          title={chip.prompt}
+          onClick={() => onPick(chip.prompt)}
+          className="rounded-[4px] border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] text-white/55 transition-colors hover:border-emerald-400/30 hover:bg-emerald-400/[0.08] hover:text-white/80 disabled:opacity-35"
+        >
+          {chip.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function FocusActionBar({
+  focusFile,
+  onPick,
+  disabled,
+}: {
+  focusFile: string;
+  onPick: (prompt: string) => void;
+  disabled?: boolean;
+}) {
+  const short = focusFile.length > 28 ? `${focusFile.slice(0, 12)}…${focusFile.slice(-10)}` : focusFile;
+  return (
+    <div className="rounded-[6px] border border-sky-400/20 bg-sky-400/[0.05] px-2.5 py-2">
+      <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-sky-200/45">
+        焦点图 · {short}
+      </p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(`解释一下这张照片（${focusFile}）`)}
+          className="rounded-[4px] border border-sky-400/25 bg-sky-400/[0.08] px-2 py-1 text-[11px] text-sky-100/80 transition-colors hover:bg-sky-400/[0.14] disabled:opacity-35"
+        >
+          解释这张
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick("最适合这张的胶片感")}
+          className="rounded-[4px] border border-amber-400/25 bg-amber-400/[0.08] px-2 py-1 text-[11px] text-amber-100/80 transition-colors hover:bg-amber-400/[0.14] disabled:opacity-35"
+        >
+          推荐胶片
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick("找出技术高但构图一般的照片")}
+          className="rounded-[4px] border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] text-white/55 transition-colors hover:bg-white/[0.07] hover:text-white/75 disabled:opacity-35"
+        >
+          技术 vs 构图
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Honest next-step chips when gallery_search returned zero hits. */
+function SearchMissHints({
+  calls,
+  onPick,
+  disabled,
+}: {
+  calls: AgentToolCall[];
+  onPick: (prompt: string) => void;
+  disabled?: boolean;
+}) {
+  const miss = calls.find((c) => {
+    if (!c.ok || c.tool !== "gallery_search") return false;
+    // Prefer explicit count=0; also treat empty files on a search ui_action as a miss.
+    const count = Number(c.metadata?.count ?? NaN);
+    if (count === 0) return true;
+    const files = Array.isArray(c.metadata?.files) ? c.metadata.files : null;
+    return String(c.metadata?.ui_action || "") === "search" && files !== null && files.length === 0;
+  });
+  if (!miss) return null;
+
+  const tagStatus = String(miss.metadata?.tag_status || "");
+  const styleIntent = String(miss.metadata?.style_intent || "");
+  const pipelineOnly = Boolean(miss.metadata?.pipeline_tags_only);
+  const sessionSize = Number(miss.metadata?.session_size ?? 0);
+
+  let title = "这轮没有命中";
+  let detail = "换个说法，或先用上方配方 chips 试高频选片。";
+  const next: { label: string; prompt: string }[] = [
+    { label: "交片 10 张", prompt: "选出10张交片" },
+    { label: "最炸", prompt: "选出最炸的10张" },
+  ];
+
+  if (pipelineOnly || tagStatus === "not_available") {
+    title = "语义标签不可用";
+    detail =
+      sessionSize > 0
+        ? `当前场有 ${sessionSize} 张，但多为 Stage2/3 跳过标签。文本搜「吉他手」会空；可先用分数配方，或在 Studio 重跑 Stage3。`
+        : "还没有可用的分析结果。";
+    next.length = 0;
+    next.push(
+      { label: "交片短名单", prompt: "选出10张交片" },
+      { label: "按能量排序", prompt: "选出最炸的10张" },
+    );
+  } else if (styleIntent === "slow_shutter") {
+    title = "没有真慢门帧";
+    detail = "慢门走 RAW ExposureTime，不是 CLIP。可改试交片或气氛短名单。";
+  } else if (tagStatus === "available") {
+    title = "标签里没命中这句";
+    detail = "试试更短的主体词，或走分数配方。";
+    next.unshift({ label: "吉他手", prompt: "找出吉他手" });
+  }
+
+  return (
+    <div className="mt-2 rounded-[5px] border border-white/[0.08] bg-white/[0.02] px-2.5 py-2">
+      <p className="text-[11px] font-medium text-white/55">{title}</p>
+      <p className="mt-0.5 text-[11px] leading-relaxed text-white/35">{detail}</p>
+      {next.length ? (
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {next.map((n) => (
+            <button
+              key={n.prompt}
+              type="button"
+              disabled={disabled}
+              onClick={() => onPick(n.prompt)}
+              className="rounded-[4px] border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[11px] text-white/50 transition-colors hover:bg-white/[0.07] hover:text-white/75 disabled:opacity-35"
+            >
+              {n.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 type PromptStages = {
   select: readonly string[];
@@ -551,7 +692,7 @@ function RotatingPromptStage({
 }
 
 const MODE_HINT =
-  "我可以基于当前 session 的分析结果帮助搜索、初选、风格预览和导出（会通过工具写入策展状态）。";
+  "当前场次策展：点配方可直接短名单（交片 / 朋友圈 / 最炸…）；也可搜主体、定胶片、导出。打开一张图后会出现「解释这张 / 推荐胶片」。";
 
 /** Render assistant text with clickable http(s) links (web results / artifacts). */
 function LinkifiedText({ text }: { text: string }) {
@@ -795,6 +936,7 @@ export function ChatDock({
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [focusFile, setFocusFile] = useState("");
   const mode: AgentMode = "gallery";
   const [promptPhase, setPromptPhase] = useState<PromptPhase>(() =>
     promptStages ? readStoredPromptPhase() : "select",
@@ -810,6 +952,20 @@ export function ChatDock({
   const consumedInitialPrompt = useRef(false);
   const pendingAutoSend = useRef<string | null>(null);
   const sendRef = useRef<(raw: string) => Promise<void>>(async () => {});
+
+  useEffect(() => {
+    const syncFocus = () => {
+      const ctx = readGalleryFocusContext();
+      setFocusFile(String(ctx.focus_file || "").trim());
+    };
+    syncFocus();
+    window.addEventListener("luma:gallery-focus-changed", syncFocus);
+    window.addEventListener("focus", syncFocus);
+    return () => {
+      window.removeEventListener("luma:gallery-focus-changed", syncFocus);
+      window.removeEventListener("focus", syncFocus);
+    };
+  }, []);
 
   const openShowcasePreview = useCallback<OpenShowcaseFn>(
     (items, variant, filmLabel, gradeClass) => {
@@ -1161,18 +1317,35 @@ export function ChatDock({
                           onPick={(p) => void send(p)}
                         />
                       ) : null}
+                      <div className="space-y-1.5">
+                        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">
+                          配方 · 点一下就短名单
+                        </p>
+                        <RecipeChipRow onPick={(p) => void send(p)} disabled={sending} />
+                      </div>
                       <div className="flex flex-col gap-1.5">
-                        {SUGGESTIONS.map((s) => (
+                        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">
+                          也可以这样问
+                        </p>
+                        {GALLERY_SEMANTIC_SUGGESTIONS.map((s) => (
                           <button
                             key={s}
                             type="button"
+                            disabled={sending}
                             onClick={() => void send(s)}
-                            className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75"
+                            className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-left text-[12px] text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/75 disabled:opacity-35"
                           >
                             {s}
                           </button>
                         ))}
                       </div>
+                      {focusFile ? (
+                        <FocusActionBar
+                          focusFile={focusFile}
+                          onPick={(p) => void send(p)}
+                          disabled={sending}
+                        />
+                      ) : null}
                     </>
                   )}
                 </div>
@@ -1216,6 +1389,15 @@ export function ChatDock({
                       ) : null}
                       {t.role === "assistant" &&
                       !t.streaming &&
+                      t.toolCalls?.length ? (
+                        <SearchMissHints
+                          calls={t.toolCalls}
+                          onPick={(p) => void send(p)}
+                          disabled={sending}
+                        />
+                      ) : null}
+                      {t.role === "assistant" &&
+                      !t.streaming &&
                       !(t.toolCalls ?? []).some(isVibePreviewCall) &&
                       mentionsVibePreviewCta(t.text) ? (
                         <VibePreviewFallbackButton
@@ -1245,11 +1427,23 @@ export function ChatDock({
                     />
                   </div>
                 ) : null}
+                {!promptStages && focusFile && !sending ? (
+                  <FocusActionBar
+                    focusFile={focusFile}
+                    onPick={(p) => void send(p)}
+                    disabled={sending}
+                  />
+                ) : null}
                 </>
               )}
             </div>
 
             <div className="shrink-0 border-t border-white/[0.06] p-2.5">
+              {!promptStages ? (
+                <div className="mb-2">
+                  <RecipeChipRow onPick={(p) => void send(p)} disabled={sending} />
+                </div>
+              ) : null}
               <div className="flex items-end gap-2">
                 <textarea
                   value={input}
@@ -1261,7 +1455,7 @@ export function ChatDock({
                     }
                   }}
                   rows={1}
-                  placeholder="问问这个 session 的照片…"
+                  placeholder="例如：选出10张交片 / 有孤独感的吉他手"
                   className="max-h-28 min-h-[38px] flex-1 resize-none rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[13px] text-white/80 placeholder:text-white/28 focus:border-white/[0.14] focus:outline-none"
                 />
                 <button

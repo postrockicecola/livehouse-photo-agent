@@ -140,11 +140,14 @@ def main() -> int:
         gate_path = Path(run2["artifact_root"]) / "run.json"
         print(f"OK smoke artifacts under {gate_path.parent}")
 
-    # Optional: hydrate a sample of the real golden_core (contract readiness).
+    # Optional: hydrate a sample of the real registered dataset (contract readiness).
+    from quality.dataset import load_dataset_registry
+
+    real_name = load_dataset_registry().get("name", "golden")
     real_labels = _REPO / "data" / "eval" / "labels.jsonl"
     real_manifest = _REPO / "data" / "eval" / "manifest.json"
     if real_labels.is_file() and real_manifest.is_file():
-        print("== quality smoke: golden_core hydrate sample ==")
+        print(f"== quality smoke: {real_name} hydrate sample ==")
         real_items, real_errs = hydrate_golden_items(
             real_labels,
             real_manifest,
@@ -153,13 +156,13 @@ def main() -> int:
         )
         bad = 0
         for i, item in enumerate(real_items[:32]):
-            verrs = validate_document(item, f"golden_core[{i}]")
+            verrs = validate_document(item, f"{real_name}[{i}]")
             if verrs:
                 bad += 1
                 if bad <= 3:
                     print(verrs[:3], file=sys.stderr)
         print(
-            f"golden_core hydrated={len(real_items)} "
+            f"{real_name} hydrated={len(real_items)} "
             f"sample_invalid={bad} skip_errors={len(real_errs)}"
         )
         if bad:

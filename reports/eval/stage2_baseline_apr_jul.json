@@ -1,0 +1,187 @@
+{
+  "matched": 250,
+  "labels_unmatched": [],
+  "predictions_unmatched_count": 0,
+  "overall": {
+    "n": 250,
+    "spearman": 0.19729023787084118,
+    "pearson": 0.2848091614389922,
+    "mae": 17.3028,
+    "rmse": 22.922723223910374
+  },
+  "per_dimension": {
+    "focus_sharpness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "exposure_control": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "noise_cleanliness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "composition_framing": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "light_color_character": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "moment_peak": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "atmosphere_impact": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "deliverable_subject": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    }
+  },
+  "macro_dim_mae": NaN,
+  "calibration": {},
+  "selection": {
+    "n": 250,
+    "n_positives": 56,
+    "mean_pred_keep": 74.13571428571429,
+    "mean_pred_discard": 66.59639175257732,
+    "score_gap": 7.539322533136968,
+    "at_k": [
+      {
+        "k": 10,
+        "precision": 0.3,
+        "recall": 0.05357142857142857,
+        "overlap": 3
+      },
+      {
+        "k": 20,
+        "precision": 0.4,
+        "recall": 0.14285714285714285,
+        "overlap": 8
+      },
+      {
+        "k": 50,
+        "precision": 0.36,
+        "recall": 0.32142857142857145,
+        "overlap": 18
+      }
+    ]
+  },
+  "bias": {
+    "n": 250,
+    "mean_bias": 4.528400000000001,
+    "std_bias": 22.47097758087084,
+    "median_bias": 6.950000000000003,
+    "pct_overscored": 68.0,
+    "pct_underscored": 32.0
+  },
+  "quintile_calibration": [
+    {
+      "quintile": 1,
+      "range": "10–53",
+      "n": 49,
+      "human_mean": 41.569387755102035,
+      "model_mean": 59.52040816326531,
+      "bias_mean": 17.951020408163266,
+      "bias_std": 28.778415398286235
+    },
+    {
+      "quintile": 2,
+      "range": "53–63",
+      "n": 51,
+      "human_mean": 57.8078431372549,
+      "model_mean": 66.36470588235295,
+      "bias_mean": 8.556862745098039,
+      "bias_std": 22.561021869691327
+    },
+    {
+      "quintile": 3,
+      "range": "63–69",
+      "n": 50,
+      "human_mean": 66.49000000000001,
+      "model_mean": 68.64399999999999,
+      "bias_mean": 2.154000000000001,
+      "bias_std": 21.555075597176643
+    },
+    {
+      "quintile": 4,
+      "range": "69–75",
+      "n": 50,
+      "human_mean": 72.58999999999999,
+      "model_mean": 72.96799999999999,
+      "bias_mean": 0.37800000000000056,
+      "bias_std": 12.713021513393267
+    },
+    {
+      "quintile": 5,
+      "range": "75–89",
+      "n": 50,
+      "human_mean": 80.002,
+      "model_mean": 73.792,
+      "bias_mean": -6.209999999999999,
+      "bias_std": 15.374514626484961
+    }
+  ],
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-08-07T05:35:00.114313+00:00",
+    "git_sha": "ab53680",
+    "seed": null,
+    "hardware": {
+      "platform": "macOS-15.3.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.12",
+      "cpu_count": 10,
+      "torch": null,
+      "cuda_available": false,
+      "system": "Darwin"
+    },
+    "model": {
+      "config_path": "configs/eval_stage3.yaml",
+      "config_sha256_prefix": "0116e3830ddb6d4b",
+      "provider": "ollama",
+      "model_name": "qwen2.5vl:7b",
+      "temperature": 0.0,
+      "num_predict": 512,
+      "fallback_model_name": null
+    },
+    "inputs": {
+      "labels": {
+        "path": "data/eval/labels.jsonl",
+        "sha256_prefix": "747adbdee48bae4c"
+      },
+      "predictions": {
+        "path": "data/eval/predictions_stage2.json",
+        "sha256_prefix": "6ccdb7a78a4dd610"
+      }
+    },
+    "extra": {
+      "version_manifest": {
+        "manifest_id": "pipeline_stage3_stage3_v6_qwen2.5vl_7b",
+        "version_manifest_hash": "27a755d1c00cceec2f455f6eda9eeba0d8ef141031814818a5cc72b5fbfdfcda"
+      },
+      "prompt_version": "stage3_v6",
+      "prompt_content_hash": "dd4de5b037f5592132dca96a3ed3550f37f89b758db20ae026c9afc8e0620119",
+      "workflow_config_hash": "7d5206e94719f2bdd4f47c42ae6471af3dadfc8412f9ac1e8a39ce9b1ce408af",
+      "manifest_path": "reports/eval/version_manifest.json"
+    }
+  },
+  "version_manifest": {
+    "manifest_id": "pipeline_stage3_stage3_v6_qwen2.5vl_7b",
+    "version_manifest_hash": "27a755d1c00cceec2f455f6eda9eeba0d8ef141031814818a5cc72b5fbfdfcda"
+  }
+}

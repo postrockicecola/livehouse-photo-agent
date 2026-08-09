@@ -1,0 +1,77 @@
+{
+  "schema": "metrics.stage3_scoring.v1",
+  "spearman_overall": 0.33352089530672335,
+  "pearson_overall": 0.35615840207655974,
+  "mae_overall": 14.716,
+  "rmse_overall": 19.933760307578698,
+  "n_scored": 250,
+  "per_dim": {
+    "focus_sharpness": {
+      "n": 236,
+      "mae": 1.469915254237288,
+      "spearman": 0.4521047150243791
+    },
+    "exposure_control": {
+      "n": 236,
+      "mae": 1.0021186440677967,
+      "spearman": 0.11789424759505836
+    },
+    "noise_cleanliness": {
+      "n": 236,
+      "mae": 1.1915254237288135,
+      "spearman": 0.2608341433181533
+    },
+    "composition_framing": {
+      "n": 236,
+      "mae": 1.2440677966101696,
+      "spearman": 0.14178422433785712
+    },
+    "light_color_character": {
+      "n": 236,
+      "mae": 1.4783898305084744,
+      "spearman": -0.012772424349044156
+    },
+    "moment_peak": {
+      "n": 236,
+      "mae": 2.122457627118644,
+      "spearman": 0.04153633190537596
+    },
+    "atmosphere_impact": {
+      "n": 236,
+      "mae": 1.6233050847457624,
+      "spearman": 0.10475008253426929
+    },
+    "deliverable_subject": {
+      "n": 236,
+      "mae": 1.3032203389830508,
+      "spearman": 0.22878663001747854
+    }
+  },
+  "selection": {
+    "n": 250,
+    "n_positives": 56,
+    "at_k": [
+      {
+        "k": 3,
+        "precision": 0.6666666666666666,
+        "recall": 0.03571428571428571,
+        "overlap": 2
+      },
+      {
+        "k": 5,
+        "precision": 0.4,
+        "recall": 0.03571428571428571,
+        "overlap": 2
+      },
+      {
+        "k": 10,
+        "precision": 0.5,
+        "recall": 0.08928571428571429,
+        "overlap": 5
+      }
+    ],
+    "score_gap": 5.806811487481582
+  },
+  "macro_dim_mae": 1.4293749999999998,
+  "parse_fail_rate": 0.0
+}

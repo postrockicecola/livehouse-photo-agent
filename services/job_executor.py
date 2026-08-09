@@ -268,6 +268,13 @@ class JobExecutor:
                 payload=succeed_payload,
                 **JobLifecycle.claim_fence_kwargs(claimed),
             )
+            # CLIP index for Gallery similar / future hybrid corpus (best-effort).
+            try:
+                from services.embedding_service import maybe_index_session_after_analyze
+
+                maybe_index_session_after_analyze(conn, pipeline_session_id)
+            except Exception:
+                logger.debug("embed index-on-analyze skipped", exc_info=True)
             prewarm_task_id = enqueue_gallery_cinestill_prewarm(
                 force=True,
                 analysis_results_path=ap.get("analysis_results"),
@@ -494,6 +501,14 @@ class JobExecutor:
             )
             prewarm_task_id = None
             if stage_name == "WRITE_ARTIFACT" and ap:
+                try:
+                    from services.embedding_service import maybe_index_session_after_analyze
+
+                    maybe_index_session_after_analyze(
+                        conn, int(session_id) if session_id is not None else None
+                    )
+                except Exception:
+                    logger.debug("embed index-on-analyze (staged) skipped", exc_info=True)
                 prewarm_task_id = enqueue_gallery_cinestill_prewarm(
                     force=True,
                     analysis_results_path=ap.get("analysis_results"),

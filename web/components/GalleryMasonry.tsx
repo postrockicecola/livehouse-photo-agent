@@ -16,6 +16,7 @@ import type { GalleryItem } from "./types";
 type Props = {
   items: GalleryItem[];
   apiBase: string;
+  preserveOrder?: boolean;
   onOpenLab: (item: GalleryItem) => void;
   selectedKeys: Set<string>;
   onToggleSelect: (item: GalleryItem, checked: boolean) => void;
@@ -118,12 +119,16 @@ function captionFromFile(name: string | undefined) {
 export function GalleryMasonry({
   items,
   apiBase,
+  preserveOrder = false,
   onOpenLab,
   selectedKeys,
   onToggleSelect,
 }: Props) {
   const columnCount = useGalleryMasonryColumnCount();
-  const sortedItems = useMemo(() => sortItemsByScoreDesc(items), [items]);
+  const sortedItems = useMemo(
+    () => (preserveOrder ? items : sortItemsByScoreDesc(items)),
+    [items, preserveOrder],
+  );
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
 
   const toggleGroup = useCallback((key: string) => {

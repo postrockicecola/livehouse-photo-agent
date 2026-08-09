@@ -6,6 +6,7 @@ from typing import Any
 from services.agent.skills.base import SkillResult
 from services.agent.skills.gallery_common import (
     _KNOWN_CATEGORIES,
+    _SEMANTIC_MIN_SIM,
     _SORT_KEYS,
     _caption,
     _dim,
@@ -14,12 +15,18 @@ from services.agent.skills.gallery_common import (
     _is_boilerplate_reason,
     _is_pipeline_tag,
     _load_rows,
+    _matched_query_terms,
     _maybe_dedupe,
     _pick_why,
+    _query_hit_score,
     _record,
     _search_slow_shutter,
     _style_intent,
+    _text_blob,
+    clip_rank_rows,
+    hybrid_merge_rows,
     semantic_fallback_rows,
+    semantic_hybrid_enabled,
 )
 
 
@@ -41,7 +48,8 @@ class GallerySearchSkill:
     description = (
         "Search the current session's analyzed photos. Prefer a named recipe "
         "(social/energy/peak/deliverable/shortlist/quality/dedupe/sort) plus optional "
-        "free-text query and limit. Returns top-N with scores, why lines, tags, caption."
+        "free-text query and limit. Free-text uses tag/caption synonyms hybrid-merged with "
+        "CLIP text→image, then re-ranked by recipe score dims. Returns top-N with why lines."
     )
     # Narrow model-facing schema — rich filters still accepted from intent_router via run().
     parameters = {
@@ -55,7 +63,7 @@ class GallerySearchSkill:
             "query": {
                 "type": "string",
                 "description": (
-                    "Free-text query. Matches tags/caption/reason with Chinese↔English synonyms."
+                    "Free-text query. Tag/caption synonyms + CLIP hybrid (not for 慢门 EXIF)."
                 ),
             },
             "tag": {"type": "string", "description": "Only photos whose tags contain this substring."},
@@ -125,39 +133,104 @@ class GallerySearchSkill:
         if query and _style_intent(query) == "slow_shutter":
             return _search_slow_shutter(rows, base_dir=self._base_dir, limit=limit)
 
-        filtered = _filter_rows(rows, filter_args)
         sort_label = sort_by
         recipe = str(filter_args.get("recipe") or "custom")
         rationale = str(filter_args.get("rationale") or f"按 {sort_label} 排序")
+        dedupe = bool(filter_args.get("dedupe_burst"))
 
-        filtered = _maybe_dedupe(filtered, self._base_dir, bool(filter_args.get("dedupe_burst")))
+        # Aesthetic / category gates without the free-text clause.
+        structural = dict(filter_args)
+        structural.pop("query", None)
+        structural["_sort_by"] = sort_by
+        pool = _filter_rows(rows, structural)
+        pool_files = {str(r.get("file") or "") for r in pool if str(r.get("file") or "").strip()}
+
+        text_hits: list[dict[str, Any]] = []
+        text_scores: dict[str, int] = {}
+        if query:
+            text_hits = _filter_rows(rows, filter_args)
+            for r in text_hits:
+                f = str(r.get("file") or "").strip()
+                if not f:
+                    continue
+                text_scores[f] = _query_hit_score(_text_blob(r), expanded)
+
         clip_meta: dict[str, Any] = {}
-        if not filtered and query:
-            # Synonym/text miss → optional CLIP text→image (not for 慢门 EXIF path).
-            clip_rows, clip_meta = semantic_fallback_rows(
-                rows,
+        clip_sims: dict[str, float] = {}
+        retrieval = "text" if query else "recipe"
+
+        if query and semantic_hybrid_enabled():
+            clip_pool = pool if pool else rows
+            _ranked, clip_sims, clip_meta = clip_rank_rows(
+                clip_pool,
                 base_dir=self._base_dir,
                 query=query,
-                limit=limit,
+                top_k=max(limit * 4, 32),
+                min_sim=0.0,
             )
-            if clip_rows:
-                filtered = clip_rows
-                recipe = f"{recipe}+clip" if recipe != "custom" else "clip_text"
-                rationale = f"{rationale}（文本无命中，改用 CLIP 语义召回）"
+            filtered = hybrid_merge_rows(
+                rows=rows,
+                text_hits=text_hits,
+                text_scores=text_scores,
+                clip_sims=clip_sims,
+                pool_files=pool_files,
+                sort_by=sort_by,
+                min_sim=_SEMANTIC_MIN_SIM,
+            )
+            if filtered:
+                retrieval = "hybrid" if text_hits and clip_sims else ("clip" if clip_sims else "text")
+                if retrieval == "hybrid":
+                    recipe = f"{recipe}+hybrid" if recipe != "custom" else "hybrid"
+                    rationale = f"{rationale}（标签/caption + CLIP 混合检索）"
+                elif retrieval == "clip":
+                    recipe = f"{recipe}+clip" if recipe != "custom" else "clip_text"
+                    rationale = f"{rationale}（文本无命中，CLIP 语义召回）"
+        elif query:
+            filtered = list(text_hits)
+            if not filtered:
+                clip_rows, clip_meta = semantic_fallback_rows(
+                    pool if pool else rows,
+                    base_dir=self._base_dir,
+                    query=query,
+                    limit=limit,
+                )
+                if clip_rows:
+                    filtered = clip_rows
+                    retrieval = "clip"
+                    recipe = f"{recipe}+clip" if recipe != "custom" else "clip_text"
+                    rationale = f"{rationale}（文本无命中，改用 CLIP 语义召回）"
+        else:
+            filtered = list(pool)
+
+        filtered = _maybe_dedupe(filtered, self._base_dir, dedupe)
 
         top_rows = filtered[:limit]
         top = []
         pick_reasons: list[dict[str, str]] = []
         for r in top_rows:
-            why = _pick_why(r, sort_by=sort_by, recipe=recipe)
-            rec = _record(r, extra={"why": why})
+            fname = str(r.get("file") or "").strip()
+            clip_sim = clip_sims.get(fname) if fname else None
+            matched = _matched_query_terms(r, expanded) if expanded else []
+            why = _pick_why(
+                r,
+                sort_by=sort_by,
+                recipe=recipe,
+                clip_sim=clip_sim,
+                matched_terms=matched or None,
+            )
+            extra: dict[str, Any] = {"why": why}
+            if clip_sim is not None:
+                extra["clip_sim"] = round(float(clip_sim), 4)
+            if matched:
+                extra["matched_terms"] = matched
+            rec = _record(r, extra=extra)
             top.append(rec)
             if rec.get("file"):
                 pick_reasons.append({"file": str(rec["file"]), "why": why})
         files = [str(r["file"]) for r in top if r.get("file")]
         summary = (
             f"{len(filtered)} photo(s) matched; showing top {len(top)} by {sort_label}."
-            f" recipe={recipe}. {rationale}"
+            f" recipe={recipe}. retrieval={retrieval}. {rationale}"
         )
         meta: dict[str, Any] = {
             "rows": top,
@@ -169,9 +242,10 @@ class GallerySearchSkill:
             "rationale": rationale,
             "sort_by": sort_label,
             "pick_reasons": pick_reasons,
+            "retrieval": retrieval,
         }
         if clip_meta.get("attempted"):
-            meta["semantic_fallback"] = clip_meta
+            meta["semantic_hybrid" if retrieval == "hybrid" else "semantic_fallback"] = clip_meta
         if not filtered:
             # Help the model explain empty results without inventing photos / fake tags.
             tag_counts: dict[str, int] = {}

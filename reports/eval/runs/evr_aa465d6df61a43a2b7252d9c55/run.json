@@ -1,0 +1,151 @@
+{
+  "schema_version": "eval_run.v1",
+  "eval_run_id": "evr_aa465d6df61a43a2b7252d9c55",
+  "suite": "stage3_scoring",
+  "status": "succeeded",
+  "started_at": "2026-08-07T15:25:24.883562+00:00",
+  "finished_at": "2026-08-07T15:25:24.883562+00:00",
+  "version_manifest": {
+    "manifest_id": "pipeline_stage3_stage3_v6_qwen2.5vl_7b",
+    "version_manifest_hash": "54d0565fa2b6f155275bfb91d19b525d1b22f0df690aae931317d540f1d9132a"
+  },
+  "dataset": {
+    "name": "golden_apr_jul_2026",
+    "version": "0.2.0",
+    "labels_sha256": "747adbdee48bae4c116c5e476cee00af5f496abdc713fd405f95c8bd4e2a4f36",
+    "manifest_sha256": "0b207c2e7228be679e04b076d97e967fc8be0cd377dafbae7494f02d2d3f71c5"
+  },
+  "metrics": {
+    "schema": "metrics.stage3_scoring.v1",
+    "spearman_overall": 0.33352089530672335,
+    "pearson_overall": 0.35615840207655974,
+    "mae_overall": 14.716,
+    "rmse_overall": 19.933760307578698,
+    "n_scored": 250,
+    "per_dim": {
+      "focus_sharpness": {
+        "n": 236,
+        "mae": 1.469915254237288,
+        "spearman": 0.4521047150243791
+      },
+      "exposure_control": {
+        "n": 236,
+        "mae": 1.0021186440677967,
+        "spearman": 0.11789424759505836
+      },
+      "noise_cleanliness": {
+        "n": 236,
+        "mae": 1.1915254237288135,
+        "spearman": 0.2608341433181533
+      },
+      "composition_framing": {
+        "n": 236,
+        "mae": 1.2440677966101696,
+        "spearman": 0.14178422433785712
+      },
+      "light_color_character": {
+        "n": 236,
+        "mae": 1.4783898305084744,
+        "spearman": -0.012772424349044156
+      },
+      "moment_peak": {
+        "n": 236,
+        "mae": 2.122457627118644,
+        "spearman": 0.04153633190537596
+      },
+      "atmosphere_impact": {
+        "n": 236,
+        "mae": 1.6233050847457624,
+        "spearman": 0.10475008253426929
+      },
+      "deliverable_subject": {
+        "n": 236,
+        "mae": 1.3032203389830508,
+        "spearman": 0.22878663001747854
+      }
+    },
+    "selection": {
+      "n": 250,
+      "n_positives": 56,
+      "at_k": [
+        {
+          "k": 3,
+          "precision": 0.6666666666666666,
+          "recall": 0.03571428571428571,
+          "overlap": 2
+        },
+        {
+          "k": 5,
+          "precision": 0.4,
+          "recall": 0.03571428571428571,
+          "overlap": 2
+        },
+        {
+          "k": 10,
+          "precision": 0.5,
+          "recall": 0.08928571428571429,
+          "overlap": 5
+        }
+      ],
+      "score_gap": 5.806811487481582
+    },
+    "macro_dim_mae": 1.4293749999999998,
+    "parse_fail_rate": 0.0
+  },
+  "artifact_root": "reports/eval/runs/evr_aa465d6df61a43a2b7252d9c55",
+  "baseline_run_id": null,
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-08-07T15:25:24.691535+00:00",
+    "git_sha": "ab53680",
+    "seed": null,
+    "hardware": {
+      "platform": "macOS-15.3.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.12",
+      "cpu_count": 10,
+      "torch": null,
+      "cuda_available": false,
+      "system": "Darwin"
+    },
+    "model": {
+      "config_path": "configs/eval_stage3.yaml",
+      "config_sha256_prefix": "0116e3830ddb6d4b",
+      "provider": "ollama",
+      "model_name": "qwen2.5vl:7b",
+      "temperature": 0.0,
+      "num_predict": 512,
+      "fallback_model_name": null
+    },
+    "inputs": {
+      "labels": {
+        "path": "data/eval/labels.jsonl",
+        "sha256_prefix": "747adbdee48bae4c"
+      },
+      "predictions": {
+        "path": "data/eval/images/analysis_results.json",
+        "sha256_prefix": "54ddaee793a27144"
+      }
+    },
+    "extra": {
+      "version_manifest": {
+        "manifest_id": "pipeline_stage3_stage3_v6_qwen2.5vl_7b",
+        "version_manifest_hash": "54d0565fa2b6f155275bfb91d19b525d1b22f0df690aae931317d540f1d9132a"
+      },
+      "prompt_version": "stage3_v6",
+      "prompt_content_hash": "dd4de5b037f5592132dca96a3ed3550f37f89b758db20ae026c9afc8e0620119",
+      "workflow_config_hash": "7d5206e94719f2bdd4f47c42ae6471af3dadfc8412f9ac1e8a39ce9b1ce408af",
+      "manifest_path": "reports/eval/version_manifest.json"
+    }
+  },
+  "counts": {
+    "items_total": 250,
+    "items_scored": 250,
+    "items_matched": 250,
+    "parse_fail": 0
+  },
+  "tags": [
+    "stage3_scoring"
+  ]
+}

@@ -1,15 +1,21 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import numpy as np
 
 from services.film_render_service import (
     EXPORT_DIR_GRADED_FROM_RAW,
     EXPORT_DIR_JPEG,
     EXPORT_DIR_RAW_COPY,
+    _cache_file_name,
     is_raw_path,
+    load_rgb_u8,
     resolve_film_catalog_paths,
     resolve_film_sources_for_export,
 )
@@ -66,6 +72,31 @@ class FilmExportSourcesTests(unittest.TestCase):
         self.assertEqual(EXPORT_DIR_JPEG, "jpeg")
         self.assertEqual(EXPORT_DIR_RAW_COPY, "raw")
         self.assertEqual(EXPORT_DIR_GRADED_FROM_RAW, "graded_from_raw")
+
+    def test_raw_half_size_is_forwarded_and_changes_cache_key(self):
+        raw_ctx = MagicMock()
+        raw_ctx.__enter__.return_value.postprocess.return_value = np.zeros((2, 2, 3), dtype=np.uint8)
+        fake_rawpy = MagicMock()
+        fake_rawpy.imread.return_value = raw_ctx
+        with patch.dict(sys.modules, {"rawpy": fake_rawpy}):
+            out = load_rgb_u8(Path("DSC0001.ARW"), raw_half_size=True)
+
+        self.assertEqual(out.shape, (2, 2, 3))
+        raw_ctx.__enter__.return_value.postprocess.assert_called_once_with(
+            use_camera_wb=True,
+            no_auto_bright=False,
+            half_size=True,
+            output_bps=8,
+        )
+        full = _cache_file_name(Path("DSC0001.ARW"), "film_cinestill_800t", 0, 3200)
+        half = _cache_file_name(
+            Path("DSC0001.ARW"),
+            "film_cinestill_800t",
+            0,
+            3200,
+            raw_half_size=True,
+        )
+        self.assertNotEqual(full, half)
 
 
 if __name__ == "__main__":

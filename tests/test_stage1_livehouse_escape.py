@@ -8,7 +8,9 @@ import pytest
 from engine.operators.image_processor import ImageProcessor, livehouse_severe_blur_escape
 from utils.config_loader import ConfigLoader
 
-_EVAL_ROOT = Path(__file__).resolve().parents[1] / "data" / "eval" / "images"
+# Tracked fixtures rather than data/eval/images/: these pin Stage1 blur behaviour and
+# must survive eval-dataset swaps (they used to live in the retired golden_core set).
+_EVAL_ROOT = Path(__file__).resolve().parents[1] / "data" / "fixtures" / "stage1"
 
 
 @pytest.fixture(scope="module")

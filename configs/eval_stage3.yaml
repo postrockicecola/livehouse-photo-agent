@@ -54,7 +54,8 @@ model:
   endpoint: "http://localhost:11434"
   model_name: "qwen2.5vl:7b"
   timeout: 300
-  # Ollama forces Parallel:1 for vision models (see docs/OLLAMA_INTEGRATION_NOTES.md §5);
+  # Ollama forces Parallel:1 for vision models (see docs/OLLAMA_INTEGRATION_NOTES.md §5).
+  # Dual-instance attempt OOM-rebooted this 24GB box (2026-08-08) — stay single-instance.
   # kept in sync with configs/livehouse.yaml so eval concurrency matches production reality.
   max_concurrent_requests: 1
   max_inference_queue_size: 1
