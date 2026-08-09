@@ -1,25 +1,48 @@
 {
   "archive_root": "/archive",
-  "count": 56,
+  "count": 57,
   "sessions": [
+    {
+      "session_key": "Session 58",
+      "session_dir": "/archive/session-58",
+      "previews_dir": "/archive/session-58/Previews",
+      "preview_count": 4218,
+      "has_analysis_results": true,
+      "cover_path_quoted": "/showcase/covers/session-58.jpg",
+      "brain_session_id": 58,
+      "photos_ingested": 4218,
+      "photos_analyzed": 1933,
+      "source": "showcase_catalog",
+      "last_job_status": "SUCCEEDED",
+      "funnel": {
+        "imported": 4218,
+        "filtered": 3332,
+        "scored": 1933,
+        "picked": 528,
+        "exported": 422
+      },
+      "cover_portrait_path_quoted": "/showcase/covers/session-58-portrait.jpg",
+      "session_date": "2026-08-08",
+      "band_name": "汉堡黄"
+    },
     {
       "session_key": "Session 57",
       "session_dir": "/archive/session-57",
       "previews_dir": "/archive/session-57/Previews",
-      "preview_count": 632,
+      "preview_count": 22,
       "has_analysis_results": true,
       "cover_path_quoted": "/showcase/covers/session-57.jpg",
       "brain_session_id": 57,
-      "photos_ingested": 632,
-      "photos_analyzed": 289,
+      "photos_ingested": 22,
+      "photos_analyzed": 10,
       "source": "showcase_catalog",
       "last_job_status": "SUCCEEDED",
       "funnel": {
-        "imported": 632,
-        "filtered": 499,
-        "scored": 289,
-        "picked": 71,
-        "exported": 57
+        "imported": 22,
+        "filtered": 17,
+        "scored": 10,
+        "picked": 2,
+        "exported": 2
       },
       "session_date": "2026-07-29",
       "band_name": "SeaPower"
@@ -1261,31 +1284,38 @@
     }
   ],
   "active": {
-    "session_key": "Session 57",
-    "session_dir": "/archive/session-57",
-    "previews_dir": "/archive/session-57/Previews",
-    "preview_count": 632,
+    "session_key": "Session 58",
+    "session_dir": "/archive/session-58",
+    "previews_dir": "/archive/session-58/Previews",
+    "preview_count": 4218,
     "has_analysis_results": true,
-    "cover_path_quoted": "/showcase/covers/session-57.jpg",
-    "cover_portrait_path_quoted": "",
-    "session_date": "2026-07-29",
-    "band_name": "SeaPower",
+    "cover_path_quoted": "/showcase/covers/session-58.jpg",
+    "cover_portrait_path_quoted": "/showcase/covers/session-58-portrait.jpg",
+    "session_date": "2026-08-08",
+    "band_name": "汉堡黄",
     "venue": "",
     "funnel": {
-      "imported": 632,
-      "filtered": 499,
-      "scored": 289,
-      "picked": 71,
-      "exported": 57
+      "imported": 4218,
+      "filtered": 3332,
+      "scored": 1933,
+      "picked": 528,
+      "exported": 422
     },
-    "photos_ingested": 632
+    "photos_ingested": 4218
   },
   "recent_deliveries": [
     {
+      "session_key": "Session 58",
+      "session_date": "2026-08-08",
+      "photos_imported": 4218,
+      "photos_exported": 422,
+      "previews_dir": "/archive/session-58/Previews"
+    },
+    {
       "session_key": "Session 57",
       "session_date": "2026-07-29",
-      "photos_imported": 632,
-      "photos_exported": 57,
+      "photos_imported": 22,
+      "photos_exported": 2,
       "previews_dir": "/archive/session-57/Previews"
     },
     {
@@ -1329,13 +1359,6 @@
       "photos_imported": 21,
       "photos_exported": 3,
       "previews_dir": "/archive/session-51/Previews"
-    },
-    {
-      "session_key": "Session 50",
-      "session_date": "2026-06-19",
-      "photos_imported": 1104,
-      "photos_exported": 121,
-      "previews_dir": "/archive/session-50/Previews"
     }
   ]
 }

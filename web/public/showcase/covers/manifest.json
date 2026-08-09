@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-31T14:19:31.735821+00:00",
+  "generated_at": "2026-08-09T12:35:39.740858+00:00",
   "tool": "build_session_covers",
   "privacy": "EXIF/ICC stripped; opaque session-NN filenames; no absolute paths",
-  "count": 56,
+  "count": 57,
   "covers": [
     {
       "slug": "session-01",
@@ -563,6 +563,16 @@
       "source_portrait_basename": "",
       "date": "2026-07-29",
       "band": "SeaPower",
+      "venue": ""
+    },
+    {
+      "slug": "session-58",
+      "path": "/showcase/covers/session-58.jpg",
+      "path_portrait": "/showcase/covers/session-58-portrait.jpg",
+      "source_basename": "1-1-13.png",
+      "source_portrait_basename": "1-1-13.png",
+      "date": "2026-08-08",
+      "band": "汉堡黄",
       "venue": ""
     }
   ]
