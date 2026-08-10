@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from services.agent import gallery_search_defaults as defaults
+from services.agent.selection_planner import compile_selection_goal, plan_selection_goal
 
 # Shared count-phrase prefixes — used by both limit extraction and shortlist routing
 # so "帮我选20张" / "找出15张" stay in sync.
@@ -178,6 +179,21 @@ def _with_query(args: dict[str, Any], text: str) -> dict[str, Any]:
     return out
 
 
+def semantic_selection_route(user_text: str) -> Optional[RouteMatch]:
+    """Build the deterministic route produced by the LangGraph semantic plan node."""
+    goal = plan_selection_goal(
+        user_text,
+        default_count=defaults.SHORTLIST_DEFAULT_LIMIT,
+    )
+    if goal is None:
+        return None
+    return RouteMatch(
+        rule_id="shortlist_semantic_goal",
+        calls=[RoutedCall("gallery_search", compile_selection_goal(goal))],
+        select_after_search=True,
+    )
+
+
 def route_gallery_intent(user_text: str) -> Optional[RouteMatch]:
     """Return a :class:`RouteMatch` if ``user_text`` is a deterministic intent.
 
@@ -224,6 +240,10 @@ def route_gallery_intent(user_text: str) -> Optional[RouteMatch]:
         )
 
     limit = _extract_limit(text, defaults.SHORTLIST_DEFAULT_LIMIT)
+
+    semantic_route = semantic_selection_route(text)
+    if semantic_route is not None:
+        return semantic_route
 
     if _CONTRAST_SEMANTIC_RE.search(text) and wants_select:
         # "选出20张，但多给我一些全景…" → shortlist + semantic query for hybrid search.

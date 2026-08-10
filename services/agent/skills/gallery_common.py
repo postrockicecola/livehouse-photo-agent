@@ -48,6 +48,9 @@ _SORT_KEYS = (
     "atmosphere_impact",
     "moment_peak",
 )
+_RANKING_WEIGHT_KEYS = frozenset(
+    (*_SORT_KEYS, "light_color_character", "composition_framing")
+)
 _TRASH_HINTS = ("blur", "blurry", "out of focus", "过曝", "overex", "糊", "失焦", "exposure")
 # Pipeline / Stage2/3 ops labels — not VLM semantic content tags.
 _PIPELINE_TAGS = frozenset(
@@ -247,6 +250,31 @@ def _dim(row: dict[str, Any], key: str) -> float:
     return 0.0
 
 
+def _ranking_score(
+    row: dict[str, Any],
+    *,
+    sort_by: str,
+    ranking_weights: Any = None,
+) -> float:
+    """Return a normalized weighted aesthetic score, or the requested single dimension."""
+    if not isinstance(ranking_weights, dict):
+        return _dim(row, sort_by)
+    valid: list[tuple[str, float]] = []
+    for key, raw_weight in ranking_weights.items():
+        if str(key) not in _RANKING_WEIGHT_KEYS:
+            continue
+        try:
+            weight = float(raw_weight)
+        except (TypeError, ValueError):
+            continue
+        if weight > 0:
+            valid.append((str(key), weight))
+    total = sum(weight for _, weight in valid)
+    if total <= 0:
+        return _dim(row, sort_by)
+    return sum(_dim(row, key) * weight for key, weight in valid) / total
+
+
 def _matched_query_terms(row: dict[str, Any], terms: list[str]) -> list[str]:
     """Expanded query terms that hit this row's tag/caption blob (for why lines)."""
     if not terms:
@@ -270,6 +298,7 @@ def _pick_why(
     *,
     sort_by: str,
     recipe: str,
+    ranking_weights: Any = None,
     clip_sim: float | None = None,
     matched_terms: list[str] | None = None,
 ) -> str:
@@ -277,7 +306,19 @@ def _pick_why(
     overall = _dim(row, "overall")
     parts = [f"overall {overall:.0f}"]
     recipe_base = str(recipe or "").split("+", 1)[0]
-    if recipe_base == "social" or sort_by == "deliverable_subject":
+    if isinstance(ranking_weights, dict) and ranking_weights:
+        ranked_axes: list[tuple[str, float]] = []
+        for key, raw_weight in ranking_weights.items():
+            try:
+                weight = float(raw_weight)
+            except (TypeError, ValueError):
+                continue
+            if str(key) in _RANKING_WEIGHT_KEYS and weight > 0:
+                ranked_axes.append((str(key), weight))
+        ranked_axes.sort(key=lambda item: item[1], reverse=True)
+        for key, _ in ranked_axes[:3]:
+            parts.append(f"{key} {_dim(row, key):.1f}")
+    elif recipe_base == "social" or sort_by == "deliverable_subject":
         parts.append(f"deliverable {_dim(row, 'deliverable_subject'):.1f}")
         parts.append(f"tech {_dim(row, 'technical'):.1f}")
     elif recipe_base == "energy" or sort_by == "atmosphere_impact":
@@ -577,6 +618,7 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
     sort_by = str(args.get("_sort_by") or "overall")
     if sort_by not in _SORT_KEYS:
         sort_by = "overall"
+    ranking_weights = args.get("ranking_weights")
 
     for row in rows:
         overall = _dim(row, "overall")
@@ -629,7 +671,14 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
             q_score = _query_hit_score(blob, query_terms)
             if q_score <= 0:
                 continue
-        scored.append((q_score, _dim(row, sort_by), overall, row))
+        scored.append(
+            (
+                q_score,
+                _ranking_score(row, sort_by=sort_by, ranking_weights=ranking_weights),
+                overall,
+                row,
+            )
+        )
 
     # Stronger semantic hit first, then requested score, then overall as tie-break.
     scored.sort(key=lambda pair: (pair[0], pair[1], pair[2]), reverse=True)
@@ -798,6 +847,7 @@ def hybrid_merge_rows(
     clip_sims: dict[str, float],
     pool_files: set[str],
     sort_by: str,
+    ranking_weights: Any = None,
     min_sim: float = _SEMANTIC_MIN_SIM,
 ) -> list[dict[str, Any]]:
     """Union tag hits + CLIP hits (above *min_sim*), re-rank with score dims."""
@@ -821,7 +871,7 @@ def hybrid_merge_rows(
         f = str(r.get("file") or "")
         t = float(text_scores.get(f, 0))
         c = float(clip_sims.get(f, 0.0))
-        aes = _dim(r, sort_by)
+        aes = _ranking_score(r, sort_by=sort_by, ranking_weights=ranking_weights)
         overall = _dim(r, "overall")
         text_boost = 1.25 if t > 0 else 0.0
         return (

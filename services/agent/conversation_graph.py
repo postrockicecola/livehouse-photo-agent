@@ -2,8 +2,9 @@
 
 Graph shape::
 
-    START → decide → act ⟲ decide → answer → END
-                   ↘ answer (plain / forced)
+    START → plan ─┬→ execute_plan → answer → END
+                  └→ decide → act ⟲ decide → answer → END
+                                ↘ answer (plain / forced)
 
 This is the **production** path for :class:`ConversationalAgent`. The imperative
 loop in ``conversation.py`` is legacy opt-in only
@@ -40,6 +41,9 @@ class ChatTurnState(TypedDict, total=False):
     answer_messages: Optional[list[dict[str, str]]]
     done: bool
     backend: str
+    selection_goal: Optional[dict[str, Any]]
+    planned_route: Optional[dict[str, Any]]
+    plan_rule_id: Optional[str]
 
 
 TurnHook = Callable[[dict[str, Any]], None]
@@ -146,8 +150,11 @@ def compile_chat_turn_graph(
     no_answer_fallback: str,
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
+    execute_planned_route: Optional[
+        Callable[[dict[str, Any]], tuple[list[dict[str, Any]], list[str]]]
+    ] = None,
 ):
-    """Compile the decide→act→answer turn graph (closures bind one agent instance)."""
+    """Compile the plan→decide/act→answer turn graph (closures bind one agent instance)."""
     from langgraph.graph import END, START, StateGraph
 
     def _emit(ev: dict[str, Any]) -> None:
@@ -165,6 +172,60 @@ def compile_chat_turn_graph(
             return bool(looks_like_tool_intent(text))
         except Exception:
             return False
+
+    def plan(state: ChatTurnState) -> dict[str, Any]:
+        """Normalize supported semantic requests before any model tool decision."""
+        if skills is None or execute_planned_route is None:
+            return {
+                "selection_goal": None,
+                "planned_route": None,
+                "plan_rule_id": None,
+            }
+        from services.agent.intent_router import semantic_selection_route
+
+        match = semantic_selection_route(str(state.get("user_text") or ""))
+        if match is None:
+            return {
+                "selection_goal": None,
+                "planned_route": None,
+                "plan_rule_id": None,
+            }
+        calls = [
+            {"tool": call.tool, "args": dict(call.args)}
+            for call in match.calls
+        ]
+        goal = None
+        if calls:
+            raw_goal = calls[0]["args"].get("selection_goal")
+            if isinstance(raw_goal, dict):
+                goal = dict(raw_goal)
+        return {
+            "selection_goal": goal,
+            "planned_route": {
+                "rule_id": match.rule_id,
+                "calls": calls,
+                "select_after_search": match.select_after_search,
+            },
+            "plan_rule_id": match.rule_id,
+        }
+
+    def route_after_plan(state: ChatTurnState) -> Literal["execute_plan", "decide"]:
+        if state.get("planned_route") and execute_planned_route is not None:
+            return "execute_plan"
+        return "decide"
+
+    def execute_plan(state: ChatTurnState) -> dict[str, Any]:
+        """Execute a semantic plan deterministically, then skip tool-selection LLM calls."""
+        route = state.get("planned_route")
+        if not isinstance(route, dict) or execute_planned_route is None:
+            return {"force_answer": False}
+        tool_calls, observations = execute_planned_route(route)
+        return {
+            "tool_calls": list(tool_calls),
+            "observations": list(observations),
+            "force_answer": True,
+            "pending_call": None,
+        }
 
     def decide(state: ChatTurnState) -> dict[str, Any]:
         max_rounds = int(state.get("max_rounds") or 0)
@@ -369,10 +430,18 @@ def compile_chat_turn_graph(
         return "decide"
 
     g = StateGraph(ChatTurnState)
+    g.add_node("plan", plan)
+    g.add_node("execute_plan", execute_plan)
     g.add_node("decide", decide)
     g.add_node("act", act)
     g.add_node("answer", answer)
-    g.add_edge(START, "decide")
+    g.add_edge(START, "plan")
+    g.add_conditional_edges(
+        "plan",
+        route_after_plan,
+        {"execute_plan": "execute_plan", "decide": "decide"},
+    )
+    g.add_edge("execute_plan", "answer")
     g.add_conditional_edges("decide", route_after_decide, {"act": "act", "answer": "answer"})
     g.add_conditional_edges("act", route_after_act, {"decide": "decide", "answer": "answer"})
     g.add_edge("answer", END)
@@ -401,6 +470,9 @@ def _initial_chat_state(
         "answer_messages": None,
         "done": False,
         "backend": "langgraph",
+        "selection_goal": None,
+        "planned_route": None,
+        "plan_rule_id": None,
     }
 
 
@@ -425,6 +497,9 @@ def run_chat_turn(
     no_answer_fallback: str,
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
+    execute_planned_route: Optional[
+        Callable[[dict[str, Any]], tuple[list[dict[str, Any]], list[str]]]
+    ] = None,
     defer_answer: bool = False,
     app: Any = None,
 ) -> ChatTurnState:
@@ -447,6 +522,7 @@ def run_chat_turn(
             no_answer_fallback=no_answer_fallback,
             looks_like_tool_intent=looks_like_tool_intent,
             merge_tool_args=merge_tool_args,
+            execute_planned_route=execute_planned_route,
         )
     init = _initial_chat_state(
         user_text=user_text,
@@ -478,6 +554,9 @@ def iter_chat_turn_updates(
     no_answer_fallback: str,
     looks_like_tool_intent: Optional[Callable[[str], bool]] = None,
     merge_tool_args: Optional[Callable[[str, dict[str, Any]], dict[str, Any]]] = None,
+    execute_planned_route: Optional[
+        Callable[[dict[str, Any]], tuple[list[dict[str, Any]], list[str]]]
+    ] = None,
     defer_answer: bool = True,
     app: Any = None,
 ):
@@ -501,6 +580,7 @@ def iter_chat_turn_updates(
             no_answer_fallback=no_answer_fallback,
             looks_like_tool_intent=looks_like_tool_intent,
             merge_tool_args=merge_tool_args,
+            execute_planned_route=execute_planned_route,
         )
     init = _initial_chat_state(
         user_text=user_text,
@@ -517,6 +597,8 @@ def iter_chat_turn_updates(
 
 GALLERY_CHAT_MAPPING = {
     "ConversationMemory": "closed over by decide/answer nodes",
+    "structured selection goal": "node: plan",
+    "deterministic planned tools": "node: execute_plan",
     "model tool JSON": "node: decide",
     "SkillRegistry.dispatch": "node: act",
     "forced / plain final answer": "node: answer",

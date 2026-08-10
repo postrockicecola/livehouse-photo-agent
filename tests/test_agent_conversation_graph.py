@@ -62,6 +62,26 @@ def _search_skill(files: list[str]):
     return _Search()
 
 
+def _select_skill():
+    class _Select:
+        name = "gallery_select"
+        description = "select"
+        parameters = {
+            "type": "object",
+            "properties": {"files": {"type": "array", "items": {"type": "string"}}},
+        }
+
+        def run(self, args):
+            files = list(args.get("files") or [])
+            return SkillResult(
+                ok=True,
+                output=f"{len(files)} selected",
+                metadata={"selected_keys": files, "files": files},
+            )
+
+    return _Select()
+
+
 def _scripted_chat(responses: list[str]):
     """Pop scripted model outputs; last response repeats (avoids StopIteration flakes)."""
     queue = list(responses)
@@ -83,6 +103,8 @@ def _scripted_chat(responses: list[str]):
 
 def test_gallery_chat_mapping_mentions_subgraph():
     assert "ConversationalAgent.chat" in GALLERY_CHAT_MAPPING
+    assert "node: plan" in GALLERY_CHAT_MAPPING.values()
+    assert "node: execute_plan" in GALLERY_CHAT_MAPPING.values()
     assert "node: decide" in GALLERY_CHAT_MAPPING.values()
 
 
@@ -156,6 +178,62 @@ def test_enforce_langgraph_available_fails_when_missing(monkeypatch):
 # ---------------------------------------------------------------------------
 # ANSWER_BRANCH_CHECKLIST integration (production LangGraph only)
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.requires_langgraph
+class TestSemanticPlanNode:
+    def test_structured_selection_runs_plan_execute_plan_answer(self):
+        reg = SkillRegistry()
+        reg.register(_search_skill(["guitar_01.jpg", "guitar_02.jpg"]))
+        reg.register(_select_skill())
+        model_calls: list[list[dict[str, str]]] = []
+
+        def _final_only(msgs):
+            model_calls.append(list(msgs))
+            return "推荐 {ref_0} 和 {ref_1}。"
+
+        agent = ConversationalAgent(
+            _final_only,
+            memory=ConversationMemory(system_prompt="test"),
+            skills=reg,
+            wrap_tool_output=False,
+        )
+        res = agent.chat("帮我选10张最有张力的吉他手照片发小红书")
+
+        assert agent.last_backend == "langgraph"
+        assert [tc["tool"] for tc in res.tool_calls] == [
+            "gallery_search",
+            "gallery_select",
+        ]
+        goal = res.tool_calls[0]["args"]["selection_goal"]
+        assert goal["subject"] == "吉他手"
+        assert goal["style"] == "tension"
+        assert goal["platform"] == "xiaohongshu"
+        assert len(model_calls) == 1, "plan path must skip the decide-model round"
+        assert res.trace["rule_id"] == "shortlist_semantic_goal"
+        assert "guitar_01.jpg" in res.reply
+
+    def test_stream_plan_emits_search_and_select_events(self):
+        reg = SkillRegistry()
+        reg.register(_search_skill(["guitar_01.jpg"]))
+        reg.register(_select_skill())
+        agent = ConversationalAgent(
+            lambda _msgs: "推荐 {ref_0}。",
+            memory=ConversationMemory(system_prompt="test"),
+            skills=reg,
+            wrap_tool_output=False,
+        )
+
+        events = list(
+            agent.stream_chat("帮我选10张最有张力的吉他手照片发小红书")
+        )
+
+        assert [e["tool"] for e in events if e.get("type") == "tool_call"] == [
+            "gallery_search",
+            "gallery_select",
+        ]
+        done = [e for e in events if e.get("type") == "done"][-1]
+        assert done["trace"]["rule_id"] == "shortlist_semantic_goal"
 
 
 @pytest.mark.requires_langgraph

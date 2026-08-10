@@ -2,7 +2,7 @@
 
 This is the dialogue counterpart to the curation graph: it keeps a running conversation,
 trims it to a token budget (oldest turns first, optionally rolled into a running summary),
-and on each user turn runs the LangGraph ``decide → act → answer`` subgraph
+and on each user turn runs the LangGraph ``plan → decide/act → answer`` subgraph
 (:mod:`services.agent.conversation_graph`) so the model can call Agent Skills before the
 final reply.
 
@@ -40,7 +40,7 @@ from services.agent.groundedness import (
     resolve_ref_placeholders,
 )
 from services.agent.guardrails import Guardrails
-from services.agent.intent_router import RouteMatch, route_gallery_intent
+from services.agent.intent_router import RouteMatch, RoutedCall, route_gallery_intent
 from services.agent.skills.base import SkillRegistry
 from services.agent.tool_protocol import (
     looks_like_tool_intent,
@@ -410,6 +410,7 @@ class ConversationalAgent:
             "emit": self._emit,
             "no_answer_fallback": _NO_ANSWER_FALLBACK,
             "merge_tool_args": self._merge_turn_context_args,
+            "execute_planned_route": self._execute_planned_route,
         }
 
     def _imperative_requested(self) -> bool:
@@ -496,6 +497,23 @@ class ConversationalAgent:
             )
         return tool_calls, observations
 
+    def _execute_planned_route(
+        self,
+        payload: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[str]]:
+        """Rehydrate a serializable plan-state route and execute it."""
+        calls = [
+            RoutedCall(str(call.get("tool") or ""), dict(call.get("args") or {}))
+            for call in (payload.get("calls") or [])
+            if isinstance(call, dict) and str(call.get("tool") or "").strip()
+        ]
+        match = RouteMatch(
+            rule_id=str(payload.get("rule_id") or "planned"),
+            calls=calls,
+            select_after_search=bool(payload.get("select_after_search")),
+        )
+        return self._execute_route_match(match)
+
     def _chat_routed(self, user_text: str, match: RouteMatch) -> TurnResult:
         """Deterministic tools + one LLM prose summary (no tool-call generation)."""
         self.last_backend = f"routed:{match.rule_id}"
@@ -544,10 +562,13 @@ class ConversationalAgent:
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
-        if match is not None:
+        imperative = self._imperative_requested()
+        if match is not None and (
+            match.rule_id != "shortlist_semantic_goal" or imperative
+        ):
             return self._chat_routed(user_text, match)
 
-        if self._imperative_requested():
+        if imperative:
             self.last_backend = "imperative"
             return self._chat_imperative(user_text)
 
@@ -555,7 +576,11 @@ class ConversationalAgent:
         self.last_backend = str(state.get("backend") or "langgraph")
         reply = str(state.get("reply") or "")
         tool_calls = list(state.get("tool_calls") or [])
-        self._attach_trace_to_done(reply, tool_calls)
+        self._attach_trace_to_done(
+            reply,
+            tool_calls,
+            routed=str(state.get("plan_rule_id") or "") or None,
+        )
         return self._make_turn_result(reply, tool_calls)
 
     def _chat_imperative(self, user_text: str) -> TurnResult:
@@ -628,11 +653,14 @@ class ConversationalAgent:
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
-        if match is not None:
+        imperative = self._imperative_requested()
+        if match is not None and (
+            match.rule_id != "shortlist_semantic_goal" or imperative
+        ):
             yield from self._stream_chat_routed(user_text, match, stream_fn=stream_fn)
             return
 
-        if self._imperative_requested():
+        if imperative:
             self.last_backend = "imperative"
             yield from self._stream_chat_imperative(user_text, stream_fn=stream_fn)
             return
@@ -652,6 +680,7 @@ class ConversationalAgent:
         tool_calls: list[dict[str, Any]] = []
         direct: Optional[str] = None
         answer_messages: Optional[list[dict[str, str]]] = None
+        plan_rule_id: Optional[str] = None
 
         for node_name, partial in iter_chat_turn_updates(
             user_text=user_text,
@@ -660,16 +689,14 @@ class ConversationalAgent:
             app=self._get_compiled_graph(),
             **self._graph_kwargs(),
         ):
-            if node_name == "act":
+            if node_name == "plan" and partial.get("plan_rule_id"):
+                plan_rule_id = str(partial.get("plan_rule_id"))
+            elif node_name in ("act", "execute_plan"):
                 tcs = list(partial.get("tool_calls") or [])
-                if tcs:
-                    # updates mode returns the full list after act; emit only the newest.
-                    newest = tcs[-1]
-                    if not tool_calls or newest != tool_calls[-1]:
-                        tool_calls = tcs
-                        yield {"type": "tool_call", **newest}
-                else:
-                    tool_calls = tcs
+                previous_count = len(tool_calls)
+                tool_calls = tcs
+                for tc in tcs[previous_count:]:
+                    yield {"type": "tool_call", **tc}
             elif node_name == "answer":
                 if partial.get("direct_reply") is not None:
                     direct = str(partial.get("direct_reply"))
@@ -682,7 +709,7 @@ class ConversationalAgent:
             reply = self._finalize(direct)
             for piece in _chunk_text(reply):
                 yield {"type": "token", "text": piece}
-            yield self._done_event(reply, tool_calls)
+            yield self._done_event(reply, tool_calls, routed=plan_rule_id)
             return
 
         film_direct = self._direct_film_grade_reply(tool_calls)
@@ -690,11 +717,16 @@ class ConversationalAgent:
             reply = self._finalize(film_direct)
             for piece in _chunk_text(reply):
                 yield {"type": "token", "text": piece}
-            yield self._done_event(reply, tool_calls)
+            yield self._done_event(reply, tool_calls, routed=plan_rule_id)
             return
 
         messages = answer_messages or self.memory.messages()
-        yield from self._stream_answer(messages, stream_fn, tool_calls)
+        yield from self._stream_answer(
+            messages,
+            stream_fn,
+            tool_calls,
+            routed=plan_rule_id,
+        )
 
     def _stream_chat_imperative(
         self, user_text: str, *, stream_fn: Optional[StreamChatFn] = None
@@ -762,6 +794,8 @@ class ConversationalAgent:
         messages: list[dict[str, str]],
         stream_fn: Optional[StreamChatFn],
         tool_calls: list[dict[str, Any]],
+        *,
+        routed: Optional[str] = None,
     ) -> Iterator[dict[str, Any]]:
         """Finalize then chunk-emit (typing effect) — not true token streaming.
 
@@ -786,7 +820,7 @@ class ConversationalAgent:
         # Typing-effect chunks only — not live model tokens.
         for piece in _chunk_text(reply):
             yield {"type": "token", "text": piece}
-        yield self._done_event(reply, tool_calls)
+        yield self._done_event(reply, tool_calls, routed=routed)
 
     def _build_turn_trace(
         self,

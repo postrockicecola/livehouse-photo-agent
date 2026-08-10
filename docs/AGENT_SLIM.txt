@@ -14,7 +14,7 @@ RUNTIME MATRIX (who decides what)
   │ Control path     │ Model protocol             │ When                     │
   ├──────────────────┼────────────────────────────┼──────────────────────────┤
   │ intent_router    │ (no tool JSON round)       │ High-freq recipe asks    │
-  │ **langgraph**    │ **text {"tool","args"}**   │ Default fuzzy / semantic │
+  │ **langgraph**    │ **plan or {"tool","args"}**│ Semantic plan / fallback │
   │ langgraph        │ native tools[] (bridge)    │ LIVEHOUSE_AGENT_NATIVE_  │
   │                  │ multi → __multi__ serial/  │ TOOLS=auto (openai/vllm  │
   │                  │ parallel read-only         │ on; ollama off) or 1/0   │
@@ -27,7 +27,9 @@ RUNTIME MATRIX (who decides what)
   SSE ``token`` = typing-effect over finalized reply (buffer → {ref_N} resolve /
   groundedness template gate → chunk). Not true token-level model streaming.
   Final-answer cites: model emits {ref_N}; code substitutes metadata.files.
-  LangGraph: after file-bearing tools, answer() prefers lean PHOTO REFS prompt
+  LangGraph: START→plan→(execute_plan | decide→act)→answer. Structured semantic
+  selection goals use deterministic execute_plan and skip the model tool round.
+  After file-bearing tools, answer() prefers lean PHOTO REFS prompt
   (ignores decide-loop prose). No-file tools (echo/stats) still use direct_reply.
   answer() branches: ANSWER_BRANCH_CHECKLIST in conversation_graph.py — keep in
   sync with TestAnswerBranch* (@pytest.mark.requires_langgraph). Missing
@@ -40,7 +42,9 @@ KEEP (default on)
 ==============================================================================
 
 Runtime
-  services/agent/conversation_graph.py Gallery chat decide→act→answer (compile-once)
+  services/agent/conversation_graph.py Gallery chat plan→execute/decide→answer
+                                      (compile-once)
+  services/agent/selection_planner.py  Structured semantic selection goals
   services/agent/conversation.py       ConversationalAgent entry
   services/agent/chat_backend.py
   services/agent/guardrails.py

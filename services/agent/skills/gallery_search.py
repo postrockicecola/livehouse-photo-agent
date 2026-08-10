@@ -120,6 +120,8 @@ class GallerySearchSkill:
         sort_by = str(filter_args.get("sort_by") or "overall")
         if sort_by not in _SORT_KEYS:
             sort_by = "overall"
+        ranking_weights = filter_args.get("ranking_weights")
+        selection_goal = filter_args.get("selection_goal")
         try:
             limit = int(filter_args.get("limit") or 20)
         except (TypeError, ValueError):
@@ -133,7 +135,12 @@ class GallerySearchSkill:
         if query and _style_intent(query) == "slow_shutter":
             return _search_slow_shutter(rows, base_dir=self._base_dir, limit=limit)
 
-        sort_label = sort_by
+        goal_style = (
+            str(selection_goal.get("style") or "")
+            if isinstance(selection_goal, dict)
+            else ""
+        )
+        sort_label = f"{goal_style} composite" if ranking_weights and goal_style else sort_by
         recipe = str(filter_args.get("recipe") or "custom")
         rationale = str(filter_args.get("rationale") or f"按 {sort_label} 排序")
         dedupe = bool(filter_args.get("dedupe_burst"))
@@ -175,6 +182,7 @@ class GallerySearchSkill:
                 clip_sims=clip_sims,
                 pool_files=pool_files,
                 sort_by=sort_by,
+                ranking_weights=ranking_weights,
                 min_sim=_SEMANTIC_MIN_SIM,
             )
             if filtered:
@@ -215,6 +223,7 @@ class GallerySearchSkill:
                 r,
                 sort_by=sort_by,
                 recipe=recipe,
+                ranking_weights=ranking_weights,
                 clip_sim=clip_sim,
                 matched_terms=matched or None,
             )
@@ -244,6 +253,10 @@ class GallerySearchSkill:
             "pick_reasons": pick_reasons,
             "retrieval": retrieval,
         }
+        if isinstance(selection_goal, dict):
+            meta["selection_goal"] = selection_goal
+        if isinstance(ranking_weights, dict):
+            meta["ranking_weights"] = ranking_weights
         if clip_meta.get("attempted"):
             meta["semantic_hybrid" if retrieval == "hybrid" else "semantic_fallback"] = clip_meta
         if not filtered:
