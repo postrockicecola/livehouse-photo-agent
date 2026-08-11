@@ -20,6 +20,7 @@ web/next_dev.log
 # Runtime / local data (do not commit)
 .runtime/
 runtime/
+.rag_index/
 *.db
 *.db-wal
 *.db-shm
@@ -93,6 +94,11 @@ data/bench/session_covers_sources.json
 
 # Markdown docs (currently messy; excluded from VCS. Use `git add -f <file>.md` to track specific ones)
 *.md
+!data/knowledge/platform_xiaohongshu.md
+!data/knowledge/platform_instagram.md
+!data/knowledge/studio_selection_sop.md
+!data/knowledge/livehouse_aesthetic_standard.md
+!data/knowledge/copyright_portrait_guideline.md
 
 # Private interview / resume notes — keep local only, never commit
 docs/interview_*

@@ -607,6 +607,10 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
     min_deliverable = args.get("min_deliverable")
     min_atmosphere = args.get("min_atmosphere")
     min_moment_peak = args.get("min_moment_peak")
+    min_exposure_control = args.get("min_exposure_control")
+    excluded_files = {
+        str(value).lower() for value in (args.get("exclude_files") or []) if str(value).strip()
+    }
     tag = str(args.get("tag") or "").strip().lower()
     query = str(args.get("query") or "").strip().lower()
     query_terms = _expand_query_terms(query) if query else []
@@ -628,10 +632,13 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
         deliverable = _dim(row, "deliverable_subject")
         atmosphere = _dim(row, "atmosphere_impact")
         moment = _dim(row, "moment_peak")
+        exposure = _dim(row, "exposure_control")
         cat = str(row.get("category") or "")
         cat_norm = _normalize_category(cat)
         blob = _text_blob(row)
 
+        if str(row.get("file") or "").lower() in excluded_files:
+            continue
         if min_score is not None and overall < float(min_score):
             continue
         if max_score is not None and overall > float(max_score):
@@ -654,6 +661,10 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
         if min_atmosphere is not None and atmosphere > 0 and atmosphere < float(min_atmosphere):
             continue
         if min_moment_peak is not None and moment > 0 and moment < float(min_moment_peak):
+            continue
+        if min_exposure_control is not None and exposure > 0 and exposure < float(
+            min_exposure_control
+        ):
             continue
         if category and cat_norm != category:
             continue

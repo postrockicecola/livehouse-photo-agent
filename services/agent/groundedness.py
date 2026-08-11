@@ -35,6 +35,7 @@ _GROUNDING_FAILURE_EMPTY = (
 
 _FILE_BEARING_TOOLS = frozenset(
     {
+        "archive_search",
         "gallery_search",
         "gallery_select",
         "explain_photo",

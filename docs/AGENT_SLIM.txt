@@ -60,6 +60,9 @@ Runtime
 
 Skills (product tools)
   services/agent/skills/gallery.py           thin façade / registry
+  services/agent/skills/archive_search.py    cross-session text + CLIP retrieval
+  services/agent/skills/knowledge_search.py  ACL-aware internal knowledge retrieval
+  services/agent/skills/experience.py        feedback store + owner-scoped Experience RAG
   services/agent/skills/gallery_common.py    search helpers + synonym/CLIP fallback
   services/agent/skills/gallery_search.py
   services/agent/skills/gallery_film.py
@@ -71,6 +74,8 @@ Skills (product tools)
   services/agent/skills/__init__.py
   data/agent/query_synonyms.jsonl
   data/agent/search_recipes.json
+  services/archive_photo_index.py            local archive manifest + CLIP vectors
+  services/knowledge_index.py                chunking + BM25/vector + ACL metadata
 
 Film recommend (P0 thin wedge — NOT a second orchestrator)
   services/film_recommend_service.py   analysis row → closed film_* + reason

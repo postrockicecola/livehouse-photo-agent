@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -27,7 +28,9 @@ from services.agent.guardrails import GuardrailEvent, Guardrails
 from services.agent.runner import AgentRunner, AgentSession, RunnerConfig
 from services.agent.skills import agent_workspace_root, safe_session_id
 from services.agent.skills.artifacts import sanitize_artifact_name
+from services.agent.skills.experience import register_experience_skills
 from services.agent.skills.gallery import gallery_registry
+from services.agent.skills.knowledge_search import KnowledgeSearchSkill
 from services.agent.skills.memory import register_memory_skills
 
 logger = logging.getLogger(__name__)
@@ -90,7 +93,8 @@ def _tool_catalog(registry) -> str:
 # ``services.agent.intent_router`` (code), not in SEMANTIC_HINTS.
 PROTOCOL_PROMPT = (
     "You are the Gallery copilot for a livehouse photography curation app. You help the "
-    "user search, select, grade, and export one shooting session's analyzed photos.\n\n"
+    "user search, select, grade, and export one shooting session's analyzed photos, and "
+    "search historical sessions through archive_search.\n\n"
     "TOOLS: to use a tool, reply with ONLY a single JSON object on its own:\n"
     '{"tool": "<tool_name>", "args": { ... }}\n'
     "You may call tools in sequence within one turn (e.g. gallery_search then "
@@ -115,10 +119,20 @@ SEMANTIC_HINTS = (
     "(tag/caption synonyms hybrid-merged with CLIP text→image, then score re-rank; "
     "慢门 uses RAW ExposureTime EXIF — never CLIP; cite metadata.files / why; "
     "say 已在预览页打开. gallery_select only if they want 初选/导出)\n"
+    "- 其它场次/历史照片/整个档案/去年拍的… → "
+    '{"tool":"archive_search","args":{"query":"<semantic subject/style>","limit":10,"mode":"hybrid"}} '
+    "(cross-session read-only retrieval; do not call gallery_select/export_selected on archive IDs)\n"
+    "- 平台规范/摄影手册/内部流程/公司知识… → "
+    '{"tool":"knowledge_search","args":{"query":"<paste the knowledge question>","limit":5,"mode":"hybrid"}} '
+    "(answer only from metadata.chunks and cite source_ref labels)\n"
     "- 最炸的吉他手 / 高潮+主体 → recipe (energy/peak) + query in the same gallery_search\n"
     "- energy 最高 → gallery_search with sort_by=\"energy\", limit=10\n"
     "- 技术高构图一般 → mark_score_gap\n"
     "- 记住我的偏好 / 以后少选剪影 → remember_preference(key, value)\n"
+    "- 对选片明确评价（太暗/太糊/没张力/这张很好）→ "
+    "record_selection_feedback with the referenced selection_history files, query, "
+    "accepted/rejected decision, and reason_code\n"
+    "- 想按我过去的取舍选 / 参考以前偏好 → retrieve_selection_experience\n"
     "- 最适合这张 / 自动推荐胶片感 / 帮我选胶片 → "
     '{"tool":"recommend_film_for_photo","args":{"prompt":"<paste the user message>"}} '
     "(uses analysis tags for the focus photo; pass file/focus_file when known. "
@@ -148,6 +162,22 @@ def _build_registry(mode: str, session_id: str, base_dir: str, *, owner: str):
     """Return ``(registry, system_prompt)`` for the gallery copilot."""
     _ = (mode, session_id)  # gallery-only today; mode kept for API compatibility
     reg = gallery_registry(base_dir)
+    knowledge_dir = (
+        os.environ.get("LIVEHOUSE_KNOWLEDGE_DIR")
+        or str(Path(__file__).resolve().parents[1] / "data" / "knowledge")
+    )
+    reg.register(
+        KnowledgeSearchSkill(
+            knowledge_dir,
+            owner=owner,
+            tenant=os.environ.get("LIVEHOUSE_AGENT_TENANT") or "default",
+        )
+    )
+    register_experience_skills(
+        reg,
+        owner=owner,
+        tenant=os.environ.get("LIVEHOUSE_AGENT_TENANT") or "default",
+    )
     register_memory_skills(
         reg,
         owner=owner,
@@ -410,6 +440,7 @@ def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
             base_dir=base_dir,
             conversation_id=conv_id,
             memory=memory,
+            tenant=os.environ.get("LIVEHOUSE_AGENT_TENANT") or "default",
             working_memory=working,
             turn_context=turn_context,
         ),
@@ -479,6 +510,7 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
             base_dir=base_dir,
             conversation_id=conv_id,
             memory=memory,
+            tenant=os.environ.get("LIVEHOUSE_AGENT_TENANT") or "default",
             working_memory=working,
             turn_context=turn_context,
         ),

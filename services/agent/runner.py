@@ -17,6 +17,7 @@ from services.agent.conversation import (
 )
 from services.agent.guardrails import Guardrails
 from services.agent.skills.base import SkillRegistry
+from services.agent.skills.experience import RetrieveSelectionExperienceSkill
 
 
 @dataclass
@@ -29,6 +30,7 @@ class AgentSession:
     base_dir: str
     conversation_id: int
     memory: ConversationMemory
+    tenant: str = "default"
     working_memory: dict[str, Any] = field(default_factory=dict)
     turn_context: dict[str, Any] = field(default_factory=dict)
 
@@ -57,6 +59,26 @@ class AgentRunner:
         cfg = config or RunnerConfig()
         ctx = dict(session.turn_context or {})
         ctx.setdefault("base_dir", session.base_dir)
+        experience_skill = RetrieveSelectionExperienceSkill(
+            owner=session.owner,
+            tenant=session.tenant,
+        )
+
+        def _load_selection_experiences(
+            goal: dict[str, Any],
+            user_text: str,
+        ) -> list[dict[str, Any]]:
+            result = experience_skill.run(
+                {
+                    "query": user_text,
+                    "subject": goal.get("subject"),
+                    "style": goal.get("style"),
+                    "platform": goal.get("platform"),
+                    "limit": 5,
+                }
+            )
+            return list((result.metadata or {}).get("experiences") or []) if result.ok else []
+
         self.agent = ConversationalAgent(
             chat_fn,
             memory=session.memory,
@@ -66,6 +88,7 @@ class AgentRunner:
             max_tool_rounds=cfg.max_tool_rounds,
             working_memory=session.working_memory,
             turn_context=ctx,
+            selection_experience_loader=_load_selection_experiences,
         )
 
     def chat(self, message: str) -> TurnResult:

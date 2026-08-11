@@ -107,11 +107,16 @@ def _ranking(
             precision_sum += relevant_seen / rank
     ap_denom = min(len(relevant), max(1, int(k)))
     average_precision = precision_sum / ap_denom if ap_denom else 1.0
+    reciprocal_rank = next(
+        (1.0 / rank for rank, image in enumerate(top, start=1) if image in relevant),
+        0.0,
+    )
     return {
         "precision_at_k": round(precision, 4),
         "recall_at_k": round(recall, 4),
         "ndcg": round(dcg / idcg, 4) if idcg else None,
         "average_precision": round(average_precision, 4),
+        "reciprocal_rank": round(reciprocal_rank, 4),
     }
 
 
@@ -465,6 +470,7 @@ def aggregate(results: list[dict[str, Any]]) -> dict[str, Any]:
         "recall_at_k": _mean([float(row["recall_at_k"]) for row in quality_rows]),
         "ndcg": _mean([float(row["ndcg"]) for row in quality_rows if row.get("ndcg") is not None]),
         "map": _mean([float(row["average_precision"]) for row in quality_rows]),
+        "mrr": _mean([float(row["reciprocal_rank"]) for row in quality_rows]),
         "spearman": _mean(
             [float(row["spearman"]) for row in quality_rows if row.get("spearman") is not None]
         ),

@@ -114,6 +114,11 @@ def compress_working_memory(
     )
     if isinstance(files, list):
         out["last_files"] = [str(f) for f in files[:max_files] if str(f).strip()]
+    archive_hits = working.get("last_archive_hits") or []
+    if isinstance(archive_hits, list) and archive_hits:
+        out["last_archive_hits"] = [
+            str(f) for f in archive_hits[:DEFAULT_SELECTION_HISTORY_PROMPT_FILES] if str(f).strip()
+        ]
     if history:
         out["selection_history"] = history
         out["active_selection_id"] = active_selection_id
@@ -131,7 +136,7 @@ def compress_working_memory(
                 }
             )
         out["last_citations"] = slim
-    for key in ("last_tool", "last_query"):
+    for key in ("last_tool", "last_query", "last_archive_query"):
         if working.get(key) is not None:
             out[key] = working[key]
     return out
@@ -187,6 +192,14 @@ def working_memory_prompt_block(working: dict[str, Any]) -> str:
         lines.append(f"- last_tool: {compact['last_tool']}")
     if files:
         lines.append(f"- last_files ({len(files)}): {', '.join(files)}")
+    archive_hits = compact.get("last_archive_hits") or []
+    if compact.get("last_archive_query"):
+        lines.append(f"- last_archive_query: {compact['last_archive_query']}")
+    if archive_hits:
+        lines.append(
+            f"- last_archive_hits ({len(archive_hits)}; not current-session selections): "
+            + ", ".join(str(f) for f in archive_hits)
+        )
     cites = compact.get("last_citations") or []
     for c in cites[:5]:
         lines.append(f"- cite {c.get('file')}: {c.get('caption')}")

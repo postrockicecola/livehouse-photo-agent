@@ -62,6 +62,23 @@ CREATE TABLE IF NOT EXISTS agent_events (
     created_at      REAL NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_agent_events_conv ON agent_events(conversation_id, id);
+CREATE TABLE IF NOT EXISTS selection_experiences (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner        TEXT NOT NULL,
+    tenant       TEXT NOT NULL,
+    selection_id TEXT,
+    query        TEXT NOT NULL,
+    subject      TEXT,
+    style        TEXT,
+    platform     TEXT,
+    decision     TEXT NOT NULL,
+    reason_code  TEXT,
+    feedback     TEXT NOT NULL,
+    files_json   TEXT NOT NULL,
+    created_at   REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_selection_experiences_owner
+ON selection_experiences(owner, tenant, created_at DESC);
 """
 
 _SCHEMA_LOCK = threading.Lock()
@@ -171,6 +188,95 @@ def reset_conversation(conn: sqlite3.Connection, owner: str, session_id: str, mo
             (time.time(), cid),
         )
         conn.commit()
+
+
+def add_selection_experience(
+    conn: sqlite3.Connection,
+    *,
+    owner: str,
+    tenant: str,
+    query: str,
+    feedback: str,
+    decision: str,
+    files: list[str],
+    selection_id: str = "",
+    subject: str = "",
+    style: str = "",
+    platform: str = "",
+    reason_code: str = "",
+) -> int:
+    """Persist one owner-scoped selection decision for Experience RAG."""
+    import json
+
+    cur = conn.execute(
+        """
+        INSERT INTO selection_experiences(
+          owner, tenant, selection_id, query, subject, style, platform,
+          decision, reason_code, feedback, files_json, created_at
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            owner,
+            tenant or "default",
+            selection_id or None,
+            query,
+            subject or None,
+            style or None,
+            platform or None,
+            decision,
+            reason_code or None,
+            feedback,
+            json.dumps(files, ensure_ascii=False),
+            time.time(),
+        ),
+    )
+    conn.commit()
+    return int(cur.lastrowid)
+
+
+def list_selection_experiences(
+    conn: sqlite3.Connection,
+    *,
+    owner: str,
+    tenant: str,
+    limit: int = 200,
+) -> list[dict[str, Any]]:
+    """Return recent experiences visible to exactly one owner/tenant."""
+    import json
+
+    rows = conn.execute(
+        """
+        SELECT id, selection_id, query, subject, style, platform, decision,
+               reason_code, feedback, files_json, created_at
+        FROM selection_experiences
+        WHERE owner=? AND tenant=?
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        (owner, tenant or "default", max(1, min(1000, int(limit)))),
+    ).fetchall()
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            files = json.loads(row["files_json"] or "[]")
+        except (TypeError, json.JSONDecodeError):
+            files = []
+        out.append(
+            {
+                "id": int(row["id"]),
+                "selection_id": str(row["selection_id"] or ""),
+                "query": str(row["query"] or ""),
+                "subject": str(row["subject"] or ""),
+                "style": str(row["style"] or ""),
+                "platform": str(row["platform"] or ""),
+                "decision": str(row["decision"] or ""),
+                "reason_code": str(row["reason_code"] or ""),
+                "feedback": str(row["feedback"] or ""),
+                "files": [str(value) for value in files] if isinstance(files, list) else [],
+                "created_at": float(row["created_at"] or 0.0),
+            }
+        )
+    return out
 
 
 def get_working_memory(conn: sqlite3.Connection, conversation_id: int) -> dict[str, Any]:

@@ -4,11 +4,15 @@ from __future__ import annotations
 from typing import Any
 
 _ACTION_PURPOSES = {
+    "archive_search": "Retrieve candidates from archived photo sessions.",
     "gallery_search": "Retrieve candidates that satisfy the user request.",
     "gallery_select": "Persist candidates as the current Gallery selection.",
     "gallery_stats": "Read aggregate statistics for the current photo session.",
     "gallery_export": "Export the already selected photo set.",
     "remember_preference": "Persist an explicit user preference for later turns.",
+    "knowledge_search": "Retrieve ACL-filtered evidence from internal documents.",
+    "record_selection_feedback": "Persist an explicit selection decision as experience.",
+    "retrieve_selection_experience": "Retrieve similar owner-scoped selection feedback.",
 }
 
 

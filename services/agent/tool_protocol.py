@@ -31,10 +31,13 @@ MULTI_TOOL = "__multi__"
 # Read-only skills safe to run concurrently inside a multi batch.
 READ_ONLY_TOOLS = frozenset(
     {
+        "archive_search",
         "gallery_search",
         "gallery_stats",
+        "knowledge_search",
         "explain_photo",
         "list_preferences",
+        "retrieve_selection_experience",
     }
 )
 

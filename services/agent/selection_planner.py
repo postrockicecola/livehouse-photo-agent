@@ -111,3 +111,47 @@ def compile_selection_goal(goal: SelectionGoal) -> dict[str, Any]:
         args["query"] = goal.subject
     args["selection_goal"] = goal.to_dict()
     return args
+
+
+def apply_selection_experiences(
+    args: dict[str, Any],
+    experiences: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Compile retrieved rejection reasons into deterministic search constraints."""
+    if not experiences:
+        return args
+    out = dict(args)
+    reasons = {
+        str(item.get("reason_code") or "")
+        for item in experiences
+        if str(item.get("decision") or "") == "rejected"
+    }
+    rejected_files = {
+        str(file)
+        for item in experiences
+        if str(item.get("decision") or "") == "rejected"
+        for file in (item.get("files") or [])
+        if str(file).strip()
+    }
+    if "too_dark" in reasons:
+        out["min_exposure_control"] = max(float(out.get("min_exposure_control") or 0), 6.0)
+    if "blurry" in reasons:
+        out["min_technical"] = max(float(out.get("min_technical") or 0), 6.0)
+        out["exclude_low_quality"] = True
+    if "weak_moment" in reasons:
+        out["min_moment_peak"] = max(float(out.get("min_moment_peak") or 0), 6.0)
+    if "poor_subject" in reasons:
+        out["min_deliverable"] = max(float(out.get("min_deliverable") or 0), 6.0)
+    if rejected_files:
+        existing = {str(value) for value in (out.get("exclude_files") or [])}
+        out["exclude_files"] = sorted(existing | rejected_files)
+    out["experience_context"] = [
+        {
+            "experience_id": item.get("experience_id") or item.get("id"),
+            "decision": item.get("decision"),
+            "reason_code": item.get("reason_code"),
+            "feedback": item.get("feedback"),
+        }
+        for item in experiences[:5]
+    ]
+    return out

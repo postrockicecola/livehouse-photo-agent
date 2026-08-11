@@ -42,6 +42,7 @@ from services.agent.groundedness import (
 )
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, RoutedCall, route_gallery_intent
+from services.agent.selection_planner import apply_selection_experiences
 from services.agent.skills.base import SkillRegistry
 from services.agent.tool_protocol import (
     looks_like_tool_intent,
@@ -60,6 +61,7 @@ StreamChatFn = Callable[[list[dict[str, str]]], Iterator[str]]
 Summarizer = Callable[[list["Message"]], str]
 # Optional observability hook: one structured event per tool / turn boundary.
 TurnHook = Callable[[dict[str, Any]], None]
+SelectionExperienceLoader = Callable[[dict[str, Any], str], list[dict[str, Any]]]
 
 
 class SelectionRecord(TypedDict):
@@ -254,6 +256,7 @@ class ConversationalAgent:
         turn_hook: Optional[TurnHook] = None,
         working_memory: Optional[dict[str, Any]] = None,
         turn_context: Optional[dict[str, Any]] = None,
+        selection_experience_loader: Optional[SelectionExperienceLoader] = None,
     ) -> None:
         self._chat = chat_fn
         self.memory = memory or ConversationMemory()
@@ -270,6 +273,7 @@ class ConversationalAgent:
         self.working_memory: dict[str, Any] = compress_working_memory(working_memory or {})
         # Per-request UI focus (focus_file / selected_files) — not persisted.
         self._turn_context: dict[str, Any] = dict(turn_context or {})
+        self._selection_experience_loader = selection_experience_loader
         self._events: list[dict[str, Any]] = []
         self.last_backend: str = "langgraph"
         self.last_trace: dict[str, Any] = {}
@@ -418,13 +422,17 @@ class ConversationalAgent:
         meta = getattr(result, "metadata", None) or {}
         self.working_memory["last_tool"] = name
         if args.get("query") is not None:
-            self.working_memory["last_query"] = args.get("query")
+            query_key = "last_archive_query" if name == "archive_search" else "last_query"
+            self.working_memory[query_key] = args.get("query")
         # Prefer explicit result files; gallery_select exposes selected_keys instead.
         files = meta.get("files") or meta.get("selected_keys") or args.get("files")
         if files:
             normalized_files = [str(f) for f in files if str(f or "").strip()]
-            self.working_memory["last_files"] = normalized_files
-            self._update_selection_history(name, args, normalized_files)
+            if name == "archive_search":
+                self.working_memory["last_archive_hits"] = normalized_files
+            else:
+                self.working_memory["last_files"] = normalized_files
+                self._update_selection_history(name, args, normalized_files)
         if meta.get("citations"):
             self.working_memory["last_citations"] = list(meta.get("citations") or [])
         self.working_memory = compress_working_memory(self.working_memory)
@@ -561,11 +569,27 @@ class ConversationalAgent:
         payload: dict[str, Any],
     ) -> tuple[list[dict[str, Any]], list[str]]:
         """Rehydrate a serializable plan-state route and execute it."""
-        calls = [
-            RoutedCall(str(call.get("tool") or ""), dict(call.get("args") or {}))
-            for call in (payload.get("calls") or [])
-            if isinstance(call, dict) and str(call.get("tool") or "").strip()
-        ]
+        calls: list[RoutedCall] = []
+        for call in (payload.get("calls") or []):
+            if not isinstance(call, dict) or not str(call.get("tool") or "").strip():
+                continue
+            tool = str(call.get("tool") or "")
+            args = dict(call.get("args") or {})
+            goal = args.get("selection_goal")
+            if (
+                tool == "gallery_search"
+                and isinstance(goal, dict)
+                and self._selection_experience_loader is not None
+            ):
+                lookup_text = " ".join(
+                    str(goal.get(key) or "") for key in ("subject", "style", "platform")
+                ).strip()
+                try:
+                    experiences = self._selection_experience_loader(goal, lookup_text)
+                except Exception:
+                    experiences = []
+                args = apply_selection_experiences(args, experiences)
+            calls.append(RoutedCall(tool, args))
         match = RouteMatch(
             rule_id=str(payload.get("rule_id") or "planned"),
             calls=calls,

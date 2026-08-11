@@ -151,6 +151,15 @@ class GallerySearchSkill:
         structural["_sort_by"] = sort_by
         pool = _filter_rows(rows, structural)
         pool_files = {str(r.get("file") or "") for r in pool if str(r.get("file") or "").strip()}
+        fail_closed_pool = bool(
+            structural.get("exclude_low_quality")
+            or structural.get("exclude_files")
+            or structural.get("min_exposure_control") is not None
+            or structural.get("min_technical") is not None
+            or structural.get("min_moment_peak") is not None
+            or structural.get("min_deliverable") is not None
+        )
+        retrieval_pool = pool if (pool or fail_closed_pool) else rows
 
         text_hits: list[dict[str, Any]] = []
         text_scores: dict[str, int] = {}
@@ -167,16 +176,15 @@ class GallerySearchSkill:
         retrieval = "text" if query else "recipe"
 
         if query and semantic_hybrid_enabled():
-            clip_pool = pool if pool else rows
             _ranked, clip_sims, clip_meta = clip_rank_rows(
-                clip_pool,
+                retrieval_pool,
                 base_dir=self._base_dir,
                 query=query,
                 top_k=max(limit * 4, 32),
                 min_sim=0.0,
             )
             filtered = hybrid_merge_rows(
-                rows=rows,
+                rows=pool if fail_closed_pool else rows,
                 text_hits=text_hits,
                 text_scores=text_scores,
                 clip_sims=clip_sims,
@@ -197,7 +205,7 @@ class GallerySearchSkill:
             filtered = list(text_hits)
             if not filtered:
                 clip_rows, clip_meta = semantic_fallback_rows(
-                    pool if pool else rows,
+                    retrieval_pool,
                     base_dir=self._base_dir,
                     query=query,
                     limit=limit,
