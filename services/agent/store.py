@@ -190,7 +190,11 @@ def get_working_memory(conn: sqlite3.Connection, conversation_id: int) -> dict[s
         data = json.loads(raw)
     except (TypeError, json.JSONDecodeError):
         return {}
-    return data if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        return {}
+    from services.agent.context_governance import compress_working_memory
+
+    return compress_working_memory(data)
 
 
 def set_working_memory(
@@ -216,7 +220,9 @@ def working_memory_from_events(events: list[dict[str, Any]]) -> dict[str, Any]:
 
     for ev in reversed(events or []):
         wm = ev.get("working_memory")
-        if isinstance(wm, dict) and (wm.get("last_files") or wm.get("last_tool")):
+        if isinstance(wm, dict) and (
+            wm.get("selection_history") or wm.get("last_files") or wm.get("last_tool")
+        ):
             return compress_working_memory(wm)
         if str(ev.get("type") or "") != "tool_call" and "tool" not in ev:
             continue

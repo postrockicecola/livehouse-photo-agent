@@ -21,7 +21,8 @@ import json
 import logging
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterator, Optional
+from datetime import datetime, timezone
+from typing import Any, Callable, Iterator, Optional, TypedDict
 
 from services.agent.context_governance import (
     DEFAULT_TOOL_RESULT_CHARS,
@@ -59,6 +60,14 @@ StreamChatFn = Callable[[list[dict[str, str]]], Iterator[str]]
 Summarizer = Callable[[list["Message"]], str]
 # Optional observability hook: one structured event per tool / turn boundary.
 TurnHook = Callable[[dict[str, Any]], None]
+
+
+class SelectionRecord(TypedDict):
+    turn_id: int
+    selection_id: str
+    query: str
+    files: list[str]
+    created_at: str
 
 
 def approx_tokens(text: str) -> int:
@@ -258,7 +267,7 @@ class ConversationalAgent:
         self._max_tool_result_chars = max(512, int(max_tool_result_chars))
         self._turn_hook = turn_hook
         # Working memory: last tool artifacts for the current dialogue (not durable prefs).
-        self.working_memory: dict[str, Any] = dict(working_memory or {})
+        self.working_memory: dict[str, Any] = compress_working_memory(working_memory or {})
         # Per-request UI focus (focus_file / selected_files) — not persisted.
         self._turn_context: dict[str, Any] = dict(turn_context or {})
         self._events: list[dict[str, Any]] = []
@@ -271,6 +280,7 @@ class ConversationalAgent:
         self._run_id: str = ""
         self._grounding_rewrite_mode: str = "none"
         self._turn_user_text: str = ""
+        self._selection_recorded_this_turn: Optional[str] = None
         self._bind_focus_vision()
 
     def _bind_focus_vision(self) -> None:
@@ -331,6 +341,7 @@ class ConversationalAgent:
         self._run_id = uuid.uuid4().hex
         self._grounding_rewrite_mode = "none"
         self._turn_user_text = ""
+        self._selection_recorded_this_turn = None
 
     def _parse_tool_call_repaired(self, raw: str) -> Optional[dict[str, Any]]:
         """Parse tool JSON; one repair completion when output looks tool-ish but invalid."""
@@ -357,6 +368,52 @@ class ConversationalAgent:
         except Exception:
             logger.exception("conversation turn_hook failed")
 
+    def _update_selection_history(
+        self,
+        name: str,
+        args: dict[str, Any],
+        files: list[str],
+    ) -> None:
+        if name not in {"gallery_search", "gallery_select"} or not files:
+            return
+        history = [
+            dict(row)
+            for row in (self.working_memory.get("selection_history") or [])
+            if isinstance(row, dict)
+        ]
+        current_id = self._selection_recorded_this_turn
+        if current_id:
+            for row in history:
+                if str(row.get("selection_id") or "") != current_id:
+                    continue
+                row["files"] = list(files)
+                if args.get("query") is not None:
+                    row["query"] = str(args.get("query") or "")
+                self.working_memory["selection_history"] = history
+                self.working_memory["active_selection_id"] = current_id
+                return
+
+        turn_id = max(
+            (
+                int(row.get("turn_id") or 0)
+                for row in history
+                if str(row.get("turn_id") or "").isdigit()
+            ),
+            default=0,
+        ) + 1
+        selection_id = f"sel_{turn_id:03d}"
+        record: SelectionRecord = {
+            "turn_id": turn_id,
+            "selection_id": selection_id,
+            "query": str(args.get("query") or self.working_memory.get("last_query") or ""),
+            "files": list(files),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        history.append(record)
+        self.working_memory["selection_history"] = history
+        self.working_memory["active_selection_id"] = selection_id
+        self._selection_recorded_this_turn = selection_id
+
     def _update_working_memory(self, name: str, args: dict[str, Any], result) -> None:
         meta = getattr(result, "metadata", None) or {}
         self.working_memory["last_tool"] = name
@@ -365,7 +422,9 @@ class ConversationalAgent:
         # Prefer explicit result files; gallery_select exposes selected_keys instead.
         files = meta.get("files") or meta.get("selected_keys") or args.get("files")
         if files:
-            self.working_memory["last_files"] = list(files)
+            normalized_files = [str(f) for f in files if str(f or "").strip()]
+            self.working_memory["last_files"] = normalized_files
+            self._update_selection_history(name, args, normalized_files)
         if meta.get("citations"):
             self.working_memory["last_citations"] = list(meta.get("citations") or [])
         self.working_memory = compress_working_memory(self.working_memory)
