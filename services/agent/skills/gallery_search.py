@@ -21,10 +21,12 @@ from services.agent.skills.gallery_common import (
     _query_hit_score,
     _record,
     _search_slow_shutter,
+    _semantic_gate_allows_auto_select,
     _style_intent,
     _text_blob,
     clip_rank_rows,
     hybrid_merge_rows,
+    query_requires_text_grounding,
     semantic_fallback_rows,
     semantic_hybrid_enabled,
 )
@@ -143,7 +145,11 @@ class GallerySearchSkill:
         sort_label = f"{goal_style} composite" if ranking_weights and goal_style else sort_by
         recipe = str(filter_args.get("recipe") or "custom")
         rationale = str(filter_args.get("rationale") or f"按 {sort_label} 排序")
-        dedupe = bool(filter_args.get("dedupe_burst"))
+        raw_dedupe = filter_args.get("dedupe_burst")
+        # Free-text agent searches should return visual choices, not adjacent burst frames.
+        # Model-facing calls commonly provide only ``query`` + ``limit`` (no recipe), so
+        # default those searches to dedupe while preserving an explicit router override.
+        dedupe = bool(raw_dedupe) if raw_dedupe is not None else bool(query)
 
         # Aesthetic / category gates without the free-text clause.
         structural = dict(filter_args)
@@ -192,6 +198,9 @@ class GallerySearchSkill:
                 sort_by=sort_by,
                 ranking_weights=ranking_weights,
                 min_sim=_SEMANTIC_MIN_SIM,
+                allow_clip_only=(
+                    not query_requires_text_grounding(query) or not text_hits
+                ),
             )
             if filtered:
                 retrieval = "hybrid" if text_hits and clip_sims else ("clip" if clip_sims else "text")
@@ -218,7 +227,9 @@ class GallerySearchSkill:
         else:
             filtered = list(pool)
 
+        count_before_dedupe = len(filtered)
         filtered = _maybe_dedupe(filtered, self._base_dir, dedupe)
+        dedupe_removed_count = count_before_dedupe - len(filtered)
 
         top_rows = filtered[:limit]
         top = []
@@ -260,6 +271,8 @@ class GallerySearchSkill:
             "sort_by": sort_label,
             "pick_reasons": pick_reasons,
             "retrieval": retrieval,
+            "dedupe_burst": dedupe,
+            "dedupe_removed_count": dedupe_removed_count,
         }
         if isinstance(selection_goal, dict):
             meta["selection_goal"] = selection_goal
@@ -447,22 +460,50 @@ class GallerySelectSkill:
         if not files:
             return SkillResult(ok=False, error="'files' must be a non-empty list of basenames")
 
-        known = {str(r.get("file") or "") for r in _load_rows(self._base_dir)}
-        valid = [f for f in files if f in known]
+        rows_by_file = {
+            str(row.get("file") or ""): row for row in _load_rows(self._base_dir)
+        }
+        known = set(rows_by_file)
+        valid = [
+            file_id
+            for file_id in files
+            if file_id in known
+            and _semantic_gate_allows_auto_select(rows_by_file[file_id])
+        ]
         missing = [f for f in files if f not in known]
+        blocked = [
+            file_id
+            for file_id in files
+            if file_id in known
+            and not _semantic_gate_allows_auto_select(rows_by_file[file_id])
+        ]
         if not valid:
-            return SkillResult(ok=False, error="none of the files exist in this session", metadata={"missing": missing})
+            return SkillResult(
+                ok=False,
+                error="没有通过 Stage 3 语义门禁的照片可进入自动精选",
+                metadata={"missing": missing, "semantic_gate_blocked": blocked},
+            )
 
         replace = True if args.get("replace") is None else bool(args.get("replace"))
         existing = read_gallery_curation(self._base_dir) or {}
-        prev_keys = list(existing.get("selected_keys") or [])
+        prev_keys = [
+            key
+            for key in (existing.get("selected_keys") or [])
+            if key in rows_by_file
+            and _semantic_gate_allows_auto_select(rows_by_file[key])
+        ]
         keys = valid if replace else list(dict.fromkeys([*prev_keys, *valid]))
 
         written = write_gallery_curation(self._base_dir, selected_keys=keys)
         if written is None:
             return SkillResult(ok=False, error="failed to write gallery_curation.json")
 
-        summary = f"已选中 {len(keys)} 张作为初选" + (f"（忽略未知 {len(missing)} 个文件名）" if missing else "") + "。"
+        ignored = len(missing) + len(blocked)
+        summary = f"已选中 {len(keys)} 张作为初选" + (
+            f"（忽略 {ignored} 张未知或未通过语义门禁的照片）"
+            if ignored
+            else ""
+        ) + "。"
         return SkillResult(
             ok=True,
             output=summary,
@@ -471,6 +512,7 @@ class GallerySelectSkill:
                 "files": keys,
                 "count": len(keys),
                 "missing": missing,
+                "semantic_gate_blocked": blocked,
                 "ui_action": "reload_curation",
             },
         )

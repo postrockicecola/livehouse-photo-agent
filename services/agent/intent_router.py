@@ -23,6 +23,7 @@ from services.agent.selection_planner import compile_selection_goal, plan_select
 _COUNT_PREFIX = r"(?:选出|挑选|找|找出|给我|帮我(?:找|挑选|选)?|筛选|选)"
 
 _LIMIT_RE = re.compile(rf"(?:{_COUNT_PREFIX})?.{{0,24}}?(\d{{1,3}})\s*张")
+_COUNT_TOKEN_RE = re.compile(r"\d{1,3}\s*张")
 # Bare / filler-tolerant select: 选出10张 / 挑选10张 / 选出最炸的10张 / 初选 / 交片
 _SELECT_SHORTLIST_RE = re.compile(
     rf"(?:{_COUNT_PREFIX}.{{0,24}}?\d{{1,3}}\s*张|初选|交片)"
@@ -47,7 +48,9 @@ _NEGATION_RE = re.compile(r"(不要|别|不用|无需|不需要)")
 _CONTRAST_SEMANTIC_RE = re.compile(
     r"(?:但|不过|但是).*(?:全景|吉他|鼓手|贝斯|胶片|风格|逆光|前排|慢门|特写|歌手|舞台)"
 )
-_PICK_VERB_RE = re.compile(r"(选出|挑选|帮我选|帮我挑|找出|找|给我|初选|标出|交片)")
+_PICK_VERB_RE = re.compile(
+    r"(帮我(?:选出|找出|挑选|选|挑|找)|选出|挑选|找出|找|给我|初选|标出|交片)"
+)
 # Strip recipe / count / filler noise so leftover becomes gallery_search.query.
 _RESIDUE_NOISE_RE = re.compile(
     r"(帮我|请|给我|选出|挑选|找出|找|初选|标出|交片(?!级)|朋友圈|发朋友圈|社交媒体|"
@@ -154,14 +157,15 @@ def semantic_residue(user_text: str) -> str:
         return ""
     cleaned = text
     for pattern in (
-        _LIMIT_RE,
+        # Strip only the count token. ``_LIMIT_RE`` intentionally spans from a
+        # pick verb to ``N张`` and would erase semantic subjects in between.
+        _COUNT_TOKEN_RE,
         _ENERGY_RE,
         _PEAK_RE,
         _SOCIAL_RE,
         _QUALITY_RE,
         _DEDUPE_RE,
         _SORT_RE,
-        _SELECT_SHORTLIST_RE,
         _PICK_VERB_RE,
         _RESIDUE_NOISE_RE,
     ):

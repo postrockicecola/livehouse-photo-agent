@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 from services.agent.conversation import ConversationalAgent
+from services.agent.gallery_search_defaults import shortlist_search_args
+from services.agent.skills.gallery_common import _maybe_dedupe
 from services.agent.skills.gallery import (
     ApplyFilmVibeSkill,
     ExplainPhotoSkill,
@@ -35,6 +37,7 @@ def _sample_rows() -> list[dict]:
             "technical": 8.0,
             "composition": 9.5,
             "category": "AI_Best_90+",
+            "semantic_gate": {"status": "pass", "mode": "observe"},
             "tags": ["crowd", "stage-light", "guitar"],
             "reason": "Strong peak-action moment. 吉他手特写",
         },
@@ -46,6 +49,7 @@ def _sample_rows() -> list[dict]:
             "technical": 8.5,
             "composition": 5.0,
             "category": "AI_Keep_60-90",
+            "semantic_gate": {"status": "pass", "mode": "observe"},
             "tags": ["portrait"],
             "reason_bilingual": {"zh": "构图一般但很清晰", "en": "Sharp but flat framing"},
         },
@@ -57,6 +61,7 @@ def _sample_rows() -> list[dict]:
             "technical": 3.0,
             "composition": 4.5,
             "category": "AI_Trash_Below60",
+            "semantic_gate": {"status": "reject", "mode": "observe"},
             "tags": ["blurry", "crowd"],
             "reason": "Out of focus.",
         },
@@ -156,6 +161,7 @@ def test_search_social_recipe_prefers_deliverable(tmp_path: Path) -> None:
             "composition": 8.0,
             "dimensions": {"deliverable_subject": 5.0, "atmosphere_impact": 9.0, "moment_peak": 8.0},
             "category": "AI_Best_90+",
+            "semantic_gate": {"status": "reject", "mode": "observe"},
             "tags": ["crowd"],
             "reason": "chaotic pit",
         },
@@ -168,6 +174,7 @@ def test_search_social_recipe_prefers_deliverable(tmp_path: Path) -> None:
             "composition": 7.5,
             "dimensions": {"deliverable_subject": 8.5, "atmosphere_impact": 6.5, "moment_peak": 7.0},
             "category": "AI_Keep_60-90",
+            "semantic_gate": {"status": "pass", "mode": "observe"},
             "tags": ["portrait"],
             "reason": "readable face",
         },
@@ -196,9 +203,93 @@ def test_search_query_matches_caption_and_tags(tmp_path: Path) -> None:
     res = GallerySearchSkill(str(tmp_path)).run({"query": "吉他手"})
     assert res.ok is True
     assert [r["file"] for r in res.metadata["rows"]] == ["a_best.jpg"]
+    assert res.metadata["dedupe_burst"] is True
     assert "guitar" in " ".join(res.metadata.get("query_terms") or []) or "吉他" in " ".join(
         res.metadata.get("query_terms") or []
     )
+
+
+def test_search_allows_legacy_query_hits_without_semantic_gate(
+    tmp_path: Path,
+) -> None:
+    _write_results(
+        tmp_path,
+        [
+            {
+                "file": "legacy_guitarist.jpg",
+                "overall_score": 86.0,
+                "scores": {"overall": 86.0, "technical": 8.0},
+                "technical": 8.0,
+                "category": "AI_Keep_60-90",
+                "dimensions": {
+                    "focus_sharpness": 8.0,
+                    "exposure_control": 8.0,
+                    "noise_cleanliness": 8.0,
+                    "composition_framing": 8.0,
+                    "light_color_character": 8.0,
+                    "moment_peak": 8.0,
+                    "atmosphere_impact": 8.0,
+                    "deliverable_subject": 8.0,
+                },
+                "tags": ["吉他手", "弹琴"],
+                "reason": "吉他手正在演奏",
+            }
+        ],
+    )
+
+    result = GallerySearchSkill(str(tmp_path)).run(
+        {
+            **shortlist_search_args(limit=10),
+            "query": "找出吉他手弹琴的10张",
+        }
+    )
+
+    assert result.ok is True
+    assert result.metadata["files"] == ["legacy_guitarist.jpg"]
+
+
+def test_free_text_search_dedupes_burst_without_losing_relevance_order(
+    tmp_path: Path,
+) -> None:
+    rows = [
+        {
+            "file": "best_match.jpg",
+            "overall_score": 88.0,
+            "phash": 0b101010,
+            "tags": ["吉他手", "弹琴", "特写"],
+            "reason": "吉他手弹琴特写",
+        },
+        {
+            "file": "same_burst_higher_score.jpg",
+            "overall_score": 92.0,
+            "phash": 0b101011,
+            "tags": ["吉他手"],
+            "reason": "吉他手",
+        },
+        {
+            "file": "different_frame.jpg",
+            "overall_score": 84.0,
+            "phash": (1 << 63) - 1,
+            "tags": ["吉他手", "弹琴"],
+            "reason": "另一角度的吉他手弹琴",
+        },
+    ]
+    _write_results(tmp_path, rows)
+
+    result = GallerySearchSkill(str(tmp_path)).run(
+        {"query": "吉他手弹琴的特写", "limit": 10}
+    )
+
+    assert result.ok is True
+    assert [row["file"] for row in result.metadata["rows"]] == [
+        "same_burst_higher_score.jpg",
+        "different_frame.jpg",
+    ]
+    assert result.metadata["dedupe_burst"] is True
+    assert result.metadata["dedupe_removed_count"] == 1
+    assert [
+        row["file"] for row in _maybe_dedupe(rows, str(tmp_path), enabled=True)
+    ] == ["best_match.jpg", "different_frame.jpg"]
 
 
 def test_expand_query_includes_synonyms() -> None:
@@ -388,6 +479,25 @@ def test_search_exclude_low_quality(tmp_path: Path) -> None:
     assert "a_best.jpg" in files
 
 
+def test_default_shortlist_excludes_unvalidated_stage3_rows(tmp_path: Path) -> None:
+    rows = _sample_rows()
+    rows.append(
+        {
+            "file": "unvalidated_high.jpg",
+            "overall_score": 99.0,
+            "scores": {"overall": 99.0, "technical": 9.0},
+            "category": "AI_Best_90+",
+            "tags": ["peak moment"],
+        }
+    )
+    _write_results(tmp_path, rows)
+    res = GallerySearchSkill(str(tmp_path)).run(shortlist_search_args(limit=10))
+    assert res.ok is True
+    assert "unvalidated_high.jpg" not in {
+        row["file"] for row in res.metadata["rows"]
+    }
+
+
 def test_search_tag_and_category_filter(tmp_path: Path) -> None:
     _write_results(tmp_path, _sample_rows())
     res = GallerySearchSkill(str(tmp_path)).run({"tag": "crowd"})
@@ -503,6 +613,78 @@ def test_gallery_select_writes_curation(tmp_path: Path) -> None:
     assert data is not None
     assert set(data["selected_keys"]) == {"a_best.jpg", "b_keep.jpg"}
     assert cur_path.exists() or True  # path layout may vary; read API is SSOT
+
+
+def test_gallery_select_only_blocks_when_operational_gate_is_active(
+    tmp_path: Path,
+) -> None:
+    rows = _sample_rows()
+    rows[2]["semantic_gate"]["mode"] = "hard"
+    rows.append(
+        {
+            "file": "legacy_unvalidated.jpg",
+            "overall_score": 99.0,
+            "scores": {"overall": 99.0},
+            "category": "AI_Best_90+",
+        }
+    )
+    rows.append(
+        {
+            "file": "gate_disabled.jpg",
+            "overall_score": 88.0,
+            "scores": {"overall": 88.0},
+            "category": "AI_Keep_60-90",
+            "semantic_gate": {
+                "status": "disabled",
+                "mode": "off",
+                "is_present": True,
+                "types": ["heavy_occlusion"],
+                "severity": 3,
+                "confidence": 0.95,
+                "evidence": "Face is blocked.",
+            },
+        }
+    )
+    rows.append(
+        {
+            "file": "legacy_stage3_validated.jpg",
+            "overall_score": 87.0,
+            "scores": {"overall": 87.0},
+            "category": "AI_Keep_60-90",
+            "dimensions": {
+                "focus_sharpness": 8.0,
+                "exposure_control": 8.0,
+                "noise_cleanliness": 8.0,
+                "composition_framing": 8.0,
+                "light_color_character": 8.0,
+                "moment_peak": 8.0,
+                "atmosphere_impact": 8.0,
+                "deliverable_subject": 8.0,
+            },
+        }
+    )
+    _write_results(tmp_path, rows)
+    res = GallerySelectSkill(str(tmp_path)).run(
+        {
+            "files": [
+                "a_best.jpg",
+                "c_trash.jpg",
+                "legacy_unvalidated.jpg",
+                "gate_disabled.jpg",
+                "legacy_stage3_validated.jpg",
+            ]
+        }
+    )
+    assert res.ok is True
+    assert res.metadata["selected_keys"] == [
+        "a_best.jpg",
+        "gate_disabled.jpg",
+        "legacy_stage3_validated.jpg",
+    ]
+    assert set(res.metadata["semantic_gate_blocked"]) == {
+        "c_trash.jpg",
+        "legacy_unvalidated.jpg",
+    }
 
 
 def test_mark_score_gap_selects(tmp_path: Path) -> None:

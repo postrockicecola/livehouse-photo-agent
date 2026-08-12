@@ -92,7 +92,8 @@ def test_generate_success_via_mocked_http(monkeypatch):
     assert captured["url"] == "http://vllm:8000/v1/chat/completions"
     assert captured["headers"]["Authorization"] == "Bearer secret"
     content = captured["payload"]["messages"][0]["content"]
-    assert content[1]["image_url"]["url"].startswith("data:image/jpeg;base64,")
+    assert content[0]["image_url"]["url"].startswith("data:image/jpeg;base64,")
+    assert content[1]["text"] == "rate"
     assert captured["payload"]["max_tokens"] == 128
 
 
@@ -121,6 +122,41 @@ def test_generate_http_error_sets_status_code(monkeypatch):
     res = prov.generate(InferenceRequest(image_path="/nope.jpg", prompt="p"), model_name="m")
     assert res.status == "error"
     assert res.metadata.get("http_status") == 500
+
+
+def test_generate_retries_cloud_rate_limit(monkeypatch):
+    import requests
+
+    monkeypatch.setattr(
+        "engine.operators.image_processor.ImageProcessor.get_optimized_base64",
+        staticmethod(lambda *a, **k: "x"),
+    )
+    err = requests.HTTPError("429 Too Many Requests")
+    err.response = _FakeResponse(status_code=429)
+    calls = 0
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return _FakeResponse(raise_exc=err)
+        return _FakeResponse(
+            json_body={"choices": [{"message": {"content": "{}"}}]}
+        )
+
+    monkeypatch.setattr("inference.providers.vllm.requests.post", fake_post)
+    monkeypatch.setattr("inference.providers.vllm.time.sleep", lambda _: None)
+    prov = VLLMProvider(
+        endpoint="https://cloud.example/v1",
+        temperature=0.0,
+        num_predict=64,
+        timeout=10,
+        max_retries=1,
+        retry_delay=0.0,
+    )
+    res = prov.generate(InferenceRequest(image_path="/nope.jpg", prompt="p"), model_name="m")
+    assert res.status == "success"
+    assert calls == 2
 
 
 def test_client_routing_builds_vllm_provider():

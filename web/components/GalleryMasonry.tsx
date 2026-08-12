@@ -19,6 +19,7 @@ type Props = {
   preserveOrder?: boolean;
   onOpenLab: (item: GalleryItem) => void;
   selectedKeys: Set<string>;
+  agentHighlightedKeys?: Set<string>;
   onToggleSelect: (item: GalleryItem, checked: boolean) => void;
 };
 
@@ -122,6 +123,7 @@ export function GalleryMasonry({
   preserveOrder = false,
   onOpenLab,
   selectedKeys,
+  agentHighlightedKeys,
   onToggleSelect,
 }: Props) {
   const columnCount = useGalleryMasonryColumnCount();
@@ -179,6 +181,7 @@ export function GalleryMasonry({
     const itemKey = gallerySelectionKey(item, index) || `item-${index}`;
     const reactKey = stableItemKey(item, index);
     const checked = selectedKeys.has(itemKey);
+    const agentHighlighted = agentHighlightedKeys?.has(itemKey) ?? false;
     const score = Number(item.overall_score ?? 0);
     const measured = measuredByKey.get(reactKey) ?? null;
     const orient = displayOrientation(item, measured);
@@ -194,6 +197,7 @@ export function GalleryMasonry({
         className={[
           "gallery-item group/tile relative block w-full min-w-0 overflow-hidden rounded-[1px] leading-none",
           checked ? "is-selected" : "",
+          agentHighlighted ? "is-agent-highlighted" : "",
         ].join(" ")}
       >
         <button

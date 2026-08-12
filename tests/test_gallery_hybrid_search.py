@@ -25,6 +25,7 @@ def _row(file: str, *, overall: float, atmosphere: float = 0.0, tags: list[str] 
         "composition": 7.0,
         "atmosphere_impact": atmosphere,
         "category": "keep",
+        "semantic_gate": {"status": "pass", "mode": "observe"},
         "tags": tags or [],
         "reason": "ok",
     }
@@ -53,6 +54,24 @@ def test_hybrid_merge_prefers_text_hit_then_clip_and_scores() -> None:
     assert files[0] == "a.jpg"
     assert "c.jpg" in files
     assert "b.jpg" not in files
+
+
+def test_hybrid_merge_blocks_clip_only_for_concrete_subject_query() -> None:
+    rows = [
+        _row("guitar.jpg", overall=82, tags=["guitarist"]),
+        _row("confetti.jpg", overall=90, tags=["confetti", "singer"]),
+    ]
+    merged = hybrid_merge_rows(
+        rows=rows,
+        text_hits=[rows[0]],
+        text_scores={"guitar.jpg": 3},
+        clip_sims={"guitar.jpg": 0.35, "confetti.jpg": 0.48},
+        pool_files={"guitar.jpg", "confetti.jpg"},
+        sort_by="overall",
+        min_sim=0.22,
+        allow_clip_only=False,
+    )
+    assert [row["file"] for row in merged] == ["guitar.jpg"]
 
 
 def test_pick_why_includes_clip_and_matched_terms() -> None:
@@ -100,6 +119,7 @@ def test_gallery_search_hybrid_path_with_mocked_clip(tmp_path, monkeypatch) -> N
     assert result.ok
     assert result.metadata.get("retrieval") in ("hybrid", "text", "clip")
     assert "hit.jpg" in (result.metadata.get("files") or [])
+    assert "miss.jpg" not in (result.metadata.get("files") or [])
     why_map = {p["file"]: p["why"] for p in result.metadata.get("pick_reasons") or []}
     assert "hit.jpg" in why_map
     assert "clip" in why_map["hit.jpg"] or "match" in why_map["hit.jpg"]

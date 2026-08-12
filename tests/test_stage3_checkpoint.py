@@ -101,6 +101,43 @@ def test_done_names_last_row_wins_after_successful_retry(tmp_path: Path):
     assert _runner(src)._audit_logged_image_names() == {"a.jpg"}
 
 
+def test_route_b_checkpoint_requires_matching_cloud_provenance(tmp_path: Path):
+    src = _layout(tmp_path)
+    runner = _runner(src)
+    runner._pipe.config["stage3"] = {
+        "route_b": {
+            "enabled": True,
+            "provider": "openai",
+            "model_name": "qwen3-vl-plus",
+        }
+    }
+    matching = {
+        **_scored("cloud.jpg"),
+        "semantic_gate": {"status": "pass"},
+        "stage3_meta": {
+            "provider": "openai",
+            "model": "qwen3-vl-plus",
+            "outcome": "success",
+        },
+    }
+    stale_local = {
+        **_scored("local.jpg"),
+        "semantic_gate": {"status": "pass"},
+        "stage3_meta": {"provider": "ollama", "model": "qwen2.5vl:7b"},
+    }
+    degraded = {
+        **_scored("degraded.jpg"),
+        "semantic_gate": {"status": "reject"},
+        "stage3_meta": {
+            "provider": "openai",
+            "model": "qwen3-vl-plus",
+            "outcome": "degraded_inference",
+        },
+    }
+    _write_audit(src, [matching, stale_local, degraded])
+    assert runner._stage3_checkpoint_names(runner._pipe) == {"cloud.jpg"}
+
+
 def test_stage3_skips_images_with_real_scores(tmp_path: Path):
     src = _layout(tmp_path)
     _write_stage2_manifest(src, ["a.jpg", "b.jpg"])

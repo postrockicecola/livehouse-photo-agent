@@ -20,6 +20,7 @@ _FALLBACK_RECIPES: dict[str, dict[str, Any]] = {
     "shortlist": {
         "min_score": 70,
         "exclude_trash": True,
+        "exclude_low_quality": True,
         "dedupe_burst": True,
         "sort_by": "overall",
         "default_limit": 10,
@@ -40,6 +41,7 @@ _FALLBACK_RECIPES: dict[str, dict[str, Any]] = {
         "min_score": 60,
         "min_atmosphere": 6.5,
         "exclude_trash": True,
+        "exclude_low_quality": True,
         "dedupe_burst": True,
         "sort_by": "atmosphere_impact",
         "default_limit": 10,
@@ -49,6 +51,7 @@ _FALLBACK_RECIPES: dict[str, dict[str, Any]] = {
         "min_score": 60,
         "min_moment_peak": 6.5,
         "exclude_trash": True,
+        "exclude_low_quality": True,
         "dedupe_burst": True,
         "sort_by": "moment_peak",
         "default_limit": 10,

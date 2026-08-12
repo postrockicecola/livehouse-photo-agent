@@ -172,6 +172,23 @@ class ConfigLoader:
     def get_model_config(cls, config: Dict) -> Dict[str, Any]:
         """Extract model configuration"""
         return config.get("model", cls.DEFAULTS["model"])
+
+    @classmethod
+    def get_stage3_model_config(cls, config: Dict) -> Dict[str, Any]:
+        """Resolve the dedicated Stage3 Route-B provider over shared model defaults."""
+        base = dict(cls.get_model_config(config))
+        route_b = ((config.get("stage3") or {}).get("route_b") or {})
+        if not isinstance(route_b, dict) or not bool(route_b.get("enabled", False)):
+            return base
+
+        out = {**base, **route_b}
+        out.pop("enabled", None)
+        api_key_env = str(route_b.get("api_key_env") or "").strip()
+        if api_key_env:
+            out["api_key"] = (os.environ.get(api_key_env) or "").strip()
+        out["use_inference_layer"] = True
+        out["route_b_enabled"] = True
+        return out
     
     @classmethod
     def get_evaluation_weights(cls, config: Dict, blur_type: str = None) -> Dict[str, float]:

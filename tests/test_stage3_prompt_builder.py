@@ -6,13 +6,29 @@ from services.processor.stages.stage3_output_validation import sanitize_stage3_p
 from services.processor.stages.stage3_prompt_builder import (
     STAGE3_PROMPT_VERSION,
     build_stage3_prompt,
+    build_stage3_semantic_compact_prompt,
+    build_stage3_semantic_first_prompt,
 )
 from services.processor.stages.stage3_prompt_registry import PROMPT_BLOCKS
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 
 def test_prompt_version_is_explicit() -> None:
-    assert STAGE3_PROMPT_VERSION == "stage3_v7"
+    assert STAGE3_PROMPT_VERSION == "stage3_v9_route_b"
+
+
+def test_semantic_first_ab_prompt_inspects_gate_before_scoring() -> None:
+    prompt = build_stage3_semantic_first_prompt()
+    assert prompt.index("first and most important") < prompt.index('"score"')
+    assert "Do not use false as a safe default" in prompt
+    assert '"semantic_gate"' in prompt
+
+
+def test_semantic_compact_ab_prompt_avoids_filled_output_defaults() -> None:
+    prompt = build_stage3_semantic_compact_prompt()
+    assert prompt.index("任务1（先做）") < prompt.index("任务2（后做）")
+    assert '"is_present":<true或false>' in prompt
+    assert '"score":<0到100>' in prompt
 
 
 def test_full_prompt_uses_layered_contract_not_editing_rules() -> None:
@@ -21,6 +37,9 @@ def test_full_prompt_uses_layered_contract_not_editing_rules() -> None:
     assert "NON-NEGOTIABLE" not in prompt
     assert "Emit exactly this shape" in prompt
     assert "mood_tags" in prompt
+    assert "semantic_gate" in prompt
+    assert '"dimensions":{' in prompt
+    assert "heavy_occlusion" in prompt
     assert "孤独" in prompt
     assert PROMPT_BLOCKS["domain"][:20] in prompt
 

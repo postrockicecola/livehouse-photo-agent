@@ -6,8 +6,10 @@ from typing import Any
 from services.processor.stages.stage1_signal_semantics import stage1_semantic_lines
 from services.processor.stages.stage3_prompt_registry import (
     PROMPT_VERSION,
+    compose_stage3_semantic_compact_prompt,
     compose_stage3_fast_prompt,
     compose_stage3_full_prompt,
+    compose_stage3_semantic_first_prompt,
 )
 
 # Re-export for benchmarks, meta, and A/B hooks.
@@ -25,6 +27,16 @@ def build_stage3_fast_prompt(*, blur_eff: str | None, stage1_features: dict[str,
         stage1_features=stage1_features,
         stage1_line_fn=stage1_semantic_lines,
     )
+
+
+def build_stage3_semantic_first_prompt() -> str:
+    """Build the semantic-first A/B candidate without changing production routing."""
+    return compose_stage3_semantic_first_prompt()
+
+
+def build_stage3_semantic_compact_prompt() -> str:
+    """Build the compact gate-first A/B candidate for the local VLM."""
+    return compose_stage3_semantic_compact_prompt()
 
 
 def build_stage3_prompt(

@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 # Bump when prompt shape changes (audit / A-B tests).
 STAGE3_PROMPT_PROFILE = STAGE3_PROMPT_VERSION
-STAGE3_FAST_PROMPT_PROFILE = "fast-v2-layered"
+STAGE3_FAST_PROMPT_PROFILE = "fast-v3-semantic-gate"
 
 _RETRYABLE_REQUEST_ERRORS = (
     requests.Timeout,
@@ -354,6 +354,26 @@ def stage3_strategy_settings(config: Dict[str, Any]) -> Dict[str, Any]:
         "full_analysis_score_threshold": float(raw.get("full_analysis_score_threshold", 85) or 85),
         "fast_num_predict": max(64, int(raw.get("fast_num_predict", 220) or 220)),
     }
+
+
+def stage3_inference_request_metadata(
+    config: Mapping[str, Any],
+    extra: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Attach Route-B transport constraints without leaking provider concerns into prompts."""
+    out = dict(extra or {})
+    route_b = ((config.get("stage3") or {}).get("route_b") or {})
+    if not isinstance(route_b, Mapping) or not bool(route_b.get("enabled", False)):
+        return out
+    out["json_mode"] = True
+    try:
+        out["vlm_thumbnail_max_side"] = max(
+            768,
+            min(2048, int(route_b.get("thumbnail_max_side") or 1600)),
+        )
+    except (TypeError, ValueError):
+        out["vlm_thumbnail_max_side"] = 1600
+    return out
 
 
 def should_run_full_after_fast(
@@ -695,6 +715,10 @@ def analyze_stage3_fast(
     Stage3 fast path: single 0–100 score + one-line verdict + tags.
     Per-dimension rubric slots exist as ``None`` in ``dimensions`` and in the ``stage3_result`` unified payload (fast mode).
     """
+    inference_extra_metadata = stage3_inference_request_metadata(
+        config,
+        inference_extra_metadata,
+    )
     first_entry = _wall_t0 is None
     if first_entry:
         _wall_t0 = time.perf_counter()
@@ -817,7 +841,9 @@ def analyze_stage3_fast(
             prompt_retry = (
                 build_stage3_fast_prompt(blur_eff=blur_eff, stage1_features=stage1_features)
                 + '\nEmit only: {"score":<number 0-100>,"verdict":"<one line>",'
-                '"tags":["t1","t2"],"mood_tags":["孤独"]}\n'
+                '"tags":["t1","t2"],"mood_tags":["孤独"],'
+                '"semantic_gate":{"is_present":<boolean>,"types":[],'
+                '"severity":<0-3>,"confidence":<0-1>,"evidence":"<visible fact>"}}\n'
             )
             retry_md = dict(inference_extra_metadata or {})
             retry_md["num_predict"] = max(int(fast_num_predict), 280)
@@ -878,6 +904,7 @@ def analyze_stage3_fast(
             "verdict_bilingual": verdict_bi,
             "tags": list(parsed.get("tags") or []),
             "mood_tags": list(parsed.get("mood_tags") or []),
+            "semantic_gate": parsed.get("semantic_gate"),
             "dimensions": dims_none,
             "dimensions_raw": {},
             "weakness": "",
@@ -991,6 +1018,10 @@ def analyze_with_dimensions(
     PR2: selective retry + backoff on transport / soft VLM failures / parse miss.
     PR3: shorter Tier-A prompt + STAGE3_DIM_PROMPT_LINES + compact Stage1 line.
     """
+    inference_extra_metadata = stage3_inference_request_metadata(
+        config,
+        inference_extra_metadata,
+    )
     first_entry = _wall_t0 is None
     if first_entry:
         _wall_t0 = time.perf_counter()
@@ -1239,6 +1270,7 @@ def analyze_with_dimensions(
             "reason_bilingual": sa,
             "tags": parsed.get("tags", []),
             "mood_tags": list(parsed.get("mood_tags") or []),
+            "semantic_gate": parsed.get("semantic_gate"),
             "dimensions": dimensions_cal,
             "dimensions_raw": dimensions_raw,
             "weakness": wa["zh"] or wa["en"] or "",

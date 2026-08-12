@@ -168,11 +168,17 @@ def test_compound_energy_attaches_semantic_query() -> None:
 
     assert semantic_residue("帮我选出最炸的10张") == ""
     assert semantic_residue("最炸的吉他手") == "吉他手"
+    assert semantic_residue("找出吉他手弹琴的10张") == "吉他手弹琴"
     m = route_gallery_intent("最炸的吉他手")
     assert m is not None
     assert m.rule_id == "shortlist_energy"
     assert m.calls[0].args.get("query") == "吉他手"
     assert m.calls[0].args.get("recipe") == "energy"
+
+    guitar = route_gallery_intent("找出吉他手弹琴的10张")
+    assert guitar is not None
+    assert guitar.rule_id == "shortlist_select"
+    assert guitar.calls[0].args.get("query") == "吉他手弹琴"
 
 
 def test_contrast_shortlist_attaches_panorama_query() -> None:

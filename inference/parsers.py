@@ -128,6 +128,7 @@ def _fallback_parse_truncated_json(json_str: str) -> Optional[dict[str, Any]]:
         "weakest_aspect": weakest,
         "tags": tags,
         "mood_tags": mood_tags,
+        "semantic_gate": None,
         "dimension_comments": dimension_comments,
         "editing_suggestions": editing_suggestions,
     }
@@ -237,6 +238,7 @@ def default_stage3_parsed() -> dict[str, Any]:
         "mood_tags": [],
         "dimension_comments": {},
         "editing_suggestions": [],
+        "semantic_gate": None,
     }
 
 
@@ -270,6 +272,7 @@ def default_fast_stage3_parsed() -> dict[str, Any]:
         "verdict": {"zh": "解析失败", "en": "Parse failure"},
         "tags": ["unparsed"],
         "mood_tags": [],
+        "semantic_gate": None,
     }
 
 
@@ -338,6 +341,16 @@ def parse_fast_vlm_response(json_str: str, raw_model_text: str | None = None) ->
         "verdict": verdict,
         "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
         "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
+        "dimensions": (
+            dict(data["dimensions"])
+            if isinstance(data.get("dimensions"), dict)
+            else {}
+        ),
+        "semantic_gate": (
+            dict(data["semantic_gate"])
+            if isinstance(data.get("semantic_gate"), dict)
+            else None
+        ),
     }
 
 
@@ -381,8 +394,11 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
 
     try:
         dimensions = {}
+        nested_dimensions = data.get("dimensions")
+        if not isinstance(nested_dimensions, dict):
+            nested_dimensions = {}
         for dim in STAGE3_DIM_KEYS:
-            score = data.get(dim, _DEFAULT_FLOAT)
+            score = data.get(dim, nested_dimensions.get(dim, _DEFAULT_FLOAT))
             try:
                 score = float(score)
                 score = max(0, min(10, score))
@@ -415,6 +431,11 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
             "strongest_aspect": sa,
             "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
             "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
+            "semantic_gate": (
+                dict(data["semantic_gate"])
+                if isinstance(data.get("semantic_gate"), dict)
+                else None
+            ),
             "weakest_aspect": wa,
             "dimension_comments": dimension_comments,
             "editing_suggestions": editing_suggestions,

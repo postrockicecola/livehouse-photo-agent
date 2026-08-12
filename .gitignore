@@ -58,6 +58,12 @@ data/eval/_*/
 data/eval/*.log
 data/eval/archive_golden_core/
 data/eval/relabel/
+data/eval/candidate_rounds/*/gallery_assets/
+data/eval/candidate_rounds/*/relabel_images/
+data/eval/candidate_rounds/*/oriented_images/
+data/eval/selection_v1/images/
+data/eval/selection_v1/gallery_assets/
+data/eval/selection_v1/normalized_images/
 models/eval/
 *.ARW
 

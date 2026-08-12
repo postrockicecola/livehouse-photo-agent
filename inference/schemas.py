@@ -72,6 +72,37 @@ class BilingualText(BaseModel):
         return cls(zh=s, en=s)
 
 
+class SemanticGateObservation(BaseModel):
+    """Model observation only; deterministic reject policy is applied downstream."""
+
+    is_present: bool = False
+    types: list[str] = Field(default_factory=list)
+    severity: int = Field(default=0, ge=0, le=3)
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    evidence: str = Field(default="", max_length=500)
+
+    @field_validator("types", mode="before")
+    @classmethod
+    def _coerce_types(cls, v: Any) -> list[str]:
+        return _coerce_str_tags(v, max_len=80)
+
+    @field_validator("severity", mode="before")
+    @classmethod
+    def _coerce_severity(cls, v: Any) -> int:
+        try:
+            return max(0, min(3, int(round(float(v)))))
+        except (TypeError, ValueError):
+            return 0
+
+    @field_validator("confidence", mode="before")
+    @classmethod
+    def _coerce_confidence(cls, v: Any) -> float:
+        try:
+            return max(0.0, min(1.0, float(v)))
+        except (TypeError, ValueError):
+            return 0.0
+
+
 # ---------------------------------------------------------------------------
 # Stage 3 — fast pass
 # ---------------------------------------------------------------------------
@@ -90,6 +121,8 @@ class Stage3FastResponse(BaseModel):
     verdict: BilingualText = Field(default_factory=BilingualText)
     tags: list[str] = Field(default_factory=list)
     mood_tags: list[str] = Field(default_factory=list)
+    dimensions: dict[str, float] = Field(default_factory=dict)
+    semantic_gate: SemanticGateObservation | None = None
 
     @field_validator("score", mode="before")
     @classmethod
@@ -115,6 +148,10 @@ class Stage3FastResponse(BaseModel):
             "verdict": self.verdict.model_dump(),
             "tags": self.tags,
             "mood_tags": self.mood_tags,
+            "dimensions": self.dimensions,
+            "semantic_gate": (
+                self.semantic_gate.model_dump() if self.semantic_gate is not None else None
+            ),
         }
 
 
@@ -144,9 +181,25 @@ class Stage3FullResponse(BaseModel):
     weakest_aspect: BilingualText = Field(default_factory=BilingualText)
     tags: list[str] = Field(default_factory=list)
     mood_tags: list[str] = Field(default_factory=list)
+    semantic_gate: SemanticGateObservation | None = None
     # Optional per-dimension text comments (may be absent in fast-model outputs).
     comments: dict[str, Any] = Field(default_factory=dict)
     editing_suggestions: list[BilingualText] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _accept_nested_dimensions(cls, value: Any) -> Any:
+        """Accept the Route-B wire schema while preserving legacy parsed output."""
+        if not isinstance(value, dict):
+            return value
+        nested = value.get("dimensions")
+        if not isinstance(nested, dict):
+            return value
+        merged = dict(value)
+        for key in STAGE3_DIM_KEYS:
+            if key not in merged and key in nested:
+                merged[key] = nested[key]
+        return merged
 
     @field_validator(
         "focus_sharpness",
@@ -201,6 +254,9 @@ class Stage3FullResponse(BaseModel):
             "weakest_aspect": self.weakest_aspect.model_dump(),
             "tags": self.tags,
             "mood_tags": self.mood_tags,
+            "semantic_gate": (
+                self.semantic_gate.model_dump() if self.semantic_gate is not None else None
+            ),
             "dimension_comments": dim_comments,
             "editing_suggestions": [s.model_dump() for s in self.editing_suggestions],
         }

@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from services.processor.stages.semantic_gate import sanitize_semantic_observation
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,7 @@ def sanitize_stage3_parsed(parsed: dict[str, Any]) -> dict[str, Any]:
 
     out = dict(parsed)
     out["editing_suggestions"] = []
+    out["semantic_gate"] = sanitize_semantic_observation(out.get("semantic_gate"))
 
     scene = _normalize_tag_list(out.get("tags"), max_items=_MAX_SCENE_TAGS)
     mood = _normalize_tag_list(out.get("mood_tags"), max_items=_MAX_MOOD_TAGS)

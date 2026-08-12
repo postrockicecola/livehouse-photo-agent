@@ -196,6 +196,27 @@ _USER_PROMPT = (
     "system message, with one decimal on every dimension."
 )
 
+_SEMANTIC_TAXONOMY_BLOCK = """
+
+Additional selection-defect classification -- independent from the numeric scores:
+Decide whether this LIVEHOUSE frame has a major semantic defect that would make a
+professional editor reject it even when focus and exposure are technically usable.
+Intentional silhouette, expressive motion blur, a hidden face with readable body
+language, and ordinary stage clutter are NOT defects by themselves.
+
+Add this field to the same JSON object:
+"semantic_defect": {
+  "is_present": <true or false>,
+  "types": [<zero or more of "closed_eyes", "bad_expression", "heavy_occlusion",
+            "no_clear_subject", "severe_composition_failure", "missed_moment", "other">],
+  "severity": <"none", "minor", "major", or "fatal">,
+  "evidence": "<short visible evidence in zh; empty when none>"
+}
+
+Use major/fatal only when the visible defect is decisive. Do not infer closed eyes
+when the eyes are too small, dark, turned away, or hidden to judge.
+"""
+
 
 _NUMBER_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 8: "eight"}
 
@@ -637,6 +658,8 @@ def merge_group_results(results: dict[str, ApiResult]) -> tuple[dict[str, Any], 
         payload["reason"] = lead.payload.get("reason")
     if tech is not None and perc is not None:
         payload["reason_technical"] = tech.payload.get("reason")
+    if perc is not None and isinstance(perc.payload.get("semantic_defect"), dict):
+        payload["semantic_defect"] = perc.payload["semantic_defect"]
     payload["tags"] = tags
     # Min, not mean: if either call was unsure about this frame, the merged row is.
     payload["confidence"] = min(confidences) if confidences else None
@@ -679,6 +702,11 @@ def build_record(
         "weakest_aspect": str(payload.get("weakest_aspect") or ""),
         "reason": str(payload.get("reason") or ""),
         "reason_technical": str(payload.get("reason_technical") or ""),
+        "semantic_defect": (
+            payload.get("semantic_defect")
+            if isinstance(payload.get("semantic_defect"), dict)
+            else None
+        ),
         "tags": [str(t) for t in tags][:12] if isinstance(tags, list) else [],
         "confidence": _clamp(payload.get("confidence"), 0, 1),
         "model": model,
@@ -849,11 +877,24 @@ def _is_pinned(model: str) -> bool:
 
 
 def _api_key(explicit: str | None) -> str:
-    key = explicit or os.environ.get("DASHSCOPE_API_KEY") or ""
+    key = (explicit or os.environ.get("DASHSCOPE_API_KEY") or "").strip()
     if not key:
         raise SystemExit(
             "DASHSCOPE_API_KEY is not set. Export it or pass --api-key.\n"
             "Get one from the Alibaba Cloud Model Studio (Bailian) console."
+        )
+    try:
+        key.encode("ascii")
+    except UnicodeEncodeError as exc:
+        raise SystemExit(
+            "DASHSCOPE_API_KEY contains non-ASCII characters. "
+            "Replace the example placeholder with the real API key; do not export "
+            "the literal Chinese text “你的 token”."
+        ) from exc
+    if any(ord(char) < 33 or ord(char) == 127 for char in key):
+        raise SystemExit(
+            "DASHSCOPE_API_KEY contains whitespace or control characters. "
+            "Copy the key again without surrounding spaces or line breaks."
         )
     return key
 
@@ -965,6 +1006,8 @@ def cmd_score(args: argparse.Namespace) -> int:
     split = args.scoring_mode == "split2"
     if split:
         group_prompts = {g: build_system_prompt(dims) for g, dims in DIM_GROUPS.items()}
+        if args.semantic_taxonomy:
+            group_prompts["perceptual"] += _SEMANTIC_TAXONOMY_BLOCK
         prompt_shas = {g: prompt_fingerprint(p) for g, p in group_prompts.items()}
         # One fingerprint over both prompts, so the provenance guard treats a change
         # in either group as a different labeling regime.
@@ -975,6 +1018,8 @@ def cmd_score(args: argparse.Namespace) -> int:
     else:
         group_prompts, prompt_shas = {}, {}
         system_prompt = build_system_prompt()
+        if args.semantic_taxonomy:
+            system_prompt += _SEMANTIC_TAXONOMY_BLOCK
         prompt_sha = prompt_fingerprint(system_prompt)
 
     targets = resolve_targets(
@@ -1393,6 +1438,11 @@ def main(argv: list[str] | None = None) -> int:
             "single: all 8 in one call, which measured a mean inter-dimension "
             "Spearman of 0.642 (the dimensions collapse into one impression)"
         ),
+    )
+    p_score.add_argument(
+        "--semantic-taxonomy",
+        action="store_true",
+        help="add explicit semantic selection-defect fields to the perceptual call",
     )
     p_score.add_argument("--concurrency", type=int, default=4)
     p_score.add_argument("--max-edge", type=int, default=1280, help="downscale long edge")

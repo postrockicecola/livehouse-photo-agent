@@ -2,6 +2,7 @@
   "shortlist": {
     "min_score": 70,
     "exclude_trash": true,
+    "exclude_low_quality": true,
     "dedupe_burst": true,
     "sort_by": "overall",
     "default_limit": 10,
@@ -22,6 +23,7 @@
     "min_score": 60,
     "min_atmosphere": 6.5,
     "exclude_trash": true,
+    "exclude_low_quality": true,
     "dedupe_burst": true,
     "sort_by": "atmosphere_impact",
     "default_limit": 10,
@@ -31,6 +33,7 @@
     "min_score": 60,
     "min_moment_peak": 6.5,
     "exclude_trash": true,
+    "exclude_low_quality": true,
     "dedupe_burst": true,
     "sort_by": "moment_peak",
     "default_limit": 10,

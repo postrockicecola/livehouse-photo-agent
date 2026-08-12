@@ -149,6 +149,9 @@ class Handler(BaseHTTPRequestHandler):
     store: LabelStore
     predictions_map: dict[str, dict[str, Any]]
     image_index: dict[str, Path]
+    blind_files: set[str]
+    overall_only: bool
+    prefill_ai: bool
 
     server_version = "LabelServer/1.0"
 
@@ -181,8 +184,9 @@ class Handler(BaseHTTPRequestHandler):
             key = normalize_name(disp)
             lab = labels.get(key)
             pred = self.predictions_map.get(key)
+            blind = key in self.blind_files
             ai = None
-            if pred is not None:
+            if pred is not None and not blind:
                 ai = {"overall": pred.get("overall"), "dims": pred.get("dims_cal") or {}}
             items.append(
                 {
@@ -190,6 +194,7 @@ class Handler(BaseHTTPRequestHandler):
                     "labeled": lab is not None and lab.get("overall") is not None,
                     "label": lab,
                     "ai": ai,
+                    "blind": blind,
                 }
             )
         return items
@@ -202,7 +207,16 @@ class Handler(BaseHTTPRequestHandler):
             self._send_bytes(PAGE_HTML.encode("utf-8"), "text/html; charset=utf-8", cache="no-store")
             return
         if route == "/api/meta":
-            self._send_json({"dims": DIM_META, "images_dir": str(self.images_dir), "labels_path": str(self.store.path)})
+            self._send_json(
+                {
+                    "dims": [] if self.overall_only else DIM_META,
+                    "images_dir": str(self.images_dir),
+                    "labels_path": str(self.store.path),
+                    "overall_only": self.overall_only,
+                    "prefill_ai": self.prefill_ai,
+                    "blind_count": len(self.blind_files),
+                }
+            )
             return
         if route == "/api/queue":
             items = self._build_queue()
@@ -269,11 +283,36 @@ def _load_predictions_map(path: Path | None) -> dict[str, dict[str, Any]]:
     return out
 
 
+def _load_blind_files(path: Path | None) -> set[str]:
+    if path is None or not path.is_file():
+        return set()
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    files = raw.get("files") if isinstance(raw, dict) else raw
+    if not isinstance(files, list):
+        raise ValueError("blind split must be a list or an object with a files list")
+    return {normalize_name(str(file_id)) for file_id in files if str(file_id).strip()}
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Minimal Stage3 labeling web server (stdlib only)")
     parser.add_argument("--images", required=True, help="directory of images to label (recursive)")
     parser.add_argument("--labels", default="data/eval/labels.jsonl", help="JSONL labels file (default: %(default)s)")
     parser.add_argument("--predictions", default="analysis_results.json", help="optional AI predictions for reference")
+    parser.add_argument(
+        "--overall-only",
+        action="store_true",
+        help="review only the 0-100 overall score; hide dimensions and keep controls",
+    )
+    parser.add_argument(
+        "--prefill-ai",
+        action="store_true",
+        help="prefill unlabeled, non-blind rows with the AI overall score",
+    )
+    parser.add_argument(
+        "--blind-split",
+        default="",
+        help="JSON list or {files: [...]} whose AI scores stay hidden",
+    )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8900)
     args = parser.parse_args(argv)
@@ -291,17 +330,24 @@ def main(argv: list[str] | None = None) -> int:
     pred_arg = (args.predictions or "").strip()
     preds_path = Path(pred_arg).expanduser() if pred_arg and pred_arg != "-" else None
     predictions_map = _load_predictions_map(preds_path)
+    blind_path = Path(args.blind_split).expanduser() if args.blind_split else None
+    blind_files = _load_blind_files(blind_path)
 
     Handler.images_dir = images_dir
     Handler.store = LabelStore(Path(args.labels).expanduser().resolve())
     Handler.predictions_map = predictions_map
     Handler.image_index = image_index
+    Handler.blind_files = blind_files
+    Handler.overall_only = bool(args.overall_only)
+    Handler.prefill_ai = bool(args.prefill_ai)
 
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
     url = f"http://{args.host}:{args.port}"
     print(f"Labeling {len(image_index)} images from {images_dir}")
     print(f"Labels -> {Handler.store.path}")
     print(f"AI reference: {'on' if predictions_map else 'off'}")
+    print(f"Review mode: {'overall only' if args.overall_only else 'overall + dimensions'}")
+    print(f"AI prefill: {'on' if args.prefill_ai else 'off'}; blind files: {len(blind_files)}")
     print(f"Open {url}  (Ctrl-C to stop)")
     try:
         httpd.serve_forever()
@@ -375,17 +421,17 @@ PAGE_HTML = r"""<!DOCTYPE html>
   <div class="panel">
     <div class="row">
       <label class="fld">整体分 Overall (0–100)</label>
-      <input type="number" id="overall" min="0" max="100" step="1" />
+      <input type="number" id="overall" min="0" max="100" step="0.1" />
       <div class="airef" id="aiOverall"></div>
     </div>
-    <div class="row">
+    <div class="row" id="keepRow">
       <label class="fld">保留 Keep</label>
       <div class="keep">
         <button type="button" id="btnKeep">★ 保留 (K)</button>
         <button type="button" id="btnDrop">✕ 弃 (D)</button>
       </div>
     </div>
-    <div class="row">
+    <div class="row" id="dimsRow">
       <label class="fld">维度分 (0–10，可留空)</label>
       <div class="dims" id="dims"></div>
     </div>
@@ -409,12 +455,18 @@ PAGE_HTML = r"""<!DOCTYPE html>
 let DIMS = [];
 let ITEMS = [];
 let idx = 0;
+let OVERALL_ONLY = false;
+let PREFILL_AI = false;
 
 const $ = (id) => document.getElementById(id);
 
 async function boot() {
   const meta = await (await fetch('/api/meta')).json();
   DIMS = meta.dims;
+  OVERALL_ONLY = !!meta.overall_only;
+  PREFILL_AI = !!meta.prefill_ai;
+  $('keepRow').style.display = OVERALL_ONLY ? 'none' : '';
+  $('dimsRow').style.display = OVERALL_ONLY ? 'none' : '';
   buildDimInputs();
   await refreshQueue(true);
   bindKeys();
@@ -460,10 +512,11 @@ function load() {
   $('photo').src = '/img?file=' + encodeURIComponent(it.file) + '&t=' + Date.now();
   $('fname').textContent = it.file + '   (' + (idx+1) + '/' + ITEMS.length + ')';
   const lab = it.label || {};
-  $('overall').value = (lab.overall ?? '');
+  const aiOverall = it.ai && it.ai.overall != null ? it.ai.overall : null;
+  $('overall').value = (lab.overall ?? (PREFILL_AI && aiOverall != null ? aiOverall : ''));
   $('notes').value = lab.notes || '';
   setKeep(lab.keep);
-  const aiO = it.ai && it.ai.overall != null ? ('AI: ' + it.ai.overall) : '';
+  const aiO = it.blind ? '盲评：AI 分数已隐藏' : (aiOverall != null ? ('AI: ' + aiOverall) : '');
   $('aiOverall').textContent = aiO;
   for (const d of DIMS) {
     const v = lab.dims ? lab.dims[d.key] : null;
@@ -471,7 +524,7 @@ function load() {
     const av = it.ai && it.ai.dims ? it.ai.dims[d.key] : null;
     $('ai_'+d.key).textContent = (av != null ? 'AI '+av : '');
   }
-  $('pos').textContent = it.labeled ? '已标注' : '未标注';
+  $('pos').textContent = (it.labeled ? '已复核' : '未复核') + (it.blind ? ' · 盲评' : '');
 }
 
 let keepState = null;
@@ -507,6 +560,11 @@ function hasInput(rec) {
 async function save() {
   if (!ITEMS.length) return false;
   const rec = collect();
+  if (OVERALL_ONLY && rec.overall == null) {
+    alert('请先填写整体分。');
+    $('overall').focus();
+    return false;
+  }
   if (!hasInput(rec)) return false; // nothing to save
   const res = await fetch('/api/label', {
     method: 'POST', headers: {'Content-Type':'application/json'},
@@ -523,9 +581,10 @@ async function save() {
 }
 
 async function saveAndNext() {
-  await save();
-  idx = visibleNextIndex(idx, +1);
-  load();
+  if (await save()) {
+    idx = visibleNextIndex(idx, +1);
+    load();
+  }
 }
 function go(dir) { idx = visibleNextIndex(idx, dir); load(); }
 

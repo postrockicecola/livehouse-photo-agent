@@ -69,6 +69,16 @@ def test_markdown_fence_stripped():
     assert parse_dimensional_response(cleaned, raw)["dimensions"]["focus_sharpness"] == 4.0
 
 
+def test_route_b_nested_dimensions_are_parsed() -> None:
+    raw_obj = _minimal_valid_scores()
+    dimensions = {key: raw_obj.pop(key) for key in STAGE3_DIM_KEYS}
+    raw_obj["dimensions"] = dimensions
+    out = parse_dimensional_response(json.dumps(raw_obj), "")
+    assert out["dimensions"] == {
+        key: max(0.0, min(10.0, value)) for key, value in dimensions.items()
+    }
+
+
 def test_default_stage3_shape():
     fb = default_stage3_parsed()
     assert len(fb["dimensions"]) == len(STAGE3_DIM_KEYS)
@@ -77,11 +87,15 @@ def test_default_stage3_shape():
 
 
 def test_parse_fast_vlm_response_basic():
-    raw = '{"score": 82, "verdict": "Nice moment.", "tags": ["stage", "crowd", "energy"]}'
+    raw = (
+        '{"score": 82, "verdict": "Nice moment.", "dimensions": {},'
+        ' "tags": ["stage", "crowd", "energy"]}'
+    )
     out = parse_fast_vlm_response(raw, raw)
     assert out["score"] == 82.0
     assert out["verdict"]["en"] == "Nice moment."
     assert out["tags"] == ["stage", "crowd", "energy"]
+    assert out["dimensions"] == {}
     assert out.get("mood_tags") == []
 
 
@@ -93,3 +107,28 @@ def test_parse_fast_vlm_response_mood_tags():
     out = parse_fast_vlm_response(raw, raw)
     assert out["tags"] == ["silhouette", "empty stage"]
     assert out["mood_tags"] == ["孤独", "lonely"]
+
+
+def test_fast_parser_preserves_semantic_gate() -> None:
+    raw = json.dumps(
+        {
+            "score": 74,
+            "verdict": "Face is blocked.",
+            "tags": ["occlusion"],
+            "semantic_gate": {
+                "is_present": True,
+                "types": ["heavy_occlusion"],
+                "severity": 3,
+                "confidence": 0.93,
+                "evidence": "Microphone blocks most of the face.",
+            },
+        }
+    )
+    out = parse_fast_vlm_response(raw, raw)
+    assert out["semantic_gate"]["types"] == ["heavy_occlusion"]
+    assert out["semantic_gate"]["confidence"] == 0.93
+
+
+def test_legacy_stage3_json_marks_semantic_gate_unassessed() -> None:
+    out = parse_dimensional_response(json.dumps(_minimal_valid_scores()), "")
+    assert out["semantic_gate"] is None

@@ -69,7 +69,31 @@ class AestheticPipeline:
         for log_path in self.log_paths.values():
             log_path.parent.mkdir(parents=True, exist_ok=True)
 
-        model_config = ConfigLoader.get_model_config(self.config)
+        model_config = ConfigLoader.get_stage3_model_config(self.config)
+        cloud_key = str(model_config.get("api_key") or "").strip()
+        if (
+            model_config.get("route_b_enabled")
+            and str(model_config.get("provider") or "").lower() in {"openai", "vllm"}
+            and not cloud_key
+        ):
+            key_env = str(
+                ((self.config.get("stage3") or {}).get("route_b") or {}).get(
+                    "api_key_env"
+                )
+                or "DASHSCOPE_API_KEY"
+            )
+            raise ValueError(
+                f"Stage3 Route B requires cloud credentials; export {key_env}"
+            )
+        if model_config.get("route_b_enabled") and cloud_key:
+            try:
+                cloud_key.encode("ascii")
+            except UnicodeEncodeError as exc:
+                raise ValueError("Stage3 Route B API key must contain ASCII only") from exc
+            if any(ord(char) < 33 or ord(char) == 127 for char in cloud_key):
+                raise ValueError(
+                    "Stage3 Route B API key contains whitespace or control characters"
+                )
         max_conc = int(model_config.get("max_concurrent_requests", 4) or 1)
         self._max_inference_queue_size = max(1, int(model_config.get("max_inference_queue_size", 16) or 16))
         self.model_provider = str(model_config.get("provider", "ollama"))

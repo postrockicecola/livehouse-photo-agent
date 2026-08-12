@@ -112,6 +112,15 @@ register_provider_spec(
 )
 register_provider_spec(
     ProviderSpec(
+        id="openai",
+        display_name="OpenAI-compatible Cloud",
+        supports_remote_endpoint=True,
+        default_model_name=None,
+        description="Hosted OpenAI-compatible multimodal API (including DashScope Qwen-VL).",
+    )
+)
+register_provider_spec(
+    ProviderSpec(
         id="mock",
         display_name="Mock",
         supports_remote_endpoint=False,

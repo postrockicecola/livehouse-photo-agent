@@ -145,6 +145,9 @@ export default function HomePage() {
   /** Copilot ``gallery_search`` / vibe hits — preview without mutating liked selection. */
   const [agentPreviewItems, setAgentPreviewItems] = useState<GalleryItem[] | null>(null);
   const [agentPreviewVariant, setAgentPreviewVariant] = useState<"agent" | "vibe">("agent");
+  const [agentResultItems, setAgentResultItems] = useState<GalleryItem[]>([]);
+  const [showAgentOnly, setShowAgentOnly] = useState(false);
+  const [agentHighlightedKeys, setAgentHighlightedKeys] = useState<Set<string>>(new Set());
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [feedbackByKey, setFeedbackByKey] = useState<Record<string, CurationFeedbackEntry>>({});
   /** ``undefined`` = not loaded; ``null`` = no file; object = apply when ``items`` ready. */
@@ -649,6 +652,9 @@ export default function HomePage() {
           ? meta.paths.map((p) => String(p || "").trim()).filter(Boolean)
           : [];
         if (files.length === 0 && paths.length === 0) {
+          setAgentResultItems([]);
+          setShowAgentOnly(false);
+          setAgentHighlightedKeys(new Set());
           setActionMsg("助手未找到匹配照片");
           return;
         }
@@ -690,6 +696,14 @@ export default function HomePage() {
             path_quoted: isStatic ? abs : encodeURIComponent(abs),
           });
         }
+        setAgentHighlightedKeys(
+          new Set(
+            resolved
+              .map((item) => gallerySelectionKey(item))
+              .filter((key): key is string => Boolean(key)),
+          ),
+        );
+        setAgentResultItems(resolved);
         setAgentPreviewVariant("agent");
         setAgentPreviewItems(resolved);
         setSelectionPreviewOpen(false);
@@ -1305,6 +1319,41 @@ export default function HomePage() {
                   我的口味
                 </button>
               </div>
+              {agentResultItems.length > 0 ? (
+                <div
+                  className="inline-flex rounded-[4px] border border-emerald-400/20 p-0.5"
+                  role="group"
+                  aria-label="Agent 结果筛选"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={!showAgentOnly}
+                    onClick={() => setShowAgentOnly(false)}
+                    className={[
+                      "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                      !showAgentOnly
+                        ? "bg-white/[0.1] text-white/80"
+                        : "text-white/40 hover:text-white/65",
+                    ].join(" ")}
+                  >
+                    全部
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={showAgentOnly}
+                    onClick={() => setShowAgentOnly(true)}
+                    className={[
+                      "rounded-[3px] px-2.5 py-1 text-[10px] transition-colors",
+                      showAgentOnly
+                        ? "bg-emerald-400/20 text-emerald-100"
+                        : "text-emerald-200/65 hover:bg-emerald-400/10 hover:text-emerald-100",
+                    ].join(" ")}
+                  >
+                    Agent 选择
+                    <span className="ml-1 tabular-nums opacity-65">{agentResultItems.length}</span>
+                  </button>
+                </div>
+              ) : null}
               <button
                 type="button"
                 aria-expanded={toolsOpen}
@@ -1497,18 +1546,21 @@ export default function HomePage() {
           <div className="w-full min-w-0 flex-1">
             <div className="min-h-[min(88svh,100svh)] w-full pb-6">
               <GalleryMasonry
-                items={items}
+                items={showAgentOnly ? agentResultItems : items}
                 apiBase={API_BASE}
-                preserveOrder={analysisRunning || effectiveGallerySort === "default"}
+                preserveOrder={
+                  showAgentOnly || analysisRunning || effectiveGallerySort === "default"
+                }
                 onOpenLab={setModal}
                 selectedKeys={selectedKeys}
+                agentHighlightedKeys={agentHighlightedKeys}
                 onToggleSelect={onToggleSelect}
               />
             </div>
           </div>
         )}
 
-        {!loadingItems && !showEmptyPanel && paginated ? (
+        {!showAgentOnly && !loadingItems && !showEmptyPanel && paginated ? (
           <div
             ref={sentinelRef}
             className="mx-auto mb-6 min-h-[1rem] w-full max-w-md text-center text-[10px] tracking-wide text-white/22"

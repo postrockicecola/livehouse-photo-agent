@@ -18,6 +18,21 @@ _SEMANTIC_FALLBACK_ENV = "LIVEHOUSE_AGENT_SEMANTIC_FALLBACK"
 # Opt-out: LIVEHOUSE_AGENT_SEMANTIC_HYBRID=0 → CLIP only when text search is empty (legacy).
 _SEMANTIC_HYBRID_ENV = "LIVEHOUSE_AGENT_SEMANTIC_HYBRID"
 _SEMANTIC_MIN_SIM = 0.22
+_CONCRETE_SUBJECT_TERMS = (
+    "吉他手",
+    "吉他",
+    "弹琴",
+    "guitarist",
+    "guitar",
+    "鼓手",
+    "打鼓",
+    "drummer",
+    "drums",
+    "贝斯手",
+    "贝斯",
+    "bassist",
+    "bass",
+)
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 _DEFAULT_SYNONYMS_PATH = _REPO_ROOT / "data" / "agent" / "query_synonyms.jsonl"
@@ -61,6 +76,8 @@ _PIPELINE_TAGS = frozenset(
         "stage3_skipped_gating",
         "near_duplicate",
         "stage2_dedup",
+        "semantic_reject",
+        "semantic_gate_unresolved",
     }
 )
 _BOILERPLATE_REASON_PREFIXES = (
@@ -199,6 +216,29 @@ def _is_boilerplate_reason(text: str) -> bool:
 
 def _is_pipeline_tag(tag: str) -> bool:
     return str(tag).strip().lower() in _PIPELINE_TAGS
+
+
+def _semantic_gate_allows_auto_select(row: dict[str, Any]) -> bool:
+    """Apply active gate policy while accepting complete legacy Stage3 records."""
+    gate = row.get("semantic_gate")
+    if not isinstance(gate, dict):
+        dimensions = row.get("dimensions")
+        required = {
+            "focus_sharpness",
+            "exposure_control",
+            "noise_cleanliness",
+            "composition_framing",
+            "light_color_character",
+            "moment_peak",
+            "atmosphere_impact",
+            "deliverable_subject",
+        }
+        return isinstance(dimensions, dict) and required.issubset(dimensions)
+    mode = str(gate.get("mode") or "").strip().lower()
+    if mode not in {"soft", "hard"}:
+        return True
+    status = str(gate.get("status") or "").strip().lower()
+    return status == "pass"
 
 
 def _load_rows(base_dir: str) -> list[dict[str, Any]]:
@@ -671,6 +711,8 @@ def _filter_rows(rows: list[dict[str, Any]], args: dict[str, Any]) -> list[dict[
         if exclude_trash and _is_trash_category(cat):
             continue
         if exclude_low_quality:
+            if not _semantic_gate_allows_auto_select(row):
+                continue
             if any(h in blob for h in _TRASH_HINTS) or technical < 5.0 or overall < 55.0:
                 continue
         if tag:
@@ -704,7 +746,15 @@ def _maybe_dedupe(rows: list[dict[str, Any]], base_dir: str, enabled: bool) -> l
 
         settings = gallery_view_dedupe_settings(None)
         settings = {**settings, "enabled": True, "keep_per_cluster": 1}
-        kept_idx, _, _ = apply_gallery_view_dedupe(rows, "overall", settings=settings)
+        # ``rows`` already carry semantic relevance order. Dedupe must only suppress
+        # look-alikes; sorting by overall here would silently discard query ranking.
+        rank_by_identity = {id(row): len(rows) - index for index, row in enumerate(rows)}
+        kept_idx, _, _ = apply_gallery_view_dedupe(
+            rows,
+            "overall",
+            settings=settings,
+            sort_key_fn=lambda row: float(rank_by_identity[id(row)]),
+        )
         return [rows[i] for i in kept_idx if 0 <= i < len(rows)]
     except Exception:
         # Filename burst fallback: keep best overall per trailing-number cluster.
@@ -860,6 +910,7 @@ def hybrid_merge_rows(
     sort_by: str,
     ranking_weights: Any = None,
     min_sim: float = _SEMANTIC_MIN_SIM,
+    allow_clip_only: bool = True,
 ) -> list[dict[str, Any]]:
     """Union tag hits + CLIP hits (above *min_sim*), re-rank with score dims."""
     row_by_file = {str(r.get("file") or ""): r for r in rows if str(r.get("file") or "").strip()}
@@ -869,6 +920,8 @@ def hybrid_merge_rows(
         if f:
             cand[f] = r
     for f, sim in clip_sims.items():
+        if not allow_clip_only and f not in cand:
+            continue
         if float(sim) < float(min_sim):
             continue
         if pool_files and f not in pool_files:
@@ -893,6 +946,12 @@ def hybrid_merge_rows(
         )
 
     return sorted(cand.values(), key=_rank_key, reverse=True)
+
+
+def query_requires_text_grounding(query: str) -> bool:
+    """Concrete performer/instrument asks need lexical evidence when available."""
+    normalized = str(query or "").strip().lower()
+    return any(term in normalized for term in _CONCRETE_SUBJECT_TERMS)
 
 
 def _basename(path_or_name: str) -> str:

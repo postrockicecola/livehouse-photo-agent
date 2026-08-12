@@ -1,0 +1,54 @@
+schema_version: selection_quality_config.v1
+
+dataset:
+  directory: data/eval/selection_v1
+  sha256: 7e684c0d89dd3601b23b7118c003dbfeb89cd431f14dbbd9a875424345c805b6
+  frozen_manifest: frozen_manifest.json
+  labels: labels.jsonl
+  defects: defects.json
+  acceptable_pool: acceptable_pool.json
+
+packs:
+  count: 10
+  seed: 20260810
+  k: 5
+  quotas:
+    technical_hard: 5
+    semantic_defect: 5
+    ordinary: 10
+    highlight: 5
+
+selection:
+  global_k: 10
+  min_global_overlap_at_k: 0.80
+  min_pack_macro_overlap_at_k: 0.80
+  max_selected_defects: 0
+
+thresholds:
+  min_technical_recall: 0.96
+  min_semantic_recall: 0.90
+  max_ordinary_fpr: 0.05
+  max_highlight_fpr: 0.02
+  max_empty_results: 0
+  max_hallucinated_ids: 0
+  max_duplicate_ids: 0
+
+diagnostics:
+  min_overall_spearman: 0.60
+  max_overall_mae: 10.0
+  max_dimension_macro_mae: 1.30
+
+operational:
+  min_schema_success_rate: 1.0
+  max_fallback_count: 0
+
+# Optional account-specific DashScope prices. Leave unset rather than guessing;
+# token totals are always reported, and cost is calculated when both are numeric.
+cost:
+  input_usd_per_million_tokens:
+  output_usd_per_million_tokens:
+
+regression:
+  max_p95_latency_increase: 0.15
+  max_vlm_calls_increase: 0.15
+  max_token_increase: 0.15

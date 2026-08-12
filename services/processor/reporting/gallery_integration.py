@@ -196,6 +196,9 @@ def build_analysis_results(
             mood_tags = audit_entry.get("mood_tags")
             if isinstance(mood_tags, list) and mood_tags:
                 row["mood_tags"] = mood_tags
+            semantic_gate = audit_entry.get("semantic_gate")
+            if isinstance(semantic_gate, dict):
+                row["semantic_gate"] = semantic_gate
 
             results.append(row)
 

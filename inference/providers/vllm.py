@@ -111,11 +111,11 @@ class VLLMProvider(InferenceProvider):
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": request.prompt},
                         {
                             "type": "image_url",
                             "image_url": {"url": f"data:image/jpeg;base64,{img_base64}"},
                         },
+                        {"type": "text", "text": request.prompt},
                     ],
                 }
             ],
@@ -143,6 +143,13 @@ class VLLMProvider(InferenceProvider):
                 return InferenceResponse(status="error", error=str(e), model=model_name)
             except requests.HTTPError as e:
                 sc = e.response.status_code if e.response is not None else None
+                if (
+                    sc is not None
+                    and (sc == 429 or sc >= 500)
+                    and attempt + 1 < attempts
+                ):
+                    time.sleep(self.retry_delay * (2**attempt))
+                    continue
                 return InferenceResponse(
                     status="error",
                     error=str(e),
@@ -174,8 +181,8 @@ class VLLMProvider(InferenceProvider):
             parsed = result.to_parsed_dict()
         """
         try:
-            import instructor
-            from openai import OpenAI
+            import instructor  # type: ignore[import-not-found]
+            from openai import OpenAI  # type: ignore[import-not-found]
         except ImportError as exc:
             raise RuntimeError(
                 "generate_structured requires 'openai' and 'instructor'; "
@@ -197,11 +204,11 @@ class VLLMProvider(InferenceProvider):
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": request.prompt},
                         {
                             "type": "image_url",
                             "image_url": {"url": f"data:image/jpeg;base64,{img_base64}"},
                         },
+                        {"type": "text", "text": request.prompt},
                     ],
                 }
             ],

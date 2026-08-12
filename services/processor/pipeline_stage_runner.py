@@ -413,6 +413,34 @@ class PipelineStageRunner:
             if entry.get("image") and not audit_entry_is_retryable(entry)
         }
 
+    def _stage3_checkpoint_names(self, pipe: AestheticPipeline) -> set[str]:
+        """Only reuse Route-B audit rows produced by the active cloud model."""
+        route_b = ((pipe.config.get("stage3") or {}).get("route_b") or {})
+        if not isinstance(route_b, dict) or not route_b.get("enabled"):
+            return self._audit_logged_image_names()
+        expected_provider = str(route_b.get("provider") or "openai")
+        expected_model = str(route_b.get("model_name") or "")
+        rows = _audit_rows_by_image(self.log_paths["log_file"])
+        return {
+            name
+            for name, entry in rows.items()
+            if entry.get("image")
+            and not audit_entry_is_retryable(entry)
+            and isinstance(entry.get("semantic_gate"), dict)
+            and str((entry.get("stage3_meta") or {}).get("outcome") or "")
+            not in {
+                "vlm_error",
+                "parse_failed",
+                "fallback_defaults",
+                "degraded_inference",
+                "exception",
+            }
+            and str((entry.get("stage3_meta") or {}).get("provider") or "")
+            == expected_provider
+            and str((entry.get("stage3_meta") or {}).get("model") or "")
+            == expected_model
+        }
+
     def _lazy_pipeline_for_vlm(self) -> AestheticPipeline:
         if self._pipe is None:
             self._pipe = AestheticPipeline(
@@ -863,7 +891,7 @@ class PipelineStageRunner:
         # the previous attempt already wrote a real audit row for.
         skipped_ckpt = 0
         if enable_checkpoint and incoming:
-            done = self._audit_logged_image_names()
+            done = self._stage3_checkpoint_names(pipe)
             if done:
                 kept = [r for r in incoming if str(r.get("file_name")) not in done]
                 skipped_ckpt = len(incoming) - len(kept)

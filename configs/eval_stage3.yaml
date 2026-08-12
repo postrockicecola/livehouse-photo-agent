@@ -7,8 +7,8 @@
 #     gets an independent prediction (burst frames are NOT score-shared).
 #   - stage3_gating omitted entirely (admit all) and strategy = full_only.
 #   - stage4_editing / vibe LLM / RAW film export disabled (irrelevant to eval).
-# Model generation params are intentionally IDENTICAL to production — this
-# evaluates the production scoring behavior, not a tuned-for-eval variant.
+# Model generation params and Route B are intentionally IDENTICAL to production
+# — this evaluates the cloud scoring behavior, not a tuned-for-eval variant.
 #
 # Usage:
 #   python run_pipeline.py --config configs/eval_stage3.yaml \
@@ -100,6 +100,8 @@ classification:
 processing:
   max_workers: 6
   stage12_max_workers: 8
+  # Preserve Stage1 measurements but never stop an eval image before cloud Stage3.
+  eval_force_stage3: true
   enable_checkpoint: true
   export_film_from_raw: false
   vibe_film:
@@ -120,10 +122,36 @@ processing:
     stage3_description: "Deep AI analysis (dimensional scoring)"
 
 stage3:
+  # Dedicated cloud evaluation path. Stage1/2 admission remains open in this
+  # config so all 250 frozen images measure Route B itself.
+  route_b:
+    enabled: true
+    provider: "openai"
+    endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    model_name: "qwen3-vl-plus"
+    api_key_env: "DASHSCOPE_API_KEY"
+    temperature: 0.0
+    num_predict: 1024
+    timeout: 180
+    max_retries: 3
+    retry_delay: 1.0
+    max_concurrent_requests: 2
+    max_inference_queue_size: 30
+    queue_wait_timeout_seconds: 300
+    inference_hard_timeout_seconds: 240
+    thumbnail_max_side: 1600
   strategy: full_only
   full_analysis_top_k: 999999
   full_analysis_score_threshold: 0
   fast_num_predict: 220
+  semantic_gate:
+    enabled: true
+    mode: observe
+    min_clear_confidence: 0.65
+    default_min_severity: 2
+    default_min_confidence: 0.80
+    subjective_min_severity: 3
+    subjective_min_confidence: 0.90
 
 stage4_editing:
   enabled: false

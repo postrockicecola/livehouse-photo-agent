@@ -25,6 +25,7 @@ from utils.stage3_result import (
 )
 from engine.operators.image_processor import ImageProcessor
 from engine.operators.stage2_prefilter import row_ambiguous_tags
+from services.processor.stages.semantic_gate import apply_semantic_gate_policy
 
 # Stage3 admission presets when ``processing.pipeline_mode`` is set (fast | balanced | strict).
 # Omit ``pipeline_mode`` in YAML to keep using ``stage3_gating`` thresholds only (legacy).
@@ -161,11 +162,33 @@ def append_aesthetic_audit_line(
     Append one JSON line to the aesthetic audit log and copy the source image into
     best / keep / trash based on ``ai_data[\"score\"]`` (same semantics as ``AestheticPipeline._process_action``).
     """
+    route_b = ((config.get("stage3") or {}).get("route_b") or {})
+    stage3_meta = ai_data.get("stage3_meta")
+    if (
+        isinstance(route_b, dict)
+        and route_b.get("enabled")
+        and isinstance(stage3_meta, dict)
+        and str(stage3_meta.get("outcome") or "")
+        not in {"skipped_stage3_gating", "skipped_near_duplicate"}
+    ):
+        ai_data = dict(ai_data)
+        stage3_meta = dict(stage3_meta)
+        stage3_meta["provider"] = str(route_b.get("provider") or "openai")
+        stage3_meta["model"] = str(route_b.get("model_name") or "")
+        ai_data["stage3_meta"] = stage3_meta
+    ai_data = apply_semantic_gate_policy(ai_data, config)
     score = ai_data.get("score", 0)
     file_name = Path(image_path).name
 
     classification_cfg = ConfigLoader.get_classification_thresholds(config)
-    if score >= classification_cfg["best_threshold"]:
+    semantic_gate = ai_data.get("semantic_gate") or {}
+    semantic_hard_reject = (
+        semantic_gate.get("mode") == "hard"
+        and semantic_gate.get("status") == "reject"
+    )
+    if semantic_hard_reject:
+        target_folder = folders["trash"]
+    elif score >= classification_cfg["best_threshold"]:
         target_folder = folders["best"]
     elif score >= classification_cfg["keep_threshold"]:
         target_folder = folders["keep"]
@@ -200,6 +223,9 @@ def append_aesthetic_audit_line(
         mood_tags = ai_data.get("mood_tags")
         if isinstance(mood_tags, list) and mood_tags:
             log_entry["mood_tags"] = mood_tags
+        semantic_gate = ai_data.get("semantic_gate")
+        if isinstance(semantic_gate, dict):
+            log_entry["semantic_gate"] = semantic_gate
         dc = ai_data.get("dimension_comments")
         if dc:
             log_entry["dimension_comments"] = dc
@@ -269,6 +295,13 @@ def assess_stage1_opencv(
         file_path,
         quality_cfg,
     )
+    if bool((config.get("processing") or {}).get("eval_force_stage3", False)):
+        debug_info = dict(debug_info or {})
+        debug_info["stage1_eval_original_passed"] = bool(passes_quality)
+        debug_info["stage1_eval_original_reason"] = str(reason)
+        debug_info["stage1_eval_force_stage3"] = True
+        passes_quality = True
+        reason = ""
     return passes_quality, str(reason), float(tech_score), dict(debug_info or {})
 
 
@@ -693,6 +726,8 @@ def finalize_stage3_dual_result(
     """
     if full_inner and not full_inner.get("error"):
         out = merge_vlm_and_technical_scores(config, full_inner, tech_score, debug_info)
+        if not out.get("semantic_gate") and fast_inner:
+            out["semantic_gate"] = fast_inner.get("semantic_gate")
         fa: Dict[str, Any] = {}
         for k in (
             "dimensions",
