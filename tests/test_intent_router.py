@@ -169,6 +169,9 @@ def test_compound_energy_attaches_semantic_query() -> None:
     assert semantic_residue("帮我选出最炸的10张") == ""
     assert semantic_residue("最炸的吉他手") == "吉他手"
     assert semantic_residue("找出吉他手弹琴的10张") == "吉他手弹琴"
+    assert semantic_residue("初选一批") == ""
+    assert semantic_residue("帮我找出适合法发ins的十张照片") == ""
+    assert semantic_residue("不要自动去重，直接选出20张") == ""
     m = route_gallery_intent("最炸的吉他手")
     assert m is not None
     assert m.rule_id == "shortlist_energy"
@@ -214,6 +217,7 @@ def test_routed_chat_skips_tool_llm(tmp_path: Any, monkeypatch: Any) -> None:
             "category": "AI_Best_90+",
             "tags": ["stage"],
             "reason": "ok",
+            "semantic_gate": {"status": "pass", "mode": "observe"},
         }
         for i in range(12)
     ]

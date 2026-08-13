@@ -54,11 +54,11 @@ _PICK_VERB_RE = re.compile(
 # Strip recipe / count / filler noise so leftover becomes gallery_search.query.
 _RESIDUE_NOISE_RE = re.compile(
     r"(帮我|请|给我|选出|挑选|找出|找|初选|标出|交片(?!级)|朋友圈|发朋友圈|社交媒体|"
-    r"适合法发|发\s*ins|发ins|instagram|交片级|最炸|气氛最好|氛围最好|最有气氛|感染力最|"
+    r"适合法发|发\s*ins|发ins|instagram|ins|交片级|最炸|气氛最好|氛围最好|最有气氛|感染力最|"
     r"高潮瞬间|决定性瞬间|最抓拍|瞬间最好|剔糊|去糊|过曝|剔除模糊|连拍|去重|只留|"
-    r"按分数排序|按得分排序|按分数排|照片|图片|精选|短名单|镜头|"
-    r"energy\s*最高|moment\s*peak|burst\s*dedup|"
-    r"但是|不过|但|多给|多|一些|一下|看看|适合|发|的|张|最)",
+    r"按分数排序|按得分排序|按分数排|照片|图片|精选|短名单|镜头|一批|直接|自动|"
+    r"不要|别|不用|无需|不需要|energy\s*最高|moment\s*peak|burst\s*dedup|"
+    r"但是|不过|但|多给|多|一些|一下|看看|适合|发|的|张|十|几|最)",
     re.IGNORECASE,
 )
 # Per-photo film recommend (look at analysis) — before keyword vibe apply.

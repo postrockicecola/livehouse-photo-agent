@@ -19,7 +19,16 @@
       "drummer",
       "drums"
     ],
-    "reason": "Peak drummer hit under red wash."
+    "reason": "Peak drummer hit under red wash.",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "guitar_01.jpg",
@@ -41,7 +50,16 @@
       "guitarist",
       "guitar"
     ],
-    "reason": "吉他手特写"
+    "reason": "吉他手特写",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "blur_01.jpg",
@@ -63,7 +81,16 @@
       "blurry",
       "low_quality"
     ],
-    "reason": "Out of focus."
+    "reason": "Out of focus.",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "wide_01.jpg",
@@ -85,7 +112,16 @@
       "wide stage",
       "panorama"
     ],
-    "reason": "舞台全景"
+    "reason": "舞台全景",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_00.jpg",
@@ -107,7 +143,16 @@
       "stage",
       "crowd"
     ],
-    "reason": "Stage frame 0"
+    "reason": "Stage frame 0",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_01.jpg",
@@ -128,7 +173,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 1"
+    "reason": "Stage frame 1",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_02.jpg",
@@ -149,7 +203,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 2"
+    "reason": "Stage frame 2",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_03.jpg",
@@ -171,7 +234,16 @@
       "stage",
       "crowd"
     ],
-    "reason": "Stage frame 3"
+    "reason": "Stage frame 3",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_04.jpg",
@@ -192,7 +264,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 4"
+    "reason": "Stage frame 4",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_05.jpg",
@@ -213,7 +294,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 5"
+    "reason": "Stage frame 5",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_06.jpg",
@@ -235,7 +325,16 @@
       "stage",
       "crowd"
     ],
-    "reason": "Stage frame 6"
+    "reason": "Stage frame 6",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_07.jpg",
@@ -256,7 +355,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 7"
+    "reason": "Stage frame 7",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_08.jpg",
@@ -277,7 +385,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 8"
+    "reason": "Stage frame 8",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_09.jpg",
@@ -299,7 +416,16 @@
       "stage",
       "crowd"
     ],
-    "reason": "Stage frame 9"
+    "reason": "Stage frame 9",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_10.jpg",
@@ -320,7 +446,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 10"
+    "reason": "Stage frame 10",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_11.jpg",
@@ -341,7 +476,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 11"
+    "reason": "Stage frame 11",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_12.jpg",
@@ -363,7 +507,16 @@
       "stage",
       "crowd"
     ],
-    "reason": "Stage frame 12"
+    "reason": "Stage frame 12",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_13.jpg",
@@ -384,7 +537,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 13"
+    "reason": "Stage frame 13",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_14.jpg",
@@ -405,7 +567,16 @@
     "tags": [
       "stage"
     ],
-    "reason": "Stage frame 14"
+    "reason": "Stage frame 14",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   },
   {
     "file": "stage_15.jpg",
@@ -427,6 +598,15 @@
       "stage",
       "crowd"
     ],
-    "reason": "Stage frame 15"
+    "reason": "Stage frame 15",
+    "semantic_gate": {
+      "status": "pass",
+      "mode": "observe",
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": ""
+    }
   }
 ]
