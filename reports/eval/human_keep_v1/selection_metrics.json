@@ -1,0 +1,127 @@
+{
+  "matched": 250,
+  "labels_unmatched": [],
+  "predictions_unmatched_count": 0,
+  "overall": {
+    "n": 0,
+    "spearman": NaN,
+    "pearson": NaN,
+    "mae": NaN,
+    "rmse": NaN
+  },
+  "per_dimension": {
+    "focus_sharpness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "exposure_control": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "noise_cleanliness": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "composition_framing": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "light_color_character": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "moment_peak": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "atmosphere_impact": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    },
+    "deliverable_subject": {
+      "n": 0,
+      "mae": NaN,
+      "spearman": NaN
+    }
+  },
+  "macro_dim_mae": NaN,
+  "calibration": {},
+  "selection": {
+    "n": 250,
+    "n_positives": 150,
+    "mean_pred_keep": 77.42800000000001,
+    "mean_pred_discard": 42.690999999999995,
+    "score_gap": 34.737000000000016,
+    "at_k": [
+      {
+        "k": 5,
+        "precision": 1.0,
+        "recall": 0.03333333333333333,
+        "overlap": 5
+      },
+      {
+        "k": 10,
+        "precision": 1.0,
+        "recall": 0.06666666666666667,
+        "overlap": 10
+      }
+    ]
+  },
+  "bias": {},
+  "quintile_calibration": [],
+  "validity": {
+    "schema": "metrics.validity.v1",
+    "n_known": 0,
+    "n_unknown": 250,
+    "coverage": 0.0,
+    "parse_fail": 0,
+    "regex_recovery": 0,
+    "missing_dim_items": 0,
+    "parse_fail_rate": 0.0,
+    "regex_recovery_rate": 0.0,
+    "missing_dim_rate": 0.0,
+    "missing_slot_rate": 0.0
+  },
+  "parse_fail_rate": 0.0,
+  "regex_recovery_rate": 0.0,
+  "missing_dim_rate": 0.0,
+  "n_excluded_parse_fail": 0,
+  "protocol": {
+    "schema_version": "1",
+    "generated_at": "2026-08-17T13:28:17.527318+00:00",
+    "git_sha": "8d4a5ba",
+    "seed": null,
+    "hardware": {
+      "platform": "macOS-15.3.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.12",
+      "cpu_count": 10,
+      "torch": null,
+      "cuda_available": false,
+      "system": "Darwin"
+    },
+    "model": {},
+    "inputs": {
+      "labels": {
+        "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/human_keep_v1/labels.jsonl",
+        "sha256_prefix": "adb2089b20c26cf3"
+      },
+      "predictions": {
+        "path": "reports/eval/selection_v1/full_vlm_baseline/predictions.jsonl",
+        "sha256_prefix": "179255a5c4290ebb"
+      }
+    },
+    "extra": {
+      "suite": "human_keep_v1_selection",
+      "keep_source": "selection_v1_sample_type"
+    }
+  }
+}

@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗑️ 低质照片 (评分 < 60) - Livehouse Photography</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .header-left p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .header-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .selection-counter {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .export-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .export-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .export-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .export-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #764ba2;
+        }
+        
+        .gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .image-row {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            transition: all 0.3s;
+        }
+        
+        .image-row:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            transform: translateY(-2px);
+        }
+        
+        .image-row.selected {
+            box-shadow: 0 0 0 3px #667eea;
+            background: #f8f9ff;
+        }
+        
+        .image-col {
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+            min-width: 0;
+        }
+        
+        /* 横图：偏宽扁区域 */
+        .image-row.orientation-landscape .image-col {
+            flex: 0 0 62%;
+            height: 380px;
+        }
+        .image-row.orientation-landscape .info-col {
+            flex: 0 0 38%;
+        }
+        /* 图片在框内按比例缩放，勿用 height:100% 以免把竖图拉成横条 */
+        .image-col img.gallery-photo {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            object-position: center;
+        }
+        
+        /* 竖图：窄而高的区域，与竖构图比例一致 */
+        .image-row.orientation-portrait .image-col {
+            flex: 0 0 34%;
+            min-width: 200px;
+            max-width: 42%;
+            min-height: 440px;
+            height: min(72vh, 640px);
+            max-height: 680px;
+        }
+        .image-row.orientation-portrait .info-col {
+            flex: 1 1 58%;
+            min-width: 0;
+        }
+        
+        .image-row.orientation-square .image-col {
+            flex: 0 0 50%;
+            height: 420px;
+        }
+        .image-row.orientation-square .info-col {
+            flex: 0 0 50%;
+        }
+        
+        .image-meta {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .orient-badge {
+            font-size: 0.8em;
+            padding: 3px 10px;
+            border-radius: 6px;
+            background: #eef0ff;
+            color: #445;
+        }
+        
+        .info-col {
+            flex: 0 0 35%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            background: white;
+            overflow-y: auto;
+        }
+        
+        .image-name {
+            font-weight: bold;
+            color: #333;
+            word-break: break-all;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        
+        .overall-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .score-circle {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .dimensions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dimension-note {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            padding: 4px 0;
+        }
+        
+        .dimension {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .dimension-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .dimension-bar {
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .dimension-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            margin-top: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        
+        .checkbox-label {
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            color: #999;
+        }
+        
+        .empty-state h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            color: #666;
+        }
+        
+        @media (max-width: 900px) {
+            .image-row {
+                flex-direction: column;
+            }
+            
+            .image-row.orientation-landscape .image-col,
+            .image-row.orientation-portrait .image-col,
+            .image-row.orientation-square .image-col {
+                flex: 0 0 auto;
+                width: 100%;
+                min-height: 280px;
+                height: auto;
+                max-height: 70vh;
+            }
+            
+            .image-row .info-col {
+                flex: 0 0 auto;
+                width: 100%;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-right {
+                text-align: center;
+                margin-top: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="preview.html" class="back-link">← 返回预览</a>
+        
+        <div class="header">
+            <div class="header-left">
+                <h1>🗑️ 低质照片 (评分 < 60)</h1>
+                <p id="total-count">共 12 张照片</p>
+            </div>
+            <div class="header-right">
+                <div class="selection-counter">
+                    已选择: <span id="selection-count">0</span> / 12
+                </div>
+                <button class="export-btn" id="export-btn" onclick="exportSelected()">
+                    📥 导出选中图片
+                </button>
+            </div>
+        </div>
+<div class="gallery">
+
+                    <div class="image-row orientation-landscape" data-image="20260405__DSC00419.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260405__DSC00419.jpg" alt="20260405__DSC00419.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260405__DSC00419.jpg">20260405__DSC00419.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">54.4</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>78/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 78.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>65/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 65.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>82/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 82.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>94/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 94.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>76/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 76.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>89/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 89.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>31/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 31.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260528ruanshizi__DSC02133.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260528ruanshizi__DSC02133.jpg" alt="20260528ruanshizi__DSC02133.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260528ruanshizi__DSC02133.jpg">20260528ruanshizi__DSC02133.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">48.4</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>68/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 68.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>75/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 75.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>52/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 52.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>17/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 17.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>30/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 30.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>5/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 5.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260528ruanshizi__DSC02227.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260528ruanshizi__DSC02227.jpg" alt="20260528ruanshizi__DSC02227.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260528ruanshizi__DSC02227.jpg">20260528ruanshizi__DSC02227.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">43.7</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>47/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 47.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>61/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 61.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>54/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 54.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>38/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 38.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>19/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 19.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>26/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 26.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>5/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 5.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260528ruanshizi__DSC03053.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260528ruanshizi__DSC03053.jpg" alt="20260528ruanshizi__DSC03053.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260528ruanshizi__DSC03053.jpg">20260528ruanshizi__DSC03053.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">57.5</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>32/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 32.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>45/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 45.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>58/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 58.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>67/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 67.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>73/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 73.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>51/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 51.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>69/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 69.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>20/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 20.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260627__DSC06864.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260627__DSC06864.jpg" alt="20260627__DSC06864.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260627__DSC06864.jpg">20260627__DSC06864.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">53.4</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>32/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 32.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>28/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 28.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>45/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 45.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>57/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 57.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>69/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 69.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>73/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 73.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>19/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 19.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260703__DSC00645.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260703__DSC00645.jpg" alt="20260703__DSC00645.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260703__DSC00645.jpg">20260703__DSC00645.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">57.4</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>68/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 68.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>55/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 55.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>47/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 47.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>86/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 86.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>39/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 39.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>72/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 72.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>18/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 18.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260703__DSC09546.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260703__DSC09546.jpg" alt="20260703__DSC09546.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260703__DSC09546.jpg">20260703__DSC09546.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">55.5</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>47/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 47.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>51/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 51.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>64/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 64.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>78/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 78.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>35/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 35.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>69/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 69.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>18/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 18.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260808__DSC01672.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260808__DSC01672.jpg" alt="20260808__DSC01672.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260808__DSC01672.jpg">20260808__DSC01672.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">52.0</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>37/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 37.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>58/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 58.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>69/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 69.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>45/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 45.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>72/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 72.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>19/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 19.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260808__DSC01776.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260808__DSC01776.jpg" alt="20260808__DSC01776.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260808__DSC01776.jpg">20260808__DSC01776.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">56.6</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>37/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 37.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>58/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 58.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>64/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 64.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>72/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 72.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>69/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 69.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>26/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 26.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260808__DSC01792.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260808__DSC01792.jpg" alt="20260808__DSC01792.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260808__DSC01792.jpg">20260808__DSC01792.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">54.8</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>37/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 37.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>58/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 58.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>72/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 72.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>64/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 64.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>69/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 69.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>26/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 26.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260808__DSC04262.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260808__DSC04262.jpg" alt="20260808__DSC04262.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260808__DSC04262.jpg">20260808__DSC04262.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">57.5</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>37/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 37.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>68/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 68.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>72/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 72.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>80/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 80.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>75/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 75.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>20/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 20.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-row orientation-landscape" data-image="20260808__DSC04316.jpg">
+                        <div class="image-col">
+                            <img class="gallery-photo" src="/image?path=/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/score_calibration_v1/images/AI_Trash_Below60/20260808__DSC04316.jpg" alt="20260808__DSC04316.jpg" style="aspect-ratio: 1616 / 1080;" onerror="this.parentElement.innerHTML='📷 图片加载失败'">
+                        </div>
+                        <div class="info-col">
+                            <div class="image-name" title="20260808__DSC04316.jpg">20260808__DSC04316.jpg</div>
+                            <div class="image-meta"><span class="orient-badge">横图</span><span class="pixel-size">1616×1080</span></div>
+                            <div class="overall-score">
+                                <span>总分</span>
+                                <div class="score-circle">54.9</div>
+                            </div>
+                            <div class="dimensions">
+                                
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>对焦与清晰度</span>
+                                <span>23/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 23.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>曝光与光比</span>
+                                <span>41/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 41.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>噪点与干净度</span>
+                                <span>57/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 57.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>构图与取景</span>
+                                <span>64/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 64.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>光影与色彩</span>
+                                <span>89/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 89.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>瞬间与张力</span>
+                                <span>30/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 30.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>氛围与感染力</span>
+                                <span>72/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 72.0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dimension">
+                            <div class="dimension-label">
+                                <span>主体可用性</span>
+                                <span>18/100</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-fill" style="width: 18.0%"></div>
+                            </div>
+                        </div>
+                            </div>
+                            <div class="checkbox-group" onclick="toggleCheckbox(this)">
+                                <input type="checkbox" class="image-checkbox">
+                                <label class="checkbox-label">选中此图片</label>
+                            </div>
+                        </div>
+                    </div>
+</div>
+
+        <div class="footer">
+            <p>图片已按照审美评分分类 | 导出后的图片将保存到本地</p>
+        </div>
+    </div>
+
+    <script>
+        const selectedImages = new Set();
+        
+        function updateSelectionCount() {
+            const count = selectedImages.size;
+            document.getElementById('selection-count').textContent = count;
+            const exportBtn = document.getElementById('export-btn');
+            if (count > 0) {
+                exportBtn.classList.add('active');
+                exportBtn.disabled = false;
+            } else {
+                exportBtn.classList.remove('active');
+                exportBtn.disabled = true;
+            }
+        }
+        
+        function toggleCheckbox(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            const row = element.closest('.image-row');
+            const imageName = row.dataset.image;
+            if (checkbox.checked) {
+                selectedImages.add(imageName);
+                row.classList.add('selected');
+            } else {
+                selectedImages.delete(imageName);
+                row.classList.remove('selected');
+            }
+            updateSelectionCount();
+        }
+        
+        function exportSelected() {
+            if (selectedImages.size === 0) {
+                alert('请先选择要导出的图片');
+                return;
+            }
+            const imageList = Array.from(selectedImages);
+            fetch('/api/export-images', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    images: imageList,
+                    category: document.title
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`成功导出 ${data.count} 张图片到: ${data.export_path}`);
+                    selectedImages.clear();
+                    document.querySelectorAll('.image-row').forEach(row => {
+                        row.classList.remove('selected');
+                        row.querySelector('input[type="checkbox"]').checked = false;
+                    });
+                    updateSelectionCount();
+                } else {
+                    alert('导出失败: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('导出出错: ' + error.message);
+            });
+        }
+        updateSelectionCount();
+    </script>
+
+</body>
+</html>

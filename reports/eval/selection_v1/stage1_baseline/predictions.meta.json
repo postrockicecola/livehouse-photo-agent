@@ -1,0 +1,10 @@
+{
+  "schema_version": "selection_predictions.v1",
+  "mode": "stage1_only",
+  "count": 250,
+  "stage1_rejected": 42,
+  "stage2_available": false,
+  "elapsed_seconds": 8.52,
+  "pipeline_config_sha256": "34c8d7067d8ac2b6d9af9dfd21c475d50eacaf2e7cc85bc6eebf6260119fe137",
+  "output": "reports/eval/selection_v1/stage1_baseline/predictions.jsonl"
+}

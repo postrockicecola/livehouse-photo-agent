@@ -1,0 +1,12 @@
+{
+  "schema_version": "selection_candidate_triage.v1",
+  "total": 198,
+  "counts": {
+    "uncertain": 7,
+    "semantic_defect": 54,
+    "ordinary": 66,
+    "highlight": 70,
+    "technical_hard": 1
+  },
+  "warning": "All categories are provisional until human review."
+}

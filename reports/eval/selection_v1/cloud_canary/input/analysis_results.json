@@ -1,0 +1,772 @@
+[
+  {
+    "file": "20260509__DSC05994.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Best_90+/20260509__DSC05994.jpg",
+    "category": "best",
+    "overall_score": 91.4,
+    "energy": 9.15,
+    "technical": 8.83,
+    "composition": 8.7,
+    "scores": {
+      "overall": 91.4,
+      "energy": 9.15,
+      "technical": 8.83,
+      "composition": 8.7,
+      "laplacian": 217.49
+    },
+    "dimensions": {
+      "focus_sharpness": 9.3,
+      "exposure_control": 8.7,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 7.8,
+      "light_color_character": 9.6,
+      "moment_peak": 9.4,
+      "atmosphere_impact": 8.9,
+      "deliverable_subject": 9.2
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "青蓝冷光勾勒湿发与面部轮廓，戏剧性光影层次",
+      "en": "Cyan-blue backlight sculpting wet hair and facial contours with dramatic chiaroscuro"
+    },
+    "weakness_bilingual": {
+      "zh": "右肩吉他带局部遮挡主体，构图略偏左失衡",
+      "en": "Guitar strap partially occludes right shoulder; slight left-weighted imbalance"
+    },
+    "reason": "青蓝冷光勾勒湿发与面部轮廓，戏剧性光影层次",
+    "weakness": "右肩吉他带局部遮挡主体，构图略偏左失衡",
+    "tags": [
+      "wet curly hair under stage gel",
+      "laced guitar strap detail",
+      "open-collared sheer shirt",
+      "dynamic vocal expression",
+      "cyan backlight haze",
+      "炽热投入",
+      "theatrical intensity",
+      "sweat-drenched euphoria"
+    ],
+    "mood_tags": [
+      "炽热投入",
+      "theatrical intensity",
+      "sweat-drenched euphoria"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260509__DSC05670.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260509__DSC05670.jpg",
+    "category": "keep",
+    "overall_score": 84.2,
+    "energy": 8.55,
+    "technical": 8.01,
+    "composition": 8.4,
+    "scores": {
+      "overall": 84.2,
+      "energy": 8.55,
+      "technical": 8.01,
+      "composition": 8.4,
+      "laplacian": 102.88
+    },
+    "dimensions": {
+      "focus_sharpness": 7.74,
+      "exposure_control": 7.8,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 7.6,
+      "light_color_character": 9.2,
+      "moment_peak": 8.7,
+      "atmosphere_impact": 8.4,
+      "deliverable_subject": 8.1
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "粉紫胶片感灯光塑造的戏剧性轮廓与情绪张力",
+      "en": "dramatic粉purple gel lighting sculpting expressive silhouette and emotional tension"
+    },
+    "weakness_bilingual": {
+      "zh": "麦克风轻微遮挡口部，削弱部分表情传达",
+      "en": "mic partially occludes mouth, slightly reducing facial expression legibility"
+    },
+    "reason": "粉紫胶片感灯光塑造的戏剧性轮廓与情绪张力",
+    "weakness": "麦克风轻微遮挡口部，削弱部分表情传达",
+    "tags": [
+      "lace-trimmed blouse",
+      "vintage guitar strap",
+      "backlit hair halo",
+      "intimate stage close-up",
+      "warm-cool light contrast",
+      "melancholic focus",
+      "introspective intensity",
+      "soft rock vulnerability"
+    ],
+    "mood_tags": [
+      "melancholic focus",
+      "introspective intensity",
+      "soft rock vulnerability"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260502__DSC05134.JPG",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260502__DSC05134.JPG",
+    "category": "keep",
+    "overall_score": 83.2,
+    "energy": 8.65,
+    "technical": 7.83,
+    "composition": 7.65,
+    "scores": {
+      "overall": 83.2,
+      "energy": 8.65,
+      "technical": 7.83,
+      "composition": 7.65,
+      "laplacian": 83.61
+    },
+    "dimensions": {
+      "focus_sharpness": 7.19,
+      "exposure_control": 7.7,
+      "noise_cleanliness": 8.6,
+      "composition_framing": 7.9,
+      "light_color_character": 7.4,
+      "moment_peak": 9.2,
+      "atmosphere_impact": 8.1,
+      "deliverable_subject": 9.0
+    },
+    "orientation": "portrait",
+    "width": 3072,
+    "height": 4608,
+    "reason_bilingual": {
+      "zh": "歌手峰值表情与手势同步，笑容真实有力",
+      "en": "Singer’s peak expression and gesture alignment—authentic, radiant smile"
+    },
+    "weakness_bilingual": {
+      "zh": "背景鼓手略显失焦且构图边缘化",
+      "en": "Drummer slightly soft-focused and compositionally marginalized"
+    },
+    "reason": "歌手峰值表情与手势同步，笑容真实有力",
+    "weakness": "背景鼓手略显失焦且构图边缘化",
+    "tags": [
+      "handheld mic grip",
+      "conga drum gradient finish",
+      "wooden shell chime rack",
+      "knit headwrap performer",
+      "backlit stage rig",
+      "joyful engagement",
+      "warm intimacy",
+      "focused euphoria"
+    ],
+    "mood_tags": [
+      "joyful engagement",
+      "warm intimacy",
+      "focused euphoria"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260509__DSC05818.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260509__DSC05818.jpg",
+    "category": "keep",
+    "overall_score": 82.8,
+    "energy": 8.1,
+    "technical": 7.87,
+    "composition": 8.15,
+    "scores": {
+      "overall": 82.8,
+      "energy": 8.1,
+      "technical": 7.87,
+      "composition": 8.15,
+      "laplacian": 88.11
+    },
+    "dimensions": {
+      "focus_sharpness": 7.32,
+      "exposure_control": 7.6,
+      "noise_cleanliness": 8.7,
+      "composition_framing": 7.2,
+      "light_color_character": 9.1,
+      "moment_peak": 7.8,
+      "atmosphere_impact": 8.4,
+      "deliverable_subject": 8.5
+    },
+    "orientation": "landscape",
+    "width": 1616,
+    "height": 1080,
+    "reason_bilingual": {
+      "zh": "蓝紫渐变舞台光雾营造沉浸氛围",
+      "en": "immersive blue-purple stage gel haze"
+    },
+    "weakness_bilingual": {
+      "zh": "左前景虚化手臂轻微干扰主体",
+      "en": "left foreground blurred arm slightly distracts"
+    },
+    "reason": "蓝紫渐变舞台光雾营造沉浸氛围",
+    "weakness": "左前景虚化手臂轻微干扰主体",
+    "tags": [
+      "white Stratocaster under stage gels",
+      "ear monitor + in-ear cable visible",
+      "backlit haze with purple-blue gradient",
+      "focused performer mid-chord transition",
+      "专注",
+      "沉静热烈",
+      "intimate intensity"
+    ],
+    "mood_tags": [
+      "专注",
+      "沉静热烈",
+      "intimate intensity"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260509__DSC06514.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260509__DSC06514.jpg",
+    "category": "keep",
+    "overall_score": 89.0,
+    "energy": 9.05,
+    "technical": 8.5,
+    "composition": 8.65,
+    "scores": {
+      "overall": 89.0,
+      "energy": 9.05,
+      "technical": 8.5,
+      "composition": 8.65,
+      "laplacian": 237.32
+    },
+    "dimensions": {
+      "focus_sharpness": 9.2,
+      "exposure_control": 7.8,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 8.3,
+      "light_color_character": 9.0,
+      "moment_peak": 8.7,
+      "atmosphere_impact": 9.4,
+      "deliverable_subject": 8.1
+    },
+    "orientation": "landscape",
+    "width": 1616,
+    "height": 1080,
+    "reason_bilingual": {
+      "zh": "红色背景屏与舞台光效营造的高能现场氛围",
+      "en": "High-energy stage atmosphere from red LED backdrop and dynamic lighting"
+    },
+    "weakness_bilingual": {
+      "zh": "观众剪影区域细节丢失，部分手臂遮挡主唱视线",
+      "en": "Audience silhouettes lack detail; raised arms partially obscure lead singer"
+    },
+    "reason": "红色背景屏与舞台光效营造的高能现场氛围",
+    "weakness": "观众剪影区域细节丢失，部分手臂遮挡主唱视线",
+    "tags": [
+      "red LED backdrop",
+      "silhouetted crowd with raised hands",
+      "shirtless vocalist mid-performance",
+      "Marshall amps on stage",
+      "backlit stage rigging",
+      "热烈",
+      "沉浸",
+      "euphoric"
+    ],
+    "mood_tags": [
+      "热烈",
+      "沉浸",
+      "euphoric"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260523__DSC09236.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260523__DSC09236.jpg",
+    "category": "keep",
+    "overall_score": 84.9,
+    "energy": 8.75,
+    "technical": 8.02,
+    "composition": 8.15,
+    "scores": {
+      "overall": 84.9,
+      "energy": 8.75,
+      "technical": 8.02,
+      "composition": 8.15,
+      "laplacian": 89.29
+    },
+    "dimensions": {
+      "focus_sharpness": 7.35,
+      "exposure_control": 8.2,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 7.6,
+      "light_color_character": 8.7,
+      "moment_peak": 9.1,
+      "atmosphere_impact": 8.4,
+      "deliverable_subject": 8.9
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "演唱瞬间的动态张力与眼神专注",
+      "en": "Dynamic vocal moment with focused expression"
+    },
+    "weakness_bilingual": {
+      "zh": "吉他琴颈轻微遮挡面部左侧",
+      "en": "Guitar neck partially obscures left side of face"
+    },
+    "reason": "演唱瞬间的动态张力与眼神专注",
+    "weakness": "吉他琴颈轻微遮挡面部左侧",
+    "tags": [
+      "side-profile vocal delivery",
+      "green electric guitar with collage strap",
+      "plaid skirt + sleeveless vest layering",
+      "low-key stage backlighting",
+      "visible arm tattoo detail",
+      "沉浸",
+      "intense focus",
+      "raw intimacy"
+    ],
+    "mood_tags": [
+      "沉浸",
+      "intense focus",
+      "raw intimacy"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260509__DSC06098.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260509__DSC06098.jpg",
+    "category": "keep",
+    "overall_score": 84.2,
+    "energy": 8.55,
+    "technical": 7.98,
+    "composition": 8.35,
+    "scores": {
+      "overall": 84.2,
+      "energy": 8.55,
+      "technical": 7.98,
+      "composition": 8.35,
+      "laplacian": 85.37
+    },
+    "dimensions": {
+      "focus_sharpness": 7.24,
+      "exposure_control": 8.2,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 7.6,
+      "light_color_character": 9.1,
+      "moment_peak": 8.7,
+      "atmosphere_impact": 8.4,
+      "deliverable_subject": 8.3
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "舞台灯光色彩与情绪高度统一",
+      "en": "Stage lighting color and emotional tone are tightly unified"
+    },
+    "weakness_bilingual": {
+      "zh": "构图略偏右，左侧留白稍空",
+      "en": "Slight right bias in framing; left negative space feels underutilized"
+    },
+    "reason": "舞台灯光色彩与情绪高度统一",
+    "weakness": "构图略偏右，左侧留白稍空",
+    "tags": [
+      "white Stratocaster under pink/blue gels",
+      "sleeveless black top with embroidered strap",
+      "focused guitarist mid-phrase",
+      "geometric backdrop with magenta blocks",
+      "visible forearm tattoo + belt harness",
+      "专注投入",
+      "炽热现场感",
+      "intense focus"
+    ],
+    "mood_tags": [
+      "专注投入",
+      "炽热现场感",
+      "intense focus"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260509__DSC06549.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260509__DSC06549.jpg",
+    "category": "keep",
+    "overall_score": 86.2,
+    "energy": 8.7,
+    "technical": 8.17,
+    "composition": 8.5,
+    "scores": {
+      "overall": 86.2,
+      "energy": 8.7,
+      "technical": 8.17,
+      "composition": 8.5,
+      "laplacian": 190.79
+    },
+    "dimensions": {
+      "focus_sharpness": 8.7,
+      "exposure_control": 7.3,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 7.8,
+      "light_color_character": 9.2,
+      "moment_peak": 8.4,
+      "atmosphere_impact": 9.0,
+      "deliverable_subject": 8.1
+    },
+    "orientation": "landscape",
+    "width": 1616,
+    "height": 1080,
+    "reason_bilingual": {
+      "zh": "红底白字背景与蓝紫追光的戏剧性色温对比",
+      "en": "dramatic warm-cool lighting contrast: red backdrop vs blue/purple spot gels"
+    },
+    "weakness_bilingual": {
+      "zh": "前景观众剪影过暗，部分遮挡舞台下缘",
+      "en": "over-dark foreground silhouettes partially obscure stage lower edge"
+    },
+    "reason": "红底白字背景与蓝紫追光的戏剧性色温对比",
+    "weakness": "前景观众剪影过暗，部分遮挡舞台下缘",
+    "tags": [
+      "backlit band silhouette",
+      "red LED backdrop with bold typography",
+      "audience phone glow",
+      "expressive gel lighting",
+      "livehouse stage haze",
+      "热烈",
+      "沉浸",
+      "euphoric"
+    ],
+    "mood_tags": [
+      "热烈",
+      "沉浸",
+      "euphoric"
+    ],
+    "semantic_gate": {
+      "is_present": false,
+      "types": [],
+      "severity": 0,
+      "confidence": 1.0,
+      "evidence": "",
+      "status": "pass",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260523__DSC08558.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Keep_60-90/20260523__DSC08558.jpg",
+    "category": "keep",
+    "overall_score": 85.2,
+    "energy": 9.0,
+    "technical": 8.17,
+    "composition": 8.3,
+    "scores": {
+      "overall": 85.2,
+      "energy": 9.0,
+      "technical": 8.17,
+      "composition": 8.3,
+      "laplacian": 120.36
+    },
+    "dimensions": {
+      "focus_sharpness": 7.8,
+      "exposure_control": 8.2,
+      "noise_cleanliness": 8.5,
+      "composition_framing": 7.6,
+      "light_color_character": 9.0,
+      "moment_peak": 9.3,
+      "atmosphere_impact": 8.7,
+      "deliverable_subject": 6.9
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "动态瞬间与光影塑造的强烈舞台张力",
+      "en": "Peak motion captured with dramatic stage lighting"
+    },
+    "weakness_bilingual": {
+      "zh": "面部被长发遮挡，主体表情辨识度偏低",
+      "en": "Subject's face heavily obscured by hair, reducing expression readability"
+    },
+    "reason": "动态瞬间与光影塑造的强烈舞台张力",
+    "weakness": "面部被长发遮挡，主体表情辨识度偏低",
+    "tags": [
+      "motion blur on hands",
+      "backlit hair halo",
+      "guqin on stand",
+      "tattooed forearm visible",
+      "stage gel lighting",
+      "专注",
+      "炽热",
+      "沉浸"
+    ],
+    "mood_tags": [
+      "专注",
+      "炽热",
+      "沉浸"
+    ],
+    "semantic_gate": {
+      "is_present": true,
+      "types": [
+        "heavy_occlusion"
+      ],
+      "severity": 2,
+      "confidence": 0.95,
+      "evidence": "Performer's eyes and upper face are fully covered by flowing hair in motion, preventing facial expression reading despite clear hand and instrument detail.",
+      "status": "reject",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260523__DSC08598.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Trash_Below60/20260523__DSC08598.jpg",
+    "category": "trash",
+    "overall_score": 11.3,
+    "energy": 0.55,
+    "technical": 2.37,
+    "composition": 1.35,
+    "scores": {
+      "overall": 11.3,
+      "energy": 0.55,
+      "technical": 2.37,
+      "composition": 1.35,
+      "laplacian": 0.48
+    },
+    "dimensions": {
+      "focus_sharpness": 0.3,
+      "exposure_control": 2.1,
+      "noise_cleanliness": 4.7,
+      "composition_framing": 1.8,
+      "light_color_character": 0.9,
+      "moment_peak": 0.5,
+      "atmosphere_impact": 0.6,
+      "deliverable_subject": 0.2
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "近乎全白的过曝留白",
+      "en": "near-total whiteout exposure"
+    },
+    "weakness_bilingual": {
+      "zh": "无可见主体与结构",
+      "en": "no visible subject or structure"
+    },
+    "reason": "近乎全白的过曝留白",
+    "weakness": "无可见主体与结构",
+    "tags": [
+      "complete overexposure",
+      "lost stage detail",
+      "absent performer silhouette",
+      "washed-out lighting",
+      "空洞",
+      "失焦"
+    ],
+    "mood_tags": [
+      "空洞",
+      "失焦"
+    ],
+    "semantic_gate": {
+      "is_present": true,
+      "types": [
+        "no_clear_subject",
+        "severe_composition_failure"
+      ],
+      "severity": 3,
+      "confidence": 1.0,
+      "evidence": "frame is >95% pure white with no discernible edges, shapes, or subjects; laplacian variance near zero confirms total loss of structural information",
+      "status": "reject",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260523__DSC08836.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Trash_Below60/20260523__DSC08836.jpg",
+    "category": "trash",
+    "overall_score": 10.3,
+    "energy": 0.75,
+    "technical": 2.0,
+    "composition": 1.4,
+    "scores": {
+      "overall": 10.3,
+      "energy": 0.75,
+      "technical": 2.0,
+      "composition": 1.4,
+      "laplacian": 0.13
+    },
+    "dimensions": {
+      "focus_sharpness": 0.3,
+      "exposure_control": 1.2,
+      "noise_cleanliness": 4.5,
+      "composition_framing": 2.0,
+      "light_color_character": 0.8,
+      "moment_peak": 0.5,
+      "atmosphere_impact": 1.0,
+      "deliverable_subject": 0.0
+    },
+    "orientation": "landscape",
+    "width": 1616,
+    "height": 1080,
+    "reason_bilingual": {
+      "zh": "极暗环境下的微弱烟雾光晕",
+      "en": "faint haze glow in near-total darkness"
+    },
+    "weakness_bilingual": {
+      "zh": "无可见主体与可识别内容",
+      "en": "no visible subject or discernible content"
+    },
+    "reason": "极暗环境下的微弱烟雾光晕",
+    "weakness": "无可见主体与可识别内容",
+    "tags": [
+      "near-black void",
+      "edge-of-light haze",
+      "unintentional underexposure",
+      "empty stage black",
+      "void",
+      "absence"
+    ],
+    "mood_tags": [
+      "void",
+      "absence"
+    ],
+    "semantic_gate": {
+      "is_present": true,
+      "types": [
+        "no_clear_subject"
+      ],
+      "severity": 3,
+      "confidence": 0.98,
+      "evidence": "entire frame is black with only faint indistinct haze in top-right; no performer, instrument, crowd, or stage element visible",
+      "status": "reject",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  },
+  {
+    "file": "20260424__DSC03910.jpg",
+    "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_canary/input/AI_Trash_Below60/20260424__DSC03910.jpg",
+    "category": "trash",
+    "overall_score": 46.7,
+    "energy": 8.05,
+    "technical": 4.07,
+    "composition": 7.55,
+    "scores": {
+      "overall": 46.7,
+      "energy": 8.05,
+      "technical": 4.07,
+      "composition": 7.55,
+      "laplacian": 1.4
+    },
+    "dimensions": {
+      "focus_sharpness": 2.3,
+      "exposure_control": 5.8,
+      "noise_cleanliness": 4.1,
+      "composition_framing": 6.7,
+      "light_color_character": 8.4,
+      "moment_peak": 7.9,
+      "atmosphere_impact": 8.2,
+      "deliverable_subject": 3.0
+    },
+    "orientation": "portrait",
+    "width": 1080,
+    "height": 1616,
+    "reason_bilingual": {
+      "zh": "红蓝胶片感舞台光晕与动态模糊交织的现场张力",
+      "en": "red-blue gel lighting and motion blur conveying live-stage intensity"
+    },
+    "weakness_bilingual": {
+      "zh": "主体面部与手部细节完全丢失，无法识别表演者身份或表情",
+      "en": "subject’s face and hands entirely obscured—no expression or identity readable"
+    },
+    "reason": "红蓝胶片感舞台光晕与动态模糊交织的现场张力",
+    "weakness": "主体面部与手部细节完全丢失，无法识别表演者身份或表情",
+    "tags": [
+      "motion-blur guitar gesture",
+      "low-key red/blue stage gels",
+      "silhouetted performer",
+      "dark ambient haze",
+      "tight mid-shot framing",
+      "紧张",
+      "沉浸",
+      "暗涌"
+    ],
+    "mood_tags": [
+      "紧张",
+      "沉浸",
+      "暗涌"
+    ],
+    "semantic_gate": {
+      "is_present": true,
+      "types": [
+        "no_clear_subject"
+      ],
+      "severity": 2,
+      "confidence": 0.95,
+      "evidence": "performer's face and hands are fully blurred beyond recognition; no discernible features or expression remain visible",
+      "status": "reject",
+      "mode": "observe",
+      "policy_version": "semantic_gate.v1"
+    }
+  }
+]

@@ -1,0 +1,904 @@
+{
+  "schema_version": "pack_missing_scoring_set.v1",
+  "source_pack_manifest": "data/eval/pack_hard_negative_v1/pack_manifest.json",
+  "existing_predictions": "data/eval/selection_v1/normalized_images/analysis_results.json",
+  "image_count": 112,
+  "items": [
+    {
+      "file": "20260523__DSC08377.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/AI_Best_90+/DSC08377.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260523__DSC08377.jpg",
+      "pack_ids": [
+        "hard_pack_01"
+      ]
+    },
+    {
+      "file": "20260523__DSC08406.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08406.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260523__DSC08406.jpg",
+      "pack_ids": [
+        "hard_pack_01"
+      ]
+    },
+    {
+      "file": "20260523__DSC08803.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08803.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260523__DSC08803.jpg",
+      "pack_ids": [
+        "hard_pack_01"
+      ]
+    },
+    {
+      "file": "20260523__DSC09927.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/AI_Best_90+/DSC09927.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260523__DSC09927.jpg",
+      "pack_ids": [
+        "hard_pack_01"
+      ]
+    },
+    {
+      "file": "20260523__DSC09939.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/AI_Best_90+/DSC09939.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260523__DSC09939.jpg",
+      "pack_ids": [
+        "hard_pack_01"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00167.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00167.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00167.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00486.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00486.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00486.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00621.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00621.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00621.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00623.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00623.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00623.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00677.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00677.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00677.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00709.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00709.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00709.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00792.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00792.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00792.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00793.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00793.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00793.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00872.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00872.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00872.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00880.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00880.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260524Chinesefootball__DSC00880.jpg",
+      "pack_ids": [
+        "hard_pack_02"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02364.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Best_90+/DSC02364.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02364.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02365.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Best_90+/DSC02365.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02365.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02377.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Best_90+/DSC02377.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02377.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02673.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02673.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02673.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02674.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02674.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02674.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02682.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02682.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02682.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02870.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02870.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02870.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02891.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02891.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02891.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02892.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02892.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02892.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260528ruanshizi__DSC02895.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02895.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260528ruanshizi__DSC02895.jpg",
+      "pack_ids": [
+        "hard_pack_03"
+      ]
+    },
+    {
+      "file": "20260613__DSC07666.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC07666.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC07666.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC08215.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC08215.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC08215.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC08709.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08709.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC08709.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC08911.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08911.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC08911.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC09255.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09255.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC09255.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC09257.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09257.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC09257.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC09272.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09272.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC09272.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260613__DSC09287.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09287.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260613__DSC09287.jpg",
+      "pack_ids": [
+        "hard_pack_04"
+      ]
+    },
+    {
+      "file": "20260618__DSC00701.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00701.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00701.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00742.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00742.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00742.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00743.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00743.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00743.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00747.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00747.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00747.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00749.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00749.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00749.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00750.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00750.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00750.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00751.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00751.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00751.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC00755.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00755.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC00755.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC01163.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC01163.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC01163.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260618__DSC01164.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC01164.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260618__DSC01164.jpg",
+      "pack_ids": [
+        "hard_pack_05"
+      ]
+    },
+    {
+      "file": "20260619__DSC02769.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02769.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02769.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02774.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02774.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02774.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02877.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02877.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02877.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02885.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02885.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02885.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02886.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02886.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02886.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02967.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02967.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02967.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02968.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02968.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02968.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02969.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02969.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02969.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02971.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02971.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02971.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC02979.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02979.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC02979.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC03044.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC03044.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC03044.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC03261.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC03261.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC03261.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260619__DSC03262.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC03262.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260619__DSC03262.jpg",
+      "pack_ids": [
+        "hard_pack_06"
+      ]
+    },
+    {
+      "file": "20260626__DSC03543.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03543.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC03543.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC03629.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC03629.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC03629.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC04342.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC04342.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC04342.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC04444.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC04444.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC04444.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC05635.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC05635.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC05635.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC05669.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC05669.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC05669.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC05743.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05743.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC05743.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260626__DSC06004.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC06004.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260626__DSC06004.jpg",
+      "pack_ids": [
+        "hard_pack_07"
+      ]
+    },
+    {
+      "file": "20260627__DSC06457.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC06457.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC06457.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC06458.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC06458.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC06458.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC07298.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC07298.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC07298.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC07347.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC07347.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC07347.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC08085.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC08085.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC08085.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC08087.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC08087.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC08087.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC08154.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Best_90+/DSC08154.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC08154.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260627__DSC08507.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC08507.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260627__DSC08507.jpg",
+      "pack_ids": [
+        "hard_pack_08"
+      ]
+    },
+    {
+      "file": "20260703__DSC00869.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00869.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC00869.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC00925.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00925.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC00925.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC00940.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00940.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC00940.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC00945.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00945.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC00945.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC00946.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00946.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC00946.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC01191.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01191.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC01191.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC01192.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01192.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC01192.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC01199.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01199.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC01199.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC01237.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01237.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC01237.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC02082.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02082.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC02082.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC02338.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC02338.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC02338.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260703__DSC02377.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC02377.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260703__DSC02377.jpg",
+      "pack_ids": [
+        "hard_pack_09"
+      ]
+    },
+    {
+      "file": "20260708__DSC03980.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03980.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03980.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC03981.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03981.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03981.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC03982.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03982.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03982.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC03983.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03983.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03983.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC03989.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03989.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03989.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC03990.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03990.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03990.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC03999.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03999.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC03999.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC04000.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC04000.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC04000.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC04001.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC04001.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC04001.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260708__DSC04002.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC04002.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260708__DSC04002.jpg",
+      "pack_ids": [
+        "hard_pack_10"
+      ]
+    },
+    {
+      "file": "20260710__DSC04390.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04390.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260710__DSC04390.jpg",
+      "pack_ids": [
+        "hard_pack_11"
+      ]
+    },
+    {
+      "file": "20260710__DSC04404.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/AI_Keep_60-90/DSC04404.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260710__DSC04404.jpg",
+      "pack_ids": [
+        "hard_pack_11"
+      ]
+    },
+    {
+      "file": "20260710__DSC04536.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04536.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260710__DSC04536.jpg",
+      "pack_ids": [
+        "hard_pack_11"
+      ]
+    },
+    {
+      "file": "20260710__DSC04538.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/AI_Keep_60-90/DSC04538.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260710__DSC04538.jpg",
+      "pack_ids": [
+        "hard_pack_11"
+      ]
+    },
+    {
+      "file": "20260710__DSC04540.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/AI_Keep_60-90/DSC04540.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260710__DSC04540.jpg",
+      "pack_ids": [
+        "hard_pack_11"
+      ]
+    },
+    {
+      "file": "20260711__DSC06045.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06045.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06045.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC06046.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06046.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06046.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC06047.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06047.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06047.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC06048.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06048.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06048.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC06049.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06049.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06049.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC06050.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06050.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06050.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC06051.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06051.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC06051.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260711__DSC07410.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC07410.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260711__DSC07410.jpg",
+      "pack_ids": [
+        "hard_pack_12"
+      ]
+    },
+    {
+      "file": "20260729__DSC09508.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09508.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260729__DSC09508.jpg",
+      "pack_ids": [
+        "hard_pack_13"
+      ]
+    },
+    {
+      "file": "20260729__DSC09825.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09825.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260729__DSC09825.jpg",
+      "pack_ids": [
+        "hard_pack_13"
+      ]
+    },
+    {
+      "file": "20260729__DSC09858.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/AI_Keep_60-90/DSC09858.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260729__DSC09858.jpg",
+      "pack_ids": [
+        "hard_pack_13"
+      ]
+    },
+    {
+      "file": "20260729__DSC09869.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/AI_Keep_60-90/DSC09869.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260729__DSC09869.jpg",
+      "pack_ids": [
+        "hard_pack_13"
+      ]
+    },
+    {
+      "file": "20260729__DSC09870.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/AI_Keep_60-90/DSC09870.jpg",
+      "materialized_path": "data/eval/pack_hard_negative_v1/cloud_scoring/input/20260729__DSC09870.jpg",
+      "pack_ids": [
+        "hard_pack_13"
+      ]
+    }
+  ]
+}

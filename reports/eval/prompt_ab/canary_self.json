@@ -1,0 +1,187 @@
+{
+  "schema_version": "prompt_ab_report.v1",
+  "split": "canary",
+  "n_files": 16,
+  "baseline_predictions": "reports/eval/selection_v1/full_vlm_baseline/predictions.jsonl",
+  "candidate_predictions": "reports/eval/selection_v1/full_vlm_baseline/predictions.jsonl",
+  "baseline": {
+    "matched": 16,
+    "validity": {
+      "schema": "metrics.validity.v1",
+      "n_known": 0,
+      "n_unknown": 16,
+      "coverage": 0.0,
+      "parse_fail": 0,
+      "regex_recovery": 0,
+      "missing_dim_items": 0,
+      "parse_fail_rate": 0.0,
+      "regex_recovery_rate": 0.0,
+      "missing_dim_rate": 0.0,
+      "missing_slot_rate": 0.0
+    },
+    "human_keep": {
+      "n": 16,
+      "n_positives": 8,
+      "score_gap": 34.775,
+      "precision_at_5": 0.8,
+      "precision_at_10": 0.7,
+      "at_k": [
+        {
+          "k": 5,
+          "precision": 0.8,
+          "recall": 0.5,
+          "overlap": 4
+        },
+        {
+          "k": 10,
+          "precision": 0.7,
+          "recall": 0.875,
+          "overlap": 7
+        }
+      ]
+    },
+    "zero_blunder": {
+      "5": {
+        "k": 5,
+        "n_ranked": 16,
+        "defect_count": 1,
+        "passed": false,
+        "defect_files": [
+          "20260711__DSC07338.jpg"
+        ]
+      },
+      "10": {
+        "k": 10,
+        "n_ranked": 16,
+        "defect_count": 3,
+        "passed": false,
+        "defect_files": [
+          "20260711__DSC07338.jpg",
+          "20260627__DSC06646.jpg",
+          "20260710__DSC05198.jpg"
+        ]
+      }
+    },
+    "diagnostics": {
+      "spearman": NaN,
+      "mae": NaN,
+      "n_scored_overall": 0
+    }
+  },
+  "candidate": {
+    "matched": 16,
+    "validity": {
+      "schema": "metrics.validity.v1",
+      "n_known": 0,
+      "n_unknown": 16,
+      "coverage": 0.0,
+      "parse_fail": 0,
+      "regex_recovery": 0,
+      "missing_dim_items": 0,
+      "parse_fail_rate": 0.0,
+      "regex_recovery_rate": 0.0,
+      "missing_dim_rate": 0.0,
+      "missing_slot_rate": 0.0
+    },
+    "human_keep": {
+      "n": 16,
+      "n_positives": 8,
+      "score_gap": 34.775,
+      "precision_at_5": 0.8,
+      "precision_at_10": 0.7,
+      "at_k": [
+        {
+          "k": 5,
+          "precision": 0.8,
+          "recall": 0.5,
+          "overlap": 4
+        },
+        {
+          "k": 10,
+          "precision": 0.7,
+          "recall": 0.875,
+          "overlap": 7
+        }
+      ]
+    },
+    "zero_blunder": {
+      "5": {
+        "k": 5,
+        "n_ranked": 16,
+        "defect_count": 1,
+        "passed": false,
+        "defect_files": [
+          "20260711__DSC07338.jpg"
+        ]
+      },
+      "10": {
+        "k": 10,
+        "n_ranked": 16,
+        "defect_count": 3,
+        "passed": false,
+        "defect_files": [
+          "20260711__DSC07338.jpg",
+          "20260627__DSC06646.jpg",
+          "20260710__DSC05198.jpg"
+        ]
+      }
+    },
+    "diagnostics": {
+      "spearman": NaN,
+      "mae": NaN,
+      "n_scored_overall": 0
+    }
+  },
+  "decision": {
+    "name": "prompt_ab",
+    "result": "pass",
+    "winner": "candidate",
+    "checks": [
+      {
+        "id": "validity_coverage",
+        "result": "skip",
+        "metric": "n_known",
+        "actual": 0,
+        "threshold": 1,
+        "message": "no parse provenance; validity gate skipped"
+      },
+      {
+        "id": "human_keep_precision_at_5",
+        "result": "pass",
+        "metric": "precision_at_5",
+        "actual": 0.8,
+        "threshold": 0.8,
+        "message": "precision_at_5 0.8 vs baseline 0.8"
+      },
+      {
+        "id": "human_keep_precision_at_10",
+        "result": "pass",
+        "metric": "precision_at_10",
+        "actual": 0.7,
+        "threshold": 0.7,
+        "message": "precision_at_10 0.7 vs baseline 0.7"
+      },
+      {
+        "id": "zero_blunder@5",
+        "result": "pass",
+        "metric": "zero_blunder_defects@5",
+        "actual": 1,
+        "threshold": 1,
+        "message": "defects@5 1 vs baseline 1"
+      },
+      {
+        "id": "zero_blunder@10",
+        "result": "pass",
+        "metric": "zero_blunder_defects@10",
+        "actual": 3,
+        "threshold": 3,
+        "message": "defects@10 3 vs baseline 3"
+      }
+    ],
+    "diagnostics_ignored": [
+      "spearman",
+      "mae",
+      "semantic_gate_recall"
+    ]
+  }
+}

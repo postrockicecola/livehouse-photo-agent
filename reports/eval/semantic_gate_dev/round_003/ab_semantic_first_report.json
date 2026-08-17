@@ -1,0 +1,448 @@
+{
+  "schema_version": "semantic_gate_dev_report.v1",
+  "review_rows": 116,
+  "source_unique_reviews": 112,
+  "unique_reviews": 32,
+  "revisions": 4,
+  "dispositions": {
+    "pass": 16,
+    "semantic_reject": 16
+  },
+  "metrics": {
+    "counts": {
+      "tp": 0,
+      "fn": 16,
+      "fp": 0,
+      "tn": 16,
+      "total": 32
+    },
+    "recall": {
+      "value": 0.0,
+      "low": 0.0,
+      "high": 0.193613
+    },
+    "false_negative_rate": 1.0,
+    "false_positive_rate": 0.0,
+    "specificity": {
+      "value": 1.0,
+      "low": 0.806387,
+      "high": 1.0
+    },
+    "precision": null
+  },
+  "type_recall": {
+    "closed_eyes": {
+      "caught": 0,
+      "total": 2,
+      "value": 0.0
+    },
+    "heavy_occlusion": {
+      "caught": 0,
+      "total": 9,
+      "value": 0.0
+    },
+    "missed_moment": {
+      "caught": 0,
+      "total": 11,
+      "value": 0.0
+    },
+    "no_clear_subject": {
+      "caught": 0,
+      "total": 8,
+      "value": 0.0
+    },
+    "severe_composition_failure": {
+      "caught": 0,
+      "total": 4,
+      "value": 0.0
+    }
+  },
+  "disagreements": [
+    {
+      "file": "20260322__DSC08029.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "鼓手面部被长发与阴影严重遮挡，且双臂未处于击打鼓面的明确动态峰值"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260322__DSC08054.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "no_clear_subject",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "鼓手面部与上半身被麦克风架、镲片及右侧大面积暗影严重遮挡，无清晰可识别姿态或表情；未捕捉到击打瞬间。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260322__DSC08061.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "no_clear_subject",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "主体为完全背对镜头的鼓手剪影，无面部、手势或击打动作可辨，无法确认是否处于演奏峰值；画面焦点落在设备与屏幕，人物未成为有效视觉主体。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260322__DSC08070.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "no_clear_subject",
+          "severe_composition_failure"
+        ],
+        "severity": 2,
+        "evidence": "画面中无清晰表演者，仅见鼓组局部与设备，主体完全不可辨识；前景麦克风架切割画面且无叙事功能。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260322__DSC08111.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "no_clear_subject",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "主体面部完全隐于阴影与鼓组后，无可见表情或手势；动作处于静止或过渡态，无击打瞬间的张力"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260405__DSC00500_film.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "severity": 2,
+        "evidence": "主唱完全处于强逆光中，仅剩模糊人形轮廓，无可见表情或明确动作；前景观众剪影进一步削弱主体辨识度。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260405__DSC00508_film.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "severity": 2,
+        "evidence": "主唱面部完全隐没于强背光与烟雾中，无任何表情或口型可辨；前景观众剪影与空中彩纸严重遮挡主体轮廓，导致无法确认其动作状态。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260502__DSC05127.JPG",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion"
+        ],
+        "severity": 2,
+        "evidence": ""
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260502__DSC05161.JPG",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "no_clear_subject",
+          "missed_moment",
+          "severe_composition_failure"
+        ],
+        "severity": 3,
+        "evidence": "画面中无清晰表演者或有效主体，焦点落在被塑料膜覆盖的标牌与杂乱设备上，构图完全偏离演出核心。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00672.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "missed_moment",
+          "severe_composition_failure"
+        ],
+        "severity": 2,
+        "evidence": "主唱姿态静态、无表情/动作张力；右侧模糊人影切入中景，破坏主体完整性；整体缺乏决定性瞬间。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00685.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "severity": 2,
+        "evidence": "主唱被‘FOOTBALL’投影严重遮挡，面部与上半身轮廓模糊；鼓手与键盘手细节缺失，整体缺乏可识别的清晰主体。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260626__DSC04341.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "missed_moment",
+          "severe_composition_failure"
+        ],
+        "severity": 2,
+        "evidence": "右侧键盘手严重动态模糊且无明确动作意图；左侧贝斯手虽清晰但被麦克风架部分遮挡，画面重心分散，缺乏统一视觉焦点"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260627__DSC08156.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "closed_eyes",
+          "heavy_occlusion",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "主体为纯剪影，无可见面部或手势细节；身体静止，未捕捉到演唱/演奏的动态瞬间。"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260708__DSC02876.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "镲片横贯面部中上部，遮挡双眼与眉区；鼓棒处于下挥中途，未捕捉到击打瞬间的张力峰值"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260708__DSC03737.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "closed_eyes",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "主体低头闭眼，面部表情不可读；姿态为演奏间隙的静止状态，非情绪或技术动作的峰值瞬间"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260708__DSC03988.jpg",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "missed_moment"
+        ],
+        "severity": 2,
+        "evidence": "镲片与麦克风支架严重遮挡面部，且手臂动作模糊，未捕捉到击打峰值瞬间"
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "confidence": 1.0,
+        "evidence": "",
+        "status": "pass",
+        "mode": "observe",
+        "policy_version": "semantic_gate.v1"
+      },
+      "error_type": "false_negative"
+    }
+  ]
+}

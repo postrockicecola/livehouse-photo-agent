@@ -64,6 +64,19 @@ data/eval/candidate_rounds/*/oriented_images/
 data/eval/selection_v1/images/
 data/eval/selection_v1/gallery_assets/
 data/eval/selection_v1/normalized_images/
+# Photo dumps stay local; labels / JSON reports are tracked
+data/eval/**/*.jpg
+data/eval/**/*.jpeg
+data/eval/**/*.JPG
+data/eval/**/*.JPEG
+data/eval/**/*.png
+data/eval/**/.luma_pipeline_staged/
+reports/eval/**/*.jpg
+reports/eval/**/*.jpeg
+reports/eval/**/*.JPG
+reports/eval/**/*.JPEG
+reports/eval/**/*.png
+reports/eval/**/.luma_pipeline_staged/
 models/eval/
 *.ARW
 

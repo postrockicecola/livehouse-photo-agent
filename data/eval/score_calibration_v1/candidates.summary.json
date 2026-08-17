@@ -1,0 +1,89 @@
+{
+  "schema_version": "score_calibration_candidates.v1",
+  "seed": 20260811,
+  "selected_total": 295,
+  "selected_counts": {
+    "technical_hard": 60,
+    "semantic_defect": 25,
+    "ordinary": 140,
+    "highlight": 70
+  },
+  "selection_v1_excluded": 250,
+  "cross_dataset_phash_max_hamming": 8,
+  "near_duplicates_removed": 9,
+  "removed": [
+    {
+      "file": "20260708__DSC03858.jpg",
+      "target_category": "technical_hard",
+      "min_selection_v1_hamming": 6
+    },
+    {
+      "file": "20260708__DSC02967.jpg",
+      "target_category": "technical_hard",
+      "min_selection_v1_hamming": 4
+    },
+    {
+      "file": "20260708__DSC02864.jpg",
+      "target_category": "technical_hard",
+      "min_selection_v1_hamming": 4
+    },
+    {
+      "file": "20260626__DSC03629.jpg",
+      "target_category": "highlight",
+      "min_selection_v1_hamming": 0
+    },
+    {
+      "file": "20260509__DSC06542.jpg",
+      "target_category": "highlight",
+      "min_selection_v1_hamming": 8
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00486.jpg",
+      "target_category": "highlight",
+      "min_selection_v1_hamming": 0
+    },
+    {
+      "file": "20260627__DSC08154.jpg",
+      "target_category": "highlight",
+      "min_selection_v1_hamming": 0
+    },
+    {
+      "file": "20260509__DSC06510.jpg",
+      "target_category": "highlight",
+      "min_selection_v1_hamming": 8
+    },
+    {
+      "file": "20260703__DSC09437.jpg",
+      "target_category": "highlight",
+      "min_selection_v1_hamming": 6
+    }
+  ],
+  "source_pool": "candidate_pool.jsonl",
+  "manual_exclusions": [
+    {
+      "file": "20260502__DSC05493.JPG",
+      "reason": "out_of_domain_landscape",
+      "ai_score": 62.3
+    },
+    {
+      "file": "20260528ruanshizi__DSC02133.jpg",
+      "reason": "out_of_domain_landscape",
+      "ai_score": 48.4
+    },
+    {
+      "file": "20260528ruanshizi__DSC02227.jpg",
+      "reason": "out_of_domain_landscape",
+      "ai_score": 43.7
+    },
+    {
+      "file": "20260528ruanshizi__DSC03053.jpg",
+      "reason": "out_of_domain_landscape",
+      "ai_score": 57.5
+    },
+    {
+      "file": "20260528ruanshizi__DSC03076.jpg",
+      "reason": "out_of_domain_landscape",
+      "ai_score": 62.4
+    }
+  ]
+}

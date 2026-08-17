@@ -1,0 +1,47 @@
+{
+  "schema_version": "keep_source_agreement.v1",
+  "independent_second_rater": false,
+  "sources": {
+    "human_keep_v1": {
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/human_keep_v1/labels.jsonl",
+      "n_keep_labels": 250
+    },
+    "round_001_reviews": {
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/candidate_rounds/round_001/human_reviews.jsonl",
+      "n_keep_labels": 196
+    },
+    "round_002_reviews": {
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/candidate_rounds/round_002/human_reviews.jsonl",
+      "n_keep_labels": 198
+    }
+  },
+  "missing": [],
+  "pairs": [
+    {
+      "a": "human_keep_v1",
+      "b": "round_001_reviews",
+      "n": 115,
+      "agreement": 0.5217391304347826,
+      "cohen_kappa": 0.18774881212276867,
+      "a_keep_rate": 0.6260869565217392,
+      "b_keep_rate": 0.14782608695652175
+    },
+    {
+      "a": "human_keep_v1",
+      "b": "round_002_reviews",
+      "n": 129,
+      "agreement": 0.6511627906976745,
+      "cohen_kappa": 0.3670264965652602,
+      "a_keep_rate": 0.6046511627906976,
+      "b_keep_rate": 0.2558139534883721
+    },
+    {
+      "a": "round_001_reviews",
+      "b": "round_002_reviews",
+      "n": 0,
+      "agreement": null,
+      "cohen_kappa": null
+    }
+  ],
+  "notes": "human_keep_v1 is selection_v1 sample_type (deliverable vs defect). Candidate-round keep is a different protocol and may be Qwen-anchored. Do not quote these pairs as human IRR."
+}

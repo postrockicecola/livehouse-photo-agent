@@ -1,0 +1,14 @@
+{
+  "schema_version": "selection_predictions.v1",
+  "mode": "cloud_intrinsic",
+  "count": 250,
+  "stage1_rejected": 0,
+  "semantic_rejected": 126,
+  "fallback_count": 0,
+  "schema_valid_count": 250,
+  "usage_count": 250,
+  "semantic_gate_note": "semantic_reject uses Stage3 semantic_gate when present; legacy audit rows fall back to the historical trash threshold. Automatic ranking is stricter: only semantic_gate.status=pass is selection_eligible.",
+  "pipeline_config_sha256": "f683eaba9858750c3f95380802f6a9e572920193a9c0d7554bfc6f596c62b202",
+  "audit_sha256": "b866cfe525a14f3f8c7dd56a7661fa93c01a6f7af00bdd2ea6974faf0d14eb6e",
+  "output": "reports/eval/selection_v1/cloud_full/predictions.jsonl"
+}

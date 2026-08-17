@@ -1,0 +1,28 @@
+{
+  "schema_version": "selection_candidate_round.v1",
+  "seed": 20260809,
+  "archive_root": "/Volumes/M4Buffer/Visions/Livehouse_Archive",
+  "sessions_scanned": 20,
+  "candidate_rows_scanned": 31270,
+  "existing_labels_excluded": 250,
+  "requested_quotas": {
+    "technical_hard": 60,
+    "semantic_defect": 80,
+    "ordinary": 30,
+    "highlight": 30
+  },
+  "dedupe": {
+    "max_hamming": 12,
+    "min_file_number_gap": 25,
+    "max_per_session": 12
+  },
+  "selected_counts": {
+    "technical_hard": 60,
+    "semantic_defect": 77,
+    "ordinary": 29,
+    "highlight": 30
+  },
+  "selected_total": 196,
+  "warning": "target_category and mining_score are model-derived sampling signals, not evaluation ground truth",
+  "manually_excluded": 4
+}

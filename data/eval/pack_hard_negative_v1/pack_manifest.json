@@ -1,0 +1,1071 @@
+{
+  "schema_version": "pack_hard_negative.v1",
+  "seed": 20260812,
+  "selection_policy": "up to five highest-scoring known defects + six highest-scoring acceptable frames + burst neighbors",
+  "max_size": 15,
+  "pack_count": 13,
+  "development_pack_count": 10,
+  "holdout_pack_count": 3,
+  "image_count": 195,
+  "known_defect_count": 53,
+  "burst_candidate_count": 26,
+  "packs": [
+    {
+      "id": "hard_pack_01",
+      "session": "2026-05-23",
+      "split": "development",
+      "files": [
+        "20260523__DSC09335.jpg",
+        "20260523__DSC08558.jpg",
+        "20260523__DSC09405.jpg",
+        "20260523__DSC09236.jpg",
+        "20260523__DSC09673.jpg",
+        "20260523__DSC08408.jpg",
+        "20260523__DSC08804.jpg",
+        "20260523__DSC09472.jpg",
+        "20260523__DSC08129.jpg",
+        "20260523__DSC09207.jpg",
+        "20260523__DSC08377.jpg",
+        "20260523__DSC09927.jpg",
+        "20260523__DSC09939.jpg",
+        "20260523__DSC08406.jpg",
+        "20260523__DSC08803.jpg"
+      ],
+      "source_paths": {
+        "20260523__DSC09335.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09335.jpg",
+        "20260523__DSC08558.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08558.jpg",
+        "20260523__DSC09405.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09405.jpg",
+        "20260523__DSC09236.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09236.jpg",
+        "20260523__DSC09673.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09673.jpg",
+        "20260523__DSC08408.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08408.jpg",
+        "20260523__DSC08804.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08804.jpg",
+        "20260523__DSC09472.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09472.jpg",
+        "20260523__DSC08129.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08129.jpg",
+        "20260523__DSC09207.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09207.jpg",
+        "20260523__DSC08377.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/AI_Best_90+/DSC08377.jpg",
+        "20260523__DSC09927.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/AI_Best_90+/DSC09927.jpg",
+        "20260523__DSC09939.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/AI_Best_90+/DSC09939.jpg",
+        "20260523__DSC08406.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08406.jpg",
+        "20260523__DSC08803.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08803.jpg"
+      },
+      "known_defect_ids": [
+        "20260523__DSC09335.jpg",
+        "20260523__DSC08558.jpg",
+        "20260523__DSC09405.jpg",
+        "20260523__DSC09236.jpg",
+        "20260523__DSC09673.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260523__DSC09335.jpg": [
+          "heavy_occlusion",
+          "severe_composition_failure"
+        ],
+        "20260523__DSC08558.jpg": [
+          "heavy_occlusion",
+          "severe_composition_failure"
+        ],
+        "20260523__DSC09405.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260523__DSC09236.jpg": [
+          "severe_composition_failure",
+          "heavy_occlusion"
+        ],
+        "20260523__DSC09673.jpg": [
+          "out_of_focus"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260523__DSC08377.jpg",
+        "20260523__DSC09927.jpg",
+        "20260523__DSC09939.jpg",
+        "20260523__DSC08406.jpg",
+        "20260523__DSC08803.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260523__DSC08406.jpg": "20260523__DSC08408.jpg",
+        "20260523__DSC08803.jpg": "20260523__DSC08804.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260523__DSC08406.jpg": 6,
+        "20260523__DSC08803.jpg": 18
+      }
+    },
+    {
+      "id": "hard_pack_02",
+      "session": "2026-05-24_Chinesefootball",
+      "split": "development",
+      "files": [
+        "20260524Chinesefootball__DSC00656.jpg",
+        "20260524Chinesefootball__DSC00810.jpg",
+        "20260524Chinesefootball__DSC00178.jpg",
+        "20260524Chinesefootball__DSC00485.jpg",
+        "20260524Chinesefootball__DSC00871.jpg",
+        "20260524Chinesefootball__DSC00167.jpg",
+        "20260524Chinesefootball__DSC00709.jpg",
+        "20260524Chinesefootball__DSC00621.jpg",
+        "20260524Chinesefootball__DSC00677.jpg",
+        "20260524Chinesefootball__DSC00623.jpg",
+        "20260524Chinesefootball__DSC00792.jpg",
+        "20260524Chinesefootball__DSC00793.jpg",
+        "20260524Chinesefootball__DSC00880.jpg",
+        "20260524Chinesefootball__DSC00486.jpg",
+        "20260524Chinesefootball__DSC00872.jpg"
+      ],
+      "source_paths": {
+        "20260524Chinesefootball__DSC00656.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00656.jpg",
+        "20260524Chinesefootball__DSC00810.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00810.jpg",
+        "20260524Chinesefootball__DSC00178.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00178.jpg",
+        "20260524Chinesefootball__DSC00485.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00485.jpg",
+        "20260524Chinesefootball__DSC00871.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00871.jpg",
+        "20260524Chinesefootball__DSC00167.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00167.jpg",
+        "20260524Chinesefootball__DSC00709.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00709.jpg",
+        "20260524Chinesefootball__DSC00621.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00621.jpg",
+        "20260524Chinesefootball__DSC00677.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00677.jpg",
+        "20260524Chinesefootball__DSC00623.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00623.jpg",
+        "20260524Chinesefootball__DSC00792.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00792.jpg",
+        "20260524Chinesefootball__DSC00793.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00793.jpg",
+        "20260524Chinesefootball__DSC00880.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/AI_Best_90+/DSC00880.jpg",
+        "20260524Chinesefootball__DSC00486.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00486.jpg",
+        "20260524Chinesefootball__DSC00872.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00872.jpg"
+      },
+      "known_defect_ids": [
+        "20260524Chinesefootball__DSC00656.jpg",
+        "20260524Chinesefootball__DSC00810.jpg",
+        "20260524Chinesefootball__DSC00178.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260524Chinesefootball__DSC00656.jpg": [
+          "technical_failure"
+        ],
+        "20260524Chinesefootball__DSC00810.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "excessive_noise",
+          "undeliverable_subject"
+        ],
+        "20260524Chinesefootball__DSC00178.jpg": [
+          "severe_composition_failure"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260524Chinesefootball__DSC00167.jpg",
+        "20260524Chinesefootball__DSC00709.jpg",
+        "20260524Chinesefootball__DSC00621.jpg",
+        "20260524Chinesefootball__DSC00677.jpg",
+        "20260524Chinesefootball__DSC00623.jpg",
+        "20260524Chinesefootball__DSC00792.jpg",
+        "20260524Chinesefootball__DSC00793.jpg",
+        "20260524Chinesefootball__DSC00880.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260524Chinesefootball__DSC00486.jpg": "20260524Chinesefootball__DSC00485.jpg",
+        "20260524Chinesefootball__DSC00872.jpg": "20260524Chinesefootball__DSC00871.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260524Chinesefootball__DSC00486.jpg": 0,
+        "20260524Chinesefootball__DSC00872.jpg": 4
+      }
+    },
+    {
+      "id": "hard_pack_03",
+      "session": "2026-05-28_ruanshizi",
+      "split": "development",
+      "files": [
+        "20260528ruanshizi__DSC02342.jpg",
+        "20260528ruanshizi__DSC02467.jpg",
+        "20260528ruanshizi__DSC02649.jpg",
+        "20260528ruanshizi__DSC02960.jpg",
+        "20260528ruanshizi__DSC02501.jpg",
+        "20260528ruanshizi__DSC02364.jpg",
+        "20260528ruanshizi__DSC02365.jpg",
+        "20260528ruanshizi__DSC02377.jpg",
+        "20260528ruanshizi__DSC02895.jpg",
+        "20260528ruanshizi__DSC02674.jpg",
+        "20260528ruanshizi__DSC02682.jpg",
+        "20260528ruanshizi__DSC02870.jpg",
+        "20260528ruanshizi__DSC02892.jpg",
+        "20260528ruanshizi__DSC02891.jpg",
+        "20260528ruanshizi__DSC02673.jpg"
+      ],
+      "source_paths": {
+        "20260528ruanshizi__DSC02342.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02342.jpg",
+        "20260528ruanshizi__DSC02467.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02467.jpg",
+        "20260528ruanshizi__DSC02649.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02649.jpg",
+        "20260528ruanshizi__DSC02960.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02960.jpg",
+        "20260528ruanshizi__DSC02501.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02501.jpg",
+        "20260528ruanshizi__DSC02364.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Best_90+/DSC02364.jpg",
+        "20260528ruanshizi__DSC02365.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Best_90+/DSC02365.jpg",
+        "20260528ruanshizi__DSC02377.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Best_90+/DSC02377.jpg",
+        "20260528ruanshizi__DSC02895.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02895.jpg",
+        "20260528ruanshizi__DSC02674.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02674.jpg",
+        "20260528ruanshizi__DSC02682.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02682.jpg",
+        "20260528ruanshizi__DSC02870.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02870.jpg",
+        "20260528ruanshizi__DSC02892.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02892.jpg",
+        "20260528ruanshizi__DSC02891.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02891.jpg",
+        "20260528ruanshizi__DSC02673.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/AI_Keep_60-90/DSC02673.jpg"
+      },
+      "known_defect_ids": [
+        "20260528ruanshizi__DSC02342.jpg",
+        "20260528ruanshizi__DSC02467.jpg",
+        "20260528ruanshizi__DSC02649.jpg",
+        "20260528ruanshizi__DSC02960.jpg",
+        "20260528ruanshizi__DSC02501.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260528ruanshizi__DSC02342.jpg": [
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "20260528ruanshizi__DSC02467.jpg": [
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "20260528ruanshizi__DSC02649.jpg": [
+          "missed_moment",
+          "heavy_occlusion"
+        ],
+        "20260528ruanshizi__DSC02960.jpg": [
+          "no_clear_subject",
+          "missed_moment"
+        ],
+        "20260528ruanshizi__DSC02501.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "excessive_noise"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260528ruanshizi__DSC02364.jpg",
+        "20260528ruanshizi__DSC02365.jpg",
+        "20260528ruanshizi__DSC02377.jpg",
+        "20260528ruanshizi__DSC02895.jpg",
+        "20260528ruanshizi__DSC02674.jpg",
+        "20260528ruanshizi__DSC02682.jpg",
+        "20260528ruanshizi__DSC02870.jpg",
+        "20260528ruanshizi__DSC02892.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260528ruanshizi__DSC02891.jpg": "20260528ruanshizi__DSC02895.jpg",
+        "20260528ruanshizi__DSC02673.jpg": "20260528ruanshizi__DSC02674.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260528ruanshizi__DSC02891.jpg": 12,
+        "20260528ruanshizi__DSC02673.jpg": 8
+      }
+    },
+    {
+      "id": "hard_pack_04",
+      "session": "2026-06-13",
+      "split": "development",
+      "files": [
+        "20260613__DSC09273.jpg",
+        "20260613__DSC09596.jpg",
+        "20260613__DSC08708.jpg",
+        "20260613__DSC08910.jpg",
+        "20260613__DSC07498.jpg",
+        "20260613__DSC08766.jpg",
+        "20260613__DSC08469.jpg",
+        "20260613__DSC07666.jpg",
+        "20260613__DSC09255.jpg",
+        "20260613__DSC09272.jpg",
+        "20260613__DSC09287.jpg",
+        "20260613__DSC09257.jpg",
+        "20260613__DSC08215.jpg",
+        "20260613__DSC08709.jpg",
+        "20260613__DSC08911.jpg"
+      ],
+      "source_paths": {
+        "20260613__DSC09273.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09273.jpg",
+        "20260613__DSC09596.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09596.jpg",
+        "20260613__DSC08708.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08708.jpg",
+        "20260613__DSC08910.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08910.jpg",
+        "20260613__DSC07498.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC07498.jpg",
+        "20260613__DSC08766.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08766.jpg",
+        "20260613__DSC08469.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08469.jpg",
+        "20260613__DSC07666.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC07666.jpg",
+        "20260613__DSC09255.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09255.jpg",
+        "20260613__DSC09272.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09272.jpg",
+        "20260613__DSC09287.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09287.jpg",
+        "20260613__DSC09257.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC09257.jpg",
+        "20260613__DSC08215.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/AI_Best_90+/DSC08215.jpg",
+        "20260613__DSC08709.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08709.jpg",
+        "20260613__DSC08911.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08911.jpg"
+      },
+      "known_defect_ids": [
+        "20260613__DSC09273.jpg",
+        "20260613__DSC09596.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260613__DSC09273.jpg": [
+          "severe_composition_failure",
+          "heavy_occlusion"
+        ],
+        "20260613__DSC09596.jpg": [
+          "no_clear_subject",
+          "missed_moment"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260613__DSC07666.jpg",
+        "20260613__DSC09255.jpg",
+        "20260613__DSC09272.jpg",
+        "20260613__DSC09287.jpg",
+        "20260613__DSC09257.jpg",
+        "20260613__DSC08215.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260613__DSC08709.jpg": "20260613__DSC08708.jpg",
+        "20260613__DSC08911.jpg": "20260613__DSC08910.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260613__DSC08709.jpg": 4,
+        "20260613__DSC08911.jpg": 10
+      }
+    },
+    {
+      "id": "hard_pack_05",
+      "session": "2026-06-18",
+      "split": "development",
+      "files": [
+        "20260618__DSC00964.jpg",
+        "20260618__DSC02221.jpg",
+        "20260618__DSC00875.jpg",
+        "20260618__DSC01260.jpg",
+        "20260618__DSC00929.jpg",
+        "20260618__DSC00750.jpg",
+        "20260618__DSC01164.jpg",
+        "20260618__DSC00751.jpg",
+        "20260618__DSC00743.jpg",
+        "20260618__DSC00747.jpg",
+        "20260618__DSC00701.jpg",
+        "20260618__DSC00755.jpg",
+        "20260618__DSC00742.jpg",
+        "20260618__DSC00749.jpg",
+        "20260618__DSC01163.jpg"
+      ],
+      "source_paths": {
+        "20260618__DSC00964.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC00964.jpg",
+        "20260618__DSC02221.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC02221.jpg",
+        "20260618__DSC00875.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC00875.jpg",
+        "20260618__DSC01260.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01260.jpg",
+        "20260618__DSC00929.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC00929.jpg",
+        "20260618__DSC00750.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00750.jpg",
+        "20260618__DSC01164.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC01164.jpg",
+        "20260618__DSC00751.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00751.jpg",
+        "20260618__DSC00743.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00743.jpg",
+        "20260618__DSC00747.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00747.jpg",
+        "20260618__DSC00701.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00701.jpg",
+        "20260618__DSC00755.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00755.jpg",
+        "20260618__DSC00742.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00742.jpg",
+        "20260618__DSC00749.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC00749.jpg",
+        "20260618__DSC01163.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/AI_Keep_60-90/DSC01163.jpg"
+      },
+      "known_defect_ids": [
+        "20260618__DSC00964.jpg",
+        "20260618__DSC02221.jpg",
+        "20260618__DSC00875.jpg",
+        "20260618__DSC01260.jpg",
+        "20260618__DSC00929.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260618__DSC00964.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260618__DSC02221.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "undeliverable_subject"
+        ],
+        "20260618__DSC00875.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "excessive_noise",
+          "undeliverable_subject"
+        ],
+        "20260618__DSC01260.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "excessive_noise",
+          "undeliverable_subject"
+        ],
+        "20260618__DSC00929.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "excessive_noise",
+          "undeliverable_subject"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260618__DSC00750.jpg",
+        "20260618__DSC01164.jpg",
+        "20260618__DSC00751.jpg",
+        "20260618__DSC00743.jpg",
+        "20260618__DSC00747.jpg",
+        "20260618__DSC00701.jpg",
+        "20260618__DSC00755.jpg",
+        "20260618__DSC00742.jpg",
+        "20260618__DSC00749.jpg",
+        "20260618__DSC01163.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260618__DSC00749.jpg": "20260618__DSC00750.jpg",
+        "20260618__DSC01163.jpg": "20260618__DSC01164.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260618__DSC00749.jpg": 4,
+        "20260618__DSC01163.jpg": 2
+      }
+    },
+    {
+      "id": "hard_pack_06",
+      "session": "2026-06-19",
+      "split": "development",
+      "files": [
+        "20260619__DSC03145.jpg",
+        "20260619__DSC02663.jpg",
+        "20260619__DSC02885.jpg",
+        "20260619__DSC02968.jpg",
+        "20260619__DSC02969.jpg",
+        "20260619__DSC03262.jpg",
+        "20260619__DSC03261.jpg",
+        "20260619__DSC02769.jpg",
+        "20260619__DSC02774.jpg",
+        "20260619__DSC02979.jpg",
+        "20260619__DSC03044.jpg",
+        "20260619__DSC02877.jpg",
+        "20260619__DSC02971.jpg",
+        "20260619__DSC02886.jpg",
+        "20260619__DSC02967.jpg"
+      ],
+      "source_paths": {
+        "20260619__DSC03145.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/DSC03145.jpg",
+        "20260619__DSC02663.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/DSC02663.jpg",
+        "20260619__DSC02885.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02885.jpg",
+        "20260619__DSC02968.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02968.jpg",
+        "20260619__DSC02969.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02969.jpg",
+        "20260619__DSC03262.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC03262.jpg",
+        "20260619__DSC03261.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC03261.jpg",
+        "20260619__DSC02769.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02769.jpg",
+        "20260619__DSC02774.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02774.jpg",
+        "20260619__DSC02979.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02979.jpg",
+        "20260619__DSC03044.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC03044.jpg",
+        "20260619__DSC02877.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02877.jpg",
+        "20260619__DSC02971.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02971.jpg",
+        "20260619__DSC02886.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02886.jpg",
+        "20260619__DSC02967.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-19/Previews/AI_Keep_60-90/DSC02967.jpg"
+      },
+      "known_defect_ids": [
+        "20260619__DSC03145.jpg",
+        "20260619__DSC02663.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260619__DSC03145.jpg": [
+          "missed_moment",
+          "heavy_occlusion"
+        ],
+        "20260619__DSC02663.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "undeliverable_subject"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260619__DSC02885.jpg",
+        "20260619__DSC02968.jpg",
+        "20260619__DSC02969.jpg",
+        "20260619__DSC03262.jpg",
+        "20260619__DSC03261.jpg",
+        "20260619__DSC02769.jpg",
+        "20260619__DSC02774.jpg",
+        "20260619__DSC02979.jpg",
+        "20260619__DSC03044.jpg",
+        "20260619__DSC02877.jpg",
+        "20260619__DSC02971.jpg",
+        "20260619__DSC02967.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260619__DSC02886.jpg": "20260619__DSC02885.jpg",
+        "20260619__DSC02967.jpg": "20260619__DSC02969.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260619__DSC02886.jpg": 8,
+        "20260619__DSC02967.jpg": 2
+      }
+    },
+    {
+      "id": "hard_pack_07",
+      "session": "2026-06-26",
+      "split": "development",
+      "files": [
+        "20260626__DSC04815.jpg",
+        "20260626__DSC04736.jpg",
+        "20260626__DSC05263.jpg",
+        "20260626__DSC05937.jpg",
+        "20260626__DSC05742.jpg",
+        "20260626__DSC03542.jpg",
+        "20260626__DSC03576.jpg",
+        "20260626__DSC04342.jpg",
+        "20260626__DSC04444.jpg",
+        "20260626__DSC06004.jpg",
+        "20260626__DSC03629.jpg",
+        "20260626__DSC05635.jpg",
+        "20260626__DSC05669.jpg",
+        "20260626__DSC05743.jpg",
+        "20260626__DSC03543.jpg"
+      ],
+      "source_paths": {
+        "20260626__DSC04815.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC04815.jpg",
+        "20260626__DSC04736.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC04736.jpg",
+        "20260626__DSC05263.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05263.jpg",
+        "20260626__DSC05937.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05937.jpg",
+        "20260626__DSC05742.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05742.jpg",
+        "20260626__DSC03542.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03542.jpg",
+        "20260626__DSC03576.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03576.jpg",
+        "20260626__DSC04342.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC04342.jpg",
+        "20260626__DSC04444.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC04444.jpg",
+        "20260626__DSC06004.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC06004.jpg",
+        "20260626__DSC03629.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC03629.jpg",
+        "20260626__DSC05635.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC05635.jpg",
+        "20260626__DSC05669.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/AI_Best_90+/Previews/DSC05669.jpg",
+        "20260626__DSC05743.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05743.jpg",
+        "20260626__DSC03543.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03543.jpg"
+      },
+      "known_defect_ids": [
+        "20260626__DSC04815.jpg",
+        "20260626__DSC04736.jpg",
+        "20260626__DSC05263.jpg",
+        "20260626__DSC05937.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260626__DSC04815.jpg": [
+          "heavy_occlusion",
+          "severe_composition_failure"
+        ],
+        "20260626__DSC04736.jpg": [
+          "severe_composition_failure",
+          "heavy_occlusion"
+        ],
+        "20260626__DSC05263.jpg": [
+          "missed_moment",
+          "heavy_occlusion"
+        ],
+        "20260626__DSC05937.jpg": [
+          "out_of_focus",
+          "poor_exposure",
+          "excessive_noise",
+          "undeliverable_subject"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260626__DSC04342.jpg",
+        "20260626__DSC04444.jpg",
+        "20260626__DSC06004.jpg",
+        "20260626__DSC03629.jpg",
+        "20260626__DSC05635.jpg",
+        "20260626__DSC05669.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260626__DSC05743.jpg": "20260626__DSC05742.jpg",
+        "20260626__DSC03543.jpg": "20260626__DSC03542.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260626__DSC05743.jpg": 2,
+        "20260626__DSC03543.jpg": 4
+      }
+    },
+    {
+      "id": "hard_pack_08",
+      "session": "2026-06-27",
+      "split": "holdout",
+      "files": [
+        "20260627__DSC08155.jpg",
+        "20260627__DSC06671.jpg",
+        "20260627__DSC08177.jpg",
+        "20260627__DSC06646.jpg",
+        "20260627__DSC09237.jpg",
+        "20260627__DSC07299.jpg",
+        "20260627__DSC07348.jpg",
+        "20260627__DSC08154.jpg",
+        "20260627__DSC08085.jpg",
+        "20260627__DSC08087.jpg",
+        "20260627__DSC06457.jpg",
+        "20260627__DSC06458.jpg",
+        "20260627__DSC08507.jpg",
+        "20260627__DSC07298.jpg",
+        "20260627__DSC07347.jpg"
+      ],
+      "source_paths": {
+        "20260627__DSC08155.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08155.jpg",
+        "20260627__DSC06671.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC06671.jpg",
+        "20260627__DSC08177.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08177.jpg",
+        "20260627__DSC06646.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC06646.jpg",
+        "20260627__DSC09237.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC09237.jpg",
+        "20260627__DSC07299.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC07299.jpg",
+        "20260627__DSC07348.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC07348.jpg",
+        "20260627__DSC08154.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Best_90+/DSC08154.jpg",
+        "20260627__DSC08085.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC08085.jpg",
+        "20260627__DSC08087.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC08087.jpg",
+        "20260627__DSC06457.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC06457.jpg",
+        "20260627__DSC06458.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC06458.jpg",
+        "20260627__DSC08507.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/AI_Keep_60-90/DSC08507.jpg",
+        "20260627__DSC07298.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC07298.jpg",
+        "20260627__DSC07347.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC07347.jpg"
+      },
+      "known_defect_ids": [
+        "20260627__DSC08155.jpg",
+        "20260627__DSC06671.jpg",
+        "20260627__DSC08177.jpg",
+        "20260627__DSC06646.jpg",
+        "20260627__DSC09237.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260627__DSC08155.jpg": [
+          "poor_exposure"
+        ],
+        "20260627__DSC06671.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260627__DSC08177.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260627__DSC06646.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260627__DSC09237.jpg": [
+          "severe_composition_failure",
+          "heavy_occlusion"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260627__DSC08154.jpg",
+        "20260627__DSC08085.jpg",
+        "20260627__DSC08087.jpg",
+        "20260627__DSC06457.jpg",
+        "20260627__DSC06458.jpg",
+        "20260627__DSC08507.jpg",
+        "20260627__DSC07298.jpg",
+        "20260627__DSC07347.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260627__DSC07298.jpg": "20260627__DSC07299.jpg",
+        "20260627__DSC07347.jpg": "20260627__DSC07348.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260627__DSC07298.jpg": 2,
+        "20260627__DSC07347.jpg": 2
+      }
+    },
+    {
+      "id": "hard_pack_09",
+      "session": "2026-07-03",
+      "split": "development",
+      "files": [
+        "20260703__DSC02524.jpg",
+        "20260703__DSC09601.jpg",
+        "20260703__DSC02083.jpg",
+        "20260703__DSC01192.jpg",
+        "20260703__DSC00869.jpg",
+        "20260703__DSC00925.jpg",
+        "20260703__DSC00940.jpg",
+        "20260703__DSC02377.jpg",
+        "20260703__DSC01199.jpg",
+        "20260703__DSC02338.jpg",
+        "20260703__DSC00946.jpg",
+        "20260703__DSC00945.jpg",
+        "20260703__DSC01237.jpg",
+        "20260703__DSC02082.jpg",
+        "20260703__DSC01191.jpg"
+      ],
+      "source_paths": {
+        "20260703__DSC02524.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02524.jpg",
+        "20260703__DSC09601.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC09601.jpg",
+        "20260703__DSC02083.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02083.jpg",
+        "20260703__DSC01192.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01192.jpg",
+        "20260703__DSC00869.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00869.jpg",
+        "20260703__DSC00925.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00925.jpg",
+        "20260703__DSC00940.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00940.jpg",
+        "20260703__DSC02377.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC02377.jpg",
+        "20260703__DSC01199.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01199.jpg",
+        "20260703__DSC02338.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC02338.jpg",
+        "20260703__DSC00946.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00946.jpg",
+        "20260703__DSC00945.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC00945.jpg",
+        "20260703__DSC01237.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01237.jpg",
+        "20260703__DSC02082.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02082.jpg",
+        "20260703__DSC01191.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/AI_Best_90+/DSC01191.jpg"
+      },
+      "known_defect_ids": [
+        "20260703__DSC02524.jpg",
+        "20260703__DSC09601.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260703__DSC02524.jpg": [
+          "missed_moment",
+          "no_clear_subject"
+        ],
+        "20260703__DSC09601.jpg": [
+          "heavy_occlusion",
+          "missed_moment"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260703__DSC01192.jpg",
+        "20260703__DSC00869.jpg",
+        "20260703__DSC00925.jpg",
+        "20260703__DSC00940.jpg",
+        "20260703__DSC02377.jpg",
+        "20260703__DSC01199.jpg",
+        "20260703__DSC02338.jpg",
+        "20260703__DSC00946.jpg",
+        "20260703__DSC00945.jpg",
+        "20260703__DSC01237.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260703__DSC02082.jpg": "20260703__DSC02083.jpg",
+        "20260703__DSC01191.jpg": "20260703__DSC01192.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260703__DSC02082.jpg": 0,
+        "20260703__DSC01191.jpg": 0
+      }
+    },
+    {
+      "id": "hard_pack_10",
+      "session": "2026-07-08",
+      "split": "holdout",
+      "files": [
+        "20260708__DSC04053.jpg",
+        "20260708__DSC03010.jpg",
+        "20260708__DSC02968.jpg",
+        "20260708__DSC02941.jpg",
+        "20260708__DSC03815.jpg",
+        "20260708__DSC03990.jpg",
+        "20260708__DSC03980.jpg",
+        "20260708__DSC04000.jpg",
+        "20260708__DSC04001.jpg",
+        "20260708__DSC04002.jpg",
+        "20260708__DSC03982.jpg",
+        "20260708__DSC03981.jpg",
+        "20260708__DSC03999.jpg",
+        "20260708__DSC03989.jpg",
+        "20260708__DSC03983.jpg"
+      ],
+      "source_paths": {
+        "20260708__DSC04053.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC04053.jpg",
+        "20260708__DSC03010.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03010.jpg",
+        "20260708__DSC02968.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC02968.jpg",
+        "20260708__DSC02941.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC02941.jpg",
+        "20260708__DSC03815.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03815.jpg",
+        "20260708__DSC03990.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03990.jpg",
+        "20260708__DSC03980.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03980.jpg",
+        "20260708__DSC04000.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC04000.jpg",
+        "20260708__DSC04001.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC04001.jpg",
+        "20260708__DSC04002.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC04002.jpg",
+        "20260708__DSC03982.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03982.jpg",
+        "20260708__DSC03981.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03981.jpg",
+        "20260708__DSC03999.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03999.jpg",
+        "20260708__DSC03989.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03989.jpg",
+        "20260708__DSC03983.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/AI_Keep_60-90/DSC03983.jpg"
+      },
+      "known_defect_ids": [
+        "20260708__DSC04053.jpg",
+        "20260708__DSC03010.jpg",
+        "20260708__DSC02968.jpg",
+        "20260708__DSC02941.jpg",
+        "20260708__DSC03815.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260708__DSC04053.jpg": [
+          "missed_moment",
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "20260708__DSC03010.jpg": [
+          "severe_composition_failure",
+          "heavy_occlusion"
+        ],
+        "20260708__DSC02968.jpg": [
+          "severe_composition_failure",
+          "missed_moment"
+        ],
+        "20260708__DSC02941.jpg": [
+          "heavy_occlusion",
+          "missed_moment"
+        ],
+        "20260708__DSC03815.jpg": [
+          "no_clear_subject",
+          "missed_moment"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260708__DSC03990.jpg",
+        "20260708__DSC03980.jpg",
+        "20260708__DSC04000.jpg",
+        "20260708__DSC04001.jpg",
+        "20260708__DSC04002.jpg",
+        "20260708__DSC03982.jpg",
+        "20260708__DSC03981.jpg",
+        "20260708__DSC03999.jpg",
+        "20260708__DSC03989.jpg",
+        "20260708__DSC03983.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260708__DSC03989.jpg": "20260708__DSC03990.jpg",
+        "20260708__DSC03983.jpg": "20260708__DSC03982.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260708__DSC03989.jpg": 6,
+        "20260708__DSC03983.jpg": 2
+      }
+    },
+    {
+      "id": "hard_pack_11",
+      "session": "2026-07-10",
+      "split": "development",
+      "files": [
+        "20260710__DSC04766.jpg",
+        "20260710__DSC05224.jpg",
+        "20260710__DSC04651.jpg",
+        "20260710__DSC05198.jpg",
+        "20260710__DSC04619.jpg",
+        "20260710__DSC04535.jpg",
+        "20260710__DSC04389.jpg",
+        "20260710__DSC04489.jpg",
+        "20260710__DSC04189.jpg",
+        "20260710__DSC04888.jpg",
+        "20260710__DSC04538.jpg",
+        "20260710__DSC04540.jpg",
+        "20260710__DSC04404.jpg",
+        "20260710__DSC04536.jpg",
+        "20260710__DSC04390.jpg"
+      ],
+      "source_paths": {
+        "20260710__DSC04766.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04766.jpg",
+        "20260710__DSC05224.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05224.jpg",
+        "20260710__DSC04651.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04651.jpg",
+        "20260710__DSC05198.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05198.jpg",
+        "20260710__DSC04619.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04619.jpg",
+        "20260710__DSC04535.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04535.jpg",
+        "20260710__DSC04389.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04389.jpg",
+        "20260710__DSC04489.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04489.jpg",
+        "20260710__DSC04189.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04189.jpg",
+        "20260710__DSC04888.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04888.jpg",
+        "20260710__DSC04538.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/AI_Keep_60-90/DSC04538.jpg",
+        "20260710__DSC04540.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/AI_Keep_60-90/DSC04540.jpg",
+        "20260710__DSC04404.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/AI_Keep_60-90/DSC04404.jpg",
+        "20260710__DSC04536.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04536.jpg",
+        "20260710__DSC04390.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04390.jpg"
+      },
+      "known_defect_ids": [
+        "20260710__DSC04766.jpg",
+        "20260710__DSC05224.jpg",
+        "20260710__DSC04651.jpg",
+        "20260710__DSC05198.jpg",
+        "20260710__DSC04619.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260710__DSC04766.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260710__DSC05224.jpg": [
+          "heavy_occlusion",
+          "no_clear_subject",
+          "missed_moment"
+        ],
+        "20260710__DSC04651.jpg": [
+          "out_of_focus",
+          "poor_exposure"
+        ],
+        "20260710__DSC05198.jpg": [
+          "no_clear_subject",
+          "severe_composition_failure",
+          "missed_moment"
+        ],
+        "20260710__DSC04619.jpg": [
+          "poor_exposure"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260710__DSC04538.jpg",
+        "20260710__DSC04540.jpg",
+        "20260710__DSC04404.jpg",
+        "20260710__DSC04536.jpg",
+        "20260710__DSC04390.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260710__DSC04536.jpg": "20260710__DSC04535.jpg",
+        "20260710__DSC04390.jpg": "20260710__DSC04389.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260710__DSC04536.jpg": 4,
+        "20260710__DSC04390.jpg": 10
+      }
+    },
+    {
+      "id": "hard_pack_12",
+      "session": "2026-07-11",
+      "split": "development",
+      "files": [
+        "20260711__DSC07338.jpg",
+        "20260711__DSC05983.jpg",
+        "20260711__DSC07939.jpg",
+        "20260711__DSC07578.jpg",
+        "20260711__DSC07695.jpg",
+        "20260711__DSC06049.jpg",
+        "20260711__DSC06050.jpg",
+        "20260711__DSC06051.jpg",
+        "20260711__DSC06048.jpg",
+        "20260711__DSC06047.jpg",
+        "20260711__DSC07410.jpg",
+        "20260711__DSC07766.jpg",
+        "20260711__DSC07513.jpg",
+        "20260711__DSC06046.jpg",
+        "20260711__DSC06045.jpg"
+      ],
+      "source_paths": {
+        "20260711__DSC07338.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07338.jpg",
+        "20260711__DSC05983.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC05983.jpg",
+        "20260711__DSC07939.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07939.jpg",
+        "20260711__DSC07578.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07578.jpg",
+        "20260711__DSC07695.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07695.jpg",
+        "20260711__DSC06049.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06049.jpg",
+        "20260711__DSC06050.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06050.jpg",
+        "20260711__DSC06051.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06051.jpg",
+        "20260711__DSC06048.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06048.jpg",
+        "20260711__DSC06047.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06047.jpg",
+        "20260711__DSC07410.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC07410.jpg",
+        "20260711__DSC07766.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07766.jpg",
+        "20260711__DSC07513.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07513.jpg",
+        "20260711__DSC06046.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06046.jpg",
+        "20260711__DSC06045.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/AI_Keep_60-90/DSC06045.jpg"
+      },
+      "known_defect_ids": [
+        "20260711__DSC07338.jpg",
+        "20260711__DSC05983.jpg",
+        "20260711__DSC07939.jpg",
+        "20260711__DSC07578.jpg",
+        "20260711__DSC07695.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260711__DSC07338.jpg": [
+          "severe_composition_failure",
+          "heavy_occlusion"
+        ],
+        "20260711__DSC05983.jpg": [
+          "severe_composition_failure"
+        ],
+        "20260711__DSC07939.jpg": [
+          "out_of_focus"
+        ],
+        "20260711__DSC07578.jpg": [
+          "out_of_focus"
+        ],
+        "20260711__DSC07695.jpg": [
+          "out_of_focus"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260711__DSC06049.jpg",
+        "20260711__DSC06050.jpg",
+        "20260711__DSC06051.jpg",
+        "20260711__DSC06048.jpg",
+        "20260711__DSC06047.jpg",
+        "20260711__DSC07410.jpg",
+        "20260711__DSC06046.jpg",
+        "20260711__DSC06045.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260711__DSC06046.jpg": "20260711__DSC06048.jpg",
+        "20260711__DSC06045.jpg": "20260711__DSC06047.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260711__DSC06046.jpg": 6,
+        "20260711__DSC06045.jpg": 6
+      }
+    },
+    {
+      "id": "hard_pack_13",
+      "session": "2026-07-29",
+      "split": "holdout",
+      "files": [
+        "20260729__DSC09962.jpg",
+        "20260729__DSC09598.jpg",
+        "20260729__DSC09480.jpg",
+        "20260729__DSC09900.jpg",
+        "20260729__DSC09412.jpg",
+        "20260729__DSC09506.jpg",
+        "20260729__DSC09826.jpg",
+        "20260729__DSC09992.jpg",
+        "20260729__DSC09852.jpg",
+        "20260729__DSC09375.jpg",
+        "20260729__DSC09870.jpg",
+        "20260729__DSC09869.jpg",
+        "20260729__DSC09858.jpg",
+        "20260729__DSC09508.jpg",
+        "20260729__DSC09825.jpg"
+      ],
+      "source_paths": {
+        "20260729__DSC09962.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09962.jpg",
+        "20260729__DSC09598.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09598.jpg",
+        "20260729__DSC09480.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09480.jpg",
+        "20260729__DSC09900.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09900.jpg",
+        "20260729__DSC09412.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09412.jpg",
+        "20260729__DSC09506.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09506.jpg",
+        "20260729__DSC09826.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09826.jpg",
+        "20260729__DSC09992.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09992.jpg",
+        "20260729__DSC09852.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09852.jpg",
+        "20260729__DSC09375.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09375.jpg",
+        "20260729__DSC09870.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/AI_Keep_60-90/DSC09870.jpg",
+        "20260729__DSC09869.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/AI_Keep_60-90/DSC09869.jpg",
+        "20260729__DSC09858.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/AI_Keep_60-90/DSC09858.jpg",
+        "20260729__DSC09508.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09508.jpg",
+        "20260729__DSC09825.jpg": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09825.jpg"
+      },
+      "known_defect_ids": [
+        "20260729__DSC09962.jpg",
+        "20260729__DSC09598.jpg",
+        "20260729__DSC09480.jpg",
+        "20260729__DSC09900.jpg",
+        "20260729__DSC09412.jpg"
+      ],
+      "known_defect_reasons": {
+        "20260729__DSC09962.jpg": [
+          "heavy_occlusion",
+          "severe_composition_failure"
+        ],
+        "20260729__DSC09598.jpg": [
+          "heavy_occlusion",
+          "missed_moment",
+          "no_clear_subject"
+        ],
+        "20260729__DSC09480.jpg": [
+          "severe_composition_failure",
+          "missed_moment",
+          "heavy_occlusion"
+        ],
+        "20260729__DSC09900.jpg": [
+          "out_of_focus",
+          "excessive_noise"
+        ],
+        "20260729__DSC09412.jpg": [
+          "technical_failure"
+        ]
+      },
+      "unreviewed_archive_ids": [
+        "20260729__DSC09870.jpg",
+        "20260729__DSC09869.jpg",
+        "20260729__DSC09858.jpg",
+        "20260729__DSC09508.jpg",
+        "20260729__DSC09825.jpg"
+      ],
+      "burst_duplicate_seed": {
+        "20260729__DSC09508.jpg": "20260729__DSC09506.jpg",
+        "20260729__DSC09825.jpg": "20260729__DSC09826.jpg"
+      },
+      "burst_duplicate_hamming": {
+        "20260729__DSC09508.jpg": 2,
+        "20260729__DSC09825.jpg": 4
+      }
+    }
+  ]
+}

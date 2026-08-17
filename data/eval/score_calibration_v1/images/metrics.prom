@@ -1,0 +1,12 @@
+# HELP livehouse_pipeline_total Total files observed by pipeline
+# TYPE livehouse_pipeline_total gauge
+livehouse_pipeline_total 300
+# HELP livehouse_pipeline_processed Total files processed successfully
+# TYPE livehouse_pipeline_processed gauge
+livehouse_pipeline_processed 300
+# HELP livehouse_pipeline_failed Total files failed
+# TYPE livehouse_pipeline_failed gauge
+livehouse_pipeline_failed 0
+# HELP livehouse_pipeline_time_cost_seconds Pipeline execution time cost
+# TYPE livehouse_pipeline_time_cost_seconds gauge
+livehouse_pipeline_time_cost_seconds 1399.2999945419724

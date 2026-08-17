@@ -1,0 +1,1934 @@
+{
+  "schema_version": "pack_reranker_eval.v1",
+  "k": 5,
+  "fit_protocol": "risk weights fitted on development only; holdout untouched",
+  "risk_formula": "overall - wc*max(0,8-composition) - ws*max(0,8-subject) - wf*max(0,7.5-focus)",
+  "risk_grid": [
+    0.0,
+    2.0,
+    4.0,
+    6.0
+  ],
+  "fitted_risk_weights": {
+    "composition": 4.0,
+    "deliverable_subject": 2.0,
+    "focus_sharpness": 2.0
+  },
+  "development": {
+    "raw": {
+      "pack_count": 16,
+      "macro_overlap_at_5": 0.6125,
+      "macro_ndcg_at_5": 0.6260522939583277,
+      "top1_accuracy": 0.1875,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_01",
+          "session": "2025-12-14",
+          "selected_ids": [
+            "20251214__DSC06510.jpg",
+            "20251214__DSC06464.jpg",
+            "20251214__DSC06532.jpg",
+            "20251214__DSC06368.jpg",
+            "20251214__DSC06638.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5339374822848032,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_02",
+          "session": "2026-03-22",
+          "selected_ids": [
+            "20260322__DSC07939.jpg",
+            "20260322__DSC08032.jpg",
+            "20260322__DSC08004.jpg",
+            "20260322__DSC08064.jpg",
+            "20260322__DSC08084.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3759132917713603,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_03",
+          "session": "2026-03-29",
+          "selected_ids": [
+            "20260329__DSC09182.jpg",
+            "20260329__DSC09307.jpg",
+            "20260329__DSC09285.jpg",
+            "20260329__DSC09517.jpg",
+            "20260329__DSC09493.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8095608894115017,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_04",
+          "session": "2026-04-04",
+          "selected_ids": [
+            "20260404__DSC09881.jpg",
+            "20260404__DSC09750.jpg",
+            "20260404__DSC09993.jpg",
+            "20260404__DSC09680.jpg",
+            "20260404__DSC09791.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.6656649330918214,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_05",
+          "session": "2026-04-05",
+          "selected_ids": [
+            "20260405__DSC00669.jpg",
+            "20260405__DSC00314.jpg",
+            "20260405__DSC00184.jpg",
+            "20260405__DSC00685.jpg",
+            "20260405__DSC00287.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.8454381713931924,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_06",
+          "session": "2026-04-16",
+          "selected_ids": [
+            "20260416__DSC03336.jpg",
+            "20260416__DSC02832.jpg",
+            "20260416__DSC02792.jpg",
+            "20260416__DSC03240.jpg",
+            "20260416__DSC02870.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7005623178696946,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_08",
+          "session": "2026-05-09",
+          "selected_ids": [
+            "20260509__DSC06467.jpg",
+            "20260509__DSC06598.jpg",
+            "20260509__DSC06572.jpg",
+            "20260509__DSC06393.jpg",
+            "20260509__DSC06619.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.41490368485021467,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_09",
+          "session": "2026-05-23",
+          "selected_ids": [
+            "20260523__DSC08950.jpg",
+            "20260523__DSC09281.jpg",
+            "20260523__DSC09072.jpg",
+            "20260523__DSC00100.jpg",
+            "20260523__DSC00079.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9178760981549413,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_10",
+          "session": "2026-05-24_Chinesefootball",
+          "selected_ids": [
+            "20260524Chinesefootball__DSC00252.jpg",
+            "20260524Chinesefootball__DSC00167.jpg",
+            "20260524Chinesefootball__DSC00565.jpg",
+            "20260524Chinesefootball__DSC00622.jpg",
+            "20260524Chinesefootball__DSC00709.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8259956912577872,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_11",
+          "session": "2026-06-06",
+          "selected_ids": [
+            "20260606__DSC05554.jpg",
+            "20260606__DSC04893.jpg",
+            "20260606__DSC05014.jpg",
+            "20260606__DSC05320.jpg",
+            "20260606__DSC04771.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.28565863301948,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_13",
+          "session": "2026-06-18",
+          "selected_ids": [
+            "20260618__DSC09918.jpg",
+            "20260618__DSC01858.jpg",
+            "20260618__DSC01920.jpg",
+            "20260618__DSC01668.jpg",
+            "20260618__DSC01138.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5302490502149692,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_14",
+          "session": "2026-06-26",
+          "selected_ids": [
+            "20260626__DSC05759.jpg",
+            "20260626__DSC04462.jpg",
+            "20260626__DSC05644.jpg",
+            "20260626__DSC03603.jpg",
+            "20260626__DSC05996.jpg"
+          ],
+          "overlap_count": 1,
+          "overlap_at_5": 0.2,
+          "ndcg_at_5": 0.24338184081081995,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_17",
+          "session": "2026-07-08",
+          "selected_ids": [
+            "20260708__DSC03155.jpg",
+            "20260708__DSC04054.jpg",
+            "20260708__DSC03509.jpg",
+            "20260708__DSC03636.jpg",
+            "20260708__DSC03879.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.36916446500838446,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_18",
+          "session": "2026-07-10",
+          "selected_ids": [
+            "20260710__DSC05295.jpg",
+            "20260710__DSC04502.jpg",
+            "20260710__DSC04938.jpg",
+            "20260710__DSC05005.jpg",
+            "20260710__DSC05092.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.793299441324393,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_19",
+          "session": "2026-07-11",
+          "selected_ids": [
+            "20260711__DSC06043.jpg",
+            "20260711__DSC07256.jpg",
+            "20260711__DSC06217.jpg",
+            "20260711__DSC05951.jpg",
+            "20260711__DSC07871.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7556382619853625,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_20",
+          "session": "2026-08-08",
+          "selected_ids": [
+            "20260808__DSC03515.jpg",
+            "20260808__DSC01385.jpg",
+            "20260808__DSC01233.jpg",
+            "20260808__DSC02084.jpg",
+            "20260808__DSC02169.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9495924508845183,
+          "top1_match": true
+        }
+      ]
+    },
+    "diversity": {
+      "pack_count": 16,
+      "macro_overlap_at_5": 0.6125,
+      "macro_ndcg_at_5": 0.6260522939583277,
+      "top1_accuracy": 0.1875,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_01",
+          "session": "2025-12-14",
+          "selected_ids": [
+            "20251214__DSC06510.jpg",
+            "20251214__DSC06464.jpg",
+            "20251214__DSC06532.jpg",
+            "20251214__DSC06368.jpg",
+            "20251214__DSC06638.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5339374822848032,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_02",
+          "session": "2026-03-22",
+          "selected_ids": [
+            "20260322__DSC07939.jpg",
+            "20260322__DSC08032.jpg",
+            "20260322__DSC08004.jpg",
+            "20260322__DSC08064.jpg",
+            "20260322__DSC08084.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3759132917713603,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_03",
+          "session": "2026-03-29",
+          "selected_ids": [
+            "20260329__DSC09182.jpg",
+            "20260329__DSC09307.jpg",
+            "20260329__DSC09285.jpg",
+            "20260329__DSC09517.jpg",
+            "20260329__DSC09493.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8095608894115017,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_04",
+          "session": "2026-04-04",
+          "selected_ids": [
+            "20260404__DSC09881.jpg",
+            "20260404__DSC09750.jpg",
+            "20260404__DSC09993.jpg",
+            "20260404__DSC09680.jpg",
+            "20260404__DSC09791.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.6656649330918214,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_05",
+          "session": "2026-04-05",
+          "selected_ids": [
+            "20260405__DSC00669.jpg",
+            "20260405__DSC00314.jpg",
+            "20260405__DSC00184.jpg",
+            "20260405__DSC00685.jpg",
+            "20260405__DSC00287.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.8454381713931924,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_06",
+          "session": "2026-04-16",
+          "selected_ids": [
+            "20260416__DSC03336.jpg",
+            "20260416__DSC02832.jpg",
+            "20260416__DSC02792.jpg",
+            "20260416__DSC03240.jpg",
+            "20260416__DSC02870.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7005623178696946,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_08",
+          "session": "2026-05-09",
+          "selected_ids": [
+            "20260509__DSC06467.jpg",
+            "20260509__DSC06598.jpg",
+            "20260509__DSC06572.jpg",
+            "20260509__DSC06393.jpg",
+            "20260509__DSC06619.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.41490368485021467,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_09",
+          "session": "2026-05-23",
+          "selected_ids": [
+            "20260523__DSC08950.jpg",
+            "20260523__DSC09281.jpg",
+            "20260523__DSC09072.jpg",
+            "20260523__DSC00100.jpg",
+            "20260523__DSC00079.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9178760981549413,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_10",
+          "session": "2026-05-24_Chinesefootball",
+          "selected_ids": [
+            "20260524Chinesefootball__DSC00252.jpg",
+            "20260524Chinesefootball__DSC00167.jpg",
+            "20260524Chinesefootball__DSC00565.jpg",
+            "20260524Chinesefootball__DSC00622.jpg",
+            "20260524Chinesefootball__DSC00709.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8259956912577872,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_11",
+          "session": "2026-06-06",
+          "selected_ids": [
+            "20260606__DSC05554.jpg",
+            "20260606__DSC04893.jpg",
+            "20260606__DSC05014.jpg",
+            "20260606__DSC05320.jpg",
+            "20260606__DSC04771.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.28565863301948,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_13",
+          "session": "2026-06-18",
+          "selected_ids": [
+            "20260618__DSC09918.jpg",
+            "20260618__DSC01858.jpg",
+            "20260618__DSC01920.jpg",
+            "20260618__DSC01668.jpg",
+            "20260618__DSC01138.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5302490502149692,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_14",
+          "session": "2026-06-26",
+          "selected_ids": [
+            "20260626__DSC05759.jpg",
+            "20260626__DSC04462.jpg",
+            "20260626__DSC05644.jpg",
+            "20260626__DSC03603.jpg",
+            "20260626__DSC05996.jpg"
+          ],
+          "overlap_count": 1,
+          "overlap_at_5": 0.2,
+          "ndcg_at_5": 0.24338184081081995,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_17",
+          "session": "2026-07-08",
+          "selected_ids": [
+            "20260708__DSC03155.jpg",
+            "20260708__DSC04054.jpg",
+            "20260708__DSC03509.jpg",
+            "20260708__DSC03636.jpg",
+            "20260708__DSC03879.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.36916446500838446,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_18",
+          "session": "2026-07-10",
+          "selected_ids": [
+            "20260710__DSC05295.jpg",
+            "20260710__DSC04502.jpg",
+            "20260710__DSC04938.jpg",
+            "20260710__DSC05005.jpg",
+            "20260710__DSC05092.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.793299441324393,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_19",
+          "session": "2026-07-11",
+          "selected_ids": [
+            "20260711__DSC06043.jpg",
+            "20260711__DSC07256.jpg",
+            "20260711__DSC06217.jpg",
+            "20260711__DSC05951.jpg",
+            "20260711__DSC07871.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7556382619853625,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_20",
+          "session": "2026-08-08",
+          "selected_ids": [
+            "20260808__DSC03515.jpg",
+            "20260808__DSC01385.jpg",
+            "20260808__DSC01233.jpg",
+            "20260808__DSC02084.jpg",
+            "20260808__DSC02169.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9495924508845183,
+          "top1_match": true
+        }
+      ]
+    },
+    "risk": {
+      "pack_count": 16,
+      "macro_overlap_at_5": 0.6375,
+      "macro_ndcg_at_5": 0.6438775407959505,
+      "top1_accuracy": 0.1875,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_01",
+          "session": "2025-12-14",
+          "selected_ids": [
+            "20251214__DSC06510.jpg",
+            "20251214__DSC06532.jpg",
+            "20251214__DSC06368.jpg",
+            "20251214__DSC06464.jpg",
+            "20251214__DSC06284.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5856742451401089,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_02",
+          "session": "2026-03-22",
+          "selected_ids": [
+            "20260322__DSC07939.jpg",
+            "20260322__DSC08032.jpg",
+            "20260322__DSC08004.jpg",
+            "20260322__DSC08223.jpg",
+            "20260322__DSC08198.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3339857503721721,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_03",
+          "session": "2026-03-29",
+          "selected_ids": [
+            "20260329__DSC09182.jpg",
+            "20260329__DSC09307.jpg",
+            "20260329__DSC09285.jpg",
+            "20260329__DSC09517.jpg",
+            "20260329__DSC09493.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8095608894115017,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_04",
+          "session": "2026-04-04",
+          "selected_ids": [
+            "20260404__DSC09750.jpg",
+            "20260404__DSC09993.jpg",
+            "20260404__DSC09881.jpg",
+            "20260404__DSC09860.jpg",
+            "20260404__DSC09791.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.6252399591916339,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_05",
+          "session": "2026-04-05",
+          "selected_ids": [
+            "20260405__DSC00669.jpg",
+            "20260405__DSC00314.jpg",
+            "20260405__DSC00184.jpg",
+            "20260405__DSC00287.jpg",
+            "20260405__DSC00157.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.8582372575736656,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_06",
+          "session": "2026-04-16",
+          "selected_ids": [
+            "20260416__DSC03336.jpg",
+            "20260416__DSC02832.jpg",
+            "20260416__DSC02870.jpg",
+            "20260416__DSC03462.jpg",
+            "20260416__DSC03240.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.7975658033845506,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_08",
+          "session": "2026-05-09",
+          "selected_ids": [
+            "20260509__DSC06467.jpg",
+            "20260509__DSC06598.jpg",
+            "20260509__DSC06572.jpg",
+            "20260509__DSC06393.jpg",
+            "20260509__DSC06427.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.41490368485021467,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_09",
+          "session": "2026-05-23",
+          "selected_ids": [
+            "20260523__DSC08950.jpg",
+            "20260523__DSC09281.jpg",
+            "20260523__DSC09072.jpg",
+            "20260523__DSC00100.jpg",
+            "20260523__DSC00079.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9178760981549413,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_10",
+          "session": "2026-05-24_Chinesefootball",
+          "selected_ids": [
+            "20260524Chinesefootball__DSC00252.jpg",
+            "20260524Chinesefootball__DSC00167.jpg",
+            "20260524Chinesefootball__DSC00565.jpg",
+            "20260524Chinesefootball__DSC00622.jpg",
+            "20260524Chinesefootball__DSC00798.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8259956912577872,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_11",
+          "session": "2026-06-06",
+          "selected_ids": [
+            "20260606__DSC05554.jpg",
+            "20260606__DSC05014.jpg",
+            "20260606__DSC04893.jpg",
+            "20260606__DSC05254.jpg",
+            "20260606__DSC04771.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.3530789139715709,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_13",
+          "session": "2026-06-18",
+          "selected_ids": [
+            "20260618__DSC09918.jpg",
+            "20260618__DSC01668.jpg",
+            "20260618__DSC01920.jpg",
+            "20260618__DSC01858.jpg",
+            "20260618__DSC01138.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.4912586571361148,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_14",
+          "session": "2026-06-26",
+          "selected_ids": [
+            "20260626__DSC05759.jpg",
+            "20260626__DSC04462.jpg",
+            "20260626__DSC05644.jpg",
+            "20260626__DSC05996.jpg",
+            "20260626__DSC05669.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3187041994888808,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_17",
+          "session": "2026-07-08",
+          "selected_ids": [
+            "20260708__DSC03636.jpg",
+            "20260708__DSC04054.jpg",
+            "20260708__DSC03434.jpg",
+            "20260708__DSC03509.jpg",
+            "20260708__DSC03155.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.4093081090502329,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_18",
+          "session": "2026-07-10",
+          "selected_ids": [
+            "20260710__DSC05295.jpg",
+            "20260710__DSC04502.jpg",
+            "20260710__DSC04938.jpg",
+            "20260710__DSC05005.jpg",
+            "20260710__DSC05075.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9062829793414843,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_19",
+          "session": "2026-07-11",
+          "selected_ids": [
+            "20260711__DSC06043.jpg",
+            "20260711__DSC07256.jpg",
+            "20260711__DSC05951.jpg",
+            "20260711__DSC07871.jpg",
+            "20260711__DSC06217.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7005623178696946,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_20",
+          "session": "2026-08-08",
+          "selected_ids": [
+            "20260808__DSC03515.jpg",
+            "20260808__DSC01233.jpg",
+            "20260808__DSC01385.jpg",
+            "20260808__DSC00752.jpg",
+            "20260808__DSC02084.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9538060965406541,
+          "top1_match": true
+        }
+      ]
+    },
+    "risk_diversity": {
+      "pack_count": 16,
+      "macro_overlap_at_5": 0.6375,
+      "macro_ndcg_at_5": 0.6438775407959505,
+      "top1_accuracy": 0.1875,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_01",
+          "session": "2025-12-14",
+          "selected_ids": [
+            "20251214__DSC06510.jpg",
+            "20251214__DSC06532.jpg",
+            "20251214__DSC06368.jpg",
+            "20251214__DSC06464.jpg",
+            "20251214__DSC06284.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5856742451401089,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_02",
+          "session": "2026-03-22",
+          "selected_ids": [
+            "20260322__DSC07939.jpg",
+            "20260322__DSC08032.jpg",
+            "20260322__DSC08004.jpg",
+            "20260322__DSC08223.jpg",
+            "20260322__DSC08198.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3339857503721721,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_03",
+          "session": "2026-03-29",
+          "selected_ids": [
+            "20260329__DSC09182.jpg",
+            "20260329__DSC09307.jpg",
+            "20260329__DSC09285.jpg",
+            "20260329__DSC09517.jpg",
+            "20260329__DSC09493.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8095608894115017,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_04",
+          "session": "2026-04-04",
+          "selected_ids": [
+            "20260404__DSC09750.jpg",
+            "20260404__DSC09993.jpg",
+            "20260404__DSC09881.jpg",
+            "20260404__DSC09860.jpg",
+            "20260404__DSC09791.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.6252399591916339,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_05",
+          "session": "2026-04-05",
+          "selected_ids": [
+            "20260405__DSC00669.jpg",
+            "20260405__DSC00314.jpg",
+            "20260405__DSC00184.jpg",
+            "20260405__DSC00287.jpg",
+            "20260405__DSC00157.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.8582372575736656,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_06",
+          "session": "2026-04-16",
+          "selected_ids": [
+            "20260416__DSC03336.jpg",
+            "20260416__DSC02832.jpg",
+            "20260416__DSC02870.jpg",
+            "20260416__DSC03462.jpg",
+            "20260416__DSC03240.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.7975658033845506,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_08",
+          "session": "2026-05-09",
+          "selected_ids": [
+            "20260509__DSC06467.jpg",
+            "20260509__DSC06598.jpg",
+            "20260509__DSC06572.jpg",
+            "20260509__DSC06393.jpg",
+            "20260509__DSC06527.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.41490368485021467,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_09",
+          "session": "2026-05-23",
+          "selected_ids": [
+            "20260523__DSC08950.jpg",
+            "20260523__DSC09281.jpg",
+            "20260523__DSC09072.jpg",
+            "20260523__DSC00100.jpg",
+            "20260523__DSC00079.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9178760981549413,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_10",
+          "session": "2026-05-24_Chinesefootball",
+          "selected_ids": [
+            "20260524Chinesefootball__DSC00252.jpg",
+            "20260524Chinesefootball__DSC00167.jpg",
+            "20260524Chinesefootball__DSC00565.jpg",
+            "20260524Chinesefootball__DSC00622.jpg",
+            "20260524Chinesefootball__DSC00798.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8259956912577872,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_11",
+          "session": "2026-06-06",
+          "selected_ids": [
+            "20260606__DSC05554.jpg",
+            "20260606__DSC05014.jpg",
+            "20260606__DSC04893.jpg",
+            "20260606__DSC05254.jpg",
+            "20260606__DSC04771.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.3530789139715709,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_13",
+          "session": "2026-06-18",
+          "selected_ids": [
+            "20260618__DSC09918.jpg",
+            "20260618__DSC01668.jpg",
+            "20260618__DSC01920.jpg",
+            "20260618__DSC01858.jpg",
+            "20260618__DSC01138.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.4912586571361148,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_14",
+          "session": "2026-06-26",
+          "selected_ids": [
+            "20260626__DSC05759.jpg",
+            "20260626__DSC04462.jpg",
+            "20260626__DSC05644.jpg",
+            "20260626__DSC05996.jpg",
+            "20260626__DSC05669.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3187041994888808,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_17",
+          "session": "2026-07-08",
+          "selected_ids": [
+            "20260708__DSC03636.jpg",
+            "20260708__DSC04054.jpg",
+            "20260708__DSC03434.jpg",
+            "20260708__DSC03509.jpg",
+            "20260708__DSC03155.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.4093081090502329,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_18",
+          "session": "2026-07-10",
+          "selected_ids": [
+            "20260710__DSC05295.jpg",
+            "20260710__DSC04502.jpg",
+            "20260710__DSC04938.jpg",
+            "20260710__DSC05005.jpg",
+            "20260710__DSC05075.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9062829793414843,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_19",
+          "session": "2026-07-11",
+          "selected_ids": [
+            "20260711__DSC06043.jpg",
+            "20260711__DSC07256.jpg",
+            "20260711__DSC05951.jpg",
+            "20260711__DSC07871.jpg",
+            "20260711__DSC06217.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7005623178696946,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_20",
+          "session": "2026-08-08",
+          "selected_ids": [
+            "20260808__DSC03515.jpg",
+            "20260808__DSC01233.jpg",
+            "20260808__DSC01385.jpg",
+            "20260808__DSC00752.jpg",
+            "20260808__DSC02084.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9538060965406541,
+          "top1_match": true
+        }
+      ]
+    },
+    "comparative_vlm": {
+      "pack_count": 16,
+      "macro_overlap_at_5": 0.525,
+      "macro_ndcg_at_5": 0.5573410157281342,
+      "top1_accuracy": 0.1875,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_01",
+          "session": "2025-12-14",
+          "selected_ids": [
+            "20251214__DSC06532.jpg",
+            "20251214__DSC06598.jpg",
+            "20251214__DSC06510.jpg",
+            "20251214__DSC06368.jpg",
+            "20251214__DSC06222.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.6544738472183925,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_02",
+          "session": "2026-03-22",
+          "selected_ids": [
+            "20260322__DSC07939.jpg",
+            "20260322__DSC08198.jpg",
+            "20260322__DSC08032.jpg",
+            "20260322__DSC08223.jpg",
+            "20260322__DSC07892.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.4846304677282937,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_03",
+          "session": "2026-03-29",
+          "selected_ids": [
+            "20260329__DSC09307.jpg",
+            "20260329__DSC09285.jpg",
+            "20260329__DSC09182.jpg",
+            "20260329__DSC09517.jpg",
+            "20260329__DSC09097.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9196599955122811,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_04",
+          "session": "2026-04-04",
+          "selected_ids": [
+            "20260404__DSC09750.jpg",
+            "20260404__DSC09772.jpg",
+            "20260404__DSC09993.jpg",
+            "20260404__DSC09680.jpg",
+            "20260404__DSC09806.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.757824126556196,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_05",
+          "session": "2026-04-05",
+          "selected_ids": [
+            "20260405__DSC00184.jpg",
+            "20260405__DSC00669.jpg",
+            "20260405__DSC00842.jpg",
+            "20260405__DSC00157.jpg",
+            "20260405__DSC00704.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.40446642601740457,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_06",
+          "session": "2026-04-16",
+          "selected_ids": [
+            "20260416__DSC03462.jpg",
+            "20260416__DSC03240.jpg",
+            "20260416__DSC02792.jpg",
+            "20260416__DSC02870.jpg",
+            "20260416__DSC02939.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.3069904433202688,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_08",
+          "session": "2026-05-09",
+          "selected_ids": [
+            "20260509__DSC06393.jpg",
+            "20260509__DSC06427.jpg",
+            "20260509__DSC06598.jpg",
+            "20260509__DSC06412.jpg",
+            "20260509__DSC06572.jpg"
+          ],
+          "overlap_count": 1,
+          "overlap_at_5": 0.2,
+          "ndcg_at_5": 0.09735273632432798,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_09",
+          "session": "2026-05-23",
+          "selected_ids": [
+            "20260523__DSC09281.jpg",
+            "20260523__DSC08950.jpg",
+            "20260523__DSC09072.jpg",
+            "20260523__DSC08244.jpg",
+            "20260523__DSC00100.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9204112792617813,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_10",
+          "session": "2026-05-24_Chinesefootball",
+          "selected_ids": [
+            "20260524Chinesefootball__DSC00622.jpg",
+            "20260524Chinesefootball__DSC00422.jpg",
+            "20260524Chinesefootball__DSC00798.jpg",
+            "20260524Chinesefootball__DSC00813.jpg",
+            "20260524Chinesefootball__DSC00520.jpg"
+          ],
+          "overlap_count": 1,
+          "overlap_at_5": 0.2,
+          "ndcg_at_5": 0.3894109452973119,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_11",
+          "session": "2026-06-06",
+          "selected_ids": [
+            "20260606__DSC05254.jpg",
+            "20260606__DSC04592.jpg",
+            "20260606__DSC04771.jpg",
+            "20260606__DSC05320.jpg",
+            "20260606__DSC04893.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5250027909509939,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_13",
+          "session": "2026-06-18",
+          "selected_ids": [
+            "20260618__DSC01668.jpg",
+            "20260618__DSC01705.jpg",
+            "20260618__DSC00106.jpg",
+            "20260618__DSC01858.jpg",
+            "20260618__DSC01066.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7473868677233861,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_14",
+          "session": "2026-06-26",
+          "selected_ids": [
+            "20260626__DSC03660.jpg",
+            "20260626__DSC05759.jpg",
+            "20260626__DSC04462.jpg",
+            "20260626__DSC05977.jpg",
+            "20260626__DSC04338.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.2231353605218925,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_17",
+          "session": "2026-07-08",
+          "selected_ids": [
+            "20260708__DSC02907.jpg",
+            "20260708__DSC04092.jpg",
+            "20260708__DSC03310.jpg",
+            "20260708__DSC03931.jpg",
+            "20260708__DSC04054.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.6965246349903885,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_18",
+          "session": "2026-07-10",
+          "selected_ids": [
+            "20260710__DSC05295.jpg",
+            "20260710__DSC04288.jpg",
+            "20260710__DSC04358.jpg",
+            "20260710__DSC05092.jpg",
+            "20260710__DSC04730.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.528691223020828,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_19",
+          "session": "2026-07-11",
+          "selected_ids": [
+            "20260711__DSC07256.jpg",
+            "20260711__DSC07502.jpg",
+            "20260711__DSC07871.jpg",
+            "20260711__DSC07207.jpg",
+            "20260711__DSC06043.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.406772927943393,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_20",
+          "session": "2026-08-08",
+          "selected_ids": [
+            "20260808__DSC01233.jpg",
+            "20260808__DSC01385.jpg",
+            "20260808__DSC03515.jpg",
+            "20260808__DSC03287.jpg",
+            "20260808__DSC01776.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8547221792630082,
+          "top1_match": false
+        }
+      ]
+    },
+    "raw_vlm_fusion": {
+      "pack_count": 16,
+      "macro_overlap_at_5": 0.6375,
+      "macro_ndcg_at_5": 0.6045365274293616,
+      "top1_accuracy": 0.1875,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_01",
+          "session": "2025-12-14",
+          "selected_ids": [
+            "20251214__DSC06510.jpg",
+            "20251214__DSC06532.jpg",
+            "20251214__DSC06598.jpg",
+            "20251214__DSC06368.jpg",
+            "20251214__DSC06464.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5501462139678901,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_02",
+          "session": "2026-03-22",
+          "selected_ids": [
+            "20260322__DSC07939.jpg",
+            "20260322__DSC08032.jpg",
+            "20260322__DSC08198.jpg",
+            "20260322__DSC08004.jpg",
+            "20260322__DSC08223.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.32971938831201436,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_03",
+          "session": "2026-03-29",
+          "selected_ids": [
+            "20260329__DSC09182.jpg",
+            "20260329__DSC09307.jpg",
+            "20260329__DSC09285.jpg",
+            "20260329__DSC09517.jpg",
+            "20260329__DSC09493.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8095608894115017,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_04",
+          "session": "2026-04-04",
+          "selected_ids": [
+            "20260404__DSC09750.jpg",
+            "20260404__DSC09881.jpg",
+            "20260404__DSC09993.jpg",
+            "20260404__DSC09680.jpg",
+            "20260404__DSC09772.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.7340625679566112,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_05",
+          "session": "2026-04-05",
+          "selected_ids": [
+            "20260405__DSC00669.jpg",
+            "20260405__DSC00184.jpg",
+            "20260405__DSC00314.jpg",
+            "20260405__DSC00685.jpg",
+            "20260405__DSC00287.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7944526922873871,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_06",
+          "session": "2026-04-16",
+          "selected_ids": [
+            "20260416__DSC03336.jpg",
+            "20260416__DSC02792.jpg",
+            "20260416__DSC03240.jpg",
+            "20260416__DSC02832.jpg",
+            "20260416__DSC03462.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5109272074347186,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_08",
+          "session": "2026-05-09",
+          "selected_ids": [
+            "20260509__DSC06598.jpg",
+            "20260509__DSC06393.jpg",
+            "20260509__DSC06467.jpg",
+            "20260509__DSC06427.jpg",
+            "20260509__DSC06572.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.34073457713514793,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_09",
+          "session": "2026-05-23",
+          "selected_ids": [
+            "20260523__DSC08950.jpg",
+            "20260523__DSC09281.jpg",
+            "20260523__DSC09072.jpg",
+            "20260523__DSC00100.jpg",
+            "20260523__DSC00079.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9178760981549413,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_10",
+          "session": "2026-05-24_Chinesefootball",
+          "selected_ids": [
+            "20260524Chinesefootball__DSC00622.jpg",
+            "20260524Chinesefootball__DSC00252.jpg",
+            "20260524Chinesefootball__DSC00167.jpg",
+            "20260524Chinesefootball__DSC00422.jpg",
+            "20260524Chinesefootball__DSC00798.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.6710318954374859,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_11",
+          "session": "2026-06-06",
+          "selected_ids": [
+            "20260606__DSC05554.jpg",
+            "20260606__DSC04893.jpg",
+            "20260606__DSC04592.jpg",
+            "20260606__DSC05254.jpg",
+            "20260606__DSC04771.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.3762625425808322,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_13",
+          "session": "2026-06-18",
+          "selected_ids": [
+            "20260618__DSC09918.jpg",
+            "20260618__DSC01668.jpg",
+            "20260618__DSC01858.jpg",
+            "20260618__DSC01920.jpg",
+            "20260618__DSC00106.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5250027909509939,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_14",
+          "session": "2026-06-26",
+          "selected_ids": [
+            "20260626__DSC05759.jpg",
+            "20260626__DSC04462.jpg",
+            "20260626__DSC03660.jpg",
+            "20260626__DSC05644.jpg",
+            "20260626__DSC04338.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.2583140751581048,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_17",
+          "session": "2026-07-08",
+          "selected_ids": [
+            "20260708__DSC03155.jpg",
+            "20260708__DSC04054.jpg",
+            "20260708__DSC03509.jpg",
+            "20260708__DSC03931.jpg",
+            "20260708__DSC03636.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.3563653788279112,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_18",
+          "session": "2026-07-10",
+          "selected_ids": [
+            "20260710__DSC05295.jpg",
+            "20260710__DSC04502.jpg",
+            "20260710__DSC04938.jpg",
+            "20260710__DSC04288.jpg",
+            "20260710__DSC05092.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.793299441324393,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_19",
+          "session": "2026-07-11",
+          "selected_ids": [
+            "20260711__DSC06043.jpg",
+            "20260711__DSC07256.jpg",
+            "20260711__DSC07871.jpg",
+            "20260711__DSC07502.jpg",
+            "20260711__DSC06217.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.7424898592688828,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_20",
+          "session": "2026-08-08",
+          "selected_ids": [
+            "20260808__DSC03515.jpg",
+            "20260808__DSC01233.jpg",
+            "20260808__DSC01385.jpg",
+            "20260808__DSC02084.jpg",
+            "20260808__DSC02169.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9623388206609695,
+          "top1_match": true
+        }
+      ]
+    }
+  },
+  "holdout": {
+    "raw": {
+      "pack_count": 4,
+      "macro_overlap_at_5": 0.65,
+      "macro_ndcg_at_5": 0.6858234484239676,
+      "top1_accuracy": 0.25,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_07",
+          "session": "2026-05-02",
+          "selected_ids": [
+            "20260502__DSC05344.JPG",
+            "20260502__DSC05185.JPG",
+            "20260502__DSC05205.JPG",
+            "20260502__DSC05293.JPG",
+            "20260502__DSC05379.JPG"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8447396040477142,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_12",
+          "session": "2026-06-13",
+          "selected_ids": [
+            "20260613__DSC07459.jpg",
+            "20260613__DSC08133.jpg",
+            "20260613__DSC08830.jpg",
+            "20260613__DSC09541.jpg",
+            "20260613__DSC09328.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.6130715194055061,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_15",
+          "session": "2026-06-27",
+          "selected_ids": [
+            "20260627__DSC08083.jpg",
+            "20260627__DSC06423.jpg",
+            "20260627__DSC08536.jpg",
+            "20260627__DSC08510.jpg",
+            "20260627__DSC08434.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5020451667783966,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_16",
+          "session": "2026-07-03",
+          "selected_ids": [
+            "20260703__DSC01186.jpg",
+            "20260703__DSC02378.jpg",
+            "20260703__DSC02150.jpg",
+            "20260703__DSC02133.jpg",
+            "20260703__DSC01734.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7834375034642536,
+          "top1_match": true
+        }
+      ]
+    },
+    "diversity": {
+      "pack_count": 4,
+      "macro_overlap_at_5": 0.65,
+      "macro_ndcg_at_5": 0.6858234484239676,
+      "top1_accuracy": 0.25,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_07",
+          "session": "2026-05-02",
+          "selected_ids": [
+            "20260502__DSC05344.JPG",
+            "20260502__DSC05185.JPG",
+            "20260502__DSC05205.JPG",
+            "20260502__DSC05293.JPG",
+            "20260502__DSC05379.JPG"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8447396040477142,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_12",
+          "session": "2026-06-13",
+          "selected_ids": [
+            "20260613__DSC07459.jpg",
+            "20260613__DSC08133.jpg",
+            "20260613__DSC08830.jpg",
+            "20260613__DSC09541.jpg",
+            "20260613__DSC09328.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.6130715194055061,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_15",
+          "session": "2026-06-27",
+          "selected_ids": [
+            "20260627__DSC08083.jpg",
+            "20260627__DSC06423.jpg",
+            "20260627__DSC08536.jpg",
+            "20260627__DSC08510.jpg",
+            "20260627__DSC08434.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5020451667783966,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_16",
+          "session": "2026-07-03",
+          "selected_ids": [
+            "20260703__DSC01186.jpg",
+            "20260703__DSC02378.jpg",
+            "20260703__DSC02150.jpg",
+            "20260703__DSC02133.jpg",
+            "20260703__DSC01734.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7834375034642536,
+          "top1_match": true
+        }
+      ]
+    },
+    "risk": {
+      "pack_count": 4,
+      "macro_overlap_at_5": 0.55,
+      "macro_ndcg_at_5": 0.5826571888867614,
+      "top1_accuracy": 0.25,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_07",
+          "session": "2026-05-02",
+          "selected_ids": [
+            "20260502__DSC05344.JPG",
+            "20260502__DSC05185.JPG",
+            "20260502__DSC05205.JPG",
+            "20260502__DSC05293.JPG",
+            "20260502__DSC05379.JPG"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8447396040477142,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_12",
+          "session": "2026-06-13",
+          "selected_ids": [
+            "20260613__DSC07459.jpg",
+            "20260613__DSC09541.jpg",
+            "20260613__DSC08830.jpg",
+            "20260613__DSC08133.jpg",
+            "20260613__DSC09500.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.4597683745697366,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_15",
+          "session": "2026-06-27",
+          "selected_ids": [
+            "20260627__DSC08083.jpg",
+            "20260627__DSC06423.jpg",
+            "20260627__DSC08536.jpg",
+            "20260627__DSC08434.jpg",
+            "20260627__DSC08183.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.3933279908214632,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_16",
+          "session": "2026-07-03",
+          "selected_ids": [
+            "20260703__DSC01186.jpg",
+            "20260703__DSC02378.jpg",
+            "20260703__DSC02150.jpg",
+            "20260703__DSC02133.jpg",
+            "20260703__DSC02117.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.6327927861081318,
+          "top1_match": true
+        }
+      ]
+    },
+    "risk_diversity": {
+      "pack_count": 4,
+      "macro_overlap_at_5": 0.55,
+      "macro_ndcg_at_5": 0.5826571888867614,
+      "top1_accuracy": 0.25,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_07",
+          "session": "2026-05-02",
+          "selected_ids": [
+            "20260502__DSC05344.JPG",
+            "20260502__DSC05185.JPG",
+            "20260502__DSC05205.JPG",
+            "20260502__DSC05293.JPG",
+            "20260502__DSC05379.JPG"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.8447396040477142,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_12",
+          "session": "2026-06-13",
+          "selected_ids": [
+            "20260613__DSC07459.jpg",
+            "20260613__DSC09541.jpg",
+            "20260613__DSC08830.jpg",
+            "20260613__DSC08133.jpg",
+            "20260613__DSC09500.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.4597683745697366,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_15",
+          "session": "2026-06-27",
+          "selected_ids": [
+            "20260627__DSC08083.jpg",
+            "20260627__DSC06423.jpg",
+            "20260627__DSC08536.jpg",
+            "20260627__DSC08434.jpg",
+            "20260627__DSC08183.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.3933279908214632,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_16",
+          "session": "2026-07-03",
+          "selected_ids": [
+            "20260703__DSC01186.jpg",
+            "20260703__DSC02378.jpg",
+            "20260703__DSC02150.jpg",
+            "20260703__DSC02133.jpg",
+            "20260703__DSC02117.jpg"
+          ],
+          "overlap_count": 2,
+          "overlap_at_5": 0.4,
+          "ndcg_at_5": 0.6327927861081318,
+          "top1_match": true
+        }
+      ]
+    },
+    "comparative_vlm": {
+      "pack_count": 4,
+      "macro_overlap_at_5": 0.65,
+      "macro_ndcg_at_5": 0.7044668858421547,
+      "top1_accuracy": 0.5,
+      "exact_top5_set_rate": 0.0,
+      "cases": [
+        {
+          "pack_id": "real_pack_07",
+          "session": "2026-05-02",
+          "selected_ids": [
+            "20260502__DSC05397.JPG",
+            "20260502__DSC05293.JPG",
+            "20260502__DSC05379.JPG",
+            "20260502__DSC05448.JPG",
+            "20260502__DSC05205.JPG"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.47978878469546543,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_12",
+          "session": "2026-06-13",
+          "selected_ids": [
+            "20260613__DSC08086.jpg",
+            "20260613__DSC07459.jpg",
+            "20260613__DSC08133.jpg",
+            "20260613__DSC09328.jpg",
+            "20260613__DSC09541.jpg"
+          ],
+          "overlap_count": 4,
+          "overlap_at_5": 0.8,
+          "ndcg_at_5": 0.9495924508845183,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_15",
+          "session": "2026-06-27",
+          "selected_ids": [
+            "20260627__DSC08083.jpg",
+            "20260627__DSC08434.jpg",
+            "20260627__DSC08556.jpg",
+            "20260627__DSC08510.jpg",
+            "20260627__DSC08883.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5721765916141572,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_16",
+          "session": "2026-07-03",
+          "selected_ids": [
+            "20260703__DSC01186.jpg",
+            "20260703__DSC01734.jpg",
+            "20260703__DSC02133.jpg",
+            "20260703__DSC02034.jpg",
+            "20260703__DSC01365.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.8163097161744777,
+          "top1_match": true
+        }
+      ]
+    },
+    "raw_vlm_fusion": {
+      "pack_count": 4,
+      "macro_overlap_at_5": 0.7,
+      "macro_ndcg_at_5": 0.7456463088058406,
+      "top1_accuracy": 0.5,
+      "exact_top5_set_rate": 0.25,
+      "cases": [
+        {
+          "pack_id": "real_pack_07",
+          "session": "2026-05-02",
+          "selected_ids": [
+            "20260502__DSC05293.JPG",
+            "20260502__DSC05344.JPG",
+            "20260502__DSC05185.JPG",
+            "20260502__DSC05205.JPG",
+            "20260502__DSC05397.JPG"
+          ],
+          "overlap_count": 5,
+          "overlap_at_5": 1.0,
+          "ndcg_at_5": 0.9872536302235486,
+          "top1_match": true
+        },
+        {
+          "pack_id": "real_pack_12",
+          "session": "2026-06-13",
+          "selected_ids": [
+            "20260613__DSC07459.jpg",
+            "20260613__DSC08133.jpg",
+            "20260613__DSC08830.jpg",
+            "20260613__DSC09541.jpg",
+            "20260613__DSC09328.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.6130715194055061,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_15",
+          "session": "2026-06-27",
+          "selected_ids": [
+            "20260627__DSC08083.jpg",
+            "20260627__DSC08434.jpg",
+            "20260627__DSC06423.jpg",
+            "20260627__DSC08510.jpg",
+            "20260627__DSC08536.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.5878073933069206,
+          "top1_match": false
+        },
+        {
+          "pack_id": "real_pack_16",
+          "session": "2026-07-03",
+          "selected_ids": [
+            "20260703__DSC01186.jpg",
+            "20260703__DSC02378.jpg",
+            "20260703__DSC01734.jpg",
+            "20260703__DSC02133.jpg",
+            "20260703__DSC02150.jpg"
+          ],
+          "overlap_count": 3,
+          "overlap_at_5": 0.6,
+          "ndcg_at_5": 0.7944526922873871,
+          "top1_match": true
+        }
+      ]
+    }
+  },
+  "fusion_protocol": "alpha and VLM exclusion penalty fitted on development only",
+  "fitted_fusion": {
+    "vlm_rank_alpha": 0.2,
+    "vlm_flag_penalty": 0.0
+  }
+}

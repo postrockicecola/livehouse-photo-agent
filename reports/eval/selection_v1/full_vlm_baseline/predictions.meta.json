@@ -1,0 +1,11 @@
+{
+  "schema_version": "selection_predictions.v1",
+  "mode": "gated_full_vlm",
+  "count": 250,
+  "stage1_rejected": 42,
+  "stage2_rejected": 3,
+  "semantic_gate_note": "Production has no dedicated semantic VLM gate; stage2_reject is the actual trash decision from low_quality tags or the configured keep threshold.",
+  "pipeline_config_sha256": "1f83ec6b2594bf4ed50ac38c338cfde9a7b523ba784c396a83b57e9cf9156c19",
+  "audit_sha256": "0e0e72ff730c764e7decff9e94a07d436f3cb6d674dc5e5db1c14a4c446cb71e",
+  "output": "reports/eval/selection_v1/full_vlm_baseline/predictions.jsonl"
+}

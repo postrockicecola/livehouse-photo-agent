@@ -1,0 +1,2072 @@
+{
+  "schema_version": "score_calibration_manifest.v1",
+  "dataset_version": "score_calibration_v1",
+  "count": 295,
+  "items": [
+    {
+      "file": "20260405__DSC00157.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00157.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "78283e6773a0d388e9c5d14eea92dd0abb5df5e6ee859d49fc40a51b3eb29a75"
+    },
+    {
+      "file": "20260405__DSC00704.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00704.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "e6969f52f93a4c7bf28f0b5fa5efcf0c52cb100d7a3358fe7c8b140a897919ce"
+    },
+    {
+      "file": "20260405__DSC00669.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00669.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "2041529dbbc0336dd4abded00302566d09bb6fc6dba3829f14f3f58cda78409e"
+    },
+    {
+      "file": "20260405__DSC00803.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00803.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "d4454c202fa1c93121c2be4c66447fb3ed973799fef9d442e9c784d5c9b17405"
+    },
+    {
+      "file": "20260405__DSC00287.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00287.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "5f62c163473793834486b2cc509f6787b0e2a329f69e6c37ff7a5c4f51da9d81"
+    },
+    {
+      "file": "20260405__DSC00444.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00444.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "cbcd388d7ec3acf678896e14759133016b6eafc7c346e1485f2d842c9baa82a0"
+    },
+    {
+      "file": "20260405__DSC00842.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00842.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "6a41a31db6a9a3538b113ab8c04dd904b29f059d031ee45a3be364e92ba10630"
+    },
+    {
+      "file": "20260404__DSC09750.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09750.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "f01cf774129e6521e068bac26bd4291f77e890954e2c5604037ed8b1d3256efb"
+    },
+    {
+      "file": "20260404__DSC09881.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09881.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "752835759d7be0923a0268539186858c08722c562a9be737338cd467c137bb35"
+    },
+    {
+      "file": "20260405__DSC00756.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00756.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "fa905beb88a5922b0e4ecb2d2c74624e70d7c9582028c6ab1e049b3f3b77bac5"
+    },
+    {
+      "file": "20260404__DSC09931.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09931.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "aa58f50d99d3d0709f81b333ae716da7d3c5d77335e1cf803288e81972fd4ae3"
+    },
+    {
+      "file": "20260405__DSC00775.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00775.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "76e00558b5f97fc386bb6cd4f804e009b32430c2dce8ab6a94d1c4d46fb3e21f"
+    },
+    {
+      "file": "20260404__DSC09772.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09772.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "f10530803096ea3f5dc4c9c2abd8f6d978d6c8f5ff58f6e1636168e46fd77d8d"
+    },
+    {
+      "file": "20260404__DSC09906.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09906.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "b0b2e99dde1069d890062302ad59ea0700c5eb73aca538507b9a3520ff361ac7"
+    },
+    {
+      "file": "20260405__DSC00685.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00685.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "b48365e699eb60a021f22659f2caaffe7551d9bf4bb27c351411238cb6f65500"
+    },
+    {
+      "file": "20260404__DSC09993.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09993.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "9815462fcd141e069fbc80482d32be92cecad8c58346000c443b7ad5f0ef925a"
+    },
+    {
+      "file": "20260405__DSC00419.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00419.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "26c7b5577ca20770b348897b149831bd4a35ca525cc413921fd9b5bd0868d122"
+    },
+    {
+      "file": "20260404__DSC09791.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09791.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "6b0a783b7277b9b0af7d474cb8a4d296c20908295f1b907136c20b4ccebe98d1"
+    },
+    {
+      "file": "20260404__DSC09860.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09860.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "c583f16a265275b2ec050f3aa26f0ea25fa2142545344f90a039efc9e331762e"
+    },
+    {
+      "file": "20260405__DSC00184.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00184.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "270aa7fcc13ddf25351852508c40f203880dc4128577fd76ced686ca1f88d5a6"
+    },
+    {
+      "file": "20260404__DSC09806.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09806.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "c29a23d1687dfa54362a19c70b1a1603e3fc346898c5063b6697e9c6766d2016"
+    },
+    {
+      "file": "20260405__DSC00238.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00238.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "d4a841391a3b4ebf0cc50168de05ea5c0a007b79a460432ff6ed7d185be0b287"
+    },
+    {
+      "file": "20260405__DSC00826.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00826.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "362841e132052b8e3e144eab9629d7abff5bf490378f6adb56e45677662af1ba"
+    },
+    {
+      "file": "20260405__DSC00314.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-05/Previews/DSC00314.jpg",
+      "session": "2026-04-05",
+      "target_category": "technical_hard",
+      "sha256": "678643ec999474b51783904b37cc3e7c7b52580f02fc5b03c65784236ef987b5"
+    },
+    {
+      "file": "20260404__DSC09680.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-04/Previews/DSC09680.jpg",
+      "session": "2026-04-04",
+      "target_category": "technical_hard",
+      "sha256": "ffaf55f82d41aee7ae5da076f3c5d2a82cf1698c437c52b3cbe1b98719c5216c"
+    },
+    {
+      "file": "20260808__DSC01672.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01672.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "b0d06bd51a951bba094fd6631f9992af46a55ccd5391e84a5d577a583bb6f282"
+    },
+    {
+      "file": "20260808__DSC01699.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01699.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "8e4641dd10704f3ce394c008e38dd482d208abed8c59d45b00f027d8c70bcf27"
+    },
+    {
+      "file": "20260329__DSC09549.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09549.jpg",
+      "session": "2026-03-29",
+      "target_category": "technical_hard",
+      "sha256": "8884d3f54274756beb1ef88a8d03fd44d1367ca55629c24bf9f358a1524bfa21"
+    },
+    {
+      "file": "20260329__DSC09437.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09437.jpg",
+      "session": "2026-03-29",
+      "target_category": "technical_hard",
+      "sha256": "8767cf59fe761f56aa17aba6420fcae8dcf1ab7beeff35ab9648441858a87902"
+    },
+    {
+      "file": "20260708__DSC03310.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03310.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "eceb8bdd80169022d6c1c268264548b19ddcf3a392f668be0d287072f90f26ab"
+    },
+    {
+      "file": "20260708__DSC03509.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03509.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "8b901e224dd67c949e036778beaf595c36069b936ed5a4c39aa4bbe4276d6622"
+    },
+    {
+      "file": "20260808__DSC01481.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01481.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "c58d687bd884d21d0111fad9c93f034715426fb33e9b49f00f1e1b6303d48ed0"
+    },
+    {
+      "file": "20260329__DSC09420.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09420.jpg",
+      "session": "2026-03-29",
+      "target_category": "technical_hard",
+      "sha256": "c57b30fdb3af15217a5d89295a7abf656f0948b567375fdf9af7f8ee464c8b60"
+    },
+    {
+      "file": "20260708__DSC03931.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03931.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "32fca6ff3eed695bebda6367392a7353c8968330e11a4f1d17af74e99614a448"
+    },
+    {
+      "file": "20260808__DSC02169.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC02169.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "6cc116a90802925aa7486f1bb4b3e47fb111893b57c48f2c80ed92527368827d"
+    },
+    {
+      "file": "20260808__DSC01776.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01776.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "37d31862df0ef4cfaca1caa4d5025c5b2df5c8cff97b83dc022036f5a24b3e4d"
+    },
+    {
+      "file": "20260729__DSC09404.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09404.jpg",
+      "session": "2026-07-29",
+      "target_category": "technical_hard",
+      "sha256": "a8f4f675e8bfae9a6688602ad0933bda3a1b1c80f1cbe4090dc3a5bd6865b236"
+    },
+    {
+      "file": "20260708__DSC03008.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03008.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "23a4708bc52725019c12b86646043de75f919384b5fec5243643627f5ce9764f"
+    },
+    {
+      "file": "20260708__DSC04092.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC04092.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "e75a791a53907d3a1780c5182fd37ca10492cbf01dd67512883132108277d669"
+    },
+    {
+      "file": "20260708__DSC02907.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC02907.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "f64fa7fad56ec5039ba2fd5794ddbd9f10f7c873851fbc7c50df435fe986956b"
+    },
+    {
+      "file": "20260808__DSC03515.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC03515.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "50594e977c68056cd4239da493a982e4373a2d1078d8ba259ca456fde609dd75"
+    },
+    {
+      "file": "20260708__DSC03879.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03879.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "3f2c0629c5ade1e8e9a2a8f000046f4453e52a67f6ab6e37d9c18726342d500b"
+    },
+    {
+      "file": "20260708__DSC03434.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03434.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "926671afe9b29a0e4ba3bcf5b543e2a79af955a82e8a25f45fdd4f56d19a0b67"
+    },
+    {
+      "file": "20260708__DSC03636.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03636.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "43ecc72aae2c4c7cb33e64079533e0420c682d05768925c01b23af08e6c91d74"
+    },
+    {
+      "file": "20260708__DSC03384.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03384.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "3dae00ff60ab3047a012b476dcc83f9021bce66296779f738ab7af9dd641ccd0"
+    },
+    {
+      "file": "20260808__DSC03968.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC03968.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "64608e413f6a59382790f42f395143cd189ab44936bed7f867a20f7681034f9b"
+    },
+    {
+      "file": "20260708__DSC04054.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC04054.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "031191935759bc0c49792c139a315724d2d189ae8758f4158d66ffc9380b33f3"
+    },
+    {
+      "file": "20260708__DSC03155.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-08/Previews/DSC03155.jpg",
+      "session": "2026-07-08",
+      "target_category": "technical_hard",
+      "sha256": "8ea5dd198c26026f0d54985f92fb2c9f1d21cc7154ba09c304d21192a6b37df6"
+    },
+    {
+      "file": "20260808__DSC01792.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01792.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "9b520aea62440cb1ce48c23efcd827188db01d3f4ffbc3d825b07a4ad7e950b2"
+    },
+    {
+      "file": "20260808__DSC03287.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC03287.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "f1feba6723c1aef388fbb9073fc90991c7c0a97c5d4d57d7c6da5f8e1eb7a43f"
+    },
+    {
+      "file": "20260808__DSC00752.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC00752.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "98820cb7c985f513ac3b996f4c5e8e9923d5fee2dcad96b6a012bc18e64a6d99"
+    },
+    {
+      "file": "20260808__DSC04316.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC04316.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "b69f0e22907295789c74523bcff74775a08f422be322838244e13a0f314f1223"
+    },
+    {
+      "file": "20260808__DSC04262.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC04262.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "90da8fe5bd93c708d11ac119db9e7b49df1f16bb46569d6ef9092a9f245887f9"
+    },
+    {
+      "file": "20260729__DSC09726.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09726.jpg",
+      "session": "2026-07-29",
+      "target_category": "technical_hard",
+      "sha256": "73e28b1a8339b1024f184935efd882df5ac8ef0efde98b1f40be367421c76b68"
+    },
+    {
+      "file": "20260729__DSC09659.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09659.jpg",
+      "session": "2026-07-29",
+      "target_category": "technical_hard",
+      "sha256": "a3ce281e7bf83ea66b1c78d079b7a4c40e7fccbcc713feee5c4a873f4820ac6d"
+    },
+    {
+      "file": "20260808__DSC01385.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01385.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "c61b2766a3612849b70952e8948822534024451ad980276f8042b578ddfb419a"
+    },
+    {
+      "file": "20260729__DSC09675.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09675.jpg",
+      "session": "2026-07-29",
+      "target_category": "technical_hard",
+      "sha256": "82977941f107b7ccacecb9f0e84fe328b63439ccd23b0e7b90f5552fad2eea63"
+    },
+    {
+      "file": "20260808__DSC02084.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC02084.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "d1b603059ca4fe6442c6e7d1713507446cc60fe9affa2b3d31e45981d1a7598e"
+    },
+    {
+      "file": "20260808__DSC01233.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-08-08/Previews/DSC01233.jpg",
+      "session": "2026-08-08",
+      "target_category": "technical_hard",
+      "sha256": "288164a1bc7d5a37c85e6b9ce50b204527dda5318d7d314ef51950141fc1afba"
+    },
+    {
+      "file": "20260329__DSC09493.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09493.jpg",
+      "session": "2026-03-29",
+      "target_category": "technical_hard",
+      "sha256": "bb5c69b84d890c086345af0c5d03a72115bfa8d8bf8e02b4a690631fb95ce457"
+    },
+    {
+      "file": "20260502__DSC05344.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05344.JPG",
+      "session": "2026-05-02",
+      "target_category": "semantic_defect",
+      "sha256": "001d5397347d30d566f3d1a8944b286e34734f13d6973ba44afb52194ef719d7"
+    },
+    {
+      "file": "20260502__DSC05205.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05205.JPG",
+      "session": "2026-05-02",
+      "target_category": "semantic_defect",
+      "sha256": "27876491234f36f8a337dba946d21498a162cfa4ade861cf0d6a70feb36ee0e8"
+    },
+    {
+      "file": "20260502__DSC05293.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05293.JPG",
+      "session": "2026-05-02",
+      "target_category": "semantic_defect",
+      "sha256": "21469e7293263b3a32bb04e4f14f56900ce91e56a4a3d9abd998dd2f2f3dd0f2"
+    },
+    {
+      "file": "20260502__DSC05185.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05185.JPG",
+      "session": "2026-05-02",
+      "target_category": "semantic_defect",
+      "sha256": "186a204a540e45b1bfaea91aea24f8fc792d2eac6728048f818df8746b556262"
+    },
+    {
+      "file": "20260711__DSC06043.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC06043.jpg",
+      "session": "2026-07-11",
+      "target_category": "semantic_defect",
+      "sha256": "df1e99fb2192cb604a6b3f940f0d294e51fb8aec078b6d3363247d86749920bd"
+    },
+    {
+      "file": "20260322__DSC08032.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08032.jpg",
+      "session": "2026-03-22",
+      "target_category": "semantic_defect",
+      "sha256": "0fa8d6f26b078d13a192addc2ee930bf99dfa8f57fb13cec8d7043750e95db35"
+    },
+    {
+      "file": "20260329__DSC09182.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09182.jpg",
+      "session": "2026-03-29",
+      "target_category": "semantic_defect",
+      "sha256": "9f32be8ae8f225d483d52a4d84bec22018aeaf530b98ca055206341dea74bdd5"
+    },
+    {
+      "file": "20260322__DSC08064.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08064.jpg",
+      "session": "2026-03-22",
+      "target_category": "semantic_defect",
+      "sha256": "44c88b994ad0b61b6d212921c9fcc47ac4780d01a62e5fa5d779e090102ada01"
+    },
+    {
+      "file": "20260626__DSC04338.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC04338.jpg",
+      "session": "2026-06-26",
+      "target_category": "semantic_defect",
+      "sha256": "246d7e919453e045bcb86ace3f3548d1f70967902bcc8560db2f6ff033644f22"
+    },
+    {
+      "file": "20260729__DSC09849.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09849.jpg",
+      "session": "2026-07-29",
+      "target_category": "semantic_defect",
+      "sha256": "ef404d17943ae7efd5b8aba6d2ce9738af10a14d55a1f898756b54ae7e442f65"
+    },
+    {
+      "file": "20260329__DSC09307.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09307.jpg",
+      "session": "2026-03-29",
+      "target_category": "semantic_defect",
+      "sha256": "4210b57183ee3ce00cc02c8e14602f292ca4e727e935023d83e99ef2c36b8b70"
+    },
+    {
+      "file": "20251214__DSC06284.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06284.jpg",
+      "session": "2025-12-14",
+      "target_category": "semantic_defect",
+      "sha256": "b0cd632a058ef57125640fc9bbd97d1cf823747a6b59d63ab4e9ae01688bc68d"
+    },
+    {
+      "file": "20260521__DSC07985.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-21/Previews/DSC07985.jpg",
+      "session": "2026-05-21",
+      "target_category": "semantic_defect",
+      "sha256": "dc376b9949c31bd3a7b715010a53ef891d8132d70a32fdafec2ac2a88a9487ce"
+    },
+    {
+      "file": "20260329__DSC09285.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09285.jpg",
+      "session": "2026-03-29",
+      "target_category": "semantic_defect",
+      "sha256": "6432aa38be61d2dec6e4b7428ddfdcff4cbd8b99c11560dd54655284bcc20e66"
+    },
+    {
+      "file": "20260330__DSC09616.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-30/Previews/DSC09616.jpg",
+      "session": "2026-03-30",
+      "target_category": "semantic_defect",
+      "sha256": "8806c34b4ee7b83f3a2b7fc4f801a2306290c5689a19ef0ae44707ca5b7fa908"
+    },
+    {
+      "file": "20260307__DSC05542.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-07/Previews/DSC05542.jpg",
+      "session": "2026-03-07",
+      "target_category": "semantic_defect",
+      "sha256": "d3be4d49f5f8ef81eb53a355c07ed4fef9cb93816fa32fc0c77e382f3576653d"
+    },
+    {
+      "file": "20260322__DSC08198.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08198.jpg",
+      "session": "2026-03-22",
+      "target_category": "semantic_defect",
+      "sha256": "04b6221995776ade1188ba11b41aba32ab5a04c4e3f5d261bb4d3aca314b4ebc"
+    },
+    {
+      "file": "20260627__DSC08556.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08556.jpg",
+      "session": "2026-06-27",
+      "target_category": "semantic_defect",
+      "sha256": "fb79aa2cd7b5608fec9220f0d59bb869255e22979f63e4f78d9c43d51c4c5886"
+    },
+    {
+      "file": "20260322__DSC07939.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC07939.jpg",
+      "session": "2026-03-22",
+      "target_category": "semantic_defect",
+      "sha256": "2267550407eac2665c2393cdd294c4297bdc84b38d0973ae72accd925453a463"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02370.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02370.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "semantic_defect",
+      "sha256": "ed7265748a76e740f330fad846370cdb1a349ef77d37380b9ce4c4d79601e9e9"
+    },
+    {
+      "file": "20260627__DSC08083.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08083.jpg",
+      "session": "2026-06-27",
+      "target_category": "semantic_defect",
+      "sha256": "62528605d62bc83685466490266d1713d160de899ad84eafaaeb2af09bd582b1"
+    },
+    {
+      "file": "20260322__DSC08004.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08004.jpg",
+      "session": "2026-03-22",
+      "target_category": "semantic_defect",
+      "sha256": "c4e74319b093f92eba4ce89e23b9889e06290e900005f8adbb9777da59b7cb52"
+    },
+    {
+      "file": "20260322__DSC08047.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08047.jpg",
+      "session": "2026-03-22",
+      "target_category": "semantic_defect",
+      "sha256": "3fbdce0f903ec0ff139f206ba983e7a1717ff9887124a20d958a62deebed7419"
+    },
+    {
+      "file": "20260729__DSC09868.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09868.jpg",
+      "session": "2026-07-29",
+      "target_category": "semantic_defect",
+      "sha256": "7ea18bc9f4f08cc27003d5ead57abdb6a6e3fbfb153e48c328a466432d6797a6"
+    },
+    {
+      "file": "20260627__DSC08536.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08536.jpg",
+      "session": "2026-06-27",
+      "target_category": "semantic_defect",
+      "sha256": "3c4dff2e31d958a4a8a0479328d7d5b3eea782d882680b984ee2a5a44e845e0f"
+    },
+    {
+      "file": "20260627__DSC08510.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08510.jpg",
+      "session": "2026-06-27",
+      "target_category": "ordinary",
+      "sha256": "f7e3664a7d62a2db5ab39f08245180e5d5d0a0e416fdd3e62d34b39cd76b2f49"
+    },
+    {
+      "file": "20260627__DSC06423.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC06423.jpg",
+      "session": "2026-06-27",
+      "target_category": "ordinary",
+      "sha256": "69bab8763ac847473d36ff747ccf8c25eb9bdbeef7592bfac5736866e45eb502"
+    },
+    {
+      "file": "20260329__DSC09517.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09517.jpg",
+      "session": "2026-03-29",
+      "target_category": "ordinary",
+      "sha256": "46912194f7210395f927e4fab2f1f2d3f6626f782415a9ecba6cad0f7341d1b7"
+    },
+    {
+      "file": "20260416__DSC03205.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC03205.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "f1b3e52ad320a8ada60c141c0e8e5f3b3faa8b5c928057a43cdeb1c4cb26e7cd"
+    },
+    {
+      "file": "20260416__DSC03240.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC03240.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "5945fa5876a3a6199b3d2dd8ae457f7a88bac46a853369a477d0e563fcff7171"
+    },
+    {
+      "file": "20260710__DSC04358.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04358.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "d9286c6d40b0d556f5d8be6938ad7faee76525f0882df8907b4b45fb43d2cc1e"
+    },
+    {
+      "file": "20260618__DSC01110.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01110.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "b746307c3e1e4cbaad8b3969cd87e9991f8cbc960199aaa3a8a7ed8b0cac48ce"
+    },
+    {
+      "file": "20260618__DSC01248.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01248.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "cf60ffb8d8199548b322ac0ecfb237e2956ec8ebe053fa40998facc86f28ac80"
+    },
+    {
+      "file": "20260416__DSC03093.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC03093.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "0b0922899ee2c29e6461b4b55c37a25acfaafd092d65c5fb5cfcb2309bcec18e"
+    },
+    {
+      "file": "20260710__DSC05092.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05092.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "16272b48ceea2d9ad29565cb130c720fbe1978e6905ce76d790f16a1bfdf5487"
+    },
+    {
+      "file": "20260322__DSC07892.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC07892.jpg",
+      "session": "2026-03-22",
+      "target_category": "ordinary",
+      "sha256": "d077b6bac72e4682afd23b1dcef98182bb7dae4fe24c9e04d5f3c7d499e7b75c"
+    },
+    {
+      "file": "20260416__DSC03462.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC03462.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "81ed164cc7aa794171112787f0d84b2f58ca243f251aa6f44556cb5b5dc2b1e0"
+    },
+    {
+      "file": "20260618__DSC02339.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC02339.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "7e920ce99458b894a62e0c3b63bf3527cc7a6ce523a5e2977abab9b9f0a466fe"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02736.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02736.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "ordinary",
+      "sha256": "214fe8d775ad7bde72837e9c63b09f421527c680c0c4f573757a02818715b277"
+    },
+    {
+      "file": "20260711__DSC05754.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC05754.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "ece7a2a55f95abaca361efa65d26f524a49970e8b42410151d74f8f6b8bbe61a"
+    },
+    {
+      "file": "20260618__DSC00851.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC00851.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "a99964e4c2399453498951e67e7f46e5307b43b10fe2dd2165fc345faa9d1303"
+    },
+    {
+      "file": "20260502__DSC05397.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05397.JPG",
+      "session": "2026-05-02",
+      "target_category": "ordinary",
+      "sha256": "d260f35d659894ec19556d18acc7fc274eb478f4dc062b2edae288791998c717"
+    },
+    {
+      "file": "20260711__DSC07502.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07502.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "243bac16a2d996ca33797a2da319e699dccb01884caea1c95e24a5204eba852e"
+    },
+    {
+      "file": "20260618__DSC09918.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC09918.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "ec6a4af1ce727b8bbc108cfe9aff1e0a1d6ee3cf6e90f3130fb88f06e6301a9c"
+    },
+    {
+      "file": "20260330__DSC09593.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-30/Previews/DSC09593.jpg",
+      "session": "2026-03-30",
+      "target_category": "ordinary",
+      "sha256": "f60edcc0a2e4be595a0b41f5290cd65d6c772fbbb8c999ee06cff613fbbe1e51"
+    },
+    {
+      "file": "20260307__DSC05112.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-07/Previews/DSC05112.jpg",
+      "session": "2026-03-07",
+      "target_category": "ordinary",
+      "sha256": "5fa59b7f9088b238787379597cadd8bbb3c867f24d661026275fa6933ccf8cf8"
+    },
+    {
+      "file": "20260618__DSC00106.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC00106.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "7f48853d851725a3ceb57a239c7ffe36fa949568edb72b38ff6511ff735b50c2"
+    },
+    {
+      "file": "20260711__DSC06242.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC06242.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "1edb1cf3a3bce6db7e678bd8c421d04b12b126fbcaa56df83dceaf84ff56de97"
+    },
+    {
+      "file": "20260618__DSC01138.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01138.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "cfbf86939bdc5366dfabfc1ceb9db6cf02e197b82bfcee80fea4b4faed11959c"
+    },
+    {
+      "file": "20260416__DSC02902.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC02902.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "608ea9823e19a6c2b5c373259f0ea1baa56158a02246d398dfed15e26f6972b6"
+    },
+    {
+      "file": "20260627__DSC08899.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08899.jpg",
+      "session": "2026-06-27",
+      "target_category": "ordinary",
+      "sha256": "718cd74085f7a2517584b6deac12afdea6ce4e03496cd157db6adde820fe3be2"
+    },
+    {
+      "file": "20260606__DSC05254.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC05254.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "55f2a39f3329180ed2fb767435b3520bc0051f2f34155bc7a0b54fb5691a49c4"
+    },
+    {
+      "file": "20260416__DSC02832.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC02832.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "c9f1750d408a4c7edf7a360f23f71e1189a8fbef479575b0c5423495185c84aa"
+    },
+    {
+      "file": "20260416__DSC03116.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC03116.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "08cb9e61aedf78cb9330ce18232a443bb4c27cd96c4f75c1778f70b3679f44ac"
+    },
+    {
+      "file": "20260711__DSC07980.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07980.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "09d81b08beb3f3eef97eb7158528bb55ba835d961fbc2aec989856705d1b80a8"
+    },
+    {
+      "file": "20260606__DSC04592.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC04592.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "e4ef6ecf84b211076c5d3438af58ab099eac479e75890452ece037a55f29216e"
+    },
+    {
+      "file": "20260618__DSC01668.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01668.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "b9fe08efd6cca9d93df717a41792188c2410e423ef7a0b41b1550cc4b38aa2a6"
+    },
+    {
+      "file": "20260711__DSC07256.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07256.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "8765384f4a74728585bb53a2dc8a9848f523e2f5e8086e51c77717aab14d0458"
+    },
+    {
+      "file": "20260710__DSC04502.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04502.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "cc63e8b35fa9d738b2c7c564723533abfd9f19eb16742270d85fca7fe2560a28"
+    },
+    {
+      "file": "20260711__DSC07227.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07227.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "6c843b51e62cc38ce01af71a22d21ecd603269e844d41fdf1aafb371d290fbb0"
+    },
+    {
+      "file": "20260711__DSC07787.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07787.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "f667152ac5085bc0d02f2f3138115263f47b6f64322e653df458978b90175ab7"
+    },
+    {
+      "file": "20260612__DSC06965.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-12/Previews/DSC06965.jpg",
+      "session": "2026-06-12",
+      "target_category": "ordinary",
+      "sha256": "88692d3355cd24e6411ae0774b2a957c951a1ed1663d32f04ce95ae79d361b9c"
+    },
+    {
+      "file": "20260618__DSC01391.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01391.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "9676f38b2359ff06d28105971d76012ad5c7d6782ebc2f79a6ccc5599b00f8b3"
+    },
+    {
+      "file": "20260322__DSC07840.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC07840.jpg",
+      "session": "2026-03-22",
+      "target_category": "ordinary",
+      "sha256": "a37d8102507252572385ef73bbb70e66e96f1269857013ca3d88c33e91c186a7"
+    },
+    {
+      "file": "20260618__DSC01858.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01858.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "7b2d9955fce6d2a043de1d3fee8b6a2400cd70873d083dd982063977379dabd0"
+    },
+    {
+      "file": "20260703__DSC02133.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02133.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "ff53ab8dbed1e72240b0fedf654ee24298d7fbbae87b1e1c5a709dfb2853dd43"
+    },
+    {
+      "file": "20260515__DSC07597.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC07597.jpg",
+      "session": "2026-05-15",
+      "target_category": "ordinary",
+      "sha256": "ef14f6d87d6fe30034933a2ac251ba6b605e9bf6d224f9f5105518c2e91f1ea3"
+    },
+    {
+      "file": "20260710__DSC05075.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05075.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "3a6ed383943d0ca793ecd31dda9e5f5fbb09f10bfce7475118527663bc44a3cc"
+    },
+    {
+      "file": "20260612__DSC06982.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-12/Previews/DSC06982.jpg",
+      "session": "2026-06-12",
+      "target_category": "ordinary",
+      "sha256": "06e8831cae1331dfb9731a2a42a9fe22e10454f39bc2c41b67d44224363e7770"
+    },
+    {
+      "file": "20260703__DSC02034.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02034.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "8197fd2ca130a8f18714fe38588f4264cb9b511c9160ff7be0e6831752fb7844"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02922.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02922.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "ordinary",
+      "sha256": "151a8e02be3f6530c2e676bcce1284b29dff2b1aef4c724c5991f06f9ce61ca4"
+    },
+    {
+      "file": "20260502__DSC05379.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05379.JPG",
+      "session": "2026-05-02",
+      "target_category": "ordinary",
+      "sha256": "f8cb6caefcdbe1cbec5099ab76a2541d8143c14fda1a7fa948fe166f4fe9ba58"
+    },
+    {
+      "file": "20260626__DSC04707.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC04707.jpg",
+      "session": "2026-06-26",
+      "target_category": "ordinary",
+      "sha256": "4fbf51e454e397b57777119227a8ffe1e2a7a28661b233fc3f633f66351b2c03"
+    },
+    {
+      "file": "20260711__DSC06217.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC06217.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "05a0dc22fa23620c45aaafcc61bef3bb46c7f67b6bb2d613db39123f7fdf4252"
+    },
+    {
+      "file": "20260711__DSC07303.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07303.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "44e72f96f83601c5b692aadb46f26360e66bbc80f026a49f8d63c1ac11ea99f2"
+    },
+    {
+      "file": "20260618__DSC01066.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01066.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "1ef3c3ffc5e8389e95d8343d5f1533cc00f8eb07c4b94ca2311fcc265b6915bb"
+    },
+    {
+      "file": "20260613__DSC08086.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08086.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "b601308afb4f9ef515ddc1338fb5fa9ab1085a2082b5b29a1718e0ee55d17c79"
+    },
+    {
+      "file": "20260618__DSC09896.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC09896.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "fb361aaf0bb293bf61510053b67f85e8fb429e8ead88e29dd7a2454b8a2cf14d"
+    },
+    {
+      "file": "20260627__DSC06864.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC06864.jpg",
+      "session": "2026-06-27",
+      "target_category": "ordinary",
+      "sha256": "eefd1d8ee9a47732a4e6f1f1e908c8ce97ff419b38b10aa8cb309b227b88eb75"
+    },
+    {
+      "file": "20260502__DSC05413.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05413.JPG",
+      "session": "2026-05-02",
+      "target_category": "ordinary",
+      "sha256": "a0bf71713fbef5f011227197e894eb8bed769e06f9012f8df20b2c7550be1dd3"
+    },
+    {
+      "file": "20260618__DSC00467.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC00467.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "631f1cde8956611ed0eaf5cd5f305e711644cccbc8fdc181bca6625eb092e687"
+    },
+    {
+      "file": "20260613__DSC09541.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09541.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "8607e81a671cc70f048cf5f5258f5eb8097d9dad8affa17cb0ce95e770421c69"
+    },
+    {
+      "file": "20260406__DSC00979.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-06/Previews/DSC00979.jpg",
+      "session": "2026-04-06",
+      "target_category": "ordinary",
+      "sha256": "36f81be1cde4c4f688b77d196326d78b720f494717861d809c882681534e5ac0"
+    },
+    {
+      "file": "20260618__DSC01705.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01705.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "1829474bf6145171c0508019114814b3564cb3643fb74c7ac6949d2c91e1354b"
+    },
+    {
+      "file": "20260711__DSC07207.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07207.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "2180b001cf4ee444cd61ade601a7e8d78f0e4e473bd946aa0544e2914708b2f8"
+    },
+    {
+      "file": "20260416__DSC03336.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC03336.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "1f21d67c471bb945f58c7283c22ca45e23d66786267c9a1c467b1b6ac3a41680"
+    },
+    {
+      "file": "20260416__DSC02939.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC02939.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "00611b9eddf4b1152ea54e86e9bf9e423237e368ac57918f7d6d05fa33bf0c6f"
+    },
+    {
+      "file": "20260703__DSC02150.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02150.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "fa98dd57c8893dcf32f09fd440a9eeb0c535b59e20a5483d100bfddb4503b53a"
+    },
+    {
+      "file": "20260703__DSC01734.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC01734.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "96a9bfc0659c5c51c39bf7e63822fdf2a8dea07a028dffe3b5b545727fe242f1"
+    },
+    {
+      "file": "20260710__DSC04730.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04730.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "9bf2a35643ba5492a687486bc10f889ac7e31e29c44241c7455e3c06ee1d1d75"
+    },
+    {
+      "file": "20260618__DSC01920.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-18/Previews/DSC01920.jpg",
+      "session": "2026-06-18",
+      "target_category": "ordinary",
+      "sha256": "3a1216251770d467ec271bf9b1e095a4a35e48e39be39f9fd7574f7238c2d639"
+    },
+    {
+      "file": "20260711__DSC05951.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC05951.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "2646518c3988cee644731ca5884c9941280fb92bc3d4de272836d408353aaa94"
+    },
+    {
+      "file": "20260327__DSC08803.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-27/Previews/DSC08803.jpg",
+      "session": "2026-03-27",
+      "target_category": "ordinary",
+      "sha256": "b2683bbc4c26ca65f51872b98231ca4846ed3ca7190822c1a2a566fe634a1a33"
+    },
+    {
+      "file": "20260307__DSC05235.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-07/Previews/DSC05235.jpg",
+      "session": "2026-03-07",
+      "target_category": "ordinary",
+      "sha256": "bef3ace5a51582811d1536dd546c3b74a975a68f99ee33d53fc127d07b54d87d"
+    },
+    {
+      "file": "20260523__DSC09702.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09702.jpg",
+      "session": "2026-05-23",
+      "target_category": "ordinary",
+      "sha256": "2eb44c33bdee08b6d536e33f18c3f9ba9079a50f07e3906e78aab5f5471769f1"
+    },
+    {
+      "file": "20260613__DSC08830.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08830.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "6cfdb0b3299218b693d0558ce6129ee3af0cb6afdb45faec7e279072083dd30c"
+    },
+    {
+      "file": "20260406__DSC00924.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-06/Previews/DSC00924.jpg",
+      "session": "2026-04-06",
+      "target_category": "ordinary",
+      "sha256": "f0e92d101d1cd5e2bc89f3cd40a8efe5ff7385f1d59df695b031d59c4657780f"
+    },
+    {
+      "file": "20260606__DSC05014.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC05014.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "e4fc1af4ca8774b2bae71a0b5aa250f7f5b2470145eb3d300dc8157566ee2e6f"
+    },
+    {
+      "file": "20260703__DSC01902.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC01902.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "fa1bb97bbe266c22182dd72c7f008e5ba5c5011a6e257bdcff39d95da31869bf"
+    },
+    {
+      "file": "20260307__DSC05088.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-07/Previews/DSC05088.jpg",
+      "session": "2026-03-07",
+      "target_category": "ordinary",
+      "sha256": "818a4e62d3ec0fa11e2dd362f4f83da20f5a81d3ad73a118b5fc6320ac2998a1"
+    },
+    {
+      "file": "20260710__DSC04938.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04938.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "f72df1b6a0a99abbbcc0a3ff2fa0afaace1db75e0bff7e5dd19c32872b1e1eab"
+    },
+    {
+      "file": "20260710__DSC04288.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04288.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "367a7bb0c3211fb7860f93d1d342123617ac1be1e4192789338c1b8c9b4bfd61"
+    },
+    {
+      "file": "20260410__DSC01571.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-10/Previews/DSC01571.jpg",
+      "session": "2026-04-10",
+      "target_category": "ordinary",
+      "sha256": "624a16c1c02e52a47e38a67443459b95d49e52b39373467c73e409bcff1ec7c9"
+    },
+    {
+      "file": "20260729__DSC09468.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-29/Previews/DSC09468.jpg",
+      "session": "2026-07-29",
+      "target_category": "ordinary",
+      "sha256": "3c5e15803c30fa997ec0bdbf07ed133399e5e3875f6c2e169ff963cd475e8445"
+    },
+    {
+      "file": "20260703__DSC09546.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC09546.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "8be4abd509303a3c3a2034a57514960d8436a4f03c2e9fc3f7821ccd3d479365"
+    },
+    {
+      "file": "20260711__DSC06406.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC06406.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "e4c1a749b2f21e9aa36cf188bb974840ccf269d54e3fca69f1473ea3f423fd80"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02268.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02268.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "ordinary",
+      "sha256": "0c5f90754f91248c061322cbbe8e3d11e4b0c869b5613bbe1da28cfef8fe4d7e"
+    },
+    {
+      "file": "20260329__DSC09097.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-29/Previews/DSC09097.jpg",
+      "session": "2026-03-29",
+      "target_category": "ordinary",
+      "sha256": "23fcbf683d6963cb45389101b4b5e6243b0813a2edf69246ede7cb48dc9f72ba"
+    },
+    {
+      "file": "20260416__DSC02870.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC02870.jpg",
+      "session": "2026-04-16",
+      "target_category": "ordinary",
+      "sha256": "3e0060eb61fb748e69cac1b09a3ed799363733284b3c22854f16df23aa166821"
+    },
+    {
+      "file": "20260627__DSC08800.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08800.jpg",
+      "session": "2026-06-27",
+      "target_category": "ordinary",
+      "sha256": "01faabe8ff2d484cd15a1a409947cb2d57cca132fbe53b8ace76c7a7a76b8f15"
+    },
+    {
+      "file": "20260613__DSC08133.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08133.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "b7d545b64dfb6d2937b0681b8f19552e1fd16a463096c254447e5e636524f512"
+    },
+    {
+      "file": "20260711__DSC07871.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07871.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "1d275113847d941c9bdaeaf7e970126e6ef3bb414a0d4dab4f03354406747e6f"
+    },
+    {
+      "file": "20260711__DSC07554.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-11/Previews/DSC07554.jpg",
+      "session": "2026-07-11",
+      "target_category": "ordinary",
+      "sha256": "833edf8ca6ebbd599c1d581fb6cbdbe2fdca552abaa0d76523973dd1ed62f2e3"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02463.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02463.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "ordinary",
+      "sha256": "249d46c0374e32ff686573896bea94b1d1bff4bc0c0db2d6247fbb7be782becf"
+    },
+    {
+      "file": "20260613__DSC09450.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09450.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "7f18abf448b4834b461b44833eda992f5e0cfad5c3b8bb66c40436cf5a383a47"
+    },
+    {
+      "file": "20260613__DSC09127.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09127.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "4623a60a40543ccdfdc05d829447a5002ca8abd875acb23d562ee23e3e7d040e"
+    },
+    {
+      "file": "20260703__DSC00645.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC00645.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "00ca7283b075bc9e95d130bf73ca01bb561a7753849a4409128fbd858d95c4d1"
+    },
+    {
+      "file": "20260703__DSC02008.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02008.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "80ce0baa768546527e282b6f7bfaeeb05d8618c7620793285491872b39ef6bce"
+    },
+    {
+      "file": "20260710__DSC04265.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC04265.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "e619bf00885148a46c02016824ca2ee31b5ed79e21d1cacc6563ce836fdd3e1e"
+    },
+    {
+      "file": "20260515__DSC07681.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC07681.jpg",
+      "session": "2026-05-15",
+      "target_category": "ordinary",
+      "sha256": "b3957ba21c4b638e8accc843917cf28215b779bd71e12f3aac68ca4a706a0dea"
+    },
+    {
+      "file": "20260612__DSC06779.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-12/Previews/DSC06779.jpg",
+      "session": "2026-06-12",
+      "target_category": "ordinary",
+      "sha256": "9785d729efd9cb586871a293a45dddfa28fae8f5f0112b140495eb6da0b4e85d"
+    },
+    {
+      "file": "20260613__DSC09328.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09328.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "f1ff417768b4d05bc287ce5c86cfc4229a497a5928588e3e8c3ad39320b6cf19"
+    },
+    {
+      "file": "20260710__DSC05694.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05694.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "c83c140ffb6b63cb6f418a51477292e99bf15a2953d6acc82630d174bcef297d"
+    },
+    {
+      "file": "20260703__DSC01365.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC01365.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "fb8f93624447c4c0b7415469f4f864293faaaa90818c63846ced0247733b0497"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02770.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02770.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "ordinary",
+      "sha256": "cb06a11df27163882a891af8c063aae2bc391d0debc047d07ba4de0fa18dd0dc"
+    },
+    {
+      "file": "20260327__DSC08832.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-27/Previews/DSC08832.jpg",
+      "session": "2026-03-27",
+      "target_category": "ordinary",
+      "sha256": "74428ad6d6ec62a7e4d232a64bee4ee15d134e30d5902697135330a54b43748e"
+    },
+    {
+      "file": "20260328__DSC09052.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-28/Previews/DSC09052.jpg",
+      "session": "2026-03-28",
+      "target_category": "ordinary",
+      "sha256": "5ca0a7867739aa38f34acecc14f23d415db341f15f2668d3e736280ce67b713d"
+    },
+    {
+      "file": "20260502__DSC05448.JPG",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-02/Previews/DSC05448.JPG",
+      "session": "2026-05-02",
+      "target_category": "ordinary",
+      "sha256": "e96b5ec7dfa5981399db517859ac15e9a6dbf54db10c6edf8d8391ff0093e5d3"
+    },
+    {
+      "file": "20260606__DSC04771.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC04771.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "415c6f958e2ecb6c8ad5690857aced6601313890c8f5f29f3af9898b23431598"
+    },
+    {
+      "file": "20260613__DSC09112.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09112.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "a07b0427d3bdb85c902005d55b31083eb97a12b6f6bae466d69fda0fdeae0f02"
+    },
+    {
+      "file": "20260710__DSC05005.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05005.jpg",
+      "session": "2026-07-10",
+      "target_category": "ordinary",
+      "sha256": "241ea7bb9e6d0f13b6d41aae530b404e3ece44b4235c42f47a36ff0b7b3c00a7"
+    },
+    {
+      "file": "20260627__DSC08883.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08883.jpg",
+      "session": "2026-06-27",
+      "target_category": "ordinary",
+      "sha256": "4e25ead7fbf62d0f00dbfe84424b1a852c3d0406fc440bf131695a1f4d3914b1"
+    },
+    {
+      "file": "20260703__DSC02117.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02117.jpg",
+      "session": "2026-07-03",
+      "target_category": "ordinary",
+      "sha256": "9b0642aca9b7429464713a334c9c9cab060942462e3678368fe263e23deb3ab7"
+    },
+    {
+      "file": "20260322__DSC07970.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC07970.jpg",
+      "session": "2026-03-22",
+      "target_category": "ordinary",
+      "sha256": "ae1fac3169fc8837042cf9766419a90fd0b0ab34d613af6c4d3a693d4320ecb2"
+    },
+    {
+      "file": "20260327__DSC08962.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-27/Previews/DSC08962.jpg",
+      "session": "2026-03-27",
+      "target_category": "ordinary",
+      "sha256": "63055041ce45d8c8d513f646845cb8412d5d891f5d640fcf2337071d6a6b36b8"
+    },
+    {
+      "file": "20260523__DSC09852.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09852.jpg",
+      "session": "2026-05-23",
+      "target_category": "ordinary",
+      "sha256": "3fcd01742ca947b5634801edf56e6244ba6fcf9500fc9afc51b39f87f15c9fb8"
+    },
+    {
+      "file": "20260515__DSC07475.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC07475.jpg",
+      "session": "2026-05-15",
+      "target_category": "ordinary",
+      "sha256": "ec241bc4158268df248aa208ee2f30ec87d9141f0b1ae6ea3d7e4d95712b442b"
+    },
+    {
+      "file": "20260523__DSC00153.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC00153.jpg",
+      "session": "2026-05-23",
+      "target_category": "ordinary",
+      "sha256": "1b6e7622cf7246a13db7fce88d9da62b2f6619d19432f53ef89573477ccbb581"
+    },
+    {
+      "file": "20260307__DSC05215.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-07/Previews/DSC05215.jpg",
+      "session": "2026-03-07",
+      "target_category": "ordinary",
+      "sha256": "aa662fc4a0d0b662ae8575ae5a825b69f627b5514c105d8fc47c7b5174834757"
+    },
+    {
+      "file": "20260613__DSC07342.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC07342.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "b37a38bf5208e4bfc4cc439b58f80fd6cc20ccb8530aa5b5d37eba4415e95465"
+    },
+    {
+      "file": "20260509__DSC05942.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC05942.jpg",
+      "session": "2026-05-09",
+      "target_category": "ordinary",
+      "sha256": "790da6f647e48b11d00f566c08d31164edd92b6ba8d85bf91d8e357e40d79666"
+    },
+    {
+      "file": "20260509__DSC05695.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC05695.jpg",
+      "session": "2026-05-09",
+      "target_category": "ordinary",
+      "sha256": "6c3473c14b5f0a103547e56aa2617a2c939a4f46fac6df93dcf0dd8506dcb6f3"
+    },
+    {
+      "file": "20260521__DSC07719.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-21/Previews/DSC07719.jpg",
+      "session": "2026-05-21",
+      "target_category": "ordinary",
+      "sha256": "c6710c14b143f691e7f297da03b67787f8a8ef2f8fbce0d3135439daa51df384"
+    },
+    {
+      "file": "20260524yewai__DSC02101.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_yewai/Previews/DSC02101.jpg",
+      "session": "2026-05-24_yewai",
+      "target_category": "ordinary",
+      "sha256": "6a9768c24471f72e542ca5d75a6df3d08cd4fd928d450a2956e4eeab2071da2d"
+    },
+    {
+      "file": "20260426__DSC05061.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-26/Previews/DSC05061.jpg",
+      "session": "2026-04-26",
+      "target_category": "ordinary",
+      "sha256": "7f57bafa1f664b30d18e5ef1a6de68cb90e46e527b3efc304112e353d162a46d"
+    },
+    {
+      "file": "20260606__DSC04608.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC04608.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "4191137dfd376662e5c210b0ed9323f31c817f9e59ab0c1b699b177a63505fda"
+    },
+    {
+      "file": "20260626__DSC03861.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03861.jpg",
+      "session": "2026-06-26",
+      "target_category": "ordinary",
+      "sha256": "bf40690e17dffe40f38e1050c279d6fc98804e63c7bf2d512132b02e41f1109a"
+    },
+    {
+      "file": "20260328__DSC09026.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-28/Previews/DSC09026.jpg",
+      "session": "2026-03-28",
+      "target_category": "ordinary",
+      "sha256": "ae7999f3ed401ed1b983b8cdaff3ba4e405f54ef1fe53b5cf4794e641b22dcca"
+    },
+    {
+      "file": "20260613__DSC07459.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC07459.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "90f73a6f2d3956a0d66caa2f3ac3d85bd5b6349486fafb6278858508a8d69f1d"
+    },
+    {
+      "file": "20260613__DSC09412.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09412.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "c841e8d026c42887a20d954ffa28740e3b7dd77a0ebe87c968aa82990e278e55"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00237.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00237.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "ordinary",
+      "sha256": "87ca2816b88edba5cee18732125bbb903f0fb841a31054504c4232f52f022fa8"
+    },
+    {
+      "file": "20260523__DSC08244.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08244.jpg",
+      "session": "2026-05-23",
+      "target_category": "ordinary",
+      "sha256": "fde2ead8035c21f8e1c837d492d9586599bfca78060c0e82c837b3b95c731b14"
+    },
+    {
+      "file": "20260509__DSC05968.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC05968.jpg",
+      "session": "2026-05-09",
+      "target_category": "ordinary",
+      "sha256": "25e1b2af621ee52f7d5d358a8afd03698a5f7e5a2a08762564d4900ef0e24bfc"
+    },
+    {
+      "file": "20260606__DSC05320.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC05320.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "6dbe653ac96d1979eb70129479caa9204c35901f3a2b7d4dc9a55d81689e6613"
+    },
+    {
+      "file": "20260613__DSC09156.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09156.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "02702094be46e78f686e1a8442dd2121e459361dcb66d616b595443b97a844b1"
+    },
+    {
+      "file": "20260425__DSC04532.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-25/Previews/DSC04532.jpg",
+      "session": "2026-04-25",
+      "target_category": "ordinary",
+      "sha256": "3c96a44b72834abe97f033b3101eabb6046ca8051d606b6628dcd257093f1388"
+    },
+    {
+      "file": "20260523__DSC00079.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC00079.jpg",
+      "session": "2026-05-23",
+      "target_category": "ordinary",
+      "sha256": "6e58e745896e76da24f47c48e6d2485ad6eb83b92f18b8c7868b333f6f138d4f"
+    },
+    {
+      "file": "20260528ruanshizi__DSC02558.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-28_ruanshizi/Previews/DSC02558.jpg",
+      "session": "2026-05-28_ruanshizi",
+      "target_category": "ordinary",
+      "sha256": "62d9d9d23ca6ff4365ba6e6bb0981fc6afe62edc7ec570b24869888fc7008395"
+    },
+    {
+      "file": "20260613__DSC08666.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC08666.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "b3c4a280a6232d098179c8931759ea74f746e6b27557cfafac32f8fdb27f4818"
+    },
+    {
+      "file": "20260612__DSC06251.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-12/Previews/DSC06251.jpg",
+      "session": "2026-06-12",
+      "target_category": "ordinary",
+      "sha256": "93197b47f37b2e9c90b647cc484d1ec1dd4a8d899e020cfb42a3712c524335e5"
+    },
+    {
+      "file": "20260613__DSC09500.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-13/Previews/DSC09500.jpg",
+      "session": "2026-06-13",
+      "target_category": "ordinary",
+      "sha256": "b6366ba6bb78c7a845fdd0b3353f947180ee6eb65406d16d7bce521f57d86deb"
+    },
+    {
+      "file": "20260606__DSC04893.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC04893.jpg",
+      "session": "2026-06-06",
+      "target_category": "ordinary",
+      "sha256": "59882b84c98dffa6decbfdee7b43782c164e7244bdbd72b1967d35cf005c5edf"
+    },
+    {
+      "file": "20260426__DSC04967.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-26/Previews/DSC04967.jpg",
+      "session": "2026-04-26",
+      "target_category": "ordinary",
+      "sha256": "a804f513688154250e700cba16ddbe08fd8fa1adeef9aecf5e35e83ac093c65a"
+    },
+    {
+      "file": "20260626__DSC03942.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03942.jpg",
+      "session": "2026-06-26",
+      "target_category": "ordinary",
+      "sha256": "a684a4d74d5585475135f8e5a3d4fad719589669e30b10b4f2cd0dce7382a367"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00520.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00520.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "ordinary",
+      "sha256": "18af97b53c806ab1d7875e339f8689766781131f1576490cb260144f0fd342fb"
+    },
+    {
+      "file": "20260627__DSC08434.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08434.jpg",
+      "session": "2026-06-27",
+      "target_category": "highlight",
+      "sha256": "4759938c42133fe20f5f7c29b870edec9083fb21acc9a9ef63246c8d44e49ba6"
+    },
+    {
+      "file": "20260509__DSC06393.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06393.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "de1674cfecdd6c49ce3f09738cb36a507cdda552f0680e6d6d5d8b7ca6b1a1e2"
+    },
+    {
+      "file": "20260509__DSC06598.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06598.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "3be0d993db6aa0cac6cc631fb26576603e7ada57b408c0e9c126d281ff4e8010"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00678.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00678.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "09bcce006f2be4b9d6e3c7b5900f9a2eaf9faf50fd2dcea7a7cd459220a6b457"
+    },
+    {
+      "file": "20260703__DSC02378.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC02378.jpg",
+      "session": "2026-07-03",
+      "target_category": "highlight",
+      "sha256": "8f7cb2021d1cd16830d80844b4de3caea41395dd2b11023b020abae393ff8356"
+    },
+    {
+      "file": "20260626__DSC05996.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05996.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "d1ef8666c2892a3acba4a57f48f143468a82b691c9514edfd07bdcced1a64042"
+    },
+    {
+      "file": "20260521__DSC07914.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-21/Previews/DSC07914.jpg",
+      "session": "2026-05-21",
+      "target_category": "highlight",
+      "sha256": "244046820190efaad5f483a42acf61fd264824be28771f364bb818b88fb21041"
+    },
+    {
+      "file": "20260515__DSC06780.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC06780.jpg",
+      "session": "2026-05-15",
+      "target_category": "highlight",
+      "sha256": "52119ad5974be0e92fffc4e473bcacde7d3a0654e069362c767df08300bf50f9"
+    },
+    {
+      "file": "20260515__DSC06751.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC06751.jpg",
+      "session": "2026-05-15",
+      "target_category": "highlight",
+      "sha256": "a017b87d95ca7823b133875350b58024a654d69811b0a120e06b5ae14b978220"
+    },
+    {
+      "file": "20260627__DSC08183.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-27/Previews/DSC08183.jpg",
+      "session": "2026-06-27",
+      "target_category": "highlight",
+      "sha256": "d3ab5e3c2474c44e8c8c88463b5427cbd33a67a6b7d6797d2f5862d446b44565"
+    },
+    {
+      "file": "20260330__DSC09676.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-30/Previews/DSC09676.jpg",
+      "session": "2026-03-30",
+      "target_category": "highlight",
+      "sha256": "c84608a23d4b2e787ead226b75261be8fd2ed4365c1f1c3baac3c91f3df35a0f"
+    },
+    {
+      "file": "20260626__DSC04444.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC04444.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "67757b6a9877eec2fa068c4276faca147f6c42f67ec19187ab525ffac7216e19"
+    },
+    {
+      "file": "20260626__DSC05644.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05644.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "3ef90b19870d99f99807c2ce84e1b9a9e255f5283e6ae0c84b2c633c926b8510"
+    },
+    {
+      "file": "20260626__DSC04462.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC04462.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "18d4aa4329c3b872f406530ccc59587436f2a45f248b38ea1a0db494d247b7a1"
+    },
+    {
+      "file": "20260626__DSC05669.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05669.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "a1b4154020c3421e92bdc2a1fe01ed2d1a7d51993349538878c9e1f9eb91eaa6"
+    },
+    {
+      "file": "20260626__DSC05977.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05977.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "5eb48753c6f32ebb20d539c78a667ed7d76ed8141733c2a196345c1c21e54e52"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00167.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00167.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "b9025c5c104f0cd88d33be59ff75eeb03c6f5a73a8b33b38f394aacbae178542"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00709.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00709.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "17b5feda749b5a94dd9f82a759fe6c6e9fb204b00a9e3752d18037cc40cf5712"
+    },
+    {
+      "file": "20260330__DSC09631.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-30/Previews/DSC09631.jpg",
+      "session": "2026-03-30",
+      "target_category": "highlight",
+      "sha256": "7d7db79faf8e2ef0cddc5cf9603be59c6fa3e221ff099aa46a8050ca8fb5f14e"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00813.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00813.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "2da8cf6e89970deea21d8327477191a65e2f783d407a29867b34644258bcb085"
+    },
+    {
+      "file": "20260515__DSC07092.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC07092.jpg",
+      "session": "2026-05-15",
+      "target_category": "highlight",
+      "sha256": "4efe05a2bc17f183d1934f4964af52a70481098b0c45d26435005f96a6bf67a7"
+    },
+    {
+      "file": "20260626__DSC03603.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03603.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "8d4c47e184d5fb614040fa05831d900aff7327166a71e605560b2a3a787bf7e3"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00622.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00622.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "120378c9b3a35908f2b63459585a6476bb2321f2f3c956c14a6e69ac1e72c7ab"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00906.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00906.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "56ae7589865b259ed23c7403dcc2ccf852688221c25c03ff19e9eb13124dc9f7"
+    },
+    {
+      "file": "20260524yewai__DSC01622.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_yewai/Previews/DSC01622.jpg",
+      "session": "2026-05-24_yewai",
+      "target_category": "highlight",
+      "sha256": "4217b92e3b859079fd661c7817ed7924fbc1f13b1eb14f11e95ec75113d3805a"
+    },
+    {
+      "file": "20260626__DSC05759.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC05759.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "13c9823781e1c7a05477cd2062d1a334b09d9fcb2c249d164b5e4db8c2538fea"
+    },
+    {
+      "file": "20260509__DSC06527.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06527.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "66264e717edcf3d19d0a313fccdf0e91e9f14f675ee0bf07b239c44ceeea0dcb"
+    },
+    {
+      "file": "20260330__DSC09659.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-30/Previews/DSC09659.jpg",
+      "session": "2026-03-30",
+      "target_category": "highlight",
+      "sha256": "b493ae3f31debe3934969dbc415244cec82f5f7b294b0bbe3d6df2fe822c34f1"
+    },
+    {
+      "file": "20260509__DSC06619.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06619.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "30d6ea870dd01b48aa9ed1565ca7eef95ee25f23ff46ece89fdb74d7559659ac"
+    },
+    {
+      "file": "20260626__DSC03660.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-26/Previews/DSC03660.jpg",
+      "session": "2026-06-26",
+      "target_category": "highlight",
+      "sha256": "9e6b551ac5a2d9a5edbadc5de117ce769a7e9689990693674081ff19ff3bdc80"
+    },
+    {
+      "file": "20260509__DSC06412.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06412.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "d86bba11ef7a8801bc187b2ddc0ab4691c9400978aebeac7da7338185f4842e5"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00782.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00782.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "3a93f184871bd3647ab625f2eac52b625a4f08913f8e34820f55d687aadd3061"
+    },
+    {
+      "file": "20260606__DSC05554.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-06-06/Previews/DSC05554.jpg",
+      "session": "2026-06-06",
+      "target_category": "highlight",
+      "sha256": "365146cec47971c41851512b68a9ce8864483131f28753277eb786cf6843eac3"
+    },
+    {
+      "file": "20260523__DSC00100.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC00100.jpg",
+      "session": "2026-05-23",
+      "target_category": "highlight",
+      "sha256": "403e3d4f9cfa0b0feb0daf76180b2a241dba71461ec65c51b2ba7de00e30c582"
+    },
+    {
+      "file": "20260710__DSC05295.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-10/Previews/DSC05295.jpg",
+      "session": "2026-07-10",
+      "target_category": "highlight",
+      "sha256": "fb86812e91b72a7dea1be55faffbbe9abe9db75bd7dc905f69c68c12f3554d7a"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00889.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00889.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "14874ce0478dd2d702d4c7c9b4172faa5210c4777704b398a024bf49e69d470d"
+    },
+    {
+      "file": "20260515__DSC06800.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-15/Previews/DSC06800.jpg",
+      "session": "2026-05-15",
+      "target_category": "highlight",
+      "sha256": "2711ac7d81fc6938861a06252efd9dd21b9518ed6449da0a48b748273dd84357"
+    },
+    {
+      "file": "20251214__DSC06237.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06237.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "c87ec960e2b7d4e5b6efb4d82dff6bafd533ccb11d6da799f94323de32783fce"
+    },
+    {
+      "file": "20260416__DSC02792.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-16/Previews/DSC02792.jpg",
+      "session": "2026-04-16",
+      "target_category": "highlight",
+      "sha256": "55ebd07a618898a79b6af0fa15ea5e2f46fc16d710997bfe6469f99ddf68b4f3"
+    },
+    {
+      "file": "20251214__DSC06464.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06464.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "50b74803c0d931ebac6be9bf1dc2a3fd67aedc6f65e03aef7ff10b39efacfd2e"
+    },
+    {
+      "file": "20260425__DSC04321.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-25/Previews/DSC04321.jpg",
+      "session": "2026-04-25",
+      "target_category": "highlight",
+      "sha256": "eab77fff8eb8aa529ab5e704116eff2afada39338d31caaef910b4a903bf80fd"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00252.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00252.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "cb4a14e16ce6e6181a20e18c9f4133cfa20b812db9c73605045cc6091672f839"
+    },
+    {
+      "file": "20251214__DSC06368.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06368.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "bb18d981025d9cc5e8c01cfb8feb0e40dda3deedd1504ba12fe5385ac826eb21"
+    },
+    {
+      "file": "20251214__DSC06598.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06598.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "49fea790d5cce645ae7d9b8fde6a524955d468109c9f5a254405d4659b264526"
+    },
+    {
+      "file": "20260322__DSC08223.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08223.jpg",
+      "session": "2026-03-22",
+      "target_category": "highlight",
+      "sha256": "7b20ac2885cda04186a972faad2be7f0d682efc3c872a8321a888436a004058b"
+    },
+    {
+      "file": "20260524yewai__DSC01661.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_yewai/Previews/DSC01661.jpg",
+      "session": "2026-05-24_yewai",
+      "target_category": "highlight",
+      "sha256": "84cf3466d0ac8375453c3d859aa2ef3c01fa47832a3e21d61c0f3d9f160ab734"
+    },
+    {
+      "file": "20260521__DSC07820.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-21/Previews/DSC07820.jpg",
+      "session": "2026-05-21",
+      "target_category": "highlight",
+      "sha256": "74ed3c22dfe3e33e26618db7894786681b65d63147d2c93f33088277c986ec2e"
+    },
+    {
+      "file": "20251214__DSC06691.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06691.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "8ccd7030e341204f6b454985b81c9aed91fe53b9c557b1357e70bbb314322509"
+    },
+    {
+      "file": "20260425__DSC04462.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-04-25/Previews/DSC04462.jpg",
+      "session": "2026-04-25",
+      "target_category": "highlight",
+      "sha256": "b4b216bf81c5c53e8df1a8440eb4449f97cffe590123a88ff31c02a81d9fbf7b"
+    },
+    {
+      "file": "20260322__DSC08105.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08105.jpg",
+      "session": "2026-03-22",
+      "target_category": "highlight",
+      "sha256": "56e1335133eacc90503e0ee78bcb305cff6d5daead53505fa65ea4dabae8360c"
+    },
+    {
+      "file": "20260524yewai__DSC01646.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_yewai/Previews/DSC01646.jpg",
+      "session": "2026-05-24_yewai",
+      "target_category": "highlight",
+      "sha256": "2a67baecef4bdcaf997f22a842412ae63ea5f1344271702f90c7d534686d0c13"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00798.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00798.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "8151f9098aaf00146e0bb23eda6dc99e530b7490d1a05c462e3ff90d3ebadc6e"
+    },
+    {
+      "file": "20260703__DSC01186.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-07-03/Previews/DSC01186.jpg",
+      "session": "2026-07-03",
+      "target_category": "highlight",
+      "sha256": "f64aff35684e5b48068777512a6393490b8b4848254bf0eabc4b94c3e1cb30c3"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00565.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00565.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "0ea2a0d9c874c5a3e2fbd8944660f16caa531311a44dc4d1b7f079ec2660335b"
+    },
+    {
+      "file": "20251214__DSC06310.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06310.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "5fffe4bd1d0c5f780c05ba25a8333e5362350926bafa9b77b3f2b92940fa5ec9"
+    },
+    {
+      "file": "20251214__DSC06532.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06532.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "1a0a848b48a50e621dcc0cf73b341000805efb7e713e30e313cc989924dcc107"
+    },
+    {
+      "file": "20251214__DSC06654.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06654.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "25fefc9bd637fdde65a51e05dac3ea8e0d54f985227216aa478a3e6b0a380bc2"
+    },
+    {
+      "file": "20251214__DSC06222.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06222.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "17464ea6f8a5e4f2e7281e6b92ede1b272829fe92c792fbcd448682933b65a89"
+    },
+    {
+      "file": "20260509__DSC06467.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06467.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "013fefe5d782f93ae88bad7e3243ab92ebc7073dbcb02bd034fb3020e0a8cdb0"
+    },
+    {
+      "file": "20260322__DSC08084.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08084.jpg",
+      "session": "2026-03-22",
+      "target_category": "highlight",
+      "sha256": "51db2712951b4281a5df5f7b9d6cde7a064ca60edb0c2b099b53091cf6cd26b5"
+    },
+    {
+      "file": "20260523__DSC09072.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09072.jpg",
+      "session": "2026-05-23",
+      "target_category": "highlight",
+      "sha256": "1253ba20c2d7b1650b9d6c1612312020390e368c3f776716d7299e73e64650dd"
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00422.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-24_Chinesefootball/Previews/DSC00422.jpg",
+      "session": "2026-05-24_Chinesefootball",
+      "target_category": "highlight",
+      "sha256": "af888ef77b096b12ffdac82436f80f75409f56db8f7f36a5b70cdc781c3b0eb2"
+    },
+    {
+      "file": "20260523__DSC08950.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC08950.jpg",
+      "session": "2026-05-23",
+      "target_category": "highlight",
+      "sha256": "60c1cedd0dac047a5e845aef26d224612cd7a7c28b56f9b32f61ed755aa43b5c"
+    },
+    {
+      "file": "20260509__DSC06489.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06489.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "f2ba6157272397c1186aea7b745f362c1800ea533851e13ed4db3b2b56e5f1f2"
+    },
+    {
+      "file": "20260509__DSC06572.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06572.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "e539a71acc7b5c523f420fd629cb4a2256f3f55157f76d46e11752a1cbba6682"
+    },
+    {
+      "file": "20260509__DSC06427.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-09/Previews/DSC06427.jpg",
+      "session": "2026-05-09",
+      "target_category": "highlight",
+      "sha256": "e5639f162694056ec1cd13e2062efa7d63334efc2dfbc04086791ff840b583ba"
+    },
+    {
+      "file": "20251214__DSC06510.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06510.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "21c14163884e67dc432ecf0204d067d6e3a7e08e4c998dda3098cf4bd6061da6"
+    },
+    {
+      "file": "20260322__DSC08172.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-03-22/Previews/DSC08172.jpg",
+      "session": "2026-03-22",
+      "target_category": "highlight",
+      "sha256": "6bd4dbb60bcaa861efe5c3f5bc9501cdf67dfc6b934ef4c6c5676045499d013d"
+    },
+    {
+      "file": "20251214__DSC06638.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2025-12-14/Previews/DSC06638.jpg",
+      "session": "2025-12-14",
+      "target_category": "highlight",
+      "sha256": "07a89d78bc7e8f30776892bf7f266fd2fffe2cd76ff4e9caf2b5afb446ab998f"
+    },
+    {
+      "file": "20260523__DSC09281.jpg",
+      "source_path": "/Volumes/M4Buffer/Visions/Livehouse_Archive/2026-05-23/Previews/DSC09281.jpg",
+      "session": "2026-05-23",
+      "target_category": "highlight",
+      "sha256": "d581899a541796874b7b152dc2dd68db012a1851d344ab96c1fab34fc2439327"
+    }
+  ]
+}

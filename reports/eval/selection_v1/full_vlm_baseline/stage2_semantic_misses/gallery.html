@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 2 漏检 · 49 张</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #eee; background: #0c0d0f; }
+    header { position: sticky; top: 0; z-index: 2; padding: 16px 22px;
+      background: #111e; backdrop-filter: blur(12px); border-bottom: 1px solid #333; }
+    h1 { margin: 0 0 4px; font-size: 22px; }
+    header p { margin: 0 0 10px; color: #aaa; }
+    input { width: min(480px, 100%); padding: 9px 12px; color: #eee;
+      background: #202226; border: 1px solid #444; border-radius: 8px; }
+    main { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px; padding: 18px; }
+    .card { overflow: hidden; background: #17191d; border: 1px solid #333;
+      border-radius: 10px; }
+    .card img { display: block; width: 100%; aspect-ratio: 3/2;
+      object-fit: contain; background: #050505; }
+    section { padding: 11px 13px 14px; }
+    h2 { margin: 0 32px 10px 0; font-size: 14px; overflow-wrap: anywhere; }
+    .index { float: right; color: #777; }
+    .scores { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .scores b, .scores span { padding: 4px 7px; border-radius: 6px; background: #272a30; }
+    .scores .model { color: #ffbc6b; }
+    p { margin: 10px 0 0; font-size: 13px; line-height: 1.45; }
+    .muted { color: #aaa; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Stage 2 语义缺陷漏检 · 49 张</h1>
+    <p>仅展示 semantic_defect + false_negative；图片已应用冻结方向校正。</p>
+    <input id="search" placeholder="搜索文件名、人工缺陷或模型标签">
+  </header>
+  <main>
+    <article class="card" data-search="20260502__dsc05134.jpgsevere_composition_failure歌手 · 活力 · 热烈 · 现场演出 · 舞台灯光 · 音乐节 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260502__DSC05134.JPG" target="_blank">
+        <img src="assets/01_20260502__DSC05134.jpg" alt="20260502__DSC05134.JPG" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#01</span>
+        <h2>20260502__DSC05134.JPG</h2>
+        <div class="scores">
+          <b>人工 72.5</b><b class="model">模型 75.6</b>
+          <span>高估 +3.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>歌手 · 活力 · 热烈 · 现场演出 · 舞台灯光 · 音乐节 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260523__dsc08558.jpgheavy_occlusion · severe_composition_failure专注 · 动感 · 情感表达 · 瞬间抓拍 · 舞台灯光 · 音乐现场">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08558.jpg" target="_blank">
+        <img src="assets/02_20260523__DSC08558.jpg" alt="20260523__DSC08558.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#02</span>
+        <h2>20260523__DSC08558.jpg</h2>
+        <div class="scores">
+          <b>人工 55.9</b><b class="model">模型 77.2</b>
+          <span>高估 +21.3</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 动感 · 情感表达 · 瞬间抓拍 · 舞台灯光 · 音乐现场</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260523__dsc09236.jpgsevere_composition_failure · heavy_occlusion专注 · 吉他手 · 情感表达 · 热烈 · 现场演出 · 舞台灯光">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09236.jpg" target="_blank">
+        <img src="assets/03_20260523__DSC09236.jpg" alt="20260523__DSC09236.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#03</span>
+        <h2>20260523__DSC09236.jpg</h2>
+        <div class="scores">
+          <b>人工 61.5</b><b class="model">模型 75.7</b>
+          <span>高估 +14.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 吉他手 · 情感表达 · 热烈 · 现场演出 · 舞台灯光</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260523__dsc09335.jpgheavy_occlusion · severe_composition_failure乐器演奏 · 动感 · 热烈 · 现场演出 · 舞台能量 · 音乐激情">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09335.jpg" target="_blank">
+        <img src="assets/04_20260523__DSC09335.jpg" alt="20260523__DSC09335.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#04</span>
+        <h2>20260523__DSC09335.jpg</h2>
+        <div class="scores">
+          <b>人工 63.0</b><b class="model">模型 78.6</b>
+          <span>高估 +15.6</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>乐器演奏 · 动感 · 热烈 · 现场演出 · 舞台能量 · 音乐激情</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260523__dsc09405.jpgsevere_composition_failure情感瞬间 · 激情 · 热烈 · 现场感 · 现场烟雾效果 · 舞台灯光 · 表演者手势 · 高对比度">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09405.jpg" target="_blank">
+        <img src="assets/05_20260523__DSC09405.jpg" alt="20260523__DSC09405.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#05</span>
+        <h2>20260523__DSC09405.jpg</h2>
+        <div class="scores">
+          <b>人工 70.9</b><b class="model">模型 76.5</b>
+          <span>高估 +5.6</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>情感瞬间 · 激情 · 热烈 · 现场感 · 现场烟雾效果 · 舞台灯光 · 表演者手势 · 高对比度</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260524chinesefootball__dsc00178.jpgsevere_composition_failure专注 · 专注神情 · 现场演出 · 紧张 · 舞台灯光 · 音乐节拍 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00178.jpg" target="_blank">
+        <img src="assets/06_20260524Chinesefootball__DSC00178.jpg" alt="20260524Chinesefootball__DSC00178.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#06</span>
+        <h2>20260524Chinesefootball__DSC00178.jpg</h2>
+        <div class="scores">
+          <b>人工 61.3</b><b class="model">模型 76.2</b>
+          <span>高估 +14.9</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 专注神情 · 现场演出 · 紧张 · 舞台灯光 · 音乐节拍 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260528ruanshizi__dsc02342.jpgheavy_occlusion · no_clear_subject乐队表演 · 动感 · 夕阳背景 · 热烈 · 舞台灯光 · 观众剪影">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02342.jpg" target="_blank">
+        <img src="assets/07_20260528ruanshizi__DSC02342.jpg" alt="20260528ruanshizi__DSC02342.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#07</span>
+        <h2>20260528ruanshizi__DSC02342.jpg</h2>
+        <div class="scores">
+          <b>人工 56.1</b><b class="model">模型 78.5</b>
+          <span>高估 +22.4</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>乐队表演 · 动感 · 夕阳背景 · 热烈 · 舞台灯光 · 观众剪影</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260528ruanshizi__dsc02467.jpgheavy_occlusion · no_clear_subject动态模糊 · 动感 · 情感表达 · 灯光效果 · 热烈 · 舞台表演者">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02467.jpg" target="_blank">
+        <img src="assets/08_20260528ruanshizi__DSC02467.jpg" alt="20260528ruanshizi__DSC02467.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#08</span>
+        <h2>20260528ruanshizi__DSC02467.jpg</h2>
+        <div class="scores">
+          <b>人工 56.5</b><b class="model">模型 76.7</b>
+          <span>高估 +20.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>动态模糊 · 动感 · 情感表达 · 灯光效果 · 热烈 · 舞台表演者</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260528ruanshizi__dsc02649.jpgmissed_moment · heavy_occlusion专注 · 动感模糊 · 现场氛围 · 紧张 · 舞台灯光 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02649.jpg" target="_blank">
+        <img src="assets/09_20260528ruanshizi__DSC02649.jpg" alt="20260528ruanshizi__DSC02649.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#09</span>
+        <h2>20260528ruanshizi__DSC02649.jpg</h2>
+        <div class="scores">
+          <b>人工 55.6</b><b class="model">模型 76.7</b>
+          <span>高估 +21.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 动感模糊 · 现场氛围 · 紧张 · 舞台灯光 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260528ruanshizi__dsc02960.jpgno_clear_subject · missed_moment动态模糊 · 动感 · 灯光效果 · 热烈 · 舞台表演 · 观众互动">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02960.jpg" target="_blank">
+        <img src="assets/10_20260528ruanshizi__DSC02960.jpg" alt="20260528ruanshizi__DSC02960.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#10</span>
+        <h2>20260528ruanshizi__DSC02960.jpg</h2>
+        <div class="scores">
+          <b>人工 40.2</b><b class="model">模型 70.1</b>
+          <span>高估 +29.9</span>
+        </div>
+        <p><strong>人工缺陷：</strong>no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>动态模糊 · 动感 · 灯光效果 · 热烈 · 舞台表演 · 观众互动</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260606__dsc05483.jpgmissed_moment专注 · 动感 · 吉他手 · 现场演出 · 舞台灯光 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05483.jpg" target="_blank">
+        <img src="assets/11_20260606__DSC05483.jpg" alt="20260606__DSC05483.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#11</span>
+        <h2>20260606__DSC05483.jpg</h2>
+        <div class="scores">
+          <b>人工 68.4</b><b class="model">模型 76.4</b>
+          <span>高估 +8.0</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 动感 · 吉他手 · 现场演出 · 舞台灯光 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260612__dsc06149.jpgheavy_occlusion · no_clear_subject · missed_moment动感 · 吉他手 · 热烈 · 现场氛围 · 舞台表演 · 音乐能量">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260612__DSC06149.jpg" target="_blank">
+        <img src="assets/12_20260612__DSC06149.jpg" alt="20260612__DSC06149.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#12</span>
+        <h2>20260612__DSC06149.jpg</h2>
+        <div class="scores">
+          <b>人工 44.0</b><b class="model">模型 77.4</b>
+          <span>高估 +33.4</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>动感 · 吉他手 · 热烈 · 现场氛围 · 舞台表演 · 音乐能量</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260613__dsc09273.jpgsevere_composition_failure · heavy_occlusion动感 · 吉他手 · 热烈 · 现场演出 · 背光模糊 · 键盘乐器">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09273.jpg" target="_blank">
+        <img src="assets/13_20260613__DSC09273.jpg" alt="20260613__DSC09273.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#13</span>
+        <h2>20260613__DSC09273.jpg</h2>
+        <div class="scores">
+          <b>人工 49.8</b><b class="model">模型 79.5</b>
+          <span>高估 +29.7</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>动感 · 吉他手 · 热烈 · 现场演出 · 背光模糊 · 键盘乐器</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260613__dsc09596.jpgno_clear_subject · missed_moment乐队剪影 · 动感 · 热烈 · 现场感 · 舞台氛围 · 色彩斑斓背景 · 观众互动 · 视觉冲击的灯光">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09596.jpg" target="_blank">
+        <img src="assets/14_20260613__DSC09596.jpg" alt="20260613__DSC09596.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#14</span>
+        <h2>20260613__DSC09596.jpg</h2>
+        <div class="scores">
+          <b>人工 66.2</b><b class="model">模型 78.6</b>
+          <span>高估 +12.4</span>
+        </div>
+        <p><strong>人工缺陷：</strong>no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>乐队剪影 · 动感 · 热烈 · 现场感 · 舞台氛围 · 色彩斑斓背景 · 观众互动 · 视觉冲击的灯光</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260618__dsc00964.jpgsevere_composition_failure专注 · 专注神情 · 乐器特写 · 吉他手 · 现场演出 · 红色灯光 · 静谧">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00964.jpg" target="_blank">
+        <img src="assets/15_20260618__DSC00964.jpg" alt="20260618__DSC00964.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#15</span>
+        <h2>20260618__DSC00964.jpg</h2>
+        <div class="scores">
+          <b>人工 61.5</b><b class="model">模型 75.2</b>
+          <span>高估 +13.7</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 专注神情 · 乐器特写 · 吉他手 · 现场演出 · 红色灯光 · 静谧</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260619__dsc03145.jpgmissed_moment · heavy_occlusion专注 · 冷静 · 现场演出 · 舞台氛围 · 蓝色灯光 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03145.jpg" target="_blank">
+        <img src="assets/16_20260619__DSC03145.jpg" alt="20260619__DSC03145.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#16</span>
+        <h2>20260619__DSC03145.jpg</h2>
+        <div class="scores">
+          <b>人工 54.3</b><b class="model">模型 78.5</b>
+          <span>高估 +24.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 冷静 · 现场演出 · 舞台氛围 · 蓝色灯光 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260626__dsc04736.jpgsevere_composition_failure · heavy_occlusion专注 · 歌手表情 · 热烈 · 现场演出 · 舞台灯光 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC04736.jpg" target="_blank">
+        <img src="assets/17_20260626__DSC04736.jpg" alt="20260626__DSC04736.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#17</span>
+        <h2>20260626__DSC04736.jpg</h2>
+        <div class="scores">
+          <b>人工 63.4</b><b class="model">模型 75.2</b>
+          <span>高估 +11.8</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 歌手表情 · 热烈 · 现场演出 · 舞台灯光 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260626__dsc04815.jpgheavy_occlusion · severe_composition_failure专注 · 热情 · 现场演出 · 舞台表演 · 键盘手 · 音乐家">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC04815.jpg" target="_blank">
+        <img src="assets/18_20260626__DSC04815.jpg" alt="20260626__DSC04815.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#18</span>
+        <h2>20260626__DSC04815.jpg</h2>
+        <div class="scores">
+          <b>人工 55.9</b><b class="model">模型 76.5</b>
+          <span>高估 +20.6</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 热情 · 现场演出 · 舞台表演 · 键盘手 · 音乐家</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260626__dsc05263.jpgmissed_moment · heavy_occlusion专注 · 乐队表演 · 吉他手 · 热烈 · 现场演出 · 键盘手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC05263.jpg" target="_blank">
+        <img src="assets/19_20260626__DSC05263.jpg" alt="20260626__DSC05263.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#19</span>
+        <h2>20260626__DSC05263.jpg</h2>
+        <div class="scores">
+          <b>人工 60.6</b><b class="model">模型 74.7</b>
+          <span>高估 +14.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 乐队表演 · 吉他手 · 热烈 · 现场演出 · 键盘手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc06584.jpgsevere_composition_failure · missed_moment专注 · 吉他手 · 现场感 · 现场演出 · 舞台灯光 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06584.jpg" target="_blank">
+        <img src="assets/20_20260627__DSC06584.jpg" alt="20260627__DSC06584.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#20</span>
+        <h2>20260627__DSC06584.jpg</h2>
+        <div class="scores">
+          <b>人工 52.9</b><b class="model">模型 74.5</b>
+          <span>高估 +21.6</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 吉他手 · 现场感 · 现场演出 · 舞台灯光 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc06646.jpgsevere_composition_failure专注 · 专注神情 · 乐器特写 · 吉他手 · 现场气氛 · 现场演出 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06646.jpg" target="_blank">
+        <img src="assets/21_20260627__DSC06646.jpg" alt="20260627__DSC06646.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#21</span>
+        <h2>20260627__DSC06646.jpg</h2>
+        <div class="scores">
+          <b>人工 52.6</b><b class="model">模型 75.5</b>
+          <span>高估 +22.9</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 专注神情 · 乐器特写 · 吉他手 · 现场气氛 · 现场演出 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc06671.jpgsevere_composition_failure专注 · 热烈 · 现场演出 · 白色连衣裙 · 舞台灯光 · 键盘手 · 麦克风">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06671.jpg" target="_blank">
+        <img src="assets/22_20260627__DSC06671.jpg" alt="20260627__DSC06671.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#22</span>
+        <h2>20260627__DSC06671.jpg</h2>
+        <div class="scores">
+          <b>人工 62.2</b><b class="model">模型 77.4</b>
+          <span>高估 +15.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 热烈 · 现场演出 · 白色连衣裙 · 舞台灯光 · 键盘手 · 麦克风</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc06759.jpgsevere_composition_failure · heavy_occlusion动感 · 热烈 · 现场演出 · 舞台灯光 · 表演者 · 音乐节 · 麦克风">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06759.jpg" target="_blank">
+        <img src="assets/23_20260627__DSC06759.jpg" alt="20260627__DSC06759.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#23</span>
+        <h2>20260627__DSC06759.jpg</h2>
+        <div class="scores">
+          <b>人工 61.2</b><b class="model">模型 71.5</b>
+          <span>高估 +10.3</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>动感 · 热烈 · 现场演出 · 舞台灯光 · 表演者 · 音乐节 · 麦克风</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc06805.jpgsevere_composition_failure专注 · 冷静 · 现场演出 · 白色连衣裙 · 舞台灯光 · 键盘演奏者 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06805.jpg" target="_blank">
+        <img src="assets/24_20260627__DSC06805.jpg" alt="20260627__DSC06805.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#24</span>
+        <h2>20260627__DSC06805.jpg</h2>
+        <div class="scores">
+          <b>人工 59.6</b><b class="model">模型 66.1</b>
+          <span>高估 +6.5</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 冷静 · 现场演出 · 白色连衣裙 · 舞台灯光 · 键盘演奏者 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc06835.jpgsevere_composition_failure · heavy_occlusion · no_clear_subject乐队表演 · 动感 · 热烈 · 现场演出 · 背光模糊 · 音乐节">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06835.jpg" target="_blank">
+        <img src="assets/25_20260627__DSC06835.jpg" alt="20260627__DSC06835.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#25</span>
+        <h2>20260627__DSC06835.jpg</h2>
+        <div class="scores">
+          <b>人工 34.9</b><b class="model">模型 67.1</b>
+          <span>高估 +32.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>乐队表演 · 动感 · 热烈 · 现场演出 · 背光模糊 · 音乐节</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc08177.jpgsevere_composition_failure专注 · 冷静 · 现场氛围 · 现场演出 · 背光效果 · 舞台灯光 · 键盘演奏者 · 音乐表演">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08177.jpg" target="_blank">
+        <img src="assets/26_20260627__DSC08177.jpg" alt="20260627__DSC08177.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#26</span>
+        <h2>20260627__DSC08177.jpg</h2>
+        <div class="scores">
+          <b>人工 59.6</b><b class="model">模型 77.4</b>
+          <span>高估 +17.8</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 冷静 · 现场氛围 · 现场演出 · 背光效果 · 舞台灯光 · 键盘演奏者 · 音乐表演</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc08430.jpgheavy_occlusion · no_clear_subject动感 · 热烈 · 现场氛围 · 舞台灯光 · 音乐节奏 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08430.jpg" target="_blank">
+        <img src="assets/27_20260627__DSC08430.jpg" alt="20260627__DSC08430.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#27</span>
+        <h2>20260627__DSC08430.jpg</h2>
+        <div class="scores">
+          <b>人工 51.5</b><b class="model">模型 74.2</b>
+          <span>高估 +22.7</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>动感 · 热烈 · 现场氛围 · 舞台灯光 · 音乐节奏 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260627__dsc09237.jpgsevere_composition_failure · heavy_occlusion情感表达 · 激情 · 热烈 · 现场演出 · 舞台灯光 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC09237.jpg" target="_blank">
+        <img src="assets/28_20260627__DSC09237.jpg" alt="20260627__DSC09237.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#28</span>
+        <h2>20260627__DSC09237.jpg</h2>
+        <div class="scores">
+          <b>人工 67.7</b><b class="model">模型 75.3</b>
+          <span>高估 +7.6</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>情感表达 · 激情 · 热烈 · 现场演出 · 舞台灯光 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260703__dsc02524.jpgmissed_moment · no_clear_subject剪影 · 热烈 · 紧张 · 舞台灯光 · 观众轮廓 · 高对比度">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02524.jpg" target="_blank">
+        <img src="assets/29_20260703__DSC02524.jpg" alt="20260703__DSC02524.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#29</span>
+        <h2>20260703__DSC02524.jpg</h2>
+        <div class="scores">
+          <b>人工 60.6</b><b class="model">模型 83.9</b>
+          <span>高估 +23.3</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>剪影 · 热烈 · 紧张 · 舞台灯光 · 观众轮廓 · 高对比度</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260703__dsc09601.jpgheavy_occlusion · missed_moment梦幻 · 热烈 · 现场演出 · 舞台灯光 · 蘑菇装饰 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC09601.jpg" target="_blank">
+        <img src="assets/30_20260703__DSC09601.jpg" alt="20260703__DSC09601.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#30</span>
+        <h2>20260703__DSC09601.jpg</h2>
+        <div class="scores">
+          <b>人工 62.1</b><b class="model">模型 79.8</b>
+          <span>高估 +17.7</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>梦幻 · 热烈 · 现场演出 · 舞台灯光 · 蘑菇装饰 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc02909.jpgmissed_moment · heavy_occlusion吉他手 · 孤独 · 现场演出 · 紧张 · 背光眩晕 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02909.jpg" target="_blank">
+        <img src="assets/31_20260708__DSC02909.jpg" alt="20260708__DSC02909.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#31</span>
+        <h2>20260708__DSC02909.jpg</h2>
+        <div class="scores">
+          <b>人工 53.5</b><b class="model">模型 60.6</b>
+          <span>高估 +7.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>吉他手 · 孤独 · 现场演出 · 紧张 · 背光眩晕 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc02941.jpgheavy_occlusion · missed_moment低对比度 · 冷静 · 神秘 · 背光雾气 · 舞台灯光 · 表演者轮廓">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02941.jpg" target="_blank">
+        <img src="assets/32_20260708__DSC02941.jpg" alt="20260708__DSC02941.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#32</span>
+        <h2>20260708__DSC02941.jpg</h2>
+        <div class="scores">
+          <b>人工 60.3</b><b class="model">模型 65.8</b>
+          <span>高估 +5.5</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>低对比度 · 冷静 · 神秘 · 背光雾气 · 舞台灯光 · 表演者轮廓</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc02968.jpgsevere_composition_failure · missed_moment吉他手 · 孤独 · 烟雾缭绕 · 现场演出 · 白色服装 · 神秘 · 舞台灯光">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02968.jpg" target="_blank">
+        <img src="assets/33_20260708__DSC02968.jpg" alt="20260708__DSC02968.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#33</span>
+        <h2>20260708__DSC02968.jpg</h2>
+        <div class="scores">
+          <b>人工 62.7</b><b class="model">模型 68.8</b>
+          <span>高估 +6.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>吉他手 · 孤独 · 烟雾缭绕 · 现场演出 · 白色服装 · 神秘 · 舞台灯光</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc03010.jpgsevere_composition_failure · heavy_occlusion光晕效果 · 吉他手 · 孤独 · 烟雾缭绕 · 现场演出 · 神秘">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03010.jpg" target="_blank">
+        <img src="assets/34_20260708__DSC03010.jpg" alt="20260708__DSC03010.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#34</span>
+        <h2>20260708__DSC03010.jpg</h2>
+        <div class="scores">
+          <b>人工 54.8</b><b class="model">模型 71.9</b>
+          <span>高估 +17.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>光晕效果 · 吉他手 · 孤独 · 烟雾缭绕 · 现场演出 · 神秘</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc03380.jpgmissed_moment低对比度 · 冷静 · 吉他手 · 孤独 · 现场演出 · 背光雾气">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03380.jpg" target="_blank">
+        <img src="assets/35_20260708__DSC03380.jpg" alt="20260708__DSC03380.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#35</span>
+        <h2>20260708__DSC03380.jpg</h2>
+        <div class="scores">
+          <b>人工 54.8</b><b class="model">模型 61.4</b>
+          <span>高估 +6.6</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>低对比度 · 冷静 · 吉他手 · 孤独 · 现场演出 · 背光雾气</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc03435.jpgmissed_moment · severe_composition_failure低对比度 · 吉他手 · 孤独 · 朦胧 · 白色服装 · 雾气缭绕">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03435.jpg" target="_blank">
+        <img src="assets/36_20260708__DSC03435.jpg" alt="20260708__DSC03435.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#36</span>
+        <h2>20260708__DSC03435.jpg</h2>
+        <div class="scores">
+          <b>人工 54.4</b><b class="model">模型 60.6</b>
+          <span>高估 +6.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>低对比度 · 吉他手 · 孤独 · 朦胧 · 白色服装 · 雾气缭绕</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc03815.jpgno_clear_subject · missed_moment光晕效果 · 孤独 · 情感张力 · 神秘 · 舞台剪影 · 高对比度">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03815.jpg" target="_blank">
+        <img src="assets/37_20260708__DSC03815.jpg" alt="20260708__DSC03815.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#37</span>
+        <h2>20260708__DSC03815.jpg</h2>
+        <div class="scores">
+          <b>人工 48.9</b><b class="model">模型 65.1</b>
+          <span>高估 +16.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>光晕效果 · 孤独 · 情感张力 · 神秘 · 舞台剪影 · 高对比度</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc03865.jpgno_clear_subject · missed_moment剪影 · 动感 · 热烈 · 现场氛围 · 背光烟雾 · 舞台表演者 · 观众互动">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03865.jpg" target="_blank">
+        <img src="assets/38_20260708__DSC03865.jpg" alt="20260708__DSC03865.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#38</span>
+        <h2>20260708__DSC03865.jpg</h2>
+        <div class="scores">
+          <b>人工 43.8</b><b class="model">模型 60.0</b>
+          <span>高估 +16.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>剪影 · 动感 · 热烈 · 现场氛围 · 背光烟雾 · 舞台表演者 · 观众互动</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc03925.jpgheavy_occlusion · no_clear_subject · missed_moment朦胧 · 热烈 · 现场氛围 · 舞台表演者 · 雾气缭绕 · 高对比度光影">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03925.jpg" target="_blank">
+        <img src="assets/39_20260708__DSC03925.jpg" alt="20260708__DSC03925.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#39</span>
+        <h2>20260708__DSC03925.jpg</h2>
+        <div class="scores">
+          <b>人工 45.7</b><b class="model">模型 60.0</b>
+          <span>高估 +14.3</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>朦胧 · 热烈 · 现场氛围 · 舞台表演者 · 雾气缭绕 · 高对比度光影</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc04053.jpgmissed_moment · heavy_occlusion · no_clear_subject动感瞬间 · 吉他手 · 激情 · 热烈 · 现场演出 · 红色滤镜 · 音乐氛围">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC04053.jpg" target="_blank">
+        <img src="assets/40_20260708__DSC04053.jpg" alt="20260708__DSC04053.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#40</span>
+        <h2>20260708__DSC04053.jpg</h2>
+        <div class="scores">
+          <b>人工 42.5</b><b class="model">模型 72.7</b>
+          <span>高估 +30.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · heavy_occlusion · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>动感瞬间 · 吉他手 · 激情 · 热烈 · 现场演出 · 红色滤镜 · 音乐氛围</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260708__dsc04097.jpgmissed_moment · severe_composition_failure冷静 · 吉他手 · 现场演出 · 神秘 · 背光雾气 · 舞台灯光">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC04097.jpg" target="_blank">
+        <img src="assets/41_20260708__DSC04097.jpg" alt="20260708__DSC04097.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#41</span>
+        <h2>20260708__DSC04097.jpg</h2>
+        <div class="scores">
+          <b>人工 47.6</b><b class="model">模型 61.4</b>
+          <span>高估 +13.8</span>
+        </div>
+        <p><strong>人工缺陷：</strong>missed_moment · severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>冷静 · 吉他手 · 现场演出 · 神秘 · 背光雾气 · 舞台灯光</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260710__dsc04766.jpgsevere_composition_failure专注 · 专注神情 · 现场氛围 · 现场演出 · 舞台灯光 · 音乐节 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04766.jpg" target="_blank">
+        <img src="assets/42_20260710__DSC04766.jpg" alt="20260710__DSC04766.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#42</span>
+        <h2>20260710__DSC04766.jpg</h2>
+        <div class="scores">
+          <b>人工 63.2</b><b class="model">模型 77.4</b>
+          <span>高估 +14.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 专注神情 · 现场氛围 · 现场演出 · 舞台灯光 · 音乐节 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260710__dsc05198.jpgno_clear_subject · severe_composition_failure · missed_moment动态模糊 · 动感 · 热烈 · 现场氛围 · 舞台光效 · 观众互动">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05198.jpg" target="_blank">
+        <img src="assets/43_20260710__DSC05198.jpg" alt="20260710__DSC05198.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#43</span>
+        <h2>20260710__DSC05198.jpg</h2>
+        <div class="scores">
+          <b>人工 35.0</b><b class="model">模型 70.2</b>
+          <span>高估 +35.2</span>
+        </div>
+        <p><strong>人工缺陷：</strong>no_clear_subject · severe_composition_failure · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>动态模糊 · 动感 · 热烈 · 现场氛围 · 舞台光效 · 观众互动</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260710__dsc05224.jpgheavy_occlusion · no_clear_subject · missed_moment动态模糊 · 动感 · 热烈 · 舞台光效 · 音乐现场 · 鼓手">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05224.jpg" target="_blank">
+        <img src="assets/44_20260710__DSC05224.jpg" alt="20260710__DSC05224.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#44</span>
+        <h2>20260710__DSC05224.jpg</h2>
+        <div class="scores">
+          <b>人工 41.1</b><b class="model">模型 75.2</b>
+          <span>高估 +34.1</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · no_clear_subject · missed_moment</p>
+        <p class="muted"><strong>模型标签：</strong>动态模糊 · 动感 · 热烈 · 舞台光效 · 音乐现场 · 鼓手</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260711__dsc05983.jpgsevere_composition_failure专注 · 低对比度 · 热烈 · 现场氛围 · 现场演出 · 舞台照明 · 表演者姿态 · 观众互动">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC05983.jpg" target="_blank">
+        <img src="assets/45_20260711__DSC05983.jpg" alt="20260711__DSC05983.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#45</span>
+        <h2>20260711__DSC05983.jpg</h2>
+        <div class="scores">
+          <b>人工 65.5</b><b class="model">模型 76.9</b>
+          <span>高估 +11.4</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>专注 · 低对比度 · 热烈 · 现场氛围 · 现场演出 · 舞台照明 · 表演者姿态 · 观众互动</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260711__dsc07338.jpgsevere_composition_failure · heavy_occlusion动感 · 热烈 · 现场演出 · 瞬间捕捉 · 舞台灯光 · 观众互动">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07338.jpg" target="_blank">
+        <img src="assets/46_20260711__DSC07338.jpg" alt="20260711__DSC07338.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#46</span>
+        <h2>20260711__DSC07338.jpg</h2>
+        <div class="scores">
+          <b>人工 66.1</b><b class="model">模型 77.9</b>
+          <span>高估 +11.8</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>动感 · 热烈 · 现场演出 · 瞬间捕捉 · 舞台灯光 · 观众互动</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260729__dsc09480.jpgsevere_composition_failure · missed_moment · heavy_occlusion动感瞬间 · 吉他手 · 激情 · 热烈 · 现场演出 · 舞台灯光 · 音乐能量">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09480.jpg" target="_blank">
+        <img src="assets/47_20260729__DSC09480.jpg" alt="20260729__DSC09480.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#47</span>
+        <h2>20260729__DSC09480.jpg</h2>
+        <div class="scores">
+          <b>人工 46.8</b><b class="model">模型 69.6</b>
+          <span>高估 +22.8</span>
+        </div>
+        <p><strong>人工缺陷：</strong>severe_composition_failure · missed_moment · heavy_occlusion</p>
+        <p class="muted"><strong>模型标签：</strong>动感瞬间 · 吉他手 · 激情 · 热烈 · 现场演出 · 舞台灯光 · 音乐能量</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260729__dsc09598.jpgheavy_occlusion · missed_moment · no_clear_subject动感模糊 · 吉他手 · 激情 · 热烈 · 舞台表演 · 音乐现场">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09598.jpg" target="_blank">
+        <img src="assets/48_20260729__DSC09598.jpg" alt="20260729__DSC09598.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#48</span>
+        <h2>20260729__DSC09598.jpg</h2>
+        <div class="scores">
+          <b>人工 44.8</b><b class="model">模型 71.5</b>
+          <span>高估 +26.7</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · missed_moment · no_clear_subject</p>
+        <p class="muted"><strong>模型标签：</strong>动感模糊 · 吉他手 · 激情 · 热烈 · 舞台表演 · 音乐现场</p>
+      </section>
+    </article>
+    <article class="card" data-search="20260729__dsc09962.jpgheavy_occlusion · severe_composition_failure动态模糊 · 动感 · 灯光效果 · 热烈 · 舞台表演 · 音乐现场">
+      <a href="file:///Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09962.jpg" target="_blank">
+        <img src="assets/49_20260729__DSC09962.jpg" alt="20260729__DSC09962.jpg" loading="lazy">
+      </a>
+      <section>
+        <span class="index">#49</span>
+        <h2>20260729__DSC09962.jpg</h2>
+        <div class="scores">
+          <b>人工 60.1</b><b class="model">模型 74.4</b>
+          <span>高估 +14.3</span>
+        </div>
+        <p><strong>人工缺陷：</strong>heavy_occlusion · severe_composition_failure</p>
+        <p class="muted"><strong>模型标签：</strong>动态模糊 · 动感 · 灯光效果 · 热烈 · 舞台表演 · 音乐现场</p>
+      </section>
+    </article></main>
+  <script>
+    const cards = [...document.querySelectorAll('.card')];
+    document.querySelector('#search').addEventListener('input', event => {
+      const query = event.target.value.trim().toLowerCase();
+      cards.forEach(card => card.classList.toggle('hidden', !card.dataset.search.includes(query)));
+    });
+  </script>
+</body>
+</html>

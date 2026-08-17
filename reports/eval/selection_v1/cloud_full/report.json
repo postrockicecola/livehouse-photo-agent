@@ -1,0 +1,1422 @@
+{
+  "schema_version": "selection_quality_report.v1",
+  "run_meta": {
+    "run_id": "20260811T055530Z",
+    "generated_at": "2026-08-11T05:55:30.119190+00:00",
+    "git_commit": "d7cc006a3102cb33ee09d5b0ae675425d6d0c07f",
+    "dataset_sha256": "7e684c0d89dd3601b23b7118c003dbfeb89cd431f14dbbd9a875424345c805b6",
+    "config_sha256": "2c8e3f28c3290de0d96fbcfa252689ed817be293d74ed42f445c3f2a80a268ec",
+    "predictions_sha256": "164fe3e3e3542761895021b1f6050e0911e1d52586665123f1a91cb9e151ded7",
+    "model": "qwen3-vl-plus",
+    "mode": "cloud_intrinsic"
+  },
+  "pipeline_metrics": {
+    "stage1": {
+      "counts": {
+        "tp": 0,
+        "fn": 50,
+        "fp": 0,
+        "tn": 200,
+        "total": 250
+      },
+      "recall": {
+        "value": 0.0,
+        "low": 0.0,
+        "high": 0.07135
+      },
+      "false_negative_rate": 1.0,
+      "false_positive_rate": 0.0,
+      "specificity": {
+        "value": 1.0,
+        "low": 0.981154,
+        "high": 1.0
+      },
+      "precision": null,
+      "class_rejection": {
+        "technical_hard": {
+          "rejected": 0,
+          "total": 50,
+          "rate": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.07135
+          }
+        },
+        "semantic_defect": {
+          "rejected": 0,
+          "total": 50,
+          "rate": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.07135
+          }
+        },
+        "ordinary": {
+          "rejected": 0,
+          "total": 100,
+          "rate": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.036995
+          }
+        },
+        "highlight": {
+          "rejected": 0,
+          "total": 50,
+          "rate": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.07135
+          }
+        }
+      },
+      "reason_recall": {
+        "excessive_noise": {
+          "caught": 0,
+          "total": 30,
+          "recall": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.113517
+          }
+        },
+        "out_of_focus": {
+          "caught": 0,
+          "total": 46,
+          "recall": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.077076
+          }
+        },
+        "poor_exposure": {
+          "caught": 0,
+          "total": 40,
+          "recall": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.087625
+          }
+        },
+        "technical_failure": {
+          "caught": 0,
+          "total": 2,
+          "recall": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.657628
+          }
+        },
+        "undeliverable_subject": {
+          "caught": 0,
+          "total": 33,
+          "recall": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.104273
+          }
+        }
+      }
+    },
+    "semantic_gate": {
+      "counts": {
+        "tp": 32,
+        "fn": 18,
+        "fp": 44,
+        "tn": 106,
+        "total": 200
+      },
+      "recall": {
+        "value": 0.64,
+        "low": 0.501408,
+        "high": 0.758614
+      },
+      "false_negative_rate": 0.36,
+      "false_positive_rate": 0.293333,
+      "specificity": {
+        "value": 0.706667,
+        "low": 0.629375,
+        "high": 0.773637
+      },
+      "precision": {
+        "value": 0.421053,
+        "low": 0.316484,
+        "high": 0.533218
+      },
+      "class_rejection": {
+        "technical_hard": {
+          "rejected": 50,
+          "total": 50,
+          "rate": {
+            "value": 1.0,
+            "low": 0.92865,
+            "high": 1.0
+          }
+        },
+        "semantic_defect": {
+          "rejected": 32,
+          "total": 50,
+          "rate": {
+            "value": 0.64,
+            "low": 0.501408,
+            "high": 0.758614
+          }
+        },
+        "ordinary": {
+          "rejected": 41,
+          "total": 100,
+          "rate": {
+            "value": 0.41,
+            "low": 0.318672,
+            "high": 0.507987
+          }
+        },
+        "highlight": {
+          "rejected": 3,
+          "total": 50,
+          "rate": {
+            "value": 0.06,
+            "low": 0.020615,
+            "high": 0.162173
+          }
+        }
+      },
+      "reason_recall": {
+        "heavy_occlusion": {
+          "caught": 21,
+          "total": 28,
+          "recall": {
+            "value": 0.75,
+            "low": 0.56644,
+            "high": 0.873237
+          }
+        },
+        "missed_moment": {
+          "caught": 23,
+          "total": 25,
+          "recall": {
+            "value": 0.92,
+            "low": 0.750335,
+            "high": 0.97778
+          }
+        },
+        "no_clear_subject": {
+          "caught": 15,
+          "total": 15,
+          "recall": {
+            "value": 1.0,
+            "low": 0.796111,
+            "high": 1.0
+          }
+        },
+        "severe_composition_failure": {
+          "caught": 12,
+          "total": 28,
+          "recall": {
+            "value": 0.428571,
+            "low": 0.265083,
+            "high": 0.609295
+          }
+        }
+      }
+    },
+    "semantic_gate_production": {
+      "counts": {
+        "tp": 32,
+        "fn": 18,
+        "fp": 44,
+        "tn": 106,
+        "total": 200
+      },
+      "recall": {
+        "value": 0.64,
+        "low": 0.501408,
+        "high": 0.758614
+      },
+      "false_negative_rate": 0.36,
+      "false_positive_rate": 0.293333,
+      "specificity": {
+        "value": 0.706667,
+        "low": 0.629375,
+        "high": 0.773637
+      },
+      "precision": {
+        "value": 0.421053,
+        "low": 0.316484,
+        "high": 0.533218
+      },
+      "reached_semantic_gate": 200
+    },
+    "pipeline": {
+      "counts": {
+        "tp": 82,
+        "fn": 18,
+        "fp": 44,
+        "tn": 106,
+        "total": 250
+      },
+      "recall": {
+        "value": 0.82,
+        "low": 0.733325,
+        "high": 0.882999
+      },
+      "false_negative_rate": 0.18,
+      "false_positive_rate": 0.293333,
+      "specificity": {
+        "value": 0.706667,
+        "low": 0.629375,
+        "high": 0.773637
+      },
+      "precision": {
+        "value": 0.650794,
+        "low": 0.564211,
+        "high": 0.728453
+      },
+      "class_rejection": {
+        "technical_hard": {
+          "rejected": 50,
+          "total": 50,
+          "rate": {
+            "value": 1.0,
+            "low": 0.92865,
+            "high": 1.0
+          }
+        },
+        "semantic_defect": {
+          "rejected": 32,
+          "total": 50,
+          "rate": {
+            "value": 0.64,
+            "low": 0.501408,
+            "high": 0.758614
+          }
+        },
+        "ordinary": {
+          "rejected": 41,
+          "total": 100,
+          "rate": {
+            "value": 0.41,
+            "low": 0.318672,
+            "high": 0.507987
+          }
+        },
+        "highlight": {
+          "rejected": 3,
+          "total": 50,
+          "rate": {
+            "value": 0.06,
+            "low": 0.020615,
+            "high": 0.162173
+          }
+        }
+      },
+      "technical_recall": {
+        "value": 1.0,
+        "low": 0.92865,
+        "high": 1.0
+      },
+      "semantic_recall": {
+        "value": 0.64,
+        "low": 0.501408,
+        "high": 0.758614
+      }
+    },
+    "errors": [
+      {
+        "file": "20260502__DSC05134.JPG",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260523__DSC09236.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260523__DSC09335.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260523__DSC09405.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260524Chinesefootball__DSC00178.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260606__DSC05483.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260613__DSC09273.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260618__DSC00964.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260626__DSC04736.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260626__DSC05263.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260627__DSC06646.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260627__DSC06671.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260627__DSC06759.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260627__DSC06805.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260627__DSC08177.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260627__DSC09237.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260710__DSC04766.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260711__DSC05983.jpg",
+        "sample_type": "semantic_defect",
+        "expected_reject": true,
+        "stage1_reject": false,
+        "semantic_reject": false,
+        "stage2_reject": false,
+        "final_reject": false,
+        "error_type": "false_negative",
+        "error_category": "semantic_gate_vlm"
+      },
+      {
+        "file": "20260515__DSC07166.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260521__DSC07818.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260521__DSC07926.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260523__DSC08974.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260524Chinesefootball__DSC00885.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260528ruanshizi__DSC02672.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260606__DSC05557.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260612__DSC06932.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260612__DSC06941.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260613__DSC09016.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260613__DSC09175.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260613__DSC09241.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260613__DSC09720.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260619__DSC02770.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260619__DSC02889.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260619__DSC03045.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260619__DSC03218.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260626__DSC03628.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260626__DSC03920.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260626__DSC04968.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260626__DSC05492.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260626__DSC06056.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260627__DSC06456.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260627__DSC08428.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC01934.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC02197.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC02331.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC02382.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC02508.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC09336.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260703__DSC09433.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260708__DSC02795.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260708__DSC02863.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260708__DSC03013.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260708__DSC03309.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260708__DSC03554.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260710__DSC05288.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260729__DSC09474.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260729__DSC09701.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260729__DSC09772.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260729__DSC09812.jpg",
+        "sample_type": "ordinary",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260524yewai__DSC02064.jpg",
+        "sample_type": "highlight",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260606__DSC05352.jpg",
+        "sample_type": "highlight",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      },
+      {
+        "file": "20260613__DSC08708.jpg",
+        "sample_type": "highlight",
+        "expected_reject": false,
+        "stage1_reject": false,
+        "semantic_reject": true,
+        "stage2_reject": true,
+        "final_reject": true,
+        "error_type": "false_positive",
+        "error_category": "semantic_gate_schema"
+      }
+    ]
+  },
+  "selection_metrics": {
+    "global": {
+      "k": 10,
+      "selected_count": 10,
+      "pool_smaller_than_k": false,
+      "defect_count": 0,
+      "defect_ids": [],
+      "zero_blunder_passed": true,
+      "overlap_count": 9,
+      "overlap_at_k": 0.9,
+      "acceptable_ids": [
+        "20260523__DSC08408.jpg",
+        "20260515__DSC06743.jpg",
+        "20260521__DSC07849.jpg",
+        "20260515__DSC07532.jpg",
+        "20260521__DSC07984.jpg",
+        "20260509__DSC05994.jpg",
+        "20260515__DSC07467.jpg",
+        "20260710__DSC04535.jpg",
+        "20260515__DSC06769.jpg"
+      ]
+    },
+    "packs": [
+      {
+        "id": "pack_01",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 2,
+        "overlap_at_k": 0.4,
+        "acceptable_ids": [
+          "20260606__DSC05160.jpg",
+          "20260613__DSC08910.jpg"
+        ]
+      },
+      {
+        "id": "pack_02",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 4,
+        "overlap_at_k": 0.8,
+        "acceptable_ids": [
+          "20260509__DSC05994.jpg",
+          "20260729__DSC09852.jpg",
+          "20260710__DSC04189.jpg",
+          "20260524Chinesefootball__DSC00871.jpg"
+        ]
+      },
+      {
+        "id": "pack_03",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 1,
+        "defect_ids": [
+          "20260710__DSC04766.jpg"
+        ],
+        "zero_blunder_passed": false,
+        "overlap_count": 2,
+        "overlap_at_k": 0.4,
+        "acceptable_ids": [
+          "20260521__DSC07849.jpg",
+          "20260523__DSC08804.jpg"
+        ]
+      },
+      {
+        "id": "pack_04",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 3,
+        "overlap_at_k": 0.6,
+        "acceptable_ids": [
+          "20260523__DSC09207.jpg",
+          "20260606__DSC05307.jpg",
+          "20260521__DSC07888.jpg"
+        ]
+      },
+      {
+        "id": "pack_05",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 4,
+        "overlap_at_k": 0.8,
+        "acceptable_ids": [
+          "20260515__DSC07532.jpg",
+          "20260626__DSC03576.jpg",
+          "20260606__DSC05172.jpg",
+          "20260524yewai__DSC01673.jpg"
+        ]
+      },
+      {
+        "id": "pack_06",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 1,
+        "defect_ids": [
+          "20260523__DSC09405.jpg"
+        ],
+        "zero_blunder_passed": false,
+        "overlap_count": 4,
+        "overlap_at_k": 0.8,
+        "acceptable_ids": [
+          "20260521__DSC07984.jpg",
+          "20260626__DSC03542.jpg",
+          "20260729__DSC09506.jpg",
+          "20260509__DSC05670.jpg"
+        ]
+      },
+      {
+        "id": "pack_07",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 1,
+        "defect_ids": [
+          "20260523__DSC09236.jpg"
+        ],
+        "zero_blunder_passed": false,
+        "overlap_count": 1,
+        "overlap_at_k": 0.2,
+        "acceptable_ids": [
+          "20260710__DSC04489.jpg"
+        ]
+      },
+      {
+        "id": "pack_08",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 4,
+        "overlap_at_k": 0.8,
+        "acceptable_ids": [
+          "20260515__DSC06743.jpg",
+          "20260710__DSC04535.jpg",
+          "20260515__DSC06769.jpg",
+          "20260509__DSC06316.jpg"
+        ]
+      },
+      {
+        "id": "pack_09",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 4,
+        "overlap_at_k": 0.8,
+        "acceptable_ids": [
+          "20260523__DSC08408.jpg",
+          "20260613__DSC08469.jpg",
+          "20260710__DSC04888.jpg",
+          "20260515__DSC07652.jpg"
+        ]
+      },
+      {
+        "id": "pack_10",
+        "k": 5,
+        "selected_count": 5,
+        "pool_smaller_than_k": false,
+        "defect_count": 0,
+        "defect_ids": [],
+        "zero_blunder_passed": true,
+        "overlap_count": 3,
+        "overlap_at_k": 0.6,
+        "acceptable_ids": [
+          "20260515__DSC07467.jpg",
+          "20260524Chinesefootball__DSC00485.jpg",
+          "20260524yewai__DSC01733.jpg"
+        ]
+      }
+    ],
+    "macro_pack_overlap_at_k": 0.62,
+    "worst_pack_overlap_at_k": 0.2,
+    "pack_zero_blunder_passed": false,
+    "pack_selected_total": 50,
+    "pack_defect_count": 3,
+    "pack_defect_rate": 0.06,
+    "zero_observation_upper_95": null
+  },
+  "score_quality": {
+    "available": true,
+    "n": 250,
+    "coverage": 1.0,
+    "spearman": 0.823527,
+    "mae": 14.5192,
+    "rmse": 16.970747,
+    "bias": {
+      "n": 250,
+      "mean_bias": 14.398400000000002,
+      "std_bias": 8.982890260934951,
+      "median_bias": 14.399999999999999,
+      "pct_overscored": 95.6,
+      "pct_underscored": 4.0
+    },
+    "dimensions": {
+      "focus_sharpness": {
+        "n": 250,
+        "mae": 1.112562,
+        "spearman": 0.777494
+      },
+      "exposure_control": {
+        "n": 250,
+        "mae": 1.3108,
+        "spearman": 0.6652
+      },
+      "noise_cleanliness": {
+        "n": 250,
+        "mae": 1.751942,
+        "spearman": 0.734493
+      },
+      "composition_framing": {
+        "n": 250,
+        "mae": 1.55,
+        "spearman": 0.594138
+      },
+      "light_color_character": {
+        "n": 250,
+        "mae": 2.3132,
+        "spearman": 0.493732
+      },
+      "moment_peak": {
+        "n": 250,
+        "mae": 1.8692,
+        "spearman": 0.750539
+      },
+      "atmosphere_impact": {
+        "n": 250,
+        "mae": 1.9792,
+        "spearman": 0.446679
+      },
+      "deliverable_subject": {
+        "n": 250,
+        "mae": 0.7552,
+        "spearman": 0.857561
+      }
+    },
+    "dimension_macro_mae": 1.580263
+  },
+  "runtime_metrics": {
+    "latency_count": 250,
+    "p50_latency_ms": 8463.2,
+    "p95_latency_ms": 27851.4,
+    "p99_latency_ms": 65926.5,
+    "vlm_calls": 250,
+    "fallback_count": 0,
+    "schema_success_rate": 1.0,
+    "full_dimensions_rate": 1.0,
+    "usage_coverage": 1.0,
+    "prompt_tokens": 749555,
+    "completion_tokens": 78646,
+    "total_tokens": 828201,
+    "estimated_cost_usd": null,
+    "cost_basis": "unavailable_set_cost_rates_in_config"
+  },
+  "prediction_metadata": {
+    "schema_version": "selection_predictions.v1",
+    "mode": "cloud_intrinsic",
+    "count": 250,
+    "stage1_rejected": 0,
+    "semantic_rejected": 126,
+    "fallback_count": 0,
+    "schema_valid_count": 250,
+    "usage_count": 250,
+    "semantic_gate_note": "semantic_reject uses Stage3 semantic_gate when present; legacy audit rows fall back to the historical trash threshold. Automatic ranking is stricter: only semantic_gate.status=pass is selection_eligible.",
+    "pipeline_config_sha256": "f683eaba9858750c3f95380802f6a9e572920193a9c0d7554bfc6f596c62b202",
+    "audit_sha256": "b866cfe525a14f3f8c7dd56a7661fa93c01a6f7af00bdd2ea6974faf0d14eb6e",
+    "output": "reports/eval/selection_v1/cloud_full/predictions.jsonl"
+  },
+  "resolved_thresholds": {
+    "thresholds": {
+      "min_technical_recall": 0.96,
+      "min_semantic_recall": 0.9,
+      "max_ordinary_fpr": 0.05,
+      "max_highlight_fpr": 0.02,
+      "max_empty_results": 0,
+      "max_hallucinated_ids": 0,
+      "max_duplicate_ids": 0
+    },
+    "selection": {
+      "global_k": 10,
+      "min_global_overlap_at_k": 0.8,
+      "min_pack_macro_overlap_at_k": 0.8,
+      "max_selected_defects": 0
+    },
+    "regression": {
+      "max_p95_latency_increase": 0.15,
+      "max_vlm_calls_increase": 0.15,
+      "max_token_increase": 0.15
+    }
+  },
+  "failures": [
+    {
+      "metric": "selection.pack_zero_blunder",
+      "current": false,
+      "operator": "==",
+      "threshold": true
+    },
+    {
+      "metric": "semantic_gate.recall",
+      "current": 0.64,
+      "operator": ">=",
+      "threshold": 0.9
+    },
+    {
+      "metric": "semantic_gate.ordinary_fpr",
+      "current": 0.41,
+      "operator": "<=",
+      "threshold": 0.05
+    },
+    {
+      "metric": "semantic_gate.highlight_fpr",
+      "current": 0.06,
+      "operator": "<=",
+      "threshold": 0.02
+    },
+    {
+      "metric": "selection.macro_pack_overlap_at_k",
+      "current": 0.62,
+      "operator": ">=",
+      "threshold": 0.8
+    }
+  ],
+  "passed": false,
+  "cloud_failures": [
+    {
+      "metric": "selection.pack_zero_blunder",
+      "current": false,
+      "operator": "==",
+      "threshold": true
+    },
+    {
+      "metric": "semantic_gate.recall",
+      "current": 0.64,
+      "operator": ">=",
+      "threshold": 0.9
+    },
+    {
+      "metric": "semantic_gate.ordinary_fpr",
+      "current": 0.41,
+      "operator": "<=",
+      "threshold": 0.05
+    },
+    {
+      "metric": "semantic_gate.highlight_fpr",
+      "current": 0.06,
+      "operator": "<=",
+      "threshold": 0.02
+    },
+    {
+      "metric": "selection.macro_pack_overlap_at_k",
+      "current": 0.62,
+      "operator": ">=",
+      "threshold": 0.8
+    }
+  ],
+  "status": "FAIL",
+  "release_eligible": false,
+  "gate": {
+    "passed": false,
+    "release_eligible": false,
+    "failures": [
+      {
+        "metric": "selection.pack_zero_blunder",
+        "current": false,
+        "operator": "==",
+        "threshold": true
+      },
+      {
+        "metric": "semantic_gate.recall",
+        "current": 0.64,
+        "operator": ">=",
+        "threshold": 0.9
+      },
+      {
+        "metric": "semantic_gate.ordinary_fpr",
+        "current": 0.41,
+        "operator": "<=",
+        "threshold": 0.05
+      },
+      {
+        "metric": "semantic_gate.highlight_fpr",
+        "current": 0.06,
+        "operator": "<=",
+        "threshold": 0.02
+      },
+      {
+        "metric": "selection.macro_pack_overlap_at_k",
+        "current": 0.62,
+        "operator": ">=",
+        "threshold": 0.8
+      }
+    ]
+  }
+}

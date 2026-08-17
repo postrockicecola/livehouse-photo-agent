@@ -1,0 +1,91 @@
+{
+  "schema_version": "score_calibration.v1",
+  "generated_at": "2026-08-11T14:13:28.042603+00:00",
+  "dataset": "score_calibration_v1",
+  "model": "qwen3-vl-plus",
+  "prompt_profile": "stage3_v9_route_b",
+  "decision": {
+    "method": "identity",
+    "apply_calibration": false,
+    "formula": "calibrated_score = raw_score",
+    "reason": "Identity has the lowest session-holdout MAE; fitted corrections degrade holdout MAE."
+  },
+  "data": {
+    "n": 295,
+    "sessions": 34,
+    "manual_exclusions": 5,
+    "human_edits": 9,
+    "unchanged": 286,
+    "manifest_sha256": "ec73000b103e2b3e7c84145bbd7d8ca58b9619cbea0fd50ce18908e738541b07",
+    "human_scores_sha256": "1c6f4b207fd03cfe03ee352f78fa57444a3d3620bc45fd0002a10e6a91423f81",
+    "predictions_sha256": "736d031bad37af413c37d287c5dbb093db795e8b2e33b9ba61948e2556aa2643"
+  },
+  "split": {
+    "seed": 20260811,
+    "method": "session_hash_80_20",
+    "train_n": 240,
+    "holdout_n": 55,
+    "train_sessions": 27,
+    "holdout_sessions": 7,
+    "holdout_session_ids": [
+      "2026-03-07",
+      "2026-03-28",
+      "2026-05-02",
+      "2026-05-15",
+      "2026-05-28_ruanshizi",
+      "2026-06-13",
+      "2026-07-03"
+    ]
+  },
+  "candidate_fits": {
+    "offset": 0.179167,
+    "affine": {
+      "a": 0.99093,
+      "b": 0.52996
+    }
+  },
+  "holdout": {
+    "identity": {
+      "n": 55,
+      "mae": 0.076364,
+      "rmse": 0.566328,
+      "bias": {
+        "n": 55,
+        "mean_bias": 0.07636363636363641,
+        "std_bias": 0.5611558319830556,
+        "median_bias": 0.0,
+        "pct_overscored": 1.8181818181818181,
+        "pct_underscored": 0.0
+      },
+      "spearman": 0.999567
+    },
+    "offset": {
+      "n": 55,
+      "mae": 0.249015,
+      "rmse": 0.570495,
+      "bias": {
+        "n": 55,
+        "mean_bias": -0.10280303030302387,
+        "std_bias": 0.5611558319830557,
+        "median_bias": -0.17916666666666003,
+        "pct_overscored": 1.8181818181818181,
+        "pct_underscored": 98.18181818181819
+      },
+      "spearman": 0.999567
+    },
+    "affine": {
+      "n": 55,
+      "mae": 0.230351,
+      "rmse": 0.581059,
+      "bias": {
+        "n": 55,
+        "mean_bias": -0.07920905356683118,
+        "std_bias": 0.5756350350466677,
+        "median_bias": -0.14665125612702923,
+        "pct_overscored": 5.454545454545454,
+        "pct_underscored": 94.54545454545455
+      },
+      "spearman": 0.999567
+    }
+  }
+}

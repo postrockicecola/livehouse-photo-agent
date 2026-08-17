@@ -1,0 +1,81 @@
+{
+  "pipeline": {
+    "meta": {
+      "source_dir": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_full/input",
+      "folders": {
+        "best": "AI_Best_90+",
+        "keep": "AI_Keep_60-90",
+        "trash": "AI_Trash_Below60"
+      }
+    },
+    "metrics": {
+      "total": 250,
+      "processed": 250,
+      "failed": 0,
+      "time_cost": 54.32096958300099,
+      "throughput": 4.602274258341554,
+      "success_rate": 1.0,
+      "stage1_image_count": 0,
+      "stage2_image_count": 0,
+      "stage3_image_count": 0,
+      "error_count": 0,
+      "error_stage": ""
+    }
+  },
+  "stages": {
+    "status": {
+      "score": "success",
+      "render": "success"
+    },
+    "durations": {
+      "score": 7.499766070395708e-07,
+      "render": 3.249995643272996e-06
+    }
+  },
+  "infra": {
+    "server": {
+      "started": false,
+      "skipped": true,
+      "ready": false,
+      "source_dir": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_full/input",
+      "port": 8080,
+      "status": "disabled",
+      "urls": {
+        "best": "http://127.0.0.1:8080/AI_Best_90+/gallery.html",
+        "keep": "http://127.0.0.1:8080/AI_Keep_60-90/gallery.html",
+        "trash": "http://127.0.0.1:8080/AI_Trash_Below60/gallery.html"
+      },
+      "reason": "disabled_by_flag",
+      "retries": 0,
+      "startup_time": 0.0,
+      "health_check_passed": false
+    },
+    "server_status": {
+      "base_url": "http://127.0.0.1:8080",
+      "Best": "http://127.0.0.1:8080/AI_Best_90+/gallery.html",
+      "Keep": "http://127.0.0.1:8080/AI_Keep_60-90/gallery.html",
+      "Trash": "http://127.0.0.1:8080/AI_Trash_Below60/gallery.html",
+      "message": "未启动画廊服务（已使用 --no-serve）。"
+    },
+    "next_dev": {
+      "started": false,
+      "skipped": true,
+      "ready": true,
+      "url": "http://127.0.0.1:3000",
+      "web_root": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/web",
+      "port": 3000,
+      "pid": null,
+      "log_file": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/web/next_dev.log",
+      "reason": "port 3000 already in use (next_probe_ok=True)",
+      "command": "",
+      "listener_probe_ok": true,
+      "status": "skipped"
+    },
+    "file_summary": {
+      "preview": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_full/input/preview.html",
+      "Best": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_full/input/AI_Best_90+/gallery.html",
+      "Keep": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_full/input/AI_Keep_60-90/gallery.html",
+      "Trash": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/reports/eval/selection_v1/cloud_full/input/AI_Trash_Below60/gallery.html"
+    }
+  }
+}

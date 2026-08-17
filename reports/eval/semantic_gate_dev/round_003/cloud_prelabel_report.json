@@ -1,0 +1,104 @@
+{
+  "schema_version": "semantic_gate_dev_report.v1",
+  "review_rows": 116,
+  "unique_reviews": 112,
+  "revisions": 4,
+  "dispositions": {
+    "pass": 96,
+    "semantic_reject": 16
+  },
+  "metrics": {
+    "counts": {
+      "tp": 15,
+      "fn": 1,
+      "fp": 1,
+      "tn": 95,
+      "total": 112
+    },
+    "recall": {
+      "value": 0.9375,
+      "low": 0.716707,
+      "high": 0.988881
+    },
+    "false_negative_rate": 0.0625,
+    "false_positive_rate": 0.010417,
+    "specificity": {
+      "value": 0.989583,
+      "low": 0.943332,
+      "high": 0.998159
+    },
+    "precision": {
+      "value": 0.9375,
+      "low": 0.716707,
+      "high": 0.988881
+    }
+  },
+  "type_recall": {
+    "closed_eyes": {
+      "caught": 2,
+      "total": 2,
+      "value": 1.0
+    },
+    "heavy_occlusion": {
+      "caught": 8,
+      "total": 9,
+      "value": 0.888889
+    },
+    "missed_moment": {
+      "caught": 11,
+      "total": 11,
+      "value": 1.0
+    },
+    "no_clear_subject": {
+      "caught": 8,
+      "total": 8,
+      "value": 1.0
+    },
+    "severe_composition_failure": {
+      "caught": 4,
+      "total": 4,
+      "value": 1.0
+    }
+  },
+  "disagreements": [
+    {
+      "file": "20260502__DSC05127.JPG",
+      "human_disposition": "semantic_reject",
+      "human_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion"
+        ],
+        "severity": 2,
+        "evidence": ""
+      },
+      "predicted_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": "none",
+        "evidence": ""
+      },
+      "error_type": "false_negative"
+    },
+    {
+      "file": "20260808__DSC03939.jpg",
+      "human_disposition": "pass",
+      "human_gate": {
+        "is_present": false,
+        "types": [],
+        "severity": 0,
+        "evidence": "大量光斑与运动轨迹覆盖面部及上半身，无法辨识表情与关键动作，主体轮廓虽存但信息严重丢失"
+      },
+      "predicted_gate": {
+        "is_present": true,
+        "types": [
+          "heavy_occlusion",
+          "no_clear_subject"
+        ],
+        "severity": "major",
+        "evidence": "大量光斑与运动轨迹覆盖面部及上半身，无法辨识表情与关键动作，主体轮廓虽存但信息严重丢失"
+      },
+      "error_type": "false_positive"
+    }
+  ]
+}

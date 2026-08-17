@@ -1,0 +1,68 @@
+{
+  "schema_version": "selection_cloud_canary.v1",
+  "dataset_sha256": "7e684c0d89dd3601b23b7118c003dbfeb89cd431f14dbbd9a875424345c805b6",
+  "per_category": 3,
+  "count": 12,
+  "items": [
+    {
+      "file": "20260424__DSC03910.jpg",
+      "sample_type": "technical_hard",
+      "sha256": "b39dd6002a5f202c68aee979fab2771b4d7b35a4747adf059d8257d0c1991ddd"
+    },
+    {
+      "file": "20260523__DSC08598.jpg",
+      "sample_type": "technical_hard",
+      "sha256": "2caa70dcaf8253b8007613be57d9aa10a0013fa9a5fcc10eb7a2b4c8735849a0"
+    },
+    {
+      "file": "20260523__DSC08836.jpg",
+      "sample_type": "technical_hard",
+      "sha256": "d9b5d79ee258f503d460b7ce419f66eee6d7a8d50a6ab2d0f59850730a14c1b6"
+    },
+    {
+      "file": "20260502__DSC05134.JPG",
+      "sample_type": "semantic_defect",
+      "sha256": "86832331544acc03cfa7567323f337c66bf866c72f55cda0baffabfb997707d1"
+    },
+    {
+      "file": "20260523__DSC08558.jpg",
+      "sample_type": "semantic_defect",
+      "sha256": "2719e47fef452ab451fb4d569d3be1fcad5953c2e8288b684f4d6f46be4d6f04"
+    },
+    {
+      "file": "20260523__DSC09236.jpg",
+      "sample_type": "semantic_defect",
+      "sha256": "f6e80319b50d0452b742e9c32436dadb7d91dfa3bb89e98ee26cb56c29224529"
+    },
+    {
+      "file": "20260509__DSC05818.jpg",
+      "sample_type": "ordinary",
+      "sha256": "a7b0730981ac99de3e42380332cb207858baab303159c26a605d76f2dab6e341"
+    },
+    {
+      "file": "20260509__DSC06514.jpg",
+      "sample_type": "ordinary",
+      "sha256": "0a8826ce764016f83437a90f5beab393ba794f6ee56f43c39f5ce78bcefcf1bb"
+    },
+    {
+      "file": "20260509__DSC06549.jpg",
+      "sample_type": "ordinary",
+      "sha256": "6c4f3bae82145c201eb53653e173b9f17acbf4e12ebdc4ea25d81b5b87652494"
+    },
+    {
+      "file": "20260509__DSC05670.jpg",
+      "sample_type": "highlight",
+      "sha256": "897488f7099ae2d159d8ac2010a3d906ef3fadfdde90759f0be7472e3a56badd"
+    },
+    {
+      "file": "20260509__DSC05994.jpg",
+      "sample_type": "highlight",
+      "sha256": "934d0c5cde77961dfb2aeca75cd745d8ca1bb942dd4f2a5c240e526e752a7705"
+    },
+    {
+      "file": "20260509__DSC06098.jpg",
+      "sample_type": "highlight",
+      "sha256": "a85012b0414bed6c94b1236271d5b2f1561b31d5c07013b6726543ba5aa33736"
+    }
+  ]
+}
