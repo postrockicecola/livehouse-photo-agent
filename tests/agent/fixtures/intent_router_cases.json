@@ -280,5 +280,16 @@
       "query": "全景"
     },
     "expect_select_after": true
+  },
+  {
+    "id": "async_delivery_night",
+    "user": "这场交30张给客户，偏鼓手",
+    "expect_rule": "async_curation_job",
+    "expect_tool": "submit_curation_job",
+    "expect_args": {
+      "limit": 30,
+      "query": "鼓手"
+    },
+    "expect_select_after": false
   }
 ]

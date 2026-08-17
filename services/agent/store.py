@@ -79,6 +79,29 @@ CREATE TABLE IF NOT EXISTS selection_experiences (
 );
 CREATE INDEX IF NOT EXISTS idx_selection_experiences_owner
 ON selection_experiences(owner, tenant, created_at DESC);
+CREATE TABLE IF NOT EXISTS curation_jobs (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id           TEXT NOT NULL UNIQUE,
+    owner            TEXT NOT NULL,
+    session_id       TEXT NOT NULL,
+    base_dir         TEXT NOT NULL,
+    fingerprint      TEXT NOT NULL,
+    status           TEXT NOT NULL,
+    user_text        TEXT,
+    goal_json        TEXT NOT NULL,
+    result_json      TEXT,
+    error            TEXT,
+    created_at       REAL NOT NULL,
+    updated_at       REAL NOT NULL,
+    started_at       REAL,
+    finished_at      REAL,
+    timeout_sec      REAL NOT NULL,
+    cancel_requested INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_curation_jobs_owner_status
+ON curation_jobs(owner, status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_curation_jobs_dedup
+ON curation_jobs(owner, base_dir, fingerprint, status);
 """
 
 _SCHEMA_LOCK = threading.Lock()

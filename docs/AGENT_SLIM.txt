@@ -1,5 +1,5 @@
 Agent slim checklist — keep the Agent surface sharp
-Updated: 2026-08-03
+Updated: 2026-08-17
 Companion: docs/PROJECT_GUIDE.txt · docs/PLATFORM_SCOPE.txt
 
 Goal: Agent is Gallery chat only; photo scoring stays on the fixed pipeline.
@@ -13,8 +13,8 @@ RUNTIME MATRIX (who decides what)
   ┌──────────────────┬────────────────────────────┬──────────────────────────┐
   │ Control path     │ Model protocol             │ When                     │
   ├──────────────────┼────────────────────────────┼──────────────────────────┤
-  │ intent_router    │ (no tool JSON round)       │ High-freq recipe asks    │
-  │ **langgraph**    │ **plan or {"tool","args"}**│ Semantic plan / fallback │
+  │ **langgraph**    │ **plan→execute_plan**      │ All intent_router hits   │
+  │ langgraph        │ {"tool","args"} / native   │ Unrouted semantic asks   │
   │ langgraph        │ native tools[] (bridge)    │ LIVEHOUSE_AGENT_NATIVE_  │
   │                  │ multi → __multi__ serial/  │ TOOLS=auto (openai/vllm  │
   │                  │ parallel read-only         │ on; ollama off) or 1/0   │
@@ -27,10 +27,12 @@ RUNTIME MATRIX (who decides what)
   SSE ``token`` = typing-effect over finalized reply (buffer → {ref_N} resolve /
   groundedness template gate → chunk). Not true token-level model streaming.
   Final-answer cites: model emits {ref_N}; code substitutes metadata.files.
-  LangGraph: START→plan→(execute_plan | decide→act)→answer. Structured semantic
-  selection goals use deterministic execute_plan and skip the model tool round.
-  After file-bearing tools, answer() prefers lean PHOTO REFS prompt
-  (ignores decide-loop prose). No-file tools (echo/stats) still use direct_reply.
+  LangGraph: START→plan→(execute_plan | decide→act)→answer. Every
+  intent_router hit (shortlist / film / async job / semantic goal) goes through
+  plan→execute_plan and skips the model tool round. After file-bearing tools,
+  answer() prefers lean PHOTO REFS; film-only tools use skill reply_zh;
+  no-file tools (echo/stats) still use direct_reply. Mixed invented cites
+  strip unknown names; all-unknown falls back to the groundedness template.
   answer() branches: ANSWER_BRANCH_CHECKLIST in conversation_graph.py — keep in
   sync with TestAnswerBranch* (@pytest.mark.requires_langgraph). Missing
   langgraph → those tests FAIL (tests/conftest.py), never silent imperative.
@@ -44,7 +46,12 @@ KEEP (default on)
 Runtime
   services/agent/conversation_graph.py Gallery chat plan→execute/decide→answer
                                       (compile-once)
-  services/agent/selection_planner.py  Structured semantic selection goals
+  services/agent/selection_planner.py  Structured goals: subject × style × platform
+                                      (tension/backlight/solitude/cinematic;
+                                      recipes still own 朋友圈/最炸/高潮/交片)
+  services/agent/curation_jobs.py      Async delivery job store + worker
+  services/agent/specialists.py        retrieve/select/style allowlists
+  services/agent/mcp_gallery.py        Cursor MCP adapter (stdio JSON-RPC)
   services/agent/conversation.py       ConversationalAgent entry
   services/agent/chat_backend.py
   services/agent/guardrails.py
@@ -67,6 +74,7 @@ Skills (product tools)
   services/agent/skills/gallery_search.py
   services/agent/skills/gallery_film.py
   services/agent/skills/gallery_export.py
+  services/agent/skills/gallery_curation_job.py  submit/poll/cancel
   services/agent/skills/artifacts.py
   services/agent/skills/memory.py
   services/agent/skills/database.py
@@ -117,8 +125,10 @@ Docs
 DOWNGRADE (legacy / opt-in)
 ==============================================================================
 
-Imperative chat runtime
+  Imperative chat runtime
   services/agent/conversation.py::_chat_imperative / _stream_chat_imperative
+  _chat_routed / _stream_chat_routed now wrap _execute_planned_route
+  (same experience + specialist path as graph execute_plan).
   Env: LIVEHOUSE_AGENT_RUNTIME=imperative|loop|legacy
   Default is LangGraph; missing langgraph → hard error (no silent fallback).
   Kept for tests + emergency only.
@@ -163,7 +173,7 @@ Demos / one-offs
   reports/infra_scaling.* · stale reports/eval/baseline_v{2,3,4}* dumps
 
 Unverified agent side-tracks (removed 2026-07-25)
-  services/agent/mcp/
+  services/agent/mcp/   # replaced 2026-08-14 by verified services/agent/mcp_gallery.py
   services/agent/orchestrator.py · messaging.py
   services/agent/rag.py
   services/agent/rl/ · scripts/rl/

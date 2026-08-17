@@ -2,8 +2,8 @@
 
 Graph shape::
 
-    START → plan ─┬→ execute_plan → answer → END
-                  └→ decide → act ⟲ decide → answer → END
+    START → plan ─┬→ execute_plan → answer → END   # all intent_router hits
+                  └→ decide → act → decide ⟲ → answer → END
                                 ↘ answer (plain / forced)
 
 This is the **production** path for :class:`ConversationalAgent`. The imperative
@@ -44,6 +44,7 @@ class ChatTurnState(TypedDict, total=False):
     selection_goal: Optional[dict[str, Any]]
     planned_route: Optional[dict[str, Any]]
     plan_rule_id: Optional[str]
+    specialist: Optional[str]
 
 
 TurnHook = Callable[[dict[str, Any]], None]
@@ -53,6 +54,11 @@ TurnHook = Callable[[dict[str, Any]], None]
 # Each entry's ``id`` must have a dedicated TestAnswerBranch* class / test.
 # When adding a branch: append here, wire ``select_answer_branch``, add a test.
 ANSWER_BRANCH_CHECKLIST: tuple[dict[str, str], ...] = (
+    {
+        "id": "film_direct",
+        "when": "this turn's tools are only apply_film_vibe / recommend_film_for_photo",
+        "path": "skill reply_zh → finalize (no PHOTO REFS / no extra model call)",
+    },
     {
         "id": "lean_refs",
         "when": (
@@ -76,7 +82,8 @@ ANSWER_BRANCH_CHECKLIST: tuple[dict[str, str], ...] = (
     },
 )
 
-AnswerBranchId = Literal["lean_refs", "direct_no_files", "plain_no_tools"]
+AnswerBranchId = Literal["film_direct", "lean_refs", "direct_no_files", "plain_no_tools"]
+FILM_GRADE_TOOLS = frozenset({"apply_film_vibe", "recommend_film_for_photo"})
 
 
 def tool_calls_have_cite_files(tool_calls: list[dict[str, Any]] | None) -> bool:
@@ -96,6 +103,16 @@ def tool_calls_have_cite_files(tool_calls: list[dict[str, Any]] | None) -> bool:
     return False
 
 
+def tool_calls_are_film_only(tool_calls: list[dict[str, Any]] | None) -> bool:
+    """True when every tool in this turn is a film-grade skill."""
+    names = [
+        str(tc.get("tool") or "")
+        for tc in (tool_calls or [])
+        if isinstance(tc, dict) and str(tc.get("tool") or "").strip()
+    ]
+    return bool(names) and all(name in FILM_GRADE_TOOLS for name in names)
+
+
 def select_answer_branch(
     *,
     has_direct: bool,
@@ -107,6 +124,8 @@ def select_answer_branch(
     Mirrors ``ANSWER_BRANCH_CHECKLIST``. Changing this without updating the
     checklist + ``requires_langgraph`` tests is a review smell.
     """
+    if tool_calls_are_film_only(tool_calls):
+        return "film_direct"
     prefer_lean_refs = bool(tool_calls) and tool_calls_have_cite_files(tool_calls)
     if has_direct and not force and not prefer_lean_refs:
         return "direct_no_files"
@@ -136,9 +155,6 @@ def compile_chat_turn_graph(
     chat_fn: Callable[[list[dict[str, str]]], str],
     memory: Any,
     skills: Any,
-    guardrails: Any,
-    wrap_tool_output: bool,
-    max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
     record_tool_decision: Callable[[str, dict[str, Any]], None],
     record_tool_observation: Callable[[str, Any], None],
@@ -153,6 +169,7 @@ def compile_chat_turn_graph(
     execute_planned_route: Optional[
         Callable[[dict[str, Any]], tuple[list[dict[str, Any]], list[str]]]
     ] = None,
+    on_plan: Optional[Callable[[Optional[str], Optional[str]], None]] = None,
 ):
     """Compile the plan→decide/act→answer turn graph (closures bind one agent instance)."""
     from langgraph.graph import END, START, StateGraph
@@ -173,23 +190,40 @@ def compile_chat_turn_graph(
         except Exception:
             return False
 
-    def plan(state: ChatTurnState) -> dict[str, Any]:
-        """Normalize supported semantic requests before any model tool decision."""
-        if skills is None or execute_planned_route is None:
-            return {
-                "selection_goal": None,
-                "planned_route": None,
-                "plan_rule_id": None,
-            }
-        from services.agent.intent_router import semantic_selection_route
+    def _emit_plan(payload: dict[str, Any]) -> dict[str, Any]:
+        if on_plan is not None:
+            try:
+                on_plan(payload.get("specialist"), payload.get("plan_rule_id"))
+            except Exception:
+                logger.exception("on_plan failed")
+        return payload
 
-        match = semantic_selection_route(str(state.get("user_text") or ""))
+    def plan(state: ChatTurnState) -> dict[str, Any]:
+        """Route every deterministic Gallery intent before any model tool decision."""
+        from services.agent.specialists import assign_specialist
+
+        user_text = str(state.get("user_text") or "")
+        if skills is None or execute_planned_route is None:
+            return _emit_plan(
+                {
+                    "selection_goal": None,
+                    "planned_route": None,
+                    "plan_rule_id": None,
+                    "specialist": assign_specialist(user_text),
+                }
+            )
+        from services.agent.intent_router import route_gallery_intent
+
+        match = route_gallery_intent(user_text)
         if match is None:
-            return {
-                "selection_goal": None,
-                "planned_route": None,
-                "plan_rule_id": None,
-            }
+            return _emit_plan(
+                {
+                    "selection_goal": None,
+                    "planned_route": None,
+                    "plan_rule_id": None,
+                    "specialist": assign_specialist(user_text),
+                }
+            )
         calls = [
             {"tool": call.tool, "args": dict(call.args)}
             for call in match.calls
@@ -199,15 +233,19 @@ def compile_chat_turn_graph(
             raw_goal = calls[0]["args"].get("selection_goal")
             if isinstance(raw_goal, dict):
                 goal = dict(raw_goal)
-        return {
-            "selection_goal": goal,
-            "planned_route": {
-                "rule_id": match.rule_id,
-                "calls": calls,
-                "select_after_search": match.select_after_search,
-            },
-            "plan_rule_id": match.rule_id,
+        planned = {
+            "rule_id": match.rule_id,
+            "calls": calls,
+            "select_after_search": match.select_after_search,
         }
+        return _emit_plan(
+            {
+                "selection_goal": goal,
+                "planned_route": planned,
+                "plan_rule_id": match.rule_id,
+                "specialist": assign_specialist(user_text, planned_route=planned),
+            }
+        )
 
     def route_after_plan(state: ChatTurnState) -> Literal["execute_plan", "decide"]:
         if state.get("planned_route") and execute_planned_route is not None:
@@ -249,7 +287,22 @@ def compile_chat_turn_graph(
                 "raw_model": None,
             }
 
-        raw = chat_fn(memory.messages())
+        from services.agent.specialists import specialist_tool_names
+
+        specialist = str(state.get("specialist") or "general")
+        messages = list(memory.messages())
+        allowed = specialist_tool_names(specialist)
+        if allowed is not None:
+            messages = messages + [
+                {
+                    "role": "system",
+                    "content": (
+                        f"This turn you may only call these tools: {', '.join(sorted(allowed))}. "
+                        "Do not call any other tool."
+                    ),
+                }
+            ]
+        raw = chat_fn(messages)
         call = parse_tool_call(raw)
         if call is None:
             # Broken tool JSON should not leak to the user as prose.
@@ -290,12 +343,15 @@ def compile_chat_turn_graph(
     def act(state: ChatTurnState) -> dict[str, Any]:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
+        from services.agent.skills.base import SkillResult
+        from services.agent.specialists import specialist_allows
         from services.agent.tool_protocol import (
             MULTI_TOOL,
             all_read_only,
             expand_tool_calls,
         )
 
+        specialist = str(state.get("specialist") or "general")
         call = state.get("pending_call") or {}
         sub_calls = expand_tool_calls(call)
         if not sub_calls:
@@ -311,6 +367,9 @@ def compile_chat_turn_graph(
             return merged
 
         def _dispatch(tool: str, merged: dict[str, Any]):
+            if not specialist_allows(specialist, tool):
+                err = f"{tool} is not available to the {specialist} specialist"
+                return SkillResult(ok=False, error=err, metadata={"error": err})
             return skills.dispatch(tool, merged)
 
         prepared = [(str(c["tool"]), _merge(str(c["tool"]), dict(c.get("args") or {}))) for c in sub_calls]
@@ -375,6 +434,20 @@ def compile_chat_turn_graph(
             tool_calls=tool_calls,
         )
 
+        if branch == "film_direct":
+            if defer:
+                return {
+                    "reply": None,
+                    "direct_reply": None,
+                    "answer_messages": None,
+                    "done": True,
+                    "backend": "langgraph",
+                }
+            final = force_final_answer(user_text, observations)
+            reply = finalize(final)
+            _emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
+            return {"reply": reply, "done": True, "backend": "langgraph"}
+
         if branch == "direct_no_files":
             # In-loop plain answer (may still be tool JSON if model misbehaved).
             if parse_tool_call(str(direct)) is not None:
@@ -425,10 +498,6 @@ def compile_chat_turn_graph(
         _emit({"type": "done", "reply": reply, "tool_calls": tool_calls})
         return {"reply": reply, "answer_messages": messages, "done": True, "backend": "langgraph"}
 
-    def route_after_act(state: ChatTurnState) -> Literal["decide", "answer"]:
-        # Always go back to decide so the model can chain tools or answer.
-        return "decide"
-
     g = StateGraph(ChatTurnState)
     g.add_node("plan", plan)
     g.add_node("execute_plan", execute_plan)
@@ -443,7 +512,7 @@ def compile_chat_turn_graph(
     )
     g.add_edge("execute_plan", "answer")
     g.add_conditional_edges("decide", route_after_decide, {"act": "act", "answer": "answer"})
-    g.add_conditional_edges("act", route_after_act, {"decide": "decide", "answer": "answer"})
+    g.add_edge("act", "decide")
     g.add_edge("answer", END)
     return g.compile()
 
@@ -473,6 +542,7 @@ def _initial_chat_state(
         "selection_goal": None,
         "planned_route": None,
         "plan_rule_id": None,
+        "specialist": None,
     }
 
 
@@ -483,9 +553,6 @@ def run_chat_turn(
     chat_fn: Callable[[list[dict[str, str]]], str],
     memory: Any,
     skills: Any,
-    guardrails: Any,
-    wrap_tool_output: bool,
-    max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
     record_tool_decision: Callable[[str, dict[str, Any]], None],
     record_tool_observation: Callable[[str, Any], None],
@@ -500,6 +567,7 @@ def run_chat_turn(
     execute_planned_route: Optional[
         Callable[[dict[str, Any]], tuple[list[dict[str, Any]], list[str]]]
     ] = None,
+    on_plan: Optional[Callable[[Optional[str], Optional[str]], None]] = None,
     defer_answer: bool = False,
     app: Any = None,
 ) -> ChatTurnState:
@@ -508,9 +576,6 @@ def run_chat_turn(
             chat_fn=chat_fn,
             memory=memory,
             skills=skills,
-            guardrails=guardrails,
-            wrap_tool_output=wrap_tool_output,
-            max_tool_result_chars=max_tool_result_chars,
             update_working_memory=update_working_memory,
             record_tool_decision=record_tool_decision,
             record_tool_observation=record_tool_observation,
@@ -523,6 +588,7 @@ def run_chat_turn(
             looks_like_tool_intent=looks_like_tool_intent,
             merge_tool_args=merge_tool_args,
             execute_planned_route=execute_planned_route,
+            on_plan=on_plan,
         )
     init = _initial_chat_state(
         user_text=user_text,
@@ -540,9 +606,6 @@ def iter_chat_turn_updates(
     chat_fn: Callable[[list[dict[str, str]]], str],
     memory: Any,
     skills: Any,
-    guardrails: Any,
-    wrap_tool_output: bool,
-    max_tool_result_chars: int,
     update_working_memory: Callable[[str, dict[str, Any], Any], None],
     record_tool_decision: Callable[[str, dict[str, Any]], None],
     record_tool_observation: Callable[[str, Any], None],
@@ -557,6 +620,7 @@ def iter_chat_turn_updates(
     execute_planned_route: Optional[
         Callable[[dict[str, Any]], tuple[list[dict[str, Any]], list[str]]]
     ] = None,
+    on_plan: Optional[Callable[[Optional[str], Optional[str]], None]] = None,
     defer_answer: bool = True,
     app: Any = None,
 ):
@@ -566,9 +630,6 @@ def iter_chat_turn_updates(
             chat_fn=chat_fn,
             memory=memory,
             skills=skills,
-            guardrails=guardrails,
-            wrap_tool_output=wrap_tool_output,
-            max_tool_result_chars=max_tool_result_chars,
             update_working_memory=update_working_memory,
             record_tool_decision=record_tool_decision,
             record_tool_observation=record_tool_observation,
@@ -581,6 +642,7 @@ def iter_chat_turn_updates(
             looks_like_tool_intent=looks_like_tool_intent,
             merge_tool_args=merge_tool_args,
             execute_planned_route=execute_planned_route,
+            on_plan=on_plan,
         )
     init = _initial_chat_state(
         user_text=user_text,
@@ -597,10 +659,11 @@ def iter_chat_turn_updates(
 
 GALLERY_CHAT_MAPPING = {
     "ConversationMemory": "closed over by decide/answer nodes",
-    "structured selection goal": "node: plan",
+    "intent_router (all deterministic hits)": "node: plan",
+    "specialist allowlist": "node: plan / decide / act",
     "deterministic planned tools": "node: execute_plan",
     "model tool JSON": "node: decide",
     "SkillRegistry.dispatch": "node: act",
-    "forced / plain final answer": "node: answer",
+    "forced / plain / film final answer": "node: answer",
     "ConversationalAgent.chat": "run_chat_turn (LangGraph primary)",
 }

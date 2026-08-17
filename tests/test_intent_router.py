@@ -245,3 +245,14 @@ def test_routed_chat_skips_tool_llm(tmp_path: Any, monkeypatch: Any) -> None:
     assert any(tc["tool"] == "gallery_select" for tc in result.tool_calls)
     assert len(llm_calls) == 1
     assert "选出" in result.reply or "照片" in result.reply
+
+
+def test_async_delivery_does_not_steal_plain_jiaopian() -> None:
+    plain = route_gallery_intent("帮我选出10张交片")
+    assert plain is not None
+    assert plain.rule_id == "shortlist_deliverable"
+    night = route_gallery_intent("这场交30张给客户，偏鼓手")
+    assert night is not None
+    assert night.rule_id == "async_curation_job"
+    assert night.calls[0].tool == "submit_curation_job"
+    assert night.select_after_search is False

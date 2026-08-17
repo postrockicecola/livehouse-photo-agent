@@ -136,7 +136,13 @@ def compress_working_memory(
                 }
             )
         out["last_citations"] = slim
-    for key in ("last_tool", "last_query", "last_archive_query"):
+    for key in (
+        "last_tool",
+        "last_query",
+        "last_archive_query",
+        "pending_curation_job_id",
+        "pending_curation_status",
+    ):
         if working.get(key) is not None:
             out[key] = working[key]
     return out

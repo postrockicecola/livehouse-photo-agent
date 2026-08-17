@@ -38,6 +38,7 @@ READ_ONLY_TOOLS = frozenset(
         "explain_photo",
         "list_preferences",
         "retrieve_selection_experience",
+        "poll_curation_job",
     }
 )
 

@@ -22,12 +22,12 @@ from services.agent.conversation_graph import (
     select_answer_branch,
     tool_calls_have_cite_files,
 )
-from services.agent.groundedness import grounding_failure_template
 from services.agent.skills.base import SkillRegistry, SkillResult
 from tests.conftest import LANGGRAPH_REQUIRED_FAIL_MSG, enforce_langgraph_available
 
 # Checklist id → owning test class name (review: counts must match).
 _BRANCH_TEST_CLASSES = {
+    "film_direct": "TestAnswerBranchFilmDirect",
     "lean_refs": "TestAnswerBranchLeanRefs",
     "direct_no_files": "TestAnswerBranchDirectNoFiles",
     "plain_no_tools": "TestAnswerBranchPlainNoTools",
@@ -60,6 +60,34 @@ def _search_skill(files: list[str]):
             )
 
     return _Search()
+
+
+def _film_skill():
+    class _Film:
+        name = "apply_film_vibe"
+        description = "film"
+        parameters = {"type": "object", "properties": {}}
+
+        def run(self, args):
+            return SkillResult(
+                ok=True,
+                output="已套复古胶片",
+                metadata={"reply_zh": "已套复古胶片风格。", "files": ["x.jpg"]},
+            )
+
+    return _Film()
+
+
+def _export_skill():
+    class _Export:
+        name = "export_selected"
+        description = "export"
+        parameters = {"type": "object", "properties": {}}
+
+        def run(self, args):
+            return SkillResult(ok=True, output="exported", metadata={"files": ["x.jpg"]})
+
+    return _Export()
 
 
 def _select_skill():
@@ -138,6 +166,11 @@ def test_answer_branch_checklist_matches_test_classes():
 def test_select_answer_branch_covers_checklist_ids():
     """Pure picker — commenting out a branch in select_answer_branch fails here."""
     cases = {
+        "film_direct": select_answer_branch(
+            has_direct=False,
+            force=True,
+            tool_calls=[{"tool": "apply_film_vibe", "metadata": {"files": ["a.jpg"]}}],
+        ),
         "lean_refs": select_answer_branch(
             has_direct=True,
             force=False,
@@ -237,6 +270,35 @@ class TestSemanticPlanNode:
 
 
 @pytest.mark.requires_langgraph
+class TestAnswerBranchFilmDirect:
+    """Checklist id: film_direct — film tools → skill Chinese text, no PHOTO REFS."""
+
+    checklist_id = "film_direct"
+
+    def test_film_route_uses_skill_text_without_model(self):
+        reg = SkillRegistry()
+        reg.register(_film_skill())
+        model_calls: list[list[dict[str, str]]] = []
+
+        def _should_not_run(msgs):
+            model_calls.append(list(msgs))
+            return "模型不该发明风格"
+
+        agent = ConversationalAgent(
+            _should_not_run,
+            memory=ConversationMemory(system_prompt="test"),
+            skills=reg,
+            wrap_tool_output=False,
+        )
+        res = agent.chat("修成复古胶片风格看看")
+        assert agent.last_backend == "langgraph"
+        assert res.trace.get("rule_id") == "apply_film_vibe"
+        assert [tc["tool"] for tc in res.tool_calls] == ["apply_film_vibe"]
+        assert res.reply == "已套复古胶片风格。"
+        assert model_calls == []
+
+
+@pytest.mark.requires_langgraph
 class TestAnswerBranchLeanRefs:
     """Checklist id: lean_refs — file-bearing tools → lean PHOTO REFS → finalize."""
 
@@ -274,7 +336,7 @@ class TestAnswerBranchLeanRefs:
         assert "guitar_02.jpg" in res.reply
         assert "{ref_" not in res.reply
 
-    def test_invented_file_in_lean_uses_template(self):
+    def test_invented_file_in_lean_strips_unknown(self):
         reg = SkillRegistry()
         reg.register(_search_skill(["drum_01.jpg"]))
         scripted = iter(
@@ -292,7 +354,9 @@ class TestAnswerBranchLeanRefs:
         )
         res = agent.chat("找鼓手")
         assert agent.last_backend == "langgraph"
-        assert res.reply == grounding_failure_template(["drum_01.jpg"])
+        assert "fake_hallucinated_99.jpg" not in res.reply
+        assert "drum_01.jpg" in res.reply
+        assert "节奏不错" in res.reply
         assert any(
             e.get("type") == "grounding_violation" and e.get("triggered")
             for e in res.events
@@ -369,3 +433,28 @@ class TestAnswerBranchPlainNoTools:
         assert agent.last_backend == "langgraph"
         assert "search" in res.reply.lower() or "select" in res.reply.lower()
         assert res.tool_calls == []
+
+
+@pytest.mark.requires_langgraph
+class TestSpecialistRetrieveRejectsExport:
+    def test_retrieve_specialist_blocks_export(self):
+        reg = SkillRegistry()
+        reg.register(_search_skill(["drum_01.jpg"]))
+        reg.register(_export_skill())
+        agent = ConversationalAgent(
+            _scripted_chat(
+                [
+                    json.dumps({"tool": "export_selected", "args": {}}),
+                    "本场没有可导出的交片结果。",
+                ]
+            ),
+            memory=ConversationMemory(system_prompt="test"),
+            skills=reg,
+            wrap_tool_output=False,
+        )
+        res = agent.chat("找鼓手特写")
+        assert agent.last_backend == "langgraph"
+        assert res.tool_calls
+        assert res.tool_calls[0]["tool"] == "export_selected"
+        assert res.tool_calls[0]["ok"] is False
+        assert "retrieve" in str(res.tool_calls[0]["metadata"].get("error") or "")

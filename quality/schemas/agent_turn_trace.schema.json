@@ -18,7 +18,7 @@
     "backend": {
       "type": "string",
       "minLength": 1,
-      "description": "langgraph | imperative | routed:<rule_id> | unknown"
+      "description": "langgraph | imperative | routed:<rule_id> (emergency only) | unknown. Deterministic routes now use backend=langgraph plus rule_id."
     },
     "rule_id": {
       "type": ["string", "null"],

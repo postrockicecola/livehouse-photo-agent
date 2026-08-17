@@ -40,10 +40,12 @@ from services.agent.groundedness import (
     redact_filenames_to_refs,
     resolve_ref_placeholders,
 )
+from services.agent.conversation_graph import FILM_GRADE_TOOLS
 from services.agent.guardrails import Guardrails
 from services.agent.intent_router import RouteMatch, RoutedCall, route_gallery_intent
 from services.agent.selection_planner import apply_selection_experiences
-from services.agent.skills.base import SkillRegistry
+from services.agent.skills.base import SkillRegistry, SkillResult
+from services.agent.specialists import specialist_allows
 from services.agent.tool_protocol import (
     looks_like_tool_intent,
     parse_tool_call,
@@ -211,7 +213,6 @@ _FINAL_ANSWER_NUDGE = (
     "never write real filenames. For film-vibe tools, copy metadata.reply_zh (or output) "
     "and stop — do not enumerate files. Do NOT output JSON and do NOT call any more tools."
 )
-_FILM_GRADE_TOOLS = frozenset({"apply_film_vibe", "recommend_film_for_photo"})
 _PREFS_SECTION_PREFIX = "LONG-TERM USER PREFERENCES"
 
 
@@ -285,6 +286,7 @@ class ConversationalAgent:
         self._grounding_rewrite_mode: str = "none"
         self._turn_user_text: str = ""
         self._selection_recorded_this_turn: Optional[str] = None
+        self._turn_specialist: str = "general"
         self._bind_focus_vision()
 
     def _bind_focus_vision(self) -> None:
@@ -318,6 +320,18 @@ class ConversationalAgent:
     def _merge_turn_context_args(self, tool: str, args: dict[str, Any]) -> dict[str, Any]:
         """Inject Gallery focus into per-photo skills when the model/router omitted them."""
         out = dict(args or {})
+        if tool in ("submit_curation_job", "poll_curation_job", "cancel_curation_job"):
+            out.setdefault("owner", str(self._turn_context.get("owner") or "anon:default"))
+            out.setdefault("session_id", str(self._turn_context.get("session_id") or "default"))
+            if tool == "submit_curation_job" and not str(out.get("user_text") or "").strip():
+                out["user_text"] = self._turn_user_text
+            if tool in ("poll_curation_job", "cancel_curation_job") and not str(
+                out.get("job_id") or ""
+            ).strip():
+                pending = str(self.working_memory.get("pending_curation_job_id") or "").strip()
+                if pending:
+                    out["job_id"] = pending
+            return out
         focus = str(self._turn_context.get("focus_file") or "").strip()
         if tool == "explain_photo" and focus and not str(out.get("file") or "").strip():
             out["file"] = focus
@@ -346,6 +360,7 @@ class ConversationalAgent:
         self._grounding_rewrite_mode = "none"
         self._turn_user_text = ""
         self._selection_recorded_this_turn = None
+        self._turn_specialist = "general"
 
     def _parse_tool_call_repaired(self, raw: str) -> Optional[dict[str, Any]]:
         """Parse tool JSON; one repair completion when output looks tool-ish but invalid."""
@@ -435,6 +450,11 @@ class ConversationalAgent:
                 self._update_selection_history(name, args, normalized_files)
         if meta.get("citations"):
             self.working_memory["last_citations"] = list(meta.get("citations") or [])
+        if name == "submit_curation_job" and meta.get("job_id"):
+            self.working_memory["pending_curation_job_id"] = str(meta["job_id"])
+            self.working_memory["pending_curation_status"] = str(meta.get("status") or "queued")
+        if name in ("poll_curation_job", "cancel_curation_job") and meta.get("status"):
+            self.working_memory["pending_curation_status"] = str(meta["status"])
         self.working_memory = compress_working_memory(self.working_memory)
 
     def _record_tool_decision(self, tool: str, args: dict[str, Any]) -> None:
@@ -458,14 +478,14 @@ class ConversationalAgent:
             self._record_tool_decision(name, dict(args or {}))
         self._record_tool_observation(name, result)
 
+    def _on_plan(self, specialist: Optional[str], rule_id: Optional[str]) -> None:
+        self._turn_specialist = str(specialist or "general")
+
     def _graph_kwargs(self) -> dict[str, Any]:
         return {
             "chat_fn": self._chat_messages,
             "memory": self.memory,
             "skills": self._skills,
-            "guardrails": self._guardrails,
-            "wrap_tool_output": self._wrap_tool_output,
-            "max_tool_result_chars": self._max_tool_result_chars,
             "update_working_memory": self._update_working_memory,
             "record_tool_decision": self._record_tool_decision,
             "record_tool_observation": self._record_tool_observation,
@@ -478,6 +498,7 @@ class ConversationalAgent:
             "no_answer_fallback": _NO_ANSWER_FALLBACK,
             "merge_tool_args": self._merge_turn_context_args,
             "execute_planned_route": self._execute_planned_route,
+            "on_plan": self._on_plan,
         }
 
     def _imperative_requested(self) -> bool:
@@ -518,7 +539,11 @@ class ConversationalAgent:
         # Causal chain: assistant(decision) lands before dispatch so a crash mid-tool
         # still leaves a decide-visible anchor for the next round.
         self._record_tool_decision(tool, args)
-        result = self._skills.dispatch(tool, args)
+        if not specialist_allows(self._turn_specialist, tool):
+            err = f"{tool} is not available to the {self._turn_specialist} specialist"
+            result = SkillResult(ok=False, error=err, metadata={"error": err})
+        else:
+            result = self._skills.dispatch(tool, args)
         self._update_working_memory(tool, args, result)
         self._record_tool_observation(tool, result)
         meta = dict(getattr(result, "metadata", None) or {})
@@ -540,6 +565,14 @@ class ConversationalAgent:
 
     def _execute_route_match(self, match: RouteMatch) -> tuple[list[dict[str, Any]], list[str]]:
         """Execute deterministic routed tool calls (no LLM tool-selection round)."""
+        from services.agent.specialists import assign_specialist
+
+        planned = {
+            "rule_id": match.rule_id,
+            "calls": [{"tool": call.tool, "args": dict(call.args)} for call in match.calls],
+            "select_after_search": match.select_after_search,
+        }
+        self._turn_specialist = assign_specialist(self._turn_user_text, planned_route=planned)
         tool_calls: list[dict[str, Any]] = []
         observations: list[str] = []
         if self._skills is None:
@@ -564,6 +597,13 @@ class ConversationalAgent:
             )
         return tool_calls, observations
 
+    def _payload_from_match(self, match: RouteMatch) -> dict[str, Any]:
+        return {
+            "rule_id": match.rule_id,
+            "calls": [{"tool": call.tool, "args": dict(call.args)} for call in match.calls],
+            "select_after_search": match.select_after_search,
+        }
+
     def _execute_planned_route(
         self,
         payload: dict[str, Any],
@@ -576,16 +616,20 @@ class ConversationalAgent:
             tool = str(call.get("tool") or "")
             args = dict(call.get("args") or {})
             goal = args.get("selection_goal")
-            if (
-                tool == "gallery_search"
-                and isinstance(goal, dict)
-                and self._selection_experience_loader is not None
-            ):
-                lookup_text = " ".join(
-                    str(goal.get(key) or "") for key in ("subject", "style", "platform")
-                ).strip()
+            wants_experience = tool == "gallery_search" and (
+                isinstance(goal, dict)
+                or bool(payload.get("select_after_search"))
+                or str(payload.get("rule_id") or "").startswith("shortlist_")
+            )
+            if wants_experience and self._selection_experience_loader is not None:
+                lookup = goal if isinstance(goal, dict) else {}
+                lookup_text = (
+                    " ".join(str(lookup.get(key) or "") for key in ("subject", "style", "platform")).strip()
+                    or str(args.get("query") or "")
+                    or self._turn_user_text
+                )
                 try:
-                    experiences = self._selection_experience_loader(goal, lookup_text)
+                    experiences = self._selection_experience_loader(lookup, lookup_text)
                 except Exception:
                     experiences = []
                 args = apply_selection_experiences(args, experiences)
@@ -598,13 +642,10 @@ class ConversationalAgent:
         return self._execute_route_match(match)
 
     def _chat_routed(self, user_text: str, match: RouteMatch) -> TurnResult:
-        """Deterministic tools + one LLM prose summary (no tool-call generation)."""
+        """Emergency/imperative wrapper around the same planned-route executor."""
         self.last_backend = f"routed:{match.rule_id}"
-        tool_calls, observations = self._execute_route_match(match)
-        # Film tools: always use skill Chinese text — never let the model invent a style.
-        direct = self._direct_film_grade_reply(tool_calls)
-        final = direct if direct else self._force_final_answer(user_text, observations)
-        reply = self._finalize(final)
+        tool_calls, observations = self._execute_planned_route(self._payload_from_match(match))
+        reply = self._finalize(self._force_final_answer(user_text, observations))
         self._done_event(reply, tool_calls, routed=match.rule_id)
         return self._make_turn_result(reply, tool_calls)
 
@@ -616,18 +657,21 @@ class ConversationalAgent:
         stream_fn: Optional[StreamChatFn] = None,
     ) -> Iterator[dict[str, Any]]:
         self.last_backend = f"routed:{match.rule_id}"
-        tool_calls, observations = self._execute_route_match(match)
+        tool_calls, observations = self._execute_planned_route(self._payload_from_match(match))
         for tc in tool_calls:
             yield {"type": "tool_call", **tc}
-        direct = self._direct_film_grade_reply(tool_calls)
-        if direct:
-            reply = self._finalize(direct)
+        film_direct = self._direct_film_grade_reply(tool_calls)
+        if film_direct:
+            reply = self._finalize(film_direct)
             for piece in _chunk_text(reply):
                 yield {"type": "token", "text": piece}
             yield self._done_event(reply, tool_calls, routed=match.rule_id)
             return
         yield from self._stream_answer(
-            self._build_final_answer_messages(user_text, observations), stream_fn, tool_calls
+            self._build_final_answer_messages(user_text, observations),
+            stream_fn,
+            tool_calls,
+            routed=match.rule_id,
         )
 
     def chat(self, user_text: str) -> TurnResult:
@@ -645,13 +689,9 @@ class ConversationalAgent:
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
-        imperative = self._imperative_requested()
-        if match is not None and (
-            match.rule_id != "shortlist_semantic_goal" or imperative
-        ):
-            return self._chat_routed(user_text, match)
-
-        if imperative:
+        if self._imperative_requested():
+            if match is not None:
+                return self._chat_routed(user_text, match)
             self.last_backend = "imperative"
             return self._chat_imperative(user_text)
 
@@ -736,14 +776,10 @@ class ConversationalAgent:
         self.memory.add_user(user_text)
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
-        imperative = self._imperative_requested()
-        if match is not None and (
-            match.rule_id != "shortlist_semantic_goal" or imperative
-        ):
-            yield from self._stream_chat_routed(user_text, match, stream_fn=stream_fn)
-            return
-
-        if imperative:
+        if self._imperative_requested():
+            if match is not None:
+                yield from self._stream_chat_routed(user_text, match, stream_fn=stream_fn)
+                return
             self.last_backend = "imperative"
             yield from self._stream_chat_imperative(user_text, stream_fn=stream_fn)
             return
@@ -1051,7 +1087,7 @@ class ConversationalAgent:
         """Skip weak final-answer models for film grade tools (they invent styles from history)."""
         if not tool_calls:
             return None
-        if any(tc.get("tool") not in _FILM_GRADE_TOOLS for tc in tool_calls):
+        if any(tc.get("tool") not in FILM_GRADE_TOOLS for tc in tool_calls):
             return None
         for tc in reversed(tool_calls):
             meta = tc.get("metadata") or {}
@@ -1084,7 +1120,8 @@ class ConversationalAgent:
         """Resolve ``{ref_N}``, dual-insurance groundedness, guardrails, commit memory.
 
         Order: placeholder resolve → invented-file gate → output guardrails.
-        Failures discard free text and use :func:`grounding_failure_template`.
+        Mixed invented cites strip the unknown names; all-unknown falls back to
+        :func:`grounding_failure_template`.
         """
         tool_calls = self._turn_tool_calls()
         raw_model = str(reply or "")
@@ -1113,7 +1150,7 @@ class ConversationalAgent:
                 "template" if verdict.triggered else "none"
             )
             if verdict.triggered:
-                reply = grounded  # always the deterministic template after P3
+                reply = grounded
                 self._emit(
                     build_grounding_event(
                         reason=verdict.reason or "invented_file",

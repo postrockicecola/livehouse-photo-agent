@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 import tempfile
@@ -68,6 +69,9 @@ def _collect_files(tool_calls: list[dict[str, Any]]) -> list[str]:
 
 
 def _route_id(agent: ConversationalAgent) -> Optional[str]:
+    trace = getattr(agent, "last_trace", None) or {}
+    if isinstance(trace, dict) and trace.get("rule_id"):
+        return str(trace["rule_id"])
     backend = str(getattr(agent, "last_backend", "") or "")
     if backend.startswith("routed:"):
         return backend.split(":", 1)[1]
@@ -76,6 +80,8 @@ def _route_id(agent: ConversationalAgent) -> Optional[str]:
 
 def run_case(case: dict[str, Any], base_dir: Path, prefs: dict[str, str]) -> dict[str, Any]:
     t0 = time.monotonic()
+    os.environ["LIVEHOUSE_CURATION_JOB_BACKEND"] = "defer"
+    os.environ["LIVEHOUSE_AGENT_DB"] = str(base_dir / "agent_store.db")
     reg = gallery_registry(str(base_dir))
     artifact_dir = base_dir / "_artifacts"
     artifact_dir.mkdir(parents=True, exist_ok=True)

@@ -75,17 +75,16 @@ def test_resolve_ref_placeholders_oob_no_crash() -> None:
     assert text == raw  # unchanged on failure — caller applies template
 
 
-def test_ground_reply_uses_template_not_strip() -> None:
+def test_ground_reply_strips_unknown_keeps_grounded_prose() -> None:
     text, v = ground_reply(
         "推荐 fake_hallucinated_99.jpg 以及 drum_01.jpg，节奏不错。",
         tool_calls=[{"metadata": {"files": ["drum_01.jpg"]}}],
     )
     assert v.triggered
-    assert v.rewrite_mode == "template"
+    assert v.rewrite_mode == "strip"
     assert "fake_hallucinated_99.jpg" not in text
-    assert "节奏不错" not in text  # free text discarded — no surgical strip
+    assert "节奏不错" in text
     assert "drum_01.jpg" in text
-    assert text == grounding_failure_template(["drum_01.jpg"])
 
 
 def test_ground_reply_empty_tool_result_blocks_invented_files() -> None:
@@ -104,7 +103,19 @@ def test_ground_reply_skips_without_signal() -> None:
     assert text == "我可以帮你搜索和初选。"
 
 
-def test_rewrite_always_template() -> None:
+def test_rewrite_mixed_cites_strips_unknown() -> None:
+    out, mode = rewrite_ungrounded_reply(
+        "推荐 x.jpg 和 a.jpg，构图干净。",
+        {"b.jpg", "a.jpg"},
+        ["x.jpg"],
+    )
+    assert mode == "strip"
+    assert "x.jpg" not in out
+    assert "a.jpg" in out
+    assert "构图干净" in out
+
+
+def test_rewrite_all_unknown_uses_template() -> None:
     out, mode = rewrite_ungrounded_reply("看 x.jpg", {"b.jpg", "a.jpg"}, ["x.jpg"])
     assert mode == "template"
     assert "x.jpg" not in out
@@ -234,8 +245,8 @@ def test_agent_finalize_invented_file_template_and_event() -> None:
     )
     res = agent.chat("找鼓手")
     assert "fake_hallucinated_99.jpg" not in res.reply
-    assert "节奏不错" not in res.reply
-    assert res.reply == grounding_failure_template(["drum_01.jpg"])
+    assert "drum_01.jpg" in res.reply
+    assert "节奏不错" in res.reply
     hits = [e for e in res.events if e.get("type") == "grounding_violation"]
     assert hits
     ev = hits[0]

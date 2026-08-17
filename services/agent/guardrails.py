@@ -47,6 +47,11 @@ _INJECTION_PATTERNS: list[tuple[str, Pattern[str]]] = [
     ("role_hijack", re.compile(r"\byou\s+are\s+now\b|\bact\s+as\s+(?:a\s+)?(?:dan|developer\s+mode)\b", re.I)),
     ("exfiltrate", re.compile(r"\b(?:send|post|exfiltrate|leak)\b.{0,30}\b(?:api[_\s-]?key|password|secret|token)\b", re.I)),
     ("forget", re.compile(r"\bforget\s+(?:everything|all|your\s+instructions)\b", re.I)),
+    ("ignore_instructions_zh", re.compile(r"忽略.{0,8}(?:指令|指示|规则)")),
+    ("disregard_zh", re.compile(r"不要遵守|无视(?:系统)?(?:指令|提示词?)")),
+    ("override_system_zh", re.compile(r"(?:泄露|展示|打印|重复).{0,16}(?:系统提示|system\s*prompt|隐藏指令)")),
+    ("role_hijack_zh", re.compile(r"你现在是(?:一个)?(?:无限制|DAN)|扮演(?:一个)?(?:无限制|DAN)")),
+    ("forget_zh", re.compile(r"忘掉你的(?:所有)?(?:指令|规则|设定)")),
 ]
 
 # Default secret-ish patterns blocked from *output* (defense in depth).

@@ -61,6 +61,11 @@ _RESIDUE_NOISE_RE = re.compile(
     r"但是|不过|但|多给|多|一些|一下|看看|适合|发|的|张|十|几|最)",
     re.IGNORECASE,
 )
+# Long-running delivery night — skip the in-turn search+select loop.
+_ASYNC_DELIVER_RE = re.compile(
+    r"(这场交|整场交片|交片给(?:客户|甲方)|异步交片|后台交片|这场.{0,12}交片)",
+    re.IGNORECASE,
+)
 # Per-photo film recommend (look at analysis) — before keyword vibe apply.
 _FILM_RECOMMEND_RE = re.compile(
     r"(最适合这张|最合适这张|适合这张.{0,16}(?:胶片|风格)|"
@@ -244,6 +249,25 @@ def route_gallery_intent(user_text: str) -> Optional[RouteMatch]:
         )
 
     limit = _extract_limit(text, defaults.SHORTLIST_DEFAULT_LIMIT)
+
+    async_m = _positive_match(text, _ASYNC_DELIVER_RE)
+    if async_m is not None:
+        job_limit = _extract_limit(text, 30)
+        args: dict[str, Any] = {"user_text": text, "limit": job_limit}
+        residue = semantic_residue(text)
+        residue = re.sub(
+            r"(这场交|整场|给客户|给甲方|后台|异步|偏)",
+            " ",
+            residue,
+        )
+        residue = " ".join(residue.split())
+        if residue:
+            args["query"] = residue
+        return RouteMatch(
+            rule_id="async_curation_job",
+            calls=[RoutedCall("submit_curation_job", args)],
+            select_after_search=False,
+        )
 
     semantic_route = semantic_selection_route(text)
     if semantic_route is not None:

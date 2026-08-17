@@ -43,6 +43,57 @@ def test_tension_xiaohongshu_goal_compiles_to_search_route() -> None:
     ]
 
 
+def test_backlight_drummer_becomes_structured_goal() -> None:
+    goal = plan_selection_goal("选出8张逆光的鼓手")
+    assert goal is not None
+    assert goal.subject == "鼓手"
+    assert goal.style == "backlight"
+    assert goal.count == 8
+    assert goal.platform is None
+
+    match = route_gallery_intent("选出8张逆光的鼓手")
+    assert match is not None
+    assert match.rule_id == "shortlist_semantic_goal"
+    assert match.select_after_search is True
+    args = match.calls[0].args
+    assert args["query"] == "鼓手"
+    assert args["sort_by"] == "light_color_character"
+    assert args["selection_goal"]["style"] == "backlight"
+
+
+def test_solitude_select_does_not_require_platform() -> None:
+    goal = plan_selection_goal("帮我选10张有孤独感的")
+    assert goal is not None
+    assert goal.style == "solitude"
+    assert goal.subject is None
+    match = route_gallery_intent("帮我选10张有孤独感的")
+    assert match is not None
+    assert match.rule_id == "shortlist_semantic_goal"
+    assert match.calls[0].args["sort_by"] == "atmosphere_impact"
+
+
+def test_cinematic_subject_compiles() -> None:
+    match = route_gallery_intent("选出10张电影感的鼓手")
+    assert match is not None
+    assert match.rule_id == "shortlist_semantic_goal"
+    assert match.calls[0].args["query"] == "鼓手"
+    assert match.calls[0].args["sort_by"] == "composition_framing"
+
+
+def test_new_styles_do_not_steal_recipe_or_subject_only_routes() -> None:
+    social = route_gallery_intent("帮我挑选10张适合发朋友圈的")
+    assert social is not None
+    assert social.rule_id == "shortlist_social"
+    energy = route_gallery_intent("帮我选出最炸的10张")
+    assert energy is not None
+    assert energy.rule_id == "shortlist_energy"
+    guitar = route_gallery_intent("找出吉他手弹琴的10张")
+    assert guitar is not None
+    assert guitar.rule_id == "shortlist_select"
+    assert guitar.calls[0].args.get("query") == "吉他手弹琴"
+    assert plan_selection_goal("找出吉他手弹琴的10张") is None
+
+
 def test_weighted_tension_ranking_uses_all_aesthetic_axes() -> None:
     peak_only = {
         "file": "peak.jpg",

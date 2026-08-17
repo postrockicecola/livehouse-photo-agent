@@ -80,6 +80,9 @@ def test_registry_has_core_skills(tmp_path: Path) -> None:
         "apply_film_vibe",
         "export_selected",
         "mark_score_gap",
+        "submit_curation_job",
+        "poll_curation_job",
+        "cancel_curation_job",
     } <= names
 
 

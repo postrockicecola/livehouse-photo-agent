@@ -11,6 +11,7 @@ Task names remain ``tasks.<name>`` for broker/beat compatibility.
 """
 from __future__ import annotations
 
+from . import curation as _curation  # noqa: F401
 from . import export as _export  # noqa: F401
 from . import film_prewarm as _film_prewarm  # noqa: F401
 from . import ingest as _ingest  # noqa: F401

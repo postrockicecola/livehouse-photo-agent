@@ -52,3 +52,10 @@
 {"schema_version": "agent_router_paraphrase.v1", "id": "st_neg_0", "utterance": "不要按分数排序，我想看原始顺序", "expect_rule": null, "rule_family": "sort_overall", "polarity": "negative"}
 {"schema_version": "agent_router_paraphrase.v1", "id": "cmp_pos_0", "utterance": "去重之后选出20张", "expect_rule": "dedupe_burst", "rule_family": "compound", "polarity": "positive", "expect_select_after": true}
 {"schema_version": "agent_router_paraphrase.v1", "id": "cmp_pos_1", "utterance": "剔糊之后交片", "expect_rule": "exclude_low_quality", "rule_family": "compound", "polarity": "positive", "expect_select_after": true}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_pos_0", "utterance": "这场交30张给客户", "expect_rule": "async_curation_job", "rule_family": "async_curation_job", "polarity": "positive", "expect_select_after": false, "expect_limit": 30}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_pos_1", "utterance": "整场交片给甲方", "expect_rule": "async_curation_job", "rule_family": "async_curation_job", "polarity": "positive", "expect_select_after": false}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_pos_2", "utterance": "交片给客户，偏鼓手", "expect_rule": "async_curation_job", "rule_family": "async_curation_job", "polarity": "positive", "expect_select_after": false}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_pos_3", "utterance": "这场交片30张", "expect_rule": "async_curation_job", "rule_family": "async_curation_job", "polarity": "positive", "expect_select_after": false, "expect_limit": 30}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_pos_4", "utterance": "后台交片20张", "expect_rule": "async_curation_job", "rule_family": "async_curation_job", "polarity": "positive", "expect_select_after": false, "expect_limit": 20}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_neg_0", "utterance": "不要这场交片给客户", "expect_rule": null, "rule_family": "async_curation_job", "polarity": "negative"}
+{"schema_version": "agent_router_paraphrase.v1", "id": "async_neg_1", "utterance": "帮我选出10张交片", "expect_rule": "shortlist_deliverable", "rule_family": "async_curation_job", "polarity": "negative", "expect_select_after": true}

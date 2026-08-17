@@ -23,6 +23,11 @@ from services.agent.skills.gallery_common import (
     _text_blob,
     load_query_synonyms,
 )
+from services.agent.skills.gallery_curation_job import (
+    CancelCurationJobSkill,
+    PollCurationJobSkill,
+    SubmitCurationJobSkill,
+)
 from services.agent.skills.gallery_export import ExportSelectedSkill
 from services.agent.skills.gallery_film import ApplyFilmVibeSkill, RecommendFilmForPhotoSkill
 from services.agent.skills.gallery_search import (
@@ -36,13 +41,16 @@ from services.agent.skills.gallery_search import (
 __all__ = [
     "ApplyFilmVibeSkill",
     "ArchiveSearchSkill",
+    "CancelCurationJobSkill",
     "ExplainPhotoSkill",
     "ExportSelectedSkill",
     "GallerySearchSkill",
     "GallerySelectSkill",
     "GalleryStatsSkill",
     "MarkScoreGapSkill",
+    "PollCurationJobSkill",
     "RecommendFilmForPhotoSkill",
+    "SubmitCurationJobSkill",
     "_QUERY_SYNONYMS",
     "_expand_query_terms",
     "_is_boilerplate_reason",
@@ -70,4 +78,7 @@ def gallery_registry(base_dir: str) -> SkillRegistry:
     reg.register(ApplyFilmVibeSkill(base_dir))
     reg.register(ExportSelectedSkill(base_dir))
     reg.register(MarkScoreGapSkill(base_dir))
+    reg.register(SubmitCurationJobSkill(base_dir))
+    reg.register(PollCurationJobSkill(base_dir))
+    reg.register(CancelCurationJobSkill(base_dir))
     return reg

@@ -4,9 +4,9 @@ Primary contract (structural):
   1. Final-answer prompts tell the model to cite only ``{ref_0}``, ``{ref_1}``, …
   2. :func:`resolve_ref_placeholders` swaps those tokens for real basenames from
      tool ``metadata.files`` / working-memory ``last_files``.
-  3. :func:`ground_reply` is a dual-insurance gate: invented bare filenames (or
-     residual failures after ref resolve) discard free text and use a deterministic
-     template — no surgical "strip" rewrites that leave broken prose.
+  3. :func:`ground_reply` is a dual-insurance gate: mixed invented cites strip
+     the unknown names and keep grounded prose; all-unknown or empty leftover
+     text uses a deterministic template.
 
 Event payloads use the same shape as guardrails (``type`` / ``kind`` / ``triggered``
 / ``matches`` / ``detail``) so review-queue export stays compatible.
@@ -42,6 +42,7 @@ _FILE_BEARING_TOOLS = frozenset(
         "export_selected",
         "recommend_film_for_photo",
         "apply_film_vibe",
+        "poll_curation_job",
     }
 )
 
@@ -52,7 +53,7 @@ class GroundingVerdict:
     cited: list[str] = field(default_factory=list)
     unknown: list[str] = field(default_factory=list)
     allowed: list[str] = field(default_factory=list)
-    rewrite_mode: str = "none"  # none | template
+    rewrite_mode: str = "none"  # none | strip | template
     reason: str = ""  # invented_file | oob_ref | ""
 
     @property
@@ -247,18 +248,33 @@ def grounding_failure_template(files: Iterable[str] | None = None) -> str:
     return _GROUNDING_FAILURE_EMPTY
 
 
+def _strip_unknown_mentions(reply: str, unknown: list[str]) -> str:
+    """Drop invented basenames and collapse leftover separators."""
+    out = str(reply or "")
+    for name in sorted({str(n) for n in unknown if str(n).strip()}, key=len, reverse=True):
+        out = re.sub(re.escape(name), "", out, flags=re.IGNORECASE)
+    out = re.sub(r"(?:、|,|，|和|以及)\s*(?:、|,|，|和|以及)", "、", out)
+    out = re.sub(r"(?:推荐|看看)\s*[、,，]\s*", "推荐 ", out)
+    out = re.sub(r"\s{2,}", " ", out)
+    return out.strip(" 、,，")
+
+
 def rewrite_ungrounded_reply(
     reply: str,
     allowed: set[str],
     unknown: list[str],
 ) -> tuple[str, str]:
-    """Return ``(template_text, \"template\")``.
+    """Keep grounded prose when possible; fall back to the deterministic template.
 
-    Surgical strip was removed: invented cites discard free text entirely.
-    ``reply`` / ``unknown`` are accepted for API compatibility with older callers.
+    Mixed cites (real + invented) strip the unknown names. All-unknown or empty
+    leftover text still uses :func:`grounding_failure_template`.
     """
-    _ = (reply, unknown)
-    return grounding_failure_template(allowed), "template"
+    allowed_norm = {normalize_file_key(a) for a in allowed if normalize_file_key(a)}
+    stripped = _strip_unknown_mentions(reply, unknown)
+    leftover = [c for c in extract_file_mentions(stripped) if c not in allowed_norm]
+    if leftover or len(stripped) < 8:
+        return grounding_failure_template(allowed), "template"
+    return stripped, "strip"
 
 
 def ground_reply(
@@ -294,8 +310,9 @@ def ground_reply(
     rewritten, mode = rewrite_ungrounded_reply(reply, allowed, verdict.unknown)
     verdict.rewrite_mode = mode
     verdict.reason = verdict.reason or "invented_file"
-    # Prefer display order from ref_files for the template list.
-    return grounding_failure_template(ref_files or sorted(allowed)), verdict
+    if mode == "template":
+        return grounding_failure_template(ref_files or sorted(allowed)), verdict
+    return rewritten, verdict
 
 
 def build_grounding_event(

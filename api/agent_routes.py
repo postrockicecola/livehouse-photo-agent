@@ -27,7 +27,7 @@ from services.agent.conversation import ConversationMemory
 from services.agent.guardrails import GuardrailEvent, Guardrails
 from services.agent.runner import AgentRunner, AgentSession, RunnerConfig
 from services.agent.skills import agent_workspace_root, safe_session_id
-from services.agent.skills.artifacts import sanitize_artifact_name
+from services.agent.skills.artifacts import WriteArtifactSkill, sanitize_artifact_name
 from services.agent.skills.experience import register_experience_skills
 from services.agent.skills.gallery import gallery_registry
 from services.agent.skills.knowledge_search import KnowledgeSearchSkill
@@ -160,8 +160,13 @@ def _system_prompt(registry) -> str:
 
 def _build_registry(mode: str, session_id: str, base_dir: str, *, owner: str):
     """Return ``(registry, system_prompt)`` for the gallery copilot."""
-    _ = (mode, session_id)  # gallery-only today; mode kept for API compatibility
+    _ = mode  # gallery-only today; mode kept for API compatibility
     reg = gallery_registry(base_dir)
+    sid = safe_session_id(session_id)
+    artifact_dir = os.path.join(agent_workspace_root(), sid)
+    reg.register(
+        WriteArtifactSkill(artifact_dir, url_prefix=f"/api/agent/artifacts/{sid}")
+    )
     knowledge_dir = (
         os.environ.get("LIVEHOUSE_KNOWLEDGE_DIR")
         or str(Path(__file__).resolve().parents[1] / "data" / "knowledge")
@@ -203,10 +208,16 @@ def _load_prefs(owner: str) -> dict[str, str]:
         conn.close()
 
 
-def _turn_context_from_request(req: ChatRequest, *, base_dir: str = "") -> dict[str, Any]:
+def _turn_context_from_request(
+    req: ChatRequest, *, base_dir: str = "", owner: str = ""
+) -> dict[str, Any]:
     ctx: dict[str, Any] = {}
     if base_dir:
         ctx["base_dir"] = base_dir
+    if owner:
+        ctx["owner"] = owner
+    if req.session_id:
+        ctx["session_id"] = req.session_id
     focus = (req.focus_file or "").strip()
     if focus:
         ctx["focus_file"] = focus
@@ -250,7 +261,7 @@ def _augment_system_prompt(
 
 def _build_memory(system_prompt: str, history: list[dict[str, Any]]) -> ConversationMemory:
     """Rebuild short-term memory from persisted messages (budget trimming still applies)."""
-    mem = ConversationMemory(system_prompt=system_prompt, max_tokens=3000)
+    mem = ConversationMemory(system_prompt=system_prompt, max_tokens=8000)
     for m in history:
         role = m.get("role")
         content = m.get("content") or ""
@@ -424,7 +435,7 @@ def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
 
     # Load history + working memory first so last_files can be injected into the prompt.
     conv_id, memory, working = _load_conversation(owner, req, base_system)
-    turn_context = _turn_context_from_request(req, base_dir=base_dir)
+    turn_context = _turn_context_from_request(req, base_dir=base_dir, owner=owner)
     system_prompt = _augment_system_prompt(base_system, owner, working, turn_context)
     memory.system_prompt = system_prompt
     stream_fn = _build_stream_fn(base_dir)
@@ -493,7 +504,7 @@ def agent_chat(req: ChatRequest) -> ChatResponse:
         return ChatResponse(reply="", base_dir=base_dir, error=err)
 
     conv_id, memory, working = _load_conversation(owner, req, base_system)
-    turn_context = _turn_context_from_request(req, base_dir=base_dir)
+    turn_context = _turn_context_from_request(req, base_dir=base_dir, owner=owner)
     system_prompt = _augment_system_prompt(base_system, owner, working, turn_context)
     memory.system_prompt = system_prompt
     events: list[GuardrailEvent] = []

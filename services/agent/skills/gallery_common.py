@@ -62,6 +62,8 @@ _SORT_KEYS = (
     "deliverable_subject",
     "atmosphere_impact",
     "moment_peak",
+    "light_color_character",
+    "composition_framing",
 )
 _RANKING_WEIGHT_KEYS = frozenset(
     (*_SORT_KEYS, "light_color_character", "composition_framing")

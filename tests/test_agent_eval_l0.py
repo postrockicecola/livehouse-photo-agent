@@ -48,6 +48,7 @@ def test_load_router_paraphrases_coverage() -> None:
         "dedupe_burst",
         "exclude_low_quality",
         "sort_overall",
+        "async_curation_job",
     ):
         pols = families.get(family) or []
         assert pols.count("positive") >= 5, family

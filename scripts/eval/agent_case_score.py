@@ -24,7 +24,9 @@ def collect_files(tool_calls: list[dict[str, Any]]) -> list[str]:
     return out
 
 
-def route_id_from_backend(backend: str) -> Optional[str]:
+def route_id_from_backend(backend: str, rule_id: Optional[str] = None) -> Optional[str]:
+    if rule_id:
+        return str(rule_id)
     b = str(backend or "")
     if b.startswith("routed:"):
         return b.split(":", 1)[1]
@@ -42,6 +44,7 @@ def score_case(
     elapsed_ms: int,
     events: list[dict[str, Any]] | None = None,
     live: bool = False,
+    rule_id: Optional[str] = None,
 ) -> dict[str, Any]:
     """Score one turn against ``case['expect']``.
 
@@ -51,7 +54,7 @@ def score_case(
     tools = [str(tc.get("tool") or "") for tc in tool_calls]
     files = collect_files(tool_calls)
     exp = case.get("expect") or {}
-    got_route = route_id_from_backend(backend)
+    got_route = route_id_from_backend(backend, rule_id)
     reasons: list[str] = []
 
     route_ok = True

@@ -9,30 +9,77 @@ from services.agent import gallery_search_defaults as defaults
 
 _SELECT_RE = re.compile(r"(选出|挑选|筛选|帮我(?:选|挑|找)|给我|找出|初选)")
 _COUNT_RE = re.compile(r"(\d{1,3})\s*张")
-_TENSION_RE = re.compile(r"(张力|戏剧性|冲击力)")
 _XIAOHONGSHU_RE = re.compile(r"(小红书|小红薯|xhs|rednote)", re.IGNORECASE)
 
+# Scene recipes (朋友圈 / 最炸 / 高潮 / 交片) stay in intent_router.
+# Planner only owns styles that those recipes do not already claim.
 _SUBJECT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("吉他手", re.compile(r"(吉他手|吉他(?:演奏|solo|手部))", re.IGNORECASE)),
     ("贝斯手", re.compile(r"(贝斯手|bass\s*player)", re.IGNORECASE)),
     ("鼓手", re.compile(r"(鼓手|drummer)", re.IGNORECASE)),
     ("主唱", re.compile(r"(主唱|歌手|vocalist|singer)", re.IGNORECASE)),
+    ("萨克斯", re.compile(r"(萨克斯|sax(?:ophone)?)", re.IGNORECASE)),
+    ("键盘手", re.compile(r"(键盘手|键盘|keyboard)", re.IGNORECASE)),
     ("观众", re.compile(r"(观众|人群|crowd)", re.IGNORECASE)),
+    ("全景", re.compile(r"(舞台全景|全景舞台|全景)", re.IGNORECASE)),
+    ("前排", re.compile(r"(前排|front\s*row)", re.IGNORECASE)),
 )
 
-_TENSION_WEIGHTS: dict[str, float] = {
-    "moment_peak": 0.40,
-    "atmosphere_impact": 0.30,
-    "light_color_character": 0.20,
-    "composition_framing": 0.10,
+_STYLE_SPECS: dict[str, dict[str, Any]] = {
+    "tension": {
+        "pattern": re.compile(r"(张力|戏剧性|冲击力)"),
+        "sort_by": "moment_peak",
+        "weights": {
+            "moment_peak": 0.40,
+            "atmosphere_impact": 0.30,
+            "light_color_character": 0.20,
+            "composition_framing": 0.10,
+        },
+        "cues": (
+            "dynamic_gesture",
+            "expression_peak",
+            "dramatic_lighting",
+            "strong_composition",
+        ),
+        "rationale": "张力综合排序：优先动态/表情峰值、现场感染力、戏剧性光影与强构图",
+    },
+    "backlight": {
+        "pattern": re.compile(r"(逆光|轮廓光|backlight)", re.IGNORECASE),
+        "sort_by": "light_color_character",
+        "weights": {
+            "light_color_character": 0.50,
+            "composition_framing": 0.30,
+            "moment_peak": 0.20,
+        },
+        "cues": ("rim_light", "silhouette", "dramatic_lighting"),
+        "rationale": "逆光/轮廓光优先：按光色性格排序，保留剪影与轮廓",
+    },
+    "solitude": {
+        "pattern": re.compile(r"(孤独感|孤独|宁静忧郁|忧郁|lonely)", re.IGNORECASE),
+        "sort_by": "atmosphere_impact",
+        "weights": {
+            "atmosphere_impact": 0.50,
+            "composition_framing": 0.30,
+            "light_color_character": 0.20,
+        },
+        "cues": ("empty_stage", "sparse_frame", "quiet_mood"),
+        "rationale": "孤独/宁静氛围优先：按现场气氛排序，偏向留白与疏离",
+    },
+    "cinematic": {
+        "pattern": re.compile(r"(电影感|cinematic)", re.IGNORECASE),
+        "sort_by": "composition_framing",
+        "weights": {
+            "composition_framing": 0.40,
+            "light_color_character": 0.35,
+            "moment_peak": 0.25,
+        },
+        "cues": ("strong_composition", "dramatic_lighting", "color_grade"),
+        "rationale": "电影感优先：强构图与光色，再看瞬间",
+    },
 }
 
-_TENSION_CUES = (
-    "dynamic_gesture",
-    "expression_peak",
-    "dramatic_lighting",
-    "strong_composition",
-)
+# First listed style wins when several cues appear.
+_STYLE_ORDER = ("tension", "backlight", "solitude", "cinematic")
 
 
 @dataclass(frozen=True)
@@ -56,8 +103,20 @@ class SelectionGoal:
         return data
 
 
+def _match_style(text: str) -> Optional[str]:
+    for name in _STYLE_ORDER:
+        if _STYLE_SPECS[name]["pattern"].search(text) is not None:
+            return name
+    return None
+
+
 def plan_selection_goal(user_text: str, *, default_count: int = 10) -> Optional[SelectionGoal]:
-    """Parse supported semantic selection concepts into a stable goal object."""
+    """Parse supported semantic selection concepts into a stable goal object.
+
+    Requires a select verb plus a style or platform. Subject-only asks stay on
+    the recipe / residue router so「找出吉他手弹琴的10张」does not steal
+    ``shortlist_select``.
+    """
     text = (user_text or "").strip()
     if not text or _SELECT_RE.search(text) is None:
         return None
@@ -70,14 +129,15 @@ def plan_selection_goal(user_text: str, *, default_count: int = 10) -> Optional[
         (name for name, pattern in _SUBJECT_PATTERNS if pattern.search(text) is not None),
         None,
     )
-    style = "tension" if _TENSION_RE.search(text) is not None else None
+    style = _match_style(text)
     platform = "xiaohongshu" if _XIAOHONGSHU_RE.search(text) is not None else None
     if style is None and platform is None:
         return None
 
-    axes = tuple(_TENSION_WEIGHTS) if style == "tension" else ()
-    cues = _TENSION_CUES if style == "tension" else ()
-    weights = tuple(_TENSION_WEIGHTS.items()) if style == "tension" else ()
+    spec = _STYLE_SPECS.get(style or "") or {}
+    weights = tuple((spec.get("weights") or {}).items())
+    cues = tuple(spec.get("cues") or ())
+    axes = tuple((spec.get("weights") or {}))
     return SelectionGoal(
         action="select",
         count=count,
@@ -97,14 +157,13 @@ def compile_selection_goal(goal: SelectionGoal) -> dict[str, Any]:
     else:
         args = defaults.shortlist_search_args(limit=goal.count)
 
-    if goal.style == "tension":
+    spec = _STYLE_SPECS.get(goal.style or "") or {}
+    if spec:
         args.update(
             {
-                "sort_by": "moment_peak",
+                "sort_by": spec["sort_by"],
                 "ranking_weights": dict(goal.ranking_weights),
-                "rationale": (
-                    "张力综合排序：优先动态/表情峰值、现场感染力、戏剧性光影与强构图"
-                ),
+                "rationale": spec["rationale"],
             }
         )
     if goal.subject:

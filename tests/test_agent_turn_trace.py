@@ -32,7 +32,7 @@ def test_routed_turn_trace_has_rule_and_rounds(tmp_path) -> None:
         wrap_tool_output=False,
     )
     res = agent.chat("选出10张")
-    assert res.trace.get("backend", "").startswith("routed:")
+    assert res.trace.get("backend") == "langgraph"
     assert res.trace.get("rule_id") == "shortlist_select"
     assert res.trace.get("rounds_used", 0) >= 1
     assert res.trace.get("grounding_ok") is True

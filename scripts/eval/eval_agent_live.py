@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 import tempfile
@@ -169,6 +170,8 @@ def run_live_case(
     prefs: dict[str, str],
     live: bool,
 ) -> dict[str, Any]:
+    os.environ["LIVEHOUSE_CURATION_JOB_BACKEND"] = "defer"
+    os.environ["LIVEHOUSE_AGENT_DB"] = str(base_dir / "agent_store.db")
     reg = gallery_registry(str(base_dir))
     artifact_dir = base_dir / "_artifacts"
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -199,6 +202,7 @@ def run_live_case(
         elapsed_ms=elapsed_ms,
         events=list(result.events),
         live=live,
+        rule_id=str((result.trace or {}).get("rule_id") or "") or None,
     )
 
 
