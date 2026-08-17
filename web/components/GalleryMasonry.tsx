@@ -10,7 +10,11 @@ import {
 } from "react";
 import { gallerySelectionKey } from "@/lib/defaultFilmExport";
 import { buildGalleryPlainImageUrl } from "@/lib/galleryDisplayUrl";
-import { GALLERY_MASONRY_MAX_CLASS, useGalleryMasonryColumnCount } from "@/lib/galleryLayout";
+import {
+  GALLERY_MASONRY_MAX_CLASS,
+  splitIntoNMasonryColumns,
+  useGalleryMasonryColumnCount,
+} from "@/lib/galleryLayout";
 import type { GalleryItem } from "./types";
 
 type Props = {
@@ -56,22 +60,6 @@ function displayOrientation(item: GalleryItem, measured: IntrinsicSize | null): 
   return "unknown";
 }
 
-function masonryWeight(
-  item: GalleryItem,
-  index: number,
-  measuredByKey: ReadonlyMap<string, IntrinsicSize>,
-): number {
-  const key = stableItemKey(item, index);
-  const m = measuredByKey.get(key);
-  if (m && m.w > 0 && m.h > 0) return m.h / m.w;
-  const { w, h } = apiLayoutHint(item);
-  if (w > 0 && h > 0) return h / w;
-  const o = displayOrientation(item, null);
-  if (o === "portrait") return 1.35;
-  if (o === "landscape") return 0.65;
-  return 1;
-}
-
 function sortKeyForTiebreak(item: GalleryItem): string {
   return `${item.file ?? ""}\0${item.path ?? ""}`;
 }
@@ -83,33 +71,6 @@ function sortItemsByScoreDesc(items: GalleryItem[]): GalleryItem[] {
     if (sb !== sa) return sb - sa;
     return sortKeyForTiebreak(a).localeCompare(sortKeyForTiebreak(b), "en");
   });
-}
-
-function splitIntoNMasonryColumns(
-  items: GalleryItem[],
-  n: number,
-  measuredByKey: ReadonlyMap<string, IntrinsicSize>,
-): PlacedItem[][] {
-  if (n <= 1) return [items.map((item, index) => ({ item, index }))];
-
-  const cols: PlacedItem[][] = Array.from({ length: n }, () => []);
-  const heights = new Float64Array(n);
-
-  items.forEach((item, index) => {
-    const weight = masonryWeight(item, index, measuredByKey);
-    let best = 0;
-    let minH = heights[0];
-    for (let i = 1; i < n; i++) {
-      if (heights[i] < minH - 1e-6) {
-        minH = heights[i];
-        best = i;
-      }
-    }
-    cols[best].push({ item, index });
-    heights[best] += weight;
-  });
-
-  return cols;
 }
 
 function captionFromFile(name: string | undefined) {
@@ -172,8 +133,12 @@ export function GalleryMasonry({
   }, []);
 
   const columns = useMemo(
-    () => splitIntoNMasonryColumns(sortedItems, columnCount, measuredByKey),
-    [sortedItems, columnCount, measuredByKey],
+    () =>
+      splitIntoNMasonryColumns(sortedItems, columnCount, (item) => {
+        const { w, h } = apiLayoutHint(item);
+        return { w, h, orientation: item.orientation };
+      }),
+    [sortedItems, columnCount],
   );
 
   const renderTile = (placed: PlacedItem) => {
@@ -209,6 +174,7 @@ export function GalleryMasonry({
           <GalleryTileImage
             item={item}
             apiBase={apiBase}
+            measured={measured}
             onMeasured={(w, h) => recordIntrinsic(item, index, w, h)}
           />
           <div className="gallery-caption-layer pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent px-2.5 pb-2 pt-8 sm:px-3 sm:pb-2.5 sm:pt-10">
@@ -310,10 +276,10 @@ export function GalleryMasonry({
   return (
     <section
       aria-label="作品列表"
-      className={`gallery-shell mx-auto flex w-full ${GALLERY_MASONRY_MAX_CLASS} items-start gap-[6px] px-[clamp(14px,3.5vw,44px)] sm:gap-2`}
+      className={`gallery-shell mx-auto grid w-full min-w-0 ${GALLERY_MASONRY_MAX_CLASS} grid-cols-1 items-start gap-[6px] px-[clamp(14px,3.5vw,44px)] min-[520px]:grid-cols-2 sm:gap-2`}
     >
       {columns.map((col, ci) => (
-        <div key={ci} className="flex min-w-0 flex-1 flex-col gap-[6px] sm:gap-2">
+        <div key={ci} className="flex min-w-0 flex-col gap-[6px] sm:gap-2">
           {col.map(renderTile)}
         </div>
       ))}
@@ -321,13 +287,30 @@ export function GalleryMasonry({
   );
 }
 
+function tileAspectRatio(
+  item: GalleryItem,
+  measured: IntrinsicSize | null,
+): string | undefined {
+  if (measured && measured.w > 0 && measured.h > 0) {
+    return `${measured.w} / ${measured.h}`;
+  }
+  const { w, h } = apiLayoutHint(item);
+  if (w > 0 && h > 0) return `${w} / ${h}`;
+  const o = String(item.orientation ?? "").toLowerCase();
+  if (o === "portrait") return "2 / 3";
+  if (o === "landscape") return "3 / 2";
+  return "3 / 2";
+}
+
 function GalleryTileImage({
   item,
   apiBase,
+  measured,
   onMeasured,
 }: {
   item: GalleryItem;
   apiBase: string;
+  measured: IntrinsicSize | null;
   onMeasured: (w: number, h: number) => void;
 }) {
   const src = useMemo(() => buildGalleryPlainImageUrl(apiBase, item), [apiBase, item]);
@@ -353,12 +336,12 @@ function GalleryTileImage({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0 max-w-full overflow-hidden" style={{ aspectRatio: tileAspectRatio(item, measured) }}>
       <img
         src={src}
         alt=""
         role="presentation"
-        className="block h-auto w-full align-bottom transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover/tile:brightness-[1.04] motion-safe:group-hover/tile:scale-[1.006]"
+        className="block h-full w-full min-w-0 max-w-full object-cover align-bottom transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:group-hover/tile:brightness-[1.04] motion-safe:group-hover/tile:scale-[1.006]"
         loading="lazy"
         decoding="async"
         onLoad={onLoad}
