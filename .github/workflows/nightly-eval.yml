@@ -1,0 +1,26 @@
+name: Nightly eval
+
+on:
+  schedule:
+    - cron: "0 16 * * *"
+  workflow_dispatch:
+
+jobs:
+  nightly:
+    name: Release gate (nightly)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Nightly release gate
+        run: python scripts/eval/run_release_gate.py --mode nightly --skip-agent
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-eval
+          path: reports/eval/release_gate/
+          if-no-files-found: ignore

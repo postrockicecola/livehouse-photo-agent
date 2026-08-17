@@ -1,0 +1,31 @@
+{
+  "schema_version": "selection_eval_freeze.v1",
+  "dataset_version": "selection_v1",
+  "frozen_at": "2026-08-10T01:53:11.956731+00:00",
+  "dataset_sha256": "7e684c0d89dd3601b23b7118c003dbfeb89cd431f14dbbd9a875424345c805b6",
+  "total": 250,
+  "counts": {
+    "technical_hard": 50,
+    "semantic_defect": 50,
+    "ordinary": 100,
+    "highlight": 50
+  },
+  "orientation": {
+    "reviewed": 250,
+    "corrections": 133,
+    "rotation_counts": {
+      "0": 117,
+      "90": 0,
+      "180": 0,
+      "270": 133
+    }
+  },
+  "artifact_sha256": {
+    "source_manifest": "1b44f918c91454db883c699108696ee139b4bac72e2674cfd30f10a602d717af",
+    "labels": "a09b656b0cadc497545da84f9913374da8eb26008992b08fd6e8e1c97619f319",
+    "defects": "ff35f53b84a9a9f649eea183712794a5a284c54715f9c2360577e224f584eaef",
+    "acceptable_pool": "91659f21dbccd40406175432e6a2d19d6e3833bef7e21ce85f1fc18c53c7375a",
+    "orientation_review": "f14a9eb8a414e23b75b71f5a4f3c1f13eaee01ec1112132c33a2f0264447c0d7",
+    "frozen_manifest": "07fe6db64e270fae61e9cecd9d6ceac4c4d7a21756ba3f815bb5389a1ef73961"
+  }
+}

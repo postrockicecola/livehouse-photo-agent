@@ -1,0 +1,949 @@
+{
+  "20260424__DSC03910.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise"
+    ],
+    "overall_score": 30.1
+  },
+  "20260523__DSC08598.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 9.4
+  },
+  "20260523__DSC08836.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 3.0
+  },
+  "20260523__DSC09601.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure"
+    ],
+    "overall_score": 50.9
+  },
+  "20260523__DSC09631.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 12.0
+  },
+  "20260523__DSC09673.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus"
+    ],
+    "overall_score": 41.0
+  },
+  "20260523__DSC09723.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 20.1
+  },
+  "20260523__DSC09765.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 0.0
+  },
+  "20260523__DSC09814.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 9.4
+  },
+  "20260523__DSC09855.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 9.4
+  },
+  "20260523__DSC09883.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 3.0
+  },
+  "20260524Chinesefootball__DSC00656.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "technical_failure"
+    ],
+    "overall_score": 44.1
+  },
+  "20260524Chinesefootball__DSC00810.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 34.2
+  },
+  "20260524yewai__DSC02031.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 9.4
+  },
+  "20260528ruanshizi__DSC02501.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise"
+    ],
+    "overall_score": 35.6
+  },
+  "20260528ruanshizi__DSC02570.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 13.3
+  },
+  "20260528ruanshizi__DSC02898.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 17.8
+  },
+  "20260618__DSC00875.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 12.7
+  },
+  "20260618__DSC00929.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 0.0
+  },
+  "20260618__DSC00989.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 2.7
+  },
+  "20260618__DSC01260.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 4.9
+  },
+  "20260618__DSC01361.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 4.5
+  },
+  "20260618__DSC01627.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 13.2
+  },
+  "20260618__DSC02221.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 26.3
+  },
+  "20260618__DSC09927.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 2.7
+  },
+  "20260619__DSC02663.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 27.0
+  },
+  "20260626__DSC05937.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 0.0
+  },
+  "20260627__DSC08155.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "poor_exposure"
+    ],
+    "overall_score": 40.1
+  },
+  "20260627__DSC08315.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 11.5
+  },
+  "20260708__DSC03620.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "undeliverable_subject"
+    ],
+    "overall_score": 25.3
+  },
+  "20260708__DSC03850.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure"
+    ],
+    "overall_score": 39.1
+  },
+  "20260708__DSC03920.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus"
+    ],
+    "overall_score": 43.8
+  },
+  "20260710__DSC04344.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 14.9
+  },
+  "20260710__DSC04619.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "poor_exposure"
+    ],
+    "overall_score": 44.8
+  },
+  "20260710__DSC04651.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure"
+    ],
+    "overall_score": 35.1
+  },
+  "20260710__DSC04654.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 13.4
+  },
+  "20260710__DSC05112.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 0.0
+  },
+  "20260710__DSC05442.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 21.9
+  },
+  "20260710__DSC05684.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "undeliverable_subject"
+    ],
+    "overall_score": 19.9
+  },
+  "20260711__DSC06014.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 19.2
+  },
+  "20260711__DSC06084.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 2.0
+  },
+  "20260711__DSC06358.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 11.7
+  },
+  "20260711__DSC06408.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure",
+      "excessive_noise",
+      "undeliverable_subject"
+    ],
+    "overall_score": 8.5
+  },
+  "20260711__DSC07578.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus"
+    ],
+    "overall_score": 44.1
+  },
+  "20260711__DSC07695.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus"
+    ],
+    "overall_score": 33.2
+  },
+  "20260711__DSC07939.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus"
+    ],
+    "overall_score": 35.7
+  },
+  "20260711__DSC08041.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus"
+    ],
+    "overall_score": 37.3
+  },
+  "20260729__DSC09412.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "technical_failure"
+    ],
+    "overall_score": 44.9
+  },
+  "20260729__DSC09900.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "excessive_noise"
+    ],
+    "overall_score": 38.2
+  },
+  "20260729__DSC09955.jpg": {
+    "is_defect": true,
+    "sample_type": "technical_hard",
+    "reasons": [
+      "out_of_focus",
+      "poor_exposure"
+    ],
+    "overall_score": 50.7
+  },
+  "20260502__DSC05134.JPG": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 72.5
+  },
+  "20260523__DSC08558.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "severe_composition_failure"
+    ],
+    "overall_score": 55.9
+  },
+  "20260523__DSC09236.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 61.5
+  },
+  "20260523__DSC09335.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "severe_composition_failure"
+    ],
+    "overall_score": 63.0
+  },
+  "20260523__DSC09405.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 70.9
+  },
+  "20260524Chinesefootball__DSC00178.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 61.3
+  },
+  "20260528ruanshizi__DSC02342.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "no_clear_subject"
+    ],
+    "overall_score": 56.1
+  },
+  "20260528ruanshizi__DSC02467.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "no_clear_subject"
+    ],
+    "overall_score": 56.5
+  },
+  "20260528ruanshizi__DSC02649.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "heavy_occlusion"
+    ],
+    "overall_score": 55.6
+  },
+  "20260528ruanshizi__DSC02960.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 40.2
+  },
+  "20260606__DSC05483.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment"
+    ],
+    "overall_score": 68.4
+  },
+  "20260612__DSC06149.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 44.0
+  },
+  "20260613__DSC09273.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 49.8
+  },
+  "20260613__DSC09596.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 66.2
+  },
+  "20260618__DSC00964.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 61.5
+  },
+  "20260619__DSC03145.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "heavy_occlusion"
+    ],
+    "overall_score": 54.3
+  },
+  "20260626__DSC04736.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 63.4
+  },
+  "20260626__DSC04815.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "severe_composition_failure"
+    ],
+    "overall_score": 55.9
+  },
+  "20260626__DSC05263.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "heavy_occlusion"
+    ],
+    "overall_score": 60.6
+  },
+  "20260627__DSC06584.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "missed_moment"
+    ],
+    "overall_score": 52.9
+  },
+  "20260627__DSC06646.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 52.6
+  },
+  "20260627__DSC06671.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 62.2
+  },
+  "20260627__DSC06759.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 61.2
+  },
+  "20260627__DSC06805.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 59.6
+  },
+  "20260627__DSC06835.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion",
+      "no_clear_subject"
+    ],
+    "overall_score": 34.9
+  },
+  "20260627__DSC08177.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 59.6
+  },
+  "20260627__DSC08430.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "no_clear_subject"
+    ],
+    "overall_score": 51.5
+  },
+  "20260627__DSC09237.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 67.7
+  },
+  "20260703__DSC02524.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "no_clear_subject"
+    ],
+    "overall_score": 60.6
+  },
+  "20260703__DSC09601.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "missed_moment"
+    ],
+    "overall_score": 62.1
+  },
+  "20260708__DSC02909.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "heavy_occlusion"
+    ],
+    "overall_score": 53.5
+  },
+  "20260708__DSC02941.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "missed_moment"
+    ],
+    "overall_score": 60.3
+  },
+  "20260708__DSC02968.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "missed_moment"
+    ],
+    "overall_score": 62.7
+  },
+  "20260708__DSC03010.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 54.8
+  },
+  "20260708__DSC03380.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment"
+    ],
+    "overall_score": 54.8
+  },
+  "20260708__DSC03435.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "severe_composition_failure"
+    ],
+    "overall_score": 54.4
+  },
+  "20260708__DSC03691.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "heavy_occlusion"
+    ],
+    "overall_score": 60.6
+  },
+  "20260708__DSC03815.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 48.9
+  },
+  "20260708__DSC03865.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 43.8
+  },
+  "20260708__DSC03925.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 45.7
+  },
+  "20260708__DSC04053.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "heavy_occlusion",
+      "no_clear_subject"
+    ],
+    "overall_score": 42.5
+  },
+  "20260708__DSC04097.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "missed_moment",
+      "severe_composition_failure"
+    ],
+    "overall_score": 47.6
+  },
+  "20260710__DSC04766.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 63.2
+  },
+  "20260710__DSC05198.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "no_clear_subject",
+      "severe_composition_failure",
+      "missed_moment"
+    ],
+    "overall_score": 35.0
+  },
+  "20260710__DSC05224.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "no_clear_subject",
+      "missed_moment"
+    ],
+    "overall_score": 41.1
+  },
+  "20260711__DSC05983.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure"
+    ],
+    "overall_score": 65.5
+  },
+  "20260711__DSC07338.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "heavy_occlusion"
+    ],
+    "overall_score": 66.1
+  },
+  "20260729__DSC09480.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "severe_composition_failure",
+      "missed_moment",
+      "heavy_occlusion"
+    ],
+    "overall_score": 46.8
+  },
+  "20260729__DSC09598.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "missed_moment",
+      "no_clear_subject"
+    ],
+    "overall_score": 44.8
+  },
+  "20260729__DSC09962.jpg": {
+    "is_defect": true,
+    "sample_type": "semantic_defect",
+    "reasons": [
+      "heavy_occlusion",
+      "severe_composition_failure"
+    ],
+    "overall_score": 60.1
+  }
+}

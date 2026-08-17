@@ -1,0 +1,1256 @@
+{
+  "schema_version": "selection_orientation_review.v1",
+  "updated_at": "2026-08-10T01:51:48.593908+00:00",
+  "items": {
+    "20260424__DSC03910.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:26:29.623054+00:00"
+    },
+    "20260523__DSC08598.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:50:01.778778+00:00"
+    },
+    "20260523__DSC09631.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:49:55.131154+00:00"
+    },
+    "20260523__DSC09673.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:05.817872+00:00"
+    },
+    "20260523__DSC09723.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:15.672907+00:00"
+    },
+    "20260523__DSC09765.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:19.679322+00:00"
+    },
+    "20260523__DSC09814.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:21.177926+00:00"
+    },
+    "20260523__DSC09855.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:22.152768+00:00"
+    },
+    "20260523__DSC09883.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:24.747692+00:00"
+    },
+    "20260524Chinesefootball__DSC00656.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:25.843166+00:00"
+    },
+    "20260524Chinesefootball__DSC00810.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:26.641352+00:00"
+    },
+    "20260524yewai__DSC02031.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:31.004366+00:00"
+    },
+    "20260528ruanshizi__DSC02501.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:32.713183+00:00"
+    },
+    "20260528ruanshizi__DSC02570.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:27:34.213291+00:00"
+    },
+    "20260528ruanshizi__DSC02898.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:09.096698+00:00"
+    },
+    "20260618__DSC00875.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:11.963336+00:00"
+    },
+    "20260618__DSC00929.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:14.122340+00:00"
+    },
+    "20260618__DSC00989.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:15.112554+00:00"
+    },
+    "20260618__DSC01260.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:16.295996+00:00"
+    },
+    "20260618__DSC01361.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:18.321585+00:00"
+    },
+    "20260618__DSC01627.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:39.606394+00:00"
+    },
+    "20260618__DSC02221.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:43.852465+00:00"
+    },
+    "20260618__DSC09927.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:47.017093+00:00"
+    },
+    "20260619__DSC02663.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:49.611565+00:00"
+    },
+    "20260626__DSC05937.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:51.786801+00:00"
+    },
+    "20260627__DSC08155.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:53.934348+00:00"
+    },
+    "20260627__DSC08315.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:55.789073+00:00"
+    },
+    "20260708__DSC03620.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:57.291146+00:00"
+    },
+    "20260708__DSC03850.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:35:59.574184+00:00"
+    },
+    "20260708__DSC03920.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:00.636018+00:00"
+    },
+    "20260710__DSC04344.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:01.821269+00:00"
+    },
+    "20260710__DSC04619.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:04.627006+00:00"
+    },
+    "20260710__DSC04651.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:05.842557+00:00"
+    },
+    "20260710__DSC04654.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:07.927713+00:00"
+    },
+    "20260710__DSC05112.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:10.505979+00:00"
+    },
+    "20260710__DSC05442.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:11.721889+00:00"
+    },
+    "20260710__DSC05684.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:13.087285+00:00"
+    },
+    "20260711__DSC06014.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:15.532168+00:00"
+    },
+    "20260711__DSC06084.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:16.901062+00:00"
+    },
+    "20260711__DSC06358.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:18.471200+00:00"
+    },
+    "20260711__DSC06408.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:20.393025+00:00"
+    },
+    "20260711__DSC07578.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:21.801701+00:00"
+    },
+    "20260711__DSC07695.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:23.181514+00:00"
+    },
+    "20260711__DSC07939.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:25.449511+00:00"
+    },
+    "20260711__DSC08041.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:26.767807+00:00"
+    },
+    "20260729__DSC09412.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:41:57.763454+00:00"
+    },
+    "20260729__DSC09900.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:41:59.202981+00:00"
+    },
+    "20260729__DSC09955.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:00.226031+00:00"
+    },
+    "20260502__DSC05134.JPG": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:01.363270+00:00"
+    },
+    "20260523__DSC08558.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:34.750156+00:00"
+    },
+    "20260523__DSC09236.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:37.477697+00:00"
+    },
+    "20260523__DSC09335.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:39.235041+00:00"
+    },
+    "20260523__DSC09405.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:41.482494+00:00"
+    },
+    "20260524Chinesefootball__DSC00178.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:42.848580+00:00"
+    },
+    "20260528ruanshizi__DSC02342.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:44.588662+00:00"
+    },
+    "20260528ruanshizi__DSC02467.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:47.002278+00:00"
+    },
+    "20260528ruanshizi__DSC02649.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:48.112601+00:00"
+    },
+    "20260528ruanshizi__DSC02960.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:49.763377+00:00"
+    },
+    "20260606__DSC05483.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:51.053138+00:00"
+    },
+    "20260612__DSC06149.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:52.522758+00:00"
+    },
+    "20260613__DSC09273.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:53.752974+00:00"
+    },
+    "20260613__DSC09596.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:55.643813+00:00"
+    },
+    "20260618__DSC00964.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:57.654240+00:00"
+    },
+    "20260619__DSC03145.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:36:59.228640+00:00"
+    },
+    "20260626__DSC04736.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:00.382895+00:00"
+    },
+    "20260626__DSC04815.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:02.380734+00:00"
+    },
+    "20260626__DSC05263.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:04.928333+00:00"
+    },
+    "20260627__DSC06584.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:07.027969+00:00"
+    },
+    "20260627__DSC06646.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:08.288665+00:00"
+    },
+    "20260627__DSC06671.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:09.367871+00:00"
+    },
+    "20260627__DSC06759.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:11.318347+00:00"
+    },
+    "20260627__DSC06805.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:12.233438+00:00"
+    },
+    "20260627__DSC06835.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:13.898913+00:00"
+    },
+    "20260627__DSC08177.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:15.008217+00:00"
+    },
+    "20260627__DSC08430.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:18.938367+00:00"
+    },
+    "20260627__DSC09237.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:20.393088+00:00"
+    },
+    "20260703__DSC02524.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:27.280694+00:00"
+    },
+    "20260703__DSC09601.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:31.958391+00:00"
+    },
+    "20260708__DSC02909.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:32.889082+00:00"
+    },
+    "20260708__DSC02941.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:34.673814+00:00"
+    },
+    "20260708__DSC02968.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:35.486167+00:00"
+    },
+    "20260708__DSC03010.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:36.685544+00:00"
+    },
+    "20260708__DSC03380.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:38.830709+00:00"
+    },
+    "20260708__DSC03435.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:41.393051+00:00"
+    },
+    "20260708__DSC03691.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:42.475027+00:00"
+    },
+    "20260708__DSC03815.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:44.486394+00:00"
+    },
+    "20260708__DSC03865.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:46.045520+00:00"
+    },
+    "20260708__DSC03925.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:47.140823+00:00"
+    },
+    "20260708__DSC04053.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:49.297520+00:00"
+    },
+    "20260708__DSC04097.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:50.318933+00:00"
+    },
+    "20260710__DSC04766.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:51.458405+00:00"
+    },
+    "20260710__DSC05198.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:52.583775+00:00"
+    },
+    "20260710__DSC05224.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:37:53.740642+00:00"
+    },
+    "20260711__DSC05983.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:38:01.388952+00:00"
+    },
+    "20260711__DSC07338.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:38:04.208642+00:00"
+    },
+    "20260729__DSC09480.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:38:05.154395+00:00"
+    },
+    "20260729__DSC09598.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:19.483684+00:00"
+    },
+    "20260729__DSC09962.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:21.178558+00:00"
+    },
+    "20260509__DSC05818.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:22.379735+00:00"
+    },
+    "20260509__DSC06514.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:23.457681+00:00"
+    },
+    "20260509__DSC06549.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:25.467816+00:00"
+    },
+    "20260515__DSC06794.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:26.849303+00:00"
+    },
+    "20260515__DSC07090.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:28.845896+00:00"
+    },
+    "20260515__DSC07166.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:30.991153+00:00"
+    },
+    "20260515__DSC07698.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:32.174195+00:00"
+    },
+    "20260521__DSC07818.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:37.018915+00:00"
+    },
+    "20260523__DSC08974.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:41.695441+00:00"
+    },
+    "20260523__DSC08994.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:42.945118+00:00"
+    },
+    "20260524Chinesefootball__DSC00286.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:44.697075+00:00"
+    },
+    "20260521__DSC07926.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:49.109585+00:00"
+    },
+    "20260523__DSC09929.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:50.175473+00:00"
+    },
+    "20260524Chinesefootball__DSC00371.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:51.343372+00:00"
+    },
+    "20260524Chinesefootball__DSC00382.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:52.439127+00:00"
+    },
+    "20260524Chinesefootball__DSC00682.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:55.288251+00:00"
+    },
+    "20260524Chinesefootball__DSC00724.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:57.224861+00:00"
+    },
+    "20260524Chinesefootball__DSC00885.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:58.168099+00:00"
+    },
+    "20260524yewai__DSC01869.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:42:59.083934+00:00"
+    },
+    "20260524yewai__DSC01959.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:01.152524+00:00"
+    },
+    "20260524yewai__DSC01968.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:02.085260+00:00"
+    },
+    "20260528ruanshizi__DSC02363.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:03.164359+00:00"
+    },
+    "20260528ruanshizi__DSC02394.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:05.383992+00:00"
+    },
+    "20260528ruanshizi__DSC02402.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:06.316006+00:00"
+    },
+    "20260528ruanshizi__DSC02672.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:07.168765+00:00"
+    },
+    "20260606__DSC05557.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:08.399996+00:00"
+    },
+    "20260612__DSC06737.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:09.433129+00:00"
+    },
+    "20260612__DSC06932.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:10.602895+00:00"
+    },
+    "20260612__DSC06941.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:12.524155+00:00"
+    },
+    "20260612__DSC07121.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:13.453671+00:00"
+    },
+    "20260613__DSC08167.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:14.399230+00:00"
+    },
+    "20260613__DSC09016.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:16.349205+00:00"
+    },
+    "20260613__DSC09175.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:17.250993+00:00"
+    },
+    "20260613__DSC09189.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:18.374431+00:00"
+    },
+    "20260613__DSC09241.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:20.039282+00:00"
+    },
+    "20260613__DSC09284.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:20.803426+00:00"
+    },
+    "20260613__DSC09476.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:22.843363+00:00"
+    },
+    "20260618__DSC00022.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:24.466099+00:00"
+    },
+    "20260613__DSC09720.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:25.365588+00:00"
+    },
+    "20260618__DSC00491.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:26.461064+00:00"
+    },
+    "20260618__DSC00530.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:28.321414+00:00"
+    },
+    "20260618__DSC00555.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:29.191300+00:00"
+    },
+    "20260618__DSC00597.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:30.301180+00:00"
+    },
+    "20260618__DSC00744.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:32.266875+00:00"
+    },
+    "20260618__DSC00754.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:33.179828+00:00"
+    },
+    "20260619__DSC02484.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:34.184189+00:00"
+    },
+    "20260619__DSC02770.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:36.616721+00:00"
+    },
+    "20260619__DSC02889.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:37.605809+00:00"
+    },
+    "20260619__DSC03045.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:38.759139+00:00"
+    },
+    "20260619__DSC03095.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:41.234697+00:00"
+    },
+    "20260619__DSC03218.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:42.118610+00:00"
+    },
+    "20260619__DSC03236.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:43.261274+00:00"
+    },
+    "20260626__DSC03737.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:44.430040+00:00"
+    },
+    "20260626__DSC03628.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:45.388813+00:00"
+    },
+    "20260619__DSC03314.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:46.302413+00:00"
+    },
+    "20260626__DSC03920.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:48.194694+00:00"
+    },
+    "20260626__DSC04955.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:49.109754+00:00"
+    },
+    "20260626__DSC04968.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:49.966588+00:00"
+    },
+    "20260626__DSC05492.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:52.005132+00:00"
+    },
+    "20260626__DSC05854.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:52.861468+00:00"
+    },
+    "20260626__DSC06056.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:53.821620+00:00"
+    },
+    "20260627__DSC07563.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:55.491654+00:00"
+    },
+    "20260627__DSC06456.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:57.135086+00:00"
+    },
+    "20260627__DSC08127.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:58.215463+00:00"
+    },
+    "20260627__DSC08519.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:43:59.851653+00:00"
+    },
+    "20260627__DSC08722.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:00.764988+00:00"
+    },
+    "20260627__DSC08428.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:01.890077+00:00"
+    },
+    "20260627__DSC08811.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:03.689963+00:00"
+    },
+    "20260627__DSC08834.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:04.696422+00:00"
+    },
+    "20260703__DSC00933.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:05.895520+00:00"
+    },
+    "20260703__DSC01934.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:07.783075+00:00"
+    },
+    "20260703__DSC02197.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:08.941843+00:00"
+    },
+    "20260703__DSC02331.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:09.901863+00:00"
+    },
+    "20260703__DSC02382.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:12.030511+00:00"
+    },
+    "20260703__DSC02508.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:13.481932+00:00"
+    },
+    "20260703__DSC09336.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:14.520138+00:00"
+    },
+    "20260708__DSC02795.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:18.780241+00:00"
+    },
+    "20260703__DSC09433.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:19.980116+00:00"
+    },
+    "20260708__DSC02863.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:20.881100+00:00"
+    },
+    "20260708__DSC03013.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:22.050680+00:00"
+    },
+    "20260708__DSC03554.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:23.131374+00:00"
+    },
+    "20260708__DSC03309.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:25.877130+00:00"
+    },
+    "20260710__DSC04573.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:27.436325+00:00"
+    },
+    "20260710__DSC04274.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:29.595213+00:00"
+    },
+    "20260710__DSC05140.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:30.782361+00:00"
+    },
+    "20260710__DSC05288.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:31.937268+00:00"
+    },
+    "20260710__DSC05343.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:32.867476+00:00"
+    },
+    "20260710__DSC05575.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:34.050766+00:00"
+    },
+    "20260711__DSC06190.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:37.036400+00:00"
+    },
+    "20260711__DSC06054.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:39.285837+00:00"
+    },
+    "20260711__DSC07452.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:40.425724+00:00"
+    },
+    "20260711__DSC07513.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:44.027253+00:00"
+    },
+    "20260711__DSC07766.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:44.913306+00:00"
+    },
+    "20260711__DSC07888.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:45.917680+00:00"
+    },
+    "20260729__DSC09474.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:47.088799+00:00"
+    },
+    "20260729__DSC09701.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:49.275995+00:00"
+    },
+    "20260711__DSC07971.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:50.806140+00:00"
+    },
+    "20260729__DSC09772.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:51.871715+00:00"
+    },
+    "20260729__DSC09812.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:52.785659+00:00"
+    },
+    "20260509__DSC05670.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:54.451289+00:00"
+    },
+    "20260509__DSC05994.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:57.707788+00:00"
+    },
+    "20260509__DSC06098.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:58.607723+00:00"
+    },
+    "20260509__DSC06316.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:44:59.701659+00:00"
+    },
+    "20260515__DSC06743.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:01.966806+00:00"
+    },
+    "20260515__DSC06769.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:03.076473+00:00"
+    },
+    "20260515__DSC07467.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:04.051429+00:00"
+    },
+    "20260515__DSC07532.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:07.891838+00:00"
+    },
+    "20260515__DSC07652.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:08.805953+00:00"
+    },
+    "20260521__DSC07849.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:09.841236+00:00"
+    },
+    "20260521__DSC07885.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:12.031632+00:00"
+    },
+    "20260521__DSC07888.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:12.874004+00:00"
+    },
+    "20260521__DSC07937.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:14.240246+00:00"
+    },
+    "20260521__DSC07984.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:16.201904+00:00"
+    },
+    "20260523__DSC08129.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:17.161201+00:00"
+    },
+    "20260523__DSC08408.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:18.168458+00:00"
+    },
+    "20260523__DSC08804.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:19.951278+00:00"
+    },
+    "20260523__DSC09207.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:21.106890+00:00"
+    },
+    "20260523__DSC09472.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:22.111579+00:00"
+    },
+    "20260524Chinesefootball__DSC00485.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:23.881186+00:00"
+    },
+    "20260524Chinesefootball__DSC00871.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:26.251765+00:00"
+    },
+    "20260524yewai__DSC01673.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:27.196559+00:00"
+    },
+    "20260524yewai__DSC01733.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:28.681930+00:00"
+    },
+    "20260524yewai__DSC02064.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:29.701563+00:00"
+    },
+    "20260606__DSC04974.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:30.708777+00:00"
+    },
+    "20260606__DSC05160.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:31.726508+00:00"
+    },
+    "20260606__DSC05172.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:32.838307+00:00"
+    },
+    "20260606__DSC05307.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:34.532400+00:00"
+    },
+    "20260606__DSC05352.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:36.618427+00:00"
+    },
+    "20260613__DSC07498.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:37.608257+00:00"
+    },
+    "20260613__DSC08469.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:38.597782+00:00"
+    },
+    "20260613__DSC08708.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:40.533210+00:00"
+    },
+    "20260613__DSC08766.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:41.371340+00:00"
+    },
+    "20260613__DSC08910.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:42.333464+00:00"
+    },
+    "20260626__DSC03542.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:43.609105+00:00"
+    },
+    "20260626__DSC03576.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:44.522962+00:00"
+    },
+    "20260626__DSC05742.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:45.496389+00:00"
+    },
+    "20260627__DSC07348.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:48.061856+00:00"
+    },
+    "20260703__DSC02083.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:49.937523+00:00"
+    },
+    "20260710__DSC04189.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:51.316552+00:00"
+    },
+    "20260627__DSC07299.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:53.071806+00:00"
+    },
+    "20260710__DSC04389.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:54.975727+00:00"
+    },
+    "20260710__DSC04489.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:55.953634+00:00"
+    },
+    "20260710__DSC04535.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:57.258585+00:00"
+    },
+    "20260710__DSC04888.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:58.200856+00:00"
+    },
+    "20260729__DSC09375.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:45:59.193718+00:00"
+    },
+    "20260729__DSC09506.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:46:02.131800+00:00"
+    },
+    "20260729__DSC09826.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:46:03.106474+00:00"
+    },
+    "20260729__DSC09852.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:46:03.993142+00:00"
+    },
+    "20260729__DSC09992.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:46:05.343487+00:00"
+    },
+    "20260523__DSC08836.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:49:49.656324+00:00"
+    },
+    "20260523__DSC09601.jpg": {
+      "rotation_degrees": 270,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:49:52.041076+00:00"
+    },
+    "20260524Chinesefootball__DSC00326.jpg": {
+      "rotation_degrees": 0,
+      "reviewed": true,
+      "updated_at": "2026-08-10T01:51:48.593908+00:00"
+    }
+  }
+}

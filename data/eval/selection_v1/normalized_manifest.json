@@ -1,0 +1,1757 @@
+{
+  "schema_version": "selection_normalized_manifest.v1",
+  "dataset_sha256": "7e684c0d89dd3601b23b7118c003dbfeb89cd431f14dbbd9a875424345c805b6",
+  "orientation_policy": "apply EXIF transpose, then rotate clockwise by orientation_correction_degrees",
+  "items": [
+    {
+      "file": "20260424__DSC03910.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260424__DSC03910.jpg",
+      "sha256": "b39dd6002a5f202c68aee979fab2771b4d7b35a4747adf059d8257d0c1991ddd",
+      "source_sha256": "7381f0eeb88f3f59b65c8195e5946b6b61cef6cd8ce87160a254489d371fc159",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC08598.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08598.jpg",
+      "sha256": "2caa70dcaf8253b8007613be57d9aa10a0013fa9a5fcc10eb7a2b4c8735849a0",
+      "source_sha256": "103bb154a8635593154d6f0fc7d7ecc8b31b21d85fdc9997d5a0498c342eab65",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC08836.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08836.jpg",
+      "sha256": "d9b5d79ee258f503d460b7ce419f66eee6d7a8d50a6ab2d0f59850730a14c1b6",
+      "source_sha256": "ec7e28a26260d15e708b8fd5e418bfca65a049cdf96cf1cfb1798e1a31e82e34",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260523__DSC09601.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09601.jpg",
+      "sha256": "242d4828cc3b3e1c502bde99906633f1016083299d0b0f7d68f17133055d118b",
+      "source_sha256": "05d587184a385271d1b769250bf88468c3419001c8e708dbe614432bc8a54aad",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09631.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09631.jpg",
+      "sha256": "104bca3dbb7b5d0bcff2bc3f4870578e049f29e6ac6d1720e8c44889a89d69a8",
+      "source_sha256": "9c429411bf4848de7b9fdbf1fddb5e5e7484f3027f19b9beb1e6e57b802b8903",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09673.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09673.jpg",
+      "sha256": "106ab9564ab317f52c2488c60566050fdaef9a63609ffe8bf594c58bed8add05",
+      "source_sha256": "46ca1269360d84d5bceabadf95df72a6a77bdcad82e547aede38f206e96da6ba",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09723.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09723.jpg",
+      "sha256": "da47ecffcf89bbc7784d09d812f50de47c81d60beef023b037c5a8492acb1477",
+      "source_sha256": "69ab2896e9a0bac54d71cc5fa637ba20d2b024534e56ca34ae3dc412d3deac58",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09765.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09765.jpg",
+      "sha256": "cfb5ed5dbc43bebf1d6fa4f1ffa49a7d316ce1261f582ecb194c38b406ddffda",
+      "source_sha256": "79efe46d936bdd5c3a4c90ca6b9eead4dc764adac4114d6a03b7774484cc9781",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260523__DSC09814.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09814.jpg",
+      "sha256": "227ac14351e1b5ee67c2b11ca880d3078f7ee522a327b57885c328702ebfd9b8",
+      "source_sha256": "9d6bcf59f42fd2a522cfd94338b63d871fa9f092e10fa5e384c85c54e4dd6d4d",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260523__DSC09855.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09855.jpg",
+      "sha256": "cb4d02c15672eebbf5d3675821f321062757fef2a75494bcecea9b6312e523c2",
+      "source_sha256": "98756d75fd0a151704357404a49bfe29ba417c44cbf9b745a1b8af2823a92385",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260523__DSC09883.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09883.jpg",
+      "sha256": "b89df296086385e027c81418a3549e7f92cd53bbdc1aa78e66d12ecc8f41d700",
+      "source_sha256": "ecdef6626e9e6870fecf06da666678b7e66aeb0885a82bc3bd03d927c28190b3",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00656.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00656.jpg",
+      "sha256": "25b37de7b927a954e2917f9b8f9a95107135575aeec89ade55e35accb3490cf4",
+      "source_sha256": "41123d5c2fdd7261ccc6fc408afaa4ac64461a5bd34ba8901b51bff11e8e764b",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00810.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00810.jpg",
+      "sha256": "c44e01fe2463cdc5d85061e5b870dcf52061df08fd22dde76115ff0c51730508",
+      "source_sha256": "380c1311d9b8f1bc3831b8f6af110de0a762869e2ca9673b1f6139557573da13",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524yewai__DSC02031.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC02031.jpg",
+      "sha256": "9344ceab6ec040784d34dad52861ce586f66914c59f846889ee2f1d178ffdf86",
+      "source_sha256": "6bba3d591812ed63b6119f7b63023b1c094835fd3a10b72fda25c062645671d8",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260528ruanshizi__DSC02501.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02501.jpg",
+      "sha256": "35d513390620cab4549dcd54d450854a2b00b9f502099cfdc4a38e78037e8328",
+      "source_sha256": "f14639ca3967a4d3c8ce84a40335c837b8ca9b2f63e2d23f1d3d4490f627a2e2",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02570.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02570.jpg",
+      "sha256": "48e24212bf963bf40616cf8d353a94280a103918c8d4dad65dafd3d2681214be",
+      "source_sha256": "df56bdf21fa9b8f14ef28974acd32f94194c06a3d3f049ad06bf73755c1d8363",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02898.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02898.jpg",
+      "sha256": "6f8a7d6e43e6b0a17fdb49f94cb6272e04ea414c5132713e9f25b551e331d271",
+      "source_sha256": "4ca54be80c457d6588b21f2221ab0b7d7cbd2cec54abf9aa52680cc28e3d0722",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00875.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00875.jpg",
+      "sha256": "434eec39d0b9fcb5aeedd08e60f521c892aabf5c2fb3dbad7d87fa3376e82dda",
+      "source_sha256": "886dcfa33418edc97e15221dd57ba458b9e1e42686c703fa36cffa1387e429cb",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00929.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00929.jpg",
+      "sha256": "cac1aa2d1955c0f039561f22c0944457e4d1a253c1a8b8121471b2167795cc54",
+      "source_sha256": "093e91f08a7cb19bbb85a59e86e5b9dbb498df022eec18a186ea3250ab28716c",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00989.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00989.jpg",
+      "sha256": "6ae4857b9628c519e89a104f9dd890185e00b54defd2e1ded4078ccf30edb2ee",
+      "source_sha256": "3fff7c1e757b7495c675d5d7c9105eb3c763948197a1cd338901c2d65f474fd9",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC01260.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC01260.jpg",
+      "sha256": "9f7171f43b9f2e6373347f26a384fa0fecde0ce4fb2b263f3908eb7a5873d467",
+      "source_sha256": "093e8d7cfa089de617f5496e8391784472ca35ce27301c3d53e43a87af948517",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC01361.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC01361.jpg",
+      "sha256": "a1aaac7c33884168d9fba3ea8efe3e9d39e9e8beaee3a8b3f9d1d5ca8717d303",
+      "source_sha256": "068e582e1acd134344e9307c41e799b5c8b902f5369963af22e0f0940f9f7270",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC01627.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC01627.jpg",
+      "sha256": "d0a72a3358247fb95a4c5a747ae8c8f77ac8dcd538403f0fc48700f2d8fdce4d",
+      "source_sha256": "b6f2c5d9f74314c0bc3961fddc421a026f5665bed60ade19c46b088f15d61e83",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260618__DSC02221.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC02221.jpg",
+      "sha256": "5553874c9c7ca7eb66554dd1de7301dc2666c90f6a07c574bebc5535babd1c49",
+      "source_sha256": "caf64055d687898f952f9a0b27e1c27ba2106f61d1c70dd9d19afa085da52de0",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260618__DSC09927.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC09927.jpg",
+      "sha256": "3fa36b98ecb320d1b72a7c6dbd9d3f4317f2838ae2a7a2ab12f51eec1bde4671",
+      "source_sha256": "485533ff36ba5f4f579ebadab6e5de88e00052c782beb2e236112e669002a57f",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC02663.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC02663.jpg",
+      "sha256": "9ab1cff8c9f1079d72ea2fcf138d213c0556cc8596af7cbd104c7ead4747a09d",
+      "source_sha256": "10504e1e39b98a6fd0db2ef282994ef226f9fe89c91028ecad106f8a496c452d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260626__DSC05937.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC05937.jpg",
+      "sha256": "a0bd7b725a3f382c23a14d57c39277e926f4b6741ae64670a50613228054e5a5",
+      "source_sha256": "8794b4ceca33733550637ca99170dedea57438ba6869a18eb31c48cf38acb1ae",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC08155.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08155.jpg",
+      "sha256": "ef80c6438d43f307efd6329e149413612fe81f423462240b3e0cf77adeaa7bcd",
+      "source_sha256": "9de1527742d7638a24f356ed93a1eb5c315e3ddcd7f7cf87bdefe2be42f894db",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC08315.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08315.jpg",
+      "sha256": "b3604ad2e6f80bed39ca71dce26a850ea106d8d77b9f1a7785fefcf114a6afc6",
+      "source_sha256": "90cf406860ec35a10a7ac9e46d27161329884c616b8cfcc80fc00fe4a5dd42ee",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03620.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03620.jpg",
+      "sha256": "28bdd3743d081b167059986163bd4a84bbb8a4a0d3c9d3490b4bc64358ce7b6a",
+      "source_sha256": "7cf3147b737d9edd9a23cc4c4c1753fcc319a924a2058fd6539860dfc61e5c8f",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03850.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03850.jpg",
+      "sha256": "e6fca6c6f4ea15021f615ce224a85a53425542445838dc019a2a76a85e01bbed",
+      "source_sha256": "5ec641eabcdfa6d5571b13a3fe52fdcb817f8b2fdd0322869a4c48469412de7e",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC03920.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03920.jpg",
+      "sha256": "040881e260fe26995d3a03d2d549e02e8db8ae7d54a3efa6ff9ee4f1a444fe6e",
+      "source_sha256": "533b8252a5a8869e095f52df02673af1a6e5ad1b249916690250d5a0835581f3",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260710__DSC04344.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04344.jpg",
+      "sha256": "893307f681e9805860d341db9b6d718964ea360a8d91367ce00f087813e07eee",
+      "source_sha256": "b258992667845108f69d0aa83772da0db5c044f80af4796a2462500048797431",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04619.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04619.jpg",
+      "sha256": "90d59028d17a0075a14fb9ec70a834412dd78f63265b8677e30301a257f2baa9",
+      "source_sha256": "53023174dc1c53a2c777d5dcc8de2528585ef934e2d0cbac340e3314002b9a4e",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260710__DSC04651.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04651.jpg",
+      "sha256": "4e3fabbd0a4010b7db946e02a33d11b97c4cc6eee28e9647f744fce71d402967",
+      "source_sha256": "70ea0d365fe61c59c6892bad64e304cca1b837437383b3d6c28d138e5f59e4e7",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04654.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04654.jpg",
+      "sha256": "706e87fe5afe421597f4cefe6f39f1952bd79770c27637f055dec3b546fe4306",
+      "source_sha256": "c0ddb147f994261761ee53041c15da791d59e8e33024c802742139ee3459bc4a",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05112.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05112.jpg",
+      "sha256": "96212501ee319316788ebe0c3ba0a9d87475f1063ea3a44e8bdb8d58aa3d5b9b",
+      "source_sha256": "c834e495e2db475e05298aa4b31ac9d140b7a810c4ab5000520078969938165a",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05442.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05442.jpg",
+      "sha256": "f125b9a7e24e9ae37e72868f97126164327d7a821a99fbc55696f20723806a61",
+      "source_sha256": "0247ff4f1b134a0982b5a944daa579520c5eed5b971afc2d68e043e514d09801",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05684.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05684.jpg",
+      "sha256": "f1ee178d4ecd59fbc63e2ceca94680bf5c8faf3aacf873d7670f198a980a2374",
+      "source_sha256": "63d2710c2d654a362ee56155f41f87674ce35333ad819de564fec553b5ff1093",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC06014.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC06014.jpg",
+      "sha256": "350c18a7bc3f8c896b3f47a1afba6727616c471515c1ab345a3e0a57dd0be746",
+      "source_sha256": "3e5dd9a6580ac253df2aa9a6a23c0768f8b86914c79a0773d788117e1eea9125",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC06084.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC06084.jpg",
+      "sha256": "f4cf3f116840a598a40b0646311e2ed0e9fd7e78e84d59cb14f5989f59c7da60",
+      "source_sha256": "c2293eb13570280a0b9d93032e4b36167d8ca2f01ca0d8d2e5a572600518fb35",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC06358.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC06358.jpg",
+      "sha256": "f3c7425f206d4aee88fe2d4e0a1d7ea11e4ddd971c607abb16e4c204b7c33abc",
+      "source_sha256": "7f1117a5929a938cc445509d6b28881ba3d75fdcc40328e05a64c5efa0900739",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC06408.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC06408.jpg",
+      "sha256": "6520e20f70b8b27546b3c530d96c57770efcddf3753cd54c7372d790b8e1002a",
+      "source_sha256": "f03d58537acb5057a426a775baa2307e551bdbaa30afc5b07808177c5895d484",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC07578.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07578.jpg",
+      "sha256": "421bcbe28b5b5863e0bcc9f7b6eb8194d07116ccbcbd224dcbabe93c8c3bbde6",
+      "source_sha256": "561d8000c1717002dc8c9cccc10dbf7cbf352cf57eeb5c4468c649516d0eda1f",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC07695.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07695.jpg",
+      "sha256": "66e8a658ea6732c48acd1a0b99b34531f0ea670b294f4a869eedbe732e947052",
+      "source_sha256": "c09f144d99de3cbc27bb8752a78e006e3ab0c860fed155bb5b9c3f3f136ace91",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC07939.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07939.jpg",
+      "sha256": "f8e1b5331d5c04705b4326e01b0b3c21e04e77d62a078dd1ab9ea9480f5beb57",
+      "source_sha256": "84a9939f639274f9abe53232f8f98654a9dcf6137cc0a092d1ae32e76b8bdaa6",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC08041.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC08041.jpg",
+      "sha256": "721afbfdf200d77c10902c8a6d84dbc25d92469af563c983a493c1687d63bfa0",
+      "source_sha256": "6c944482544efef81b5fdd277ec42eaf5fd418b27e3ace78f1e3c23957aeda51",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260729__DSC09412.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09412.jpg",
+      "sha256": "ac6a67f625c2bff5037be734f907a8c670070b0e9b5799484635aa9728bc6502",
+      "source_sha256": "3dc6094c70209af86df46e4530bfd02a3a93f651d322fa874ead6cfe19d5e417",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09900.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09900.jpg",
+      "sha256": "0bdca8cc7865ac899cc240d7e83f113014db117878b37cc31b436564b39e98f5",
+      "source_sha256": "83be1b3ccc34a633cae2b0f46d7d2c3fcf3c4aa8ab00badd2d412065dd480925",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09955.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09955.jpg",
+      "sha256": "3a3f20695fdfcd59d8795c854ea24c83da060de5b19d21baa9b757da545f181f",
+      "source_sha256": "f52c6ba9583b7adeebb38abb15ecea2fac915604289ae9fb6604d2c70a37bd0d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260502__DSC05134.JPG",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260502__DSC05134.JPG",
+      "sha256": "86832331544acc03cfa7567323f337c66bf866c72f55cda0baffabfb997707d1",
+      "source_sha256": "0a1b11f497729d23ed6854445b3b5f73bd2afbacf1081658a5e19567ac6968b6",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260523__DSC08558.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08558.jpg",
+      "sha256": "2719e47fef452ab451fb4d569d3be1fcad5953c2e8288b684f4d6f46be4d6f04",
+      "source_sha256": "c6e4c06f6d318510fe55746f58be24c1a5826f0763a797c411c44ea477cea9a6",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09236.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09236.jpg",
+      "sha256": "f6e80319b50d0452b742e9c32436dadb7d91dfa3bb89e98ee26cb56c29224529",
+      "source_sha256": "ae9a1c151471ef4b5b5614d87f35415168650fd78df5289ae2917c5c7733c2ce",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09335.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09335.jpg",
+      "sha256": "01eab666613b09fb60918095f62bc4e1cdc19217fa3f0e5abc153968cbb47436",
+      "source_sha256": "50e849d9e9c7fe5e8f630885beecc6c9ebd16b886af8be400985b7b33b3cc20e",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09405.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09405.jpg",
+      "sha256": "e26a8dd67840dfe73b7e721919f8ee821f06791a6f77915258fb34f8d1217ba7",
+      "source_sha256": "bec92e01fc7875a9bef5f9b2fa73435d26b05c05d8b3975cab203b70aae6fac6",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00178.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00178.jpg",
+      "sha256": "459421c73acf5b0afb4aec2a943f3c204f09ba72f3179b3a21baefa42c4a28ce",
+      "source_sha256": "25aafac771f65b17492437a52f38479baf8cb780c2eb62dc1c2b0f08fedeb0c1",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260528ruanshizi__DSC02342.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02342.jpg",
+      "sha256": "8730a777ae184dfe6efc28a4fd775fc2e5a1715520e45e9913e4b741bce19711",
+      "source_sha256": "de47861afaa8921c90725b1d7a60636bfd0896cd07071d145600021780276fd6",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02467.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02467.jpg",
+      "sha256": "4d0988fdb5a42ce2289484f352b4e8eb81fb32996963038c86b4c3da040bded2",
+      "source_sha256": "a0fb5797810463db9791e50d1ca3951a914bd5a9ebdda6b338d189d951337cf5",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260528ruanshizi__DSC02649.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02649.jpg",
+      "sha256": "562794f9f259751ceb4f94b6f35ce2a6d75c2d4b39ccbf6d3af80bdc34eb7faa",
+      "source_sha256": "e1c7a206da719ea1abb542457db6a756e66c4c04868bf01bfbb4dd8d3ab408aa",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02960.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02960.jpg",
+      "sha256": "29bd0513f4c529324e344378540c14d95e8881c6cd920ca5209cb36e37fc91de",
+      "source_sha256": "c4220415f97c7b0e0aeea3ec86ccc3b8753cc222578b5b310abe0bf3e28c9eab",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260606__DSC05483.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05483.jpg",
+      "sha256": "da9d802d504d7e46e0dd32cda28804c13bf57fee476f544ac841c4f573db3315",
+      "source_sha256": "f4b83d8bf38648215647b998579a3ae23b8e40f0772fda6be29af11ee65b0fa8",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260612__DSC06149.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260612__DSC06149.jpg",
+      "sha256": "3f309f7b33e1ae2035665a465eea8c1c8abb7324c24b5e51e98a13bc709dc8f0",
+      "source_sha256": "183b749e21ab192d6307c3a2787abacba063405153e41e82a023a82ed7415658",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC09273.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09273.jpg",
+      "sha256": "4878268e709a7f4f8b3ba7b4bb309584f07ca28b05f4dda51bd5f98e3a9503a6",
+      "source_sha256": "7cea901b98a11fde0a9524caa283cfd61ea3dcabb4d80ee88f0326c4357827d9",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC09596.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09596.jpg",
+      "sha256": "0fc605555ba3aedbfa17cc1507ce7b006fc973de4698ca97f729623f7fff5656",
+      "source_sha256": "65942998201d199c7e68a66c86ac91bd0dfd057fbb77a1916cd4a87f49ab6402",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00964.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00964.jpg",
+      "sha256": "c979ea120d8b525c949caa23f65acb4cd4ffbd549f456359717f210cb3a86cb2",
+      "source_sha256": "a87de765890e74990192a12ba431f1d6438e2334d80e928d66d43ab609e4a6dc",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260619__DSC03145.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03145.jpg",
+      "sha256": "4db8894b5f805f35009bf59e5991b7ef7fe5c8f31ea5181e1d6bdcd5410fb6e2",
+      "source_sha256": "a5d3d69accad31c7eedc73f59c70d2aa2df294a6341b4607e2fb01586b728cac",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC04736.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC04736.jpg",
+      "sha256": "e947120409412643bea4bc349e84b5e55f60f419ef3b8783fc4150f44bd1d8f4",
+      "source_sha256": "ee1764716bb7fe39f1ac5372d23f8eda565b2f9c5f874381921671b34c17354e",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260626__DSC04815.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC04815.jpg",
+      "sha256": "c4cb904a02ebf659186199c95967f060dfb48d3fa982ccf45161bcd57c4d4cdf",
+      "source_sha256": "7ff75f8c691992c6e4eed683f28181b0003d900636693d2da0fbbaa83374f2a4",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260626__DSC05263.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC05263.jpg",
+      "sha256": "ea1a299b683fcc21b17f766640f236ae7aa9807afb44af7d9c1b00bb33c85537",
+      "source_sha256": "96c0bf71cf80151822fda354af47da7534d49f9076ee5698ca74e5636b571d81",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC06584.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06584.jpg",
+      "sha256": "6d1dd4374e0ec48a09535356a3163a41f7cc2c7b8b8a5004eba2d4806dfff3c2",
+      "source_sha256": "bd295b11588e77284ea4e649c7dcb3d335352e68c768bf052b2c76799f3ce500",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC06646.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06646.jpg",
+      "sha256": "edbf7b33e9b9b73f8766bc784cd8b1e259bd9cde5886f32fc78eddeb06d9ef54",
+      "source_sha256": "9461885f28dcf483e9b0ece462399fc40bc93e0106198565f2273b527bcbc00e",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC06671.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06671.jpg",
+      "sha256": "f37916269da7ed658ff9d1c0df3bb9b5192165cf88781b37f892785bb82736a8",
+      "source_sha256": "cf6dff63238eadc09f8d1f69fcd21b321d8f5b3f8ede0163d956de9a0c77a15d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC06759.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06759.jpg",
+      "sha256": "1f7a5be49f0699518d8e93ec0ab6aa45a6cf4e9d7009b7196faf763ed23b587e",
+      "source_sha256": "1d106b4fa00ec1447f57cbdb4aaaa57af864f48e1c0941e5d13a732c1e7b93bf",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC06805.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06805.jpg",
+      "sha256": "6f54ead9eca7c5627cfd9ba6f96792955be3b7ecae6944474744a812eabad772",
+      "source_sha256": "628d92306ac8d84beba9712d325b17564f927ec939963cc34cecf5d1fc0472bb",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC06835.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06835.jpg",
+      "sha256": "33bd20db3af96a09c6b1079b0f6ce9c1e9cdb02334582b652bf1d3acde87e998",
+      "source_sha256": "f29ffe143c59096086ab8e350da952213fc7ba5669c59fefdf128ea4710f479d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC08177.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08177.jpg",
+      "sha256": "3376049841c3bee1fd7fd32995d1ba67ae98b692407b369bd42dbe3921f3e094",
+      "source_sha256": "99598b590c5d4ce35e9a26b7b09a09fa20eb52e99805afa52be406b57fe21387",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC08430.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08430.jpg",
+      "sha256": "763b316328c695f802baa69b5aa5c607bcf8b7a9bb8ddcefdd62c96abd553bfd",
+      "source_sha256": "580a8c88c73e81a41349ce61a363a2ad79c86dad42e92aa80eee5efa500726bc",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC09237.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC09237.jpg",
+      "sha256": "518394f68956e15ac6e34cd41fed35cf775942fe1de5bc446625060ede58e5d4",
+      "source_sha256": "a1628e5e1f960cdc0b1ebc8bcaa2eeb83ac6caf6325270f1f8258c50337a8205",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260703__DSC02524.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02524.jpg",
+      "sha256": "5966f78aecb7f0b388e2b1434c9eac1367db66003e0c3715eba9d8b27f31b8db",
+      "source_sha256": "9ee8bed9deed8595b2bfefc6d3c32205c3c99d8fbc4fa463ac8828e9f1156bf8",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC09601.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC09601.jpg",
+      "sha256": "7d85f225063dd8df63a4ded1a2d17fc4ed8b9ccf4d376645e726ec6135e23f15",
+      "source_sha256": "f198ddc388cbcf492604828698b1339d1d2117790fbe5d956b94be38d4c5a14b",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC02909.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02909.jpg",
+      "sha256": "29b3889f1ef9c4b31307e84d07df9ad95800d988046db6784ade9af10cad9647",
+      "source_sha256": "02ce5b5dc8593315a26dfae5591c1cbdcd69a8514c07c6d44e3616fae422e712",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC02941.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02941.jpg",
+      "sha256": "cee21462bc213a2f46b9ce1578af280b868361d862f782876834bfd70084db81",
+      "source_sha256": "07176f8fc1129aadc82579517b48336cc9a9695262d928537e680c7c454be357",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC02968.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02968.jpg",
+      "sha256": "588e26872cc463d3c5d17f17fd0297a35199a2e3b598c0d5bc2129be2eb22e9a",
+      "source_sha256": "90d500019df80dd4a376b3917c460f75a46bf69fa3374a662392b719fecd0851",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03010.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03010.jpg",
+      "sha256": "adbf3b940dee0f67a99b04855f85a7f48d9ff7159061d475d114ce6ecb41dbdd",
+      "source_sha256": "e70f6ac522b87db7d74c937e7d61ff10f046942cd2518163085f785c0a76209d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03380.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03380.jpg",
+      "sha256": "34db72e9728acab69330b9d4883cf77ef1fe726c02e091f2c320ea3d623e9615",
+      "source_sha256": "002d6936f254b013a91da99cb96d5aa1d8f7f44ece69a1df7ade5b2f5f7df7e2",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03435.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03435.jpg",
+      "sha256": "7c5950ba010673c391f90848317e41df7465fafd82ae1dc798ac90a6e9044634",
+      "source_sha256": "350d59c5a47d5990ff649e190b13537806736f28f3fc7776676c98b7a0d68da3",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03691.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03691.jpg",
+      "sha256": "442b5133ec5e5526ff166fdaa4d43d4caa11664b3e51597adbc1c4bd2d33f720",
+      "source_sha256": "994233a38ed9af30d8bd27ed88989c9059392513a5568d84eb4ef93f2cd58ccd",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03815.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03815.jpg",
+      "sha256": "ebb21a30d0919e498674482c9f9af9ead2247bfcff4f51235f3c6e8ab3490e3f",
+      "source_sha256": "b0681c300c2bb00c4aca514839d966e8e95e88b466bdeb4b6c0d9add398b9cc3",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03865.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03865.jpg",
+      "sha256": "3e07c2117172f7f10cd8e83172ea79bab467c2dde0340f856de5092e3c18d728",
+      "source_sha256": "cf8d3aa99babc37de225fc07bf6fc031f121f1fabeae8a7cf84bfd8b0012b897",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC03925.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03925.jpg",
+      "sha256": "7d008103f6de7a83ab7ea0ac55952cee64a050a420891c0974c3b9d967ce97b9",
+      "source_sha256": "125e11c2d1d13c5c518cbc768f66ab8a6936d25cab85df209abc58b0836ab76b",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC04053.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC04053.jpg",
+      "sha256": "870af6e4d3379bf232a4c7d39c4b9fdcccc2d5e96d77a835bb1dfe39dca2d016",
+      "source_sha256": "bcd5f9d7583000fd39a51127777998904044dd60ab4923c6180f7ae5b4a180d3",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC04097.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC04097.jpg",
+      "sha256": "750e0bf5748de8e10e96ab9abab868bbde5e9bf04a721d195bc619449ba265d2",
+      "source_sha256": "f9160297445f60487ae692bf51a4a24552933eecbda9b8f4b1dbc48b6c42a5b9",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04766.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04766.jpg",
+      "sha256": "cb9514d21cc20fed85955b93088683c88fcf0803332639bef606b3f08c176ba1",
+      "source_sha256": "4648346ac292c5de5f6ec21e511863ea501b766dbd8cac0b651ad8b20ce7a858",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05198.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05198.jpg",
+      "sha256": "a5d8ceeb7efe0c4d7ed92704d45ea08b888823e1eeec95c673170d8a9150d4ee",
+      "source_sha256": "6eb4b9b17da63b0add084b0ab2ebf9ab2635f5bf7b62253198aba8968f6d9e0b",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05224.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05224.jpg",
+      "sha256": "066f851a854047d815f62e522a943441ca032b04a359f8e5d39c6efbcfcf4d52",
+      "source_sha256": "9c1965d35d6b69d8f2626aaf6e8b16b2ba8af717e15f7152031aa893aa978643",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC05983.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC05983.jpg",
+      "sha256": "db6ce981fdee1efb05317558a4ec285942cd371981b3b2928addbf65d2a196b3",
+      "source_sha256": "94a27bbc5fa0da361336dffd7f915692b17c340e59354cf379bd3e3c55b3e2ae",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC07338.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07338.jpg",
+      "sha256": "ef55dd05164ed9ad43af3a809f1086bf6ab44c356a316e0aed944272f9d39be0",
+      "source_sha256": "25bb9881005de0e6a04c4d31a57a9b6d0165765e74de5f56fbe5f49fe6269595",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260729__DSC09480.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09480.jpg",
+      "sha256": "735aa06ff94dbe71ea358334ec75c966890f87e56fb1f509af14daf47da226b6",
+      "source_sha256": "b861252051cff2340dd14c146e0c26be7541750389da9c6179243c80617bede5",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09598.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09598.jpg",
+      "sha256": "95a58a23f9cbaa5d44b84e251da18d2082045930bf665693f3c3a07ca43af274",
+      "source_sha256": "84d8a72a74afb11bde35370bbdadd290aecdcb313d422471734139cb31799bc0",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09962.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09962.jpg",
+      "sha256": "02027c7b46ddc6fcc4da887d441592ee1a61c22475e9c066920532959760e6b6",
+      "source_sha256": "7c95ad9fe87fb97ba41d3b103adfc931fbdcb76aaefdfaec581b5130c57d5867",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260509__DSC05818.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC05818.jpg",
+      "sha256": "a7b0730981ac99de3e42380332cb207858baab303159c26a605d76f2dab6e341",
+      "source_sha256": "8ee5e2cc488201cb76c434a9b775aee12958b5da5ff50221ffb8d66f4396b810",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260509__DSC06514.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC06514.jpg",
+      "sha256": "0a8826ce764016f83437a90f5beab393ba794f6ee56f43c39f5ce78bcefcf1bb",
+      "source_sha256": "ddc184e124f0dd4423ad9c0e274ed8faedfc8a42d76e3c885d1da6c2e5d02144",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260509__DSC06549.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC06549.jpg",
+      "sha256": "6c4f3bae82145c201eb53653e173b9f17acbf4e12ebdc4ea25d81b5b87652494",
+      "source_sha256": "6aca8cf36539440d8f1a1c34f185a4352dd864219c17e5601ce4f3c89518eba0",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260515__DSC06794.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC06794.jpg",
+      "sha256": "2daee038c4c9dbf21f1ebb5fb5dfee2cca2086b11228098c687e302b7d068edd",
+      "source_sha256": "f2d57aec2d1d9b74df60f0e1b1bd1f28e5496e9d3ecabb123f6b42c4e179638e",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260515__DSC07090.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC07090.jpg",
+      "sha256": "7718f10a2701f8a93281ba7e9e6d476afcd616e3fc19ee99186c2fe4b07100ae",
+      "source_sha256": "3451898fb65e74f5f337fc5ac751ebcda31b46faa7416af9d79b13b3ddc1ad87",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260515__DSC07166.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC07166.jpg",
+      "sha256": "2bf67cc77df41c9c4393c5d31e039220c2f546bc7f3be748641187d757692da4",
+      "source_sha256": "2442aec3571d167f5e757a0237b081989d97b2f984116f22421e15ef919455f7",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260515__DSC07698.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC07698.jpg",
+      "sha256": "af3060e2905e0e18012d65ef8bf40a6b03df7bdfc93a6fbed12e33556c34788b",
+      "source_sha256": "e73c9a43d368a3d71e0df309401343c6d3d808904f07825e9d6f7003c28a5bd2",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260521__DSC07818.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07818.jpg",
+      "sha256": "be7ca1b9d3f341402bfcd3cc38d41f69a9cfca6ad98082919eb6675506352a28",
+      "source_sha256": "a080954bd686e8558e0a05877217547c4121a5379413b3d272d59772b387a9bb",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260521__DSC07926.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07926.jpg",
+      "sha256": "566506a03acd3b82f54f15670d1db98da4669042b87711a45ba0f096f8e79774",
+      "source_sha256": "6b3cb6db669ff035a9f270f3cccdc9d8c840e3cba9cb50af0d9a130d41b38d75",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260523__DSC08974.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08974.jpg",
+      "sha256": "6179c8d459dc55ad68d060e4ba8a5ed1edee402aff647b01f0f1e6a011b6cf1c",
+      "source_sha256": "4328d3cb48ab30727916ae4fb5a4db13aec48ddf5de0c6df94b494cf9b7dd2ab",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC08994.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08994.jpg",
+      "sha256": "f191e27c15bd7cb1613b4781e419494ae92dc4e9fd81c1ce572939fa1b5639ac",
+      "source_sha256": "6a0f498aeab58b165dd506b2a7e8651cc5c07fca51a288b2b19c8432dbe83ee2",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09929.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09929.jpg",
+      "sha256": "349e2d163f753c355665d3f1ab9ce73b73e919092766c1b10da94d719d724a0a",
+      "source_sha256": "4f953a9e201f6944a2e4022478fe3690cf566966892d4da21d8f1d9befa4ba57",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00286.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00286.jpg",
+      "sha256": "a02469cd1325ee64301c7d7b9d559c5b267b17371e58d82793995087d9835432",
+      "source_sha256": "7425d7ccc9a87c1b44a460b1f3e3c166672b8132c13b71b337a52dc50e349ca4",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00326.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00326.jpg",
+      "sha256": "09a63c18cc420147421cb7420287ffe4f4c8e2ef85a3be9e2d659f3caa8e2f46",
+      "source_sha256": "49abe91ebe9a2a3beabf693e13129870d1101481b5df5ad31c06f8e572b8dcbf",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00371.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00371.jpg",
+      "sha256": "3edf9e1f95aa9ca600f611048449b916b2c4da99903efe8335e589df318e0a89",
+      "source_sha256": "d062e9d8f12c206328b3979f3e4b6aac6374481b7f02815416a4805068bcb3c3",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00382.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00382.jpg",
+      "sha256": "88d1223e57b38eca45294c858ef60ac76aaee597e55b08c85bfa5277ff2e3b87",
+      "source_sha256": "b8ca317bcfb9ebe695cd3dedfc9d63273e2aa291a27017dcc7e173a19decbb57",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00682.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00682.jpg",
+      "sha256": "d59834260444782212a4be086083c6b0a0cce3ff12a78bfb339f0ff352723beb",
+      "source_sha256": "22fb742b226fe1b4a5a14c9caddf1b29b46e6a33fe33a1e1f558e5eccfb9eeb7",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00724.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00724.jpg",
+      "sha256": "a29cec661c2aff14b6a4d12bb688d5b2745269711bb359d9f89d13a5fe2b54dc",
+      "source_sha256": "5d8f34d63d8928c3cca79dfb7f115760c7c679e9714b92364fe1d1950e1dfd34",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00885.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00885.jpg",
+      "sha256": "0aa0bcd19e525bc69770ff487da9c1da14e4989418c24f8aa661db19342700fb",
+      "source_sha256": "c6cd20bb08ff38d7ecb139282ace3fc2006de73bec599b2fb7d93509e4730f0d",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524yewai__DSC01869.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC01869.jpg",
+      "sha256": "2037c984141b64af83d305af087768e51b1135c1b3a8459e45095d31c774cc04",
+      "source_sha256": "fbc47844eb91f3a2c25f2c7571b52d1fcc83ac7adc20cb11f9e6bd3fd5396d57",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524yewai__DSC01959.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC01959.jpg",
+      "sha256": "3a7982497b7f072536779c68ce8d58eb4591b2485daa28df5fcb4222417755c9",
+      "source_sha256": "54ca7d8b796e54ac24d7af770dfc644fbdf00b70cff73f9243f2aa568aaa4ac4",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524yewai__DSC01968.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC01968.jpg",
+      "sha256": "f42c4eca640d89a5e8dc47e93717cd20b8d8a60b913b566ce09ed57e3a2927ef",
+      "source_sha256": "8d678beb1f7beda42fa989713244f2d561a190962f073e5a276a860be59961f9",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02363.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02363.jpg",
+      "sha256": "361c78f5dd018c1ce57b1590d314819ecb8258e06565416f3e5b2ced920b07e6",
+      "source_sha256": "966832dd0043ade51dadec3942d78450a73d163886329fbd81631c6e6551f685",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02394.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02394.jpg",
+      "sha256": "1dd5d5ca75d59d4dbd73b58a3148383f4eb7b0906315a2618b87ccce87bccb45",
+      "source_sha256": "868eae310f7108e01de1e17258c493047534581c314e678d8f1e60ec0015506d",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02402.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02402.jpg",
+      "sha256": "14f34ceec969a772a488be287dc1965a8aff44307d9e0cc9c9f1610c2c1e9c20",
+      "source_sha256": "6a3838b56409d0acf8e7c7f70c009d8b2617fe962d4db0fdce731ecbf86d1ad8",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260528ruanshizi__DSC02672.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260528ruanshizi__DSC02672.jpg",
+      "sha256": "07558ae18850b6d2a7cd58e5c365147ce8d05ce1ef65950e019b9880d78b8ddd",
+      "source_sha256": "e14a476689b5d35607c136053f398958b680bf9e4bdf40c0b48c1c7d82e39d9d",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260606__DSC05557.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05557.jpg",
+      "sha256": "9472e1c3e199effe86a44a0ca557f14ff7ba33c46e151f5370d05ff8b35843c6",
+      "source_sha256": "dd2677bcc939ed5349c71632397c6cf576ceea80ad01553d045dc1552a6bf14a",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260612__DSC06737.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260612__DSC06737.jpg",
+      "sha256": "ab8f6616dac9a8a791b2ce91159297fa25ee2e884ab5e8867c102035a3a4b114",
+      "source_sha256": "c3f4462aa22955a51fef3b9fd8aabcd91bcc4a38a34740b3e33ef7c108539f23",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260612__DSC06932.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260612__DSC06932.jpg",
+      "sha256": "c884bd2255e514572599f8df006773df75cdbc1e5fbbc961e03629ee3e4858a7",
+      "source_sha256": "466d535e08c4a4aa3d548f4fd2d58907e710fb8c2beed6189148ff37259a777e",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260612__DSC06941.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260612__DSC06941.jpg",
+      "sha256": "ade187cd3a43dc1fc9a4345e1df30743294e8e207f04d6d7246f52f2f7409396",
+      "source_sha256": "9a2d2b0dedee6e31ff13b66d4d32c35cae184153f7db97f2a71eda922e4511e4",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260612__DSC07121.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260612__DSC07121.jpg",
+      "sha256": "6cbe0dd982a998396e06abbaf370d55289f5a0610ed163d6547273888386e84d",
+      "source_sha256": "9b1e9c8a79edcf8136359816eb0af9d85a21a3b665fb9a31083b2836241e7f42",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260613__DSC08167.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC08167.jpg",
+      "sha256": "9791a7d4fef6cb7a7f931213ccb0ca4865509a34190aee4ea170a6c24be26772",
+      "source_sha256": "672e73a92bc6e066418931b7c8bd3d785fb1295653fab68d444cbfc374ace3e0",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC09016.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09016.jpg",
+      "sha256": "c74d2ddc587c6bc6d8665742242b98598922070f261086ae6091751b73101f83",
+      "source_sha256": "3f095a599b2ee06406fb222927760ed1a5602571c994b4431339040f0d7cffac",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260613__DSC09175.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09175.jpg",
+      "sha256": "d582de7e41f8976892f03a91784089f6c19b4c84fb4dd028bd093cbe2744457f",
+      "source_sha256": "83ca7cd693739e395cb9119b4bce9a4e0ea930abfb38bdff91c56411712dbc29",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260613__DSC09189.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09189.jpg",
+      "sha256": "18e29cf9551e418c1ecab0cb1140de18f9220f28dda1e2498e0ab2af632e8ced",
+      "source_sha256": "76b933752db3064351ad1747054d8541b4aa95c696713edba62ba67f5d85c3c8",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260613__DSC09241.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09241.jpg",
+      "sha256": "33d244bcb5dbfd3969ffaad940c8732c95d191b0d729f881bf02be88f5f43810",
+      "source_sha256": "bb893f5e34f589108cba0e833f0e3ce453d46b621ac1656ba2c0373ced97209d",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260613__DSC09284.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09284.jpg",
+      "sha256": "540bf536c4a19c6d0878348a606fd89bbf02ee6e9ad75f14d792c325ed58e1ea",
+      "source_sha256": "e56892afa1a5373bb46a0c7e8aa84f1df01e8ae9e64f0dc574e4df41e95fad2b",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC09476.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09476.jpg",
+      "sha256": "a878d39879aa473153c0eb7f2134aac7d2f9aeabc61593f104edd4d8844182ee",
+      "source_sha256": "c4bc9425b70c1729b15e79a37b6fdf58f964d7a64c996a85fa84099c1f0ff741",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260613__DSC09720.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC09720.jpg",
+      "sha256": "d5e92d509bca81c7f09359452cc068948d963df2b9f7347211f572bcb221d1ac",
+      "source_sha256": "337877f3f65fb208fec9d009e239f624193fbf9d48a9bc6e39bf0edd9ae5cd45",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00022.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00022.jpg",
+      "sha256": "28c4e31bf4ef859e85d83c8d3777cbf0ffc57b8da2ee6dff573508466d4611a2",
+      "source_sha256": "b1688e59da7f8db8640a68b6c173fc77348303c637c1669bfe102c08110fcfea",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260618__DSC00491.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00491.jpg",
+      "sha256": "3b3ec9a996b2eec8cb3d60f3af32fbb3fd0e97fb6ee41268011bbef558ed1fb0",
+      "source_sha256": "1d7e11165621525f0f01f740a0f64c2ea5b5814e8e5340d5298c1d733bda0730",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00530.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00530.jpg",
+      "sha256": "7e09142b9ad12523d5fc386f6421dbfe7d618715ba6c51f242e9fc755aef727c",
+      "source_sha256": "5e3c62507a25b169373be4cd10771ce7b3bd1c3f78a5203c5f966be0d2d4cabb",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00555.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00555.jpg",
+      "sha256": "acf31d34fb9ba1d9955b802eb562dcc8afbbfa8ba73068996907256ae324a670",
+      "source_sha256": "8a8de08dda4cb8ca6f5c6cc8cd38cee9318d3f5d88aac2b6560bc208d61dcd14",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00597.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00597.jpg",
+      "sha256": "d3a6c71694dd30958ec38acd1196e3e11001af5585e00f9cd30bd9a0b72b948f",
+      "source_sha256": "51be2909653b473bdc1bfeeb5110f5510098705161b1879220bf43ae69a18296",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00744.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00744.jpg",
+      "sha256": "0444b645b6c98151639fec1acfb8848e01c27d86363d3ce184768b605794b4ee",
+      "source_sha256": "ae78dc24088295db16ef36856a7365d4d0a35421679e1dda6c706112bee26e43",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260618__DSC00754.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260618__DSC00754.jpg",
+      "sha256": "804e4d157dc35ef24f7ae64fbbffd4f4c6d55a693e43da5db996e182169e002a",
+      "source_sha256": "32d2d0286fa8780db6e9a989734627ceb18fdd98dea46bab9e02f0d7cc649d54",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC02484.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC02484.jpg",
+      "sha256": "9ad827ebaa4d10ab3213b6713862cfb595d48347732f864fca252f8263ad305f",
+      "source_sha256": "5d807ddcd6661f170ad2a15edec4b0d19915ba52d14847239f033acb97501e25",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC02770.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC02770.jpg",
+      "sha256": "4fa590e5b38568f46713bbf4480e7b45f7d859c592140dbcbcdba8990a36ba8f",
+      "source_sha256": "0654289aa9a5292134a31a735f568851165c969ebd24c23cba556c5aca6e7228",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC02889.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC02889.jpg",
+      "sha256": "26af945c9f6c49237e7ae852b34e75c89a244690d31ba0d875ced35e68e5ff96",
+      "source_sha256": "77186fce250492aa6dd8245808ae9b263b7e2123d43339fdd6a00ea7615b5e39",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC03045.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03045.jpg",
+      "sha256": "75e6ba24e725f42ca49f1915db6145e256d7f9e0bc4a23beef9c2870b3d5a8c0",
+      "source_sha256": "c101d79e72fab54c9432c646226ed805c7dfbce91fc8cfe7c1a2826005b17de0",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC03095.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03095.jpg",
+      "sha256": "7b03e3e947996b36b7e99e1afe5f98511ca3c986bf98f069faea106e66ac6f2b",
+      "source_sha256": "b49c9571977958a4ce23865c5115bd86898cb2aa5593fab7ffc0bb239f50198f",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC03218.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03218.jpg",
+      "sha256": "734518a9f46c92ebb1ebf4175eaf81e395e213a656a6b3079e8f9c0b25f9be9d",
+      "source_sha256": "8fda2d86c7c4eb17c0c4c49df3b62041f3822354b4aeb4d726720d6fc1ecd0cc",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC03236.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03236.jpg",
+      "sha256": "511d7dcbdb3edbd89078850075d7438cd2bffc0a971e562c1b069d9334ea14b5",
+      "source_sha256": "56c74ee7d5c60145de0430c7d1fefd700f48d319b2a1ce053cc2f438d00a249a",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260619__DSC03314.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260619__DSC03314.jpg",
+      "sha256": "4d4965aaf32592168428c84de283bc04621aebd57a48ca1ffbd197c17e21d191",
+      "source_sha256": "52c377993dd95e5e9857a6e4a4be1247f8265e456fe2d537b9a0bcb3a2b5da79",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC03628.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC03628.jpg",
+      "sha256": "2e60e9bd6961bff905770da4095042d0808fd79a787f06e8512bc4949142859a",
+      "source_sha256": "7f8f19aaa90eb1fd9569b9ebe44251bd95ce55f51d1ab374805b40ed7a27b388",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC03737.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC03737.jpg",
+      "sha256": "a0399d340fdc0b19b2cb39c1acc6a52786b6570a3646876d2e6bfbc39a9f2992",
+      "source_sha256": "79425a8b4fbcbfe2cd8af358cf4205914b564209a19f8aaf537fb10ffa8ea0b6",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC03920.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC03920.jpg",
+      "sha256": "a651cc24c1671488b9985d291d3308d7e7909a8b3f0907ace263283bb0408a39",
+      "source_sha256": "838bfcaaf0a8fbc37a57924ae25f3635d9aeb302cdbea95f59273e6be5581219",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC04955.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC04955.jpg",
+      "sha256": "bdf9f9d53d0e43bdeab718e910fe816c519cb5608cd15e597369d0a707ef35ce",
+      "source_sha256": "e387aaa9e8fabc87140a995155457d4a2011b5723f262568e0906f94b5725f67",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC04968.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC04968.jpg",
+      "sha256": "34e1159a324a1c5cbc2561006f2e774137a40b3f2546a470317213731a7869e5",
+      "source_sha256": "88ed8f15c192dd0b2b7c2c88aab577120eb6b8e851336774b2dd1980439ef26a",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC05492.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC05492.jpg",
+      "sha256": "422a8a4ac40aeb387a586389cd6229a7a22ff76f46f3afeb96c782718087da88",
+      "source_sha256": "cca09556888f47d4457319bab159cbe4a4d3a1805194979632a446b2f0e33ee0",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC05854.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC05854.jpg",
+      "sha256": "e177cf6b3f0742fe29b91ada178f919e91918c9df8606e90f533e4c3f293df18",
+      "source_sha256": "ca68ad4005880b0a00539b3c7a54dda0922d161fe6956368e250427365bfd8b9",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260626__DSC06056.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC06056.jpg",
+      "sha256": "6376d7b40a17da1bbfee07699750f08e0b5a8de93d1c69c800827a393cd68819",
+      "source_sha256": "493fda2389711f9b5cc9e2ce2741c17ce9c5aa4ec1ce6733d06ccded0dfb5f5e",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC06456.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC06456.jpg",
+      "sha256": "b5bf1d0512fe79bc70af58b39a515dda5382f1e819e4455de99bfd5a2a9e0e18",
+      "source_sha256": "971d12e080bd09c3d735a70b38520103a93b80d42cdf084cfbd41f27c4a16c3f",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC07563.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC07563.jpg",
+      "sha256": "2102f97e955b861b9c2791e179aef0b692ba2712c412da3599935f27d88e20fe",
+      "source_sha256": "4a5a3eaeeadde3796e5660195fed5535993989d406f868c639b1ad1fea20ad1e",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC08127.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08127.jpg",
+      "sha256": "56ebda61273ccab8a121b2a636649b1f69d64136744b697d5ff6ad481e2c2bda",
+      "source_sha256": "81a0ca5f5ffdbad7b5ee2165728fb44acaff6f5a3505756f777b599753a943c4",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC08428.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08428.jpg",
+      "sha256": "9861f1c500c3615f24261b335213bdc19591d33c3a33fcc70238c8b135fc0537",
+      "source_sha256": "0f53ffead23a20dd25c2de8ba6a6a7c22cfc2d4bbfc517d74ffe3b7badf95dd6",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC08519.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08519.jpg",
+      "sha256": "e76d85af4801aa405e043bb8fe82b723ebde874675591a359abc32dfbc9c105c",
+      "source_sha256": "1dd86c7bba36188dde3950d73cd4d807867ac30af9c6eb4dbebacebfa2e2a57e",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC08722.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08722.jpg",
+      "sha256": "3c10e8797b72bcf3d0bdb33bf40b01cdfc0f9b00e051ae7317604514dc7e8135",
+      "source_sha256": "bdea83cbd265a4f8a1b0b1834a7ce99f46b3cdd84a9c99baf9ca8307be86e22d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC08811.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08811.jpg",
+      "sha256": "a2de20a6a3bcdeef94464f9261c65461bd789ff75ebf575740b65a948e1db702",
+      "source_sha256": "ec4b2ff12d3b238b70b7a36c527514689e3287cee53ac419ee2ed0556f8d89bc",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC08834.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC08834.jpg",
+      "sha256": "ae560f447c1f3296213522267c9ee8ef3c8c192d22397fb1f19992da3e530238",
+      "source_sha256": "33c1a4b91edea7902c800dcbb9a951653857597d0c67ab7578749111470c9d6a",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC00933.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC00933.jpg",
+      "sha256": "c0156fc8af85c7e3b3f3147013a10c4ca5418092af37a1e054c028f1e840c3d3",
+      "source_sha256": "82074d8f345e570f989a26ad68ed5deb7a2ea8aee90c462964dc3a767fb26b86",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC01934.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC01934.jpg",
+      "sha256": "76dcb0bb1b5225df361fd46a05a2e08a2bea2559deb26b9d52fc0e477ee81839",
+      "source_sha256": "68203a07d44d4b679e26f8cf145a0d3a57f18e0a2f1290af96e8f4fd5fe78d09",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260703__DSC02197.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02197.jpg",
+      "sha256": "2f100069b8e6ad65a72d107c94612f055626565545a86b295b2a3d4cc55a7ab9",
+      "source_sha256": "cca95040579483e9792424d59b59bff3aab003566213f8e7fc7b392cbfadadf8",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC02331.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02331.jpg",
+      "sha256": "c7e7073ce65425ce3d17c42392070e94d4393e5f2cdd86446de519acb5f40379",
+      "source_sha256": "c92b684261d7f619a8d422eb77268dbb04000fa53371ab5b5d593a983e61683d",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC02382.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02382.jpg",
+      "sha256": "728b0593fc8e41fac41e47981608beebfc9699a099e5298d3a70e83afae010d7",
+      "source_sha256": "edd33d4f081f14465b1aaa60f63d06f61fc4044d7b6657bd59803ba8f5fec6d3",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260703__DSC02508.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02508.jpg",
+      "sha256": "4641d79781af0159341df2f922229742a1556827ec4c2ee64c66843a10113bfd",
+      "source_sha256": "bb48dd8b7b13623d3ee71cf84fff48cee868295290b47bd5c26f6e85b331cc26",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC09336.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC09336.jpg",
+      "sha256": "4d7df24517e1b361d915de60795d892936b30b75416ebfe9a9cf7619fda68aec",
+      "source_sha256": "1045b1d2a406ec987fb902e36c9e476d8c54dd83e0f917ae79169a708a9db601",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260703__DSC09433.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC09433.jpg",
+      "sha256": "007dc4a070226988611067519df80a5f1a102f16483fd3b3bdbd53cdb2c619b2",
+      "source_sha256": "1aaff455e5fa93f4ea729bda963d6a138e5f9cbbe108b53e79ccf5ec5c3e9355",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC02795.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02795.jpg",
+      "sha256": "c7ef119ae9ab59052a37da5db99579e2194459423752e5ea186493433d46c434",
+      "source_sha256": "5a3d154040d2070d5c671e1f96a58110ce3748ba96cf72fc939c79c62905e9c3",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC02863.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC02863.jpg",
+      "sha256": "3c85cd75b2e4d29d068c38193e8cead30dd36c02eb0807962b1e5fd77248c287",
+      "source_sha256": "b5a7ecd40dfa89495b659b6c6664b58fde320070aa0750edf8b428da1340b1c9",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC03013.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03013.jpg",
+      "sha256": "eff18450ed598af4564c7e6eb25e99cf6a77d5b961fbd05cce151aa99481cec6",
+      "source_sha256": "53a6c4ae239d76ef06b4af4294350e588d84867f08df2c9a144d1f899d2684cc",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260708__DSC03309.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03309.jpg",
+      "sha256": "28a51f61a200dc6d4bf9dde3fbfbbf5e84aca366bc0e0ecb984464bddd6c95a9",
+      "source_sha256": "72dd69c2269e3560dac678cffa91c7dc8afe64f6cac2f9c05002ba4543f8f218",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260708__DSC03554.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260708__DSC03554.jpg",
+      "sha256": "a92e676f124a0572e004c3bafd6fe6a24ae551d25ee8dbdc1b1fe4487491090f",
+      "source_sha256": "e4dd7caa1f06adf5e4795d8792170042cf7607e8dbf3fdce371d5b87cfca6e52",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04274.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04274.jpg",
+      "sha256": "5ce69d728094a4244cd8856854f32307af71f24411e2c45ecdaa5af828f035dd",
+      "source_sha256": "cf04d000cf57395a83300a25a0908449fd0831d42f5ec6317b70e49d6e0b5776",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260710__DSC04573.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04573.jpg",
+      "sha256": "f94bf9974a0f56be44c1ef0f6980cd798c5eba60196e29c10151ddd5d6f8f019",
+      "source_sha256": "f404d20fe2cfbfb169dd8eceac67582f50f0e63760151c9c6bee79c01cda0b62",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05140.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05140.jpg",
+      "sha256": "858d947cc8bf699e8dd1f4151f7764bc20696a0e2c1cecf93ae8fd42cf569047",
+      "source_sha256": "d4d72b98e0428a7d6972f02d50397042b4e5b5286b2e9b5e37d7e34369fb1bcd",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260710__DSC05288.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05288.jpg",
+      "sha256": "37418bb22fd9022293b72085b58b91e0038aa260b9ae8bbbbdcbcffc52f93806",
+      "source_sha256": "9c372b2e60c4bb000a2512ad8fa7f952866af59cc881a876fe5ea7502e606c0b",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC05343.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05343.jpg",
+      "sha256": "132c81131965baabddb93eeb29c5930b1fba340de718ff3e1782c42e3771a83c",
+      "source_sha256": "bb81cc2438792aa420216b33c454bb0b3d0f9ed83c7fc21cadfd3a1a73d6603a",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260710__DSC05575.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC05575.jpg",
+      "sha256": "84f3422ac3821c73811835ce0ebb49070688193ff30a4c048bcdb5c99e0415ba",
+      "source_sha256": "a977e766dda595878469084b136bb7919748a5e04df146ac3a4acac9d2f07269",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC06054.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC06054.jpg",
+      "sha256": "17d9b3f5c55420e6a363352747afad2c70ae9f3dd22eded3f55430154948cdcf",
+      "source_sha256": "af3afa77abf77624f03937435f3def753fad9bae5ce3bc3b822ab14532295dae",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC06190.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC06190.jpg",
+      "sha256": "dbd4c833d6eb63329eaedaeb897377a77a0bc497d3d5be24707175dfff4b2f7e",
+      "source_sha256": "99610b0c6666ba88d48ccd1d9e1ff19da53cb327da17319dcd0c538b66f99d4b",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260711__DSC07452.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07452.jpg",
+      "sha256": "59b6a16c2be92e7e2dcde0204e98dfb8f35d2107cb518050c4b26fe565f5a932",
+      "source_sha256": "4fecb0bc33d2ee3e95cfa14e644dbffa4ad9fa671fc89841e72a17b3c8b6a6ef",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC07513.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07513.jpg",
+      "sha256": "bdeb199450c3c15c61e94e60ac845ddf8c6f75e5290174613e6577a5bdefe020",
+      "source_sha256": "8d55576062580d9395ef08ec40f86aeaa342a3cfff1d9585d3a8dab5215139bf",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC07766.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07766.jpg",
+      "sha256": "1c16993af051a08c67900eda547a7d18dc1abe4dcbe06aca8d6e5ec5ccdb06b8",
+      "source_sha256": "67056503ec92ea3dee27d55f6ae71c31504b2619556144f780608316be939e72",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC07888.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07888.jpg",
+      "sha256": "cbf857c9be330a183ae5669ea04a14caa7f336c109f5efc67170dab1d9b04183",
+      "source_sha256": "497eedffa7d76104c13a78bdfa3efdb7222e5fac62aa47258e3a57a27d289b61",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260711__DSC07971.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260711__DSC07971.jpg",
+      "sha256": "6d807321359d172ed895a61b9b55f3afbc7b46568af93da146ae2993d0649857",
+      "source_sha256": "e00f1a58ce5a42ec1c6b8be02edc77cba7e05c85ab2b97d59136281bb98bd182",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260729__DSC09474.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09474.jpg",
+      "sha256": "978c3f4f6971f692fdd7bd1c88cc2a4c7771135ba3a5b9bc3b6f57a02f88680f",
+      "source_sha256": "baded3f54b9d5b6c82731615146fba38e32254a8085ecb823f970b550ed82580",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09701.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09701.jpg",
+      "sha256": "76a7ac2143a4b56329af29ca1e2b64c004644d90805f14dfc4b5b800635628c9",
+      "source_sha256": "f279d52c1a5abde7fb20ef2244de53e9380f39657bb14968ea2c1e30de1523c0",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09772.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09772.jpg",
+      "sha256": "d71ae59456ff5a27f8363602e2b8b4b557e57c1e18791aed836ba28afcffef57",
+      "source_sha256": "609221cf6b2b223509b79a7b555fa2142efd743c5b6be4cab3f18b4eadb063ea",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09812.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09812.jpg",
+      "sha256": "e4900cb65014938a1ffa5531fbfb52d09cada4e513183976a99054a01c60e436",
+      "source_sha256": "18a797afdde7531fb891b3c308620e6bc6e49101deeb5df5f8771d5c2ae41254",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260509__DSC05670.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC05670.jpg",
+      "sha256": "897488f7099ae2d159d8ac2010a3d906ef3fadfdde90759f0be7472e3a56badd",
+      "source_sha256": "4b3954220517e6155ac5a69e2a570521f3ef85edbf12048c0d9ebcf6ee84e56d",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260509__DSC05994.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC05994.jpg",
+      "sha256": "934d0c5cde77961dfb2aeca75cd745d8ca1bb942dd4f2a5c240e526e752a7705",
+      "source_sha256": "332987eb6f6aa0e73ce535798dff3976586e10f4abb79da03d84044296ca5772",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260509__DSC06098.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC06098.jpg",
+      "sha256": "a85012b0414bed6c94b1236271d5b2f1561b31d5c07013b6726543ba5aa33736",
+      "source_sha256": "889c3d3896d0a1c4f7f68b3ef955bbaf438d7bb5dd571dadc9fb5fcca285b6cc",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260509__DSC06316.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260509__DSC06316.jpg",
+      "sha256": "c60a3d8675bb2dd341673df1b5a1a6a204aaf031785917d8a6d52b9e129da620",
+      "source_sha256": "5ea5c2035c6aa16cfd1ed5be1c0ca8db4e647499ed9c0668d71e86826475aaf2",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260515__DSC06743.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC06743.jpg",
+      "sha256": "96f54fb9d40a17301560d05c7f8e8e1d457457d2a47ae6babcbae799e4242971",
+      "source_sha256": "b5c3a7448791e1550da27e42a2ad7daf179e1265381756fd716d1621c8d80b03",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260515__DSC06769.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC06769.jpg",
+      "sha256": "15eba3a5ef1a321910097c9a08a85e020bc180823fc000668dc213b94db93c22",
+      "source_sha256": "83e47d13cb04c0d38ba1612c97afa5bfd504f9bff8daab6861e81e6712639d82",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260515__DSC07467.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC07467.jpg",
+      "sha256": "70771730bbe9afdb3e89741dbf595a4b7a53307c88f31713a4de33200e5f2bb2",
+      "source_sha256": "6b1770a20109a88834001515a7a13bf144c03547eb6b53d88040a6ca53a173eb",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260515__DSC07532.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC07532.jpg",
+      "sha256": "a83461598649620a120b86527530842e4a56f8632a872daaaa3581276883983a",
+      "source_sha256": "4aab23b14c40dab7d4068ec3bca029f0e0f7613cb11da0fe8ad63ff09cc3e04a",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260515__DSC07652.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260515__DSC07652.jpg",
+      "sha256": "81f0e366f07725ab23ca3f05aa53e1210985a1bb183fcb62d42959f6042b8e8a",
+      "source_sha256": "acc62163c8482fafe191f38d69e377a1a583fecdda5dac8a152a221ee14b57dc",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260521__DSC07849.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07849.jpg",
+      "sha256": "55334453b29aabbf5a8efc20b86af49b8f79d0f33efb930458af37dae7935ae8",
+      "source_sha256": "d4bb92b15fa9ddf074912ff498c572d4522e43ffef0a0f5d52955ddaf7147588",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260521__DSC07885.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07885.jpg",
+      "sha256": "9f4fd399466b3cfa999bf80ea3f5f4951e9c1606799823f7e59570fe00a6f486",
+      "source_sha256": "9d485d4afee443b82bb17d85bb5ba92c90e585e88b1221020962b274316d6340",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260521__DSC07888.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07888.jpg",
+      "sha256": "5db193b8c17f89804dbf818215fa85f0f771ec49a594446c595397006d19daf8",
+      "source_sha256": "7f1a54b3b28269c4dd0c4ee6e8cb0c0cd73b3f862b2de008e57b84dc92041d33",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260521__DSC07937.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07937.jpg",
+      "sha256": "a3c4674f665c8c37fbadab75468a4537f84ec7b2d9e00de315616fee27a1fa4a",
+      "source_sha256": "670c805519a21c5e20616c6813261001b78fe1d247373c180f22ee6c52650890",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260521__DSC07984.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260521__DSC07984.jpg",
+      "sha256": "5906ac9f815ae210d70dfd0e1c388fa6bcb6e4683382cbd2bea69d5c0c88245e",
+      "source_sha256": "95a683054e53b8091d12b9cfa20d8a61dbd8cc31ec1890bd79591f0624830eaa",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC08129.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08129.jpg",
+      "sha256": "4f3f86305db456de17d85040def2720a84324f8a21ab369de94baf5c11d63b9b",
+      "source_sha256": "6470184b7f0fa134d2be6332f8f8484126f73a639c5da9be4ff6d8bd6196bd67",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC08408.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08408.jpg",
+      "sha256": "de50f7e9816fbb7172bfb10d03dc4635bfe3b1c0cc93dfc7e925c7d8c047c408",
+      "source_sha256": "c400973992ffeb753186f55149f4e8e460e9caa43dd63602886b17e6164377b7",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC08804.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC08804.jpg",
+      "sha256": "b6deada445249ee923979e6a4f386d2b48d9732e2e2c43ad33b1b1de045b7432",
+      "source_sha256": "e37750b8a4687c183d26f4858c5647085ba796564444195b42df27b616cf8fa5",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09207.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09207.jpg",
+      "sha256": "fb42084a6b9af7ff955b146f68c2d50450fdc558d84f2f1c11016bacbb11421d",
+      "source_sha256": "453e8355130f811c09001d0c17bc61ce6ab98254f9f13d7ff8edf10b4903ffe6",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260523__DSC09472.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260523__DSC09472.jpg",
+      "sha256": "f912bfac57c96244757486a050b67e7415e42c194cd8e38f747dc9b36a67b348",
+      "source_sha256": "a72b44f3950887786a5859283530e8a09930e92628c4266b04ce7ccd7c329a91",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00485.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00485.jpg",
+      "sha256": "3173d3512fdca87cee7e16c277cbc70273dac3daee9905013a7ba1326a8f3b8c",
+      "source_sha256": "4285d2b41e9f12528dd336361b85a4ac01e71ca0a974a3445dfeea45ded8d589",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524Chinesefootball__DSC00871.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524Chinesefootball__DSC00871.jpg",
+      "sha256": "a20000f67bbd083554c6e90106cbdf5d3c7f3526f1213c69d94115c27f62ca29",
+      "source_sha256": "51f194fced9858353fb8c4f7916c49da84a01c91b12e4f00d2f0dad20362287c",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260524yewai__DSC01673.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC01673.jpg",
+      "sha256": "5eb862c9ca60154e219be53455f21d3e65aaa38d7cabce499a82304aa3a0f2a5",
+      "source_sha256": "b84ae87f8ca406892973fe32ec89b08f86dae5e3584d872566f4d5e69adca736",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524yewai__DSC01733.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC01733.jpg",
+      "sha256": "d46513437854b24cdfc2346e8a4b3bd46f2027341b03d54c40d2686448c23ff3",
+      "source_sha256": "44429707248ee09590ac1841038fb6f2b29fd859b543146619333c3a5fe1e6e5",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260524yewai__DSC02064.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260524yewai__DSC02064.jpg",
+      "sha256": "664ac4dce11a1b2c402be4fe61d0b06de025f0e75ed8537c804a521e82dc1193",
+      "source_sha256": "3614806254ae7f9fb9a20803cc15061169059fef792b541743a8231e3be6a1c6",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260606__DSC04974.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC04974.jpg",
+      "sha256": "c0687265480f02d023105377ae3968c35fbd210de7ee75ceb76f8ca857e903cc",
+      "source_sha256": "9a64b326cb77d4cf48f371642d77676ebca4ade0e876bd9be53645b7fdff94ca",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260606__DSC05160.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05160.jpg",
+      "sha256": "aa7120420a4885fbcf60bb9bcafc3240c09970edb7fa185bb42269a41f844c44",
+      "source_sha256": "e70ce446e7647ec6d4c5b0d6fc9cf368666d8f3d004325db132e496bbb3a07af",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260606__DSC05172.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05172.jpg",
+      "sha256": "29531b2730f1c77bb34b0657edc5ecb9312beef4417c6eafb320b67d392fc4d4",
+      "source_sha256": "b387f002c8c008de7711207ae4357e3f9d9c682723cc6b7fca434c29a3e60402",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260606__DSC05307.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05307.jpg",
+      "sha256": "780438364b514ebd6fe8b01459dd77894fc2c7d4cdb8c1b3c7f9123583192ba2",
+      "source_sha256": "fa181f131cb7b72e6c313f6f51d1a4eb99ebe64e1b78737af0845885dcdea68f",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260606__DSC05352.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260606__DSC05352.jpg",
+      "sha256": "e6d60ba2bb44961fe31436b3117ba5c1b019ee856551bbfc8398b03dace7a6e0",
+      "source_sha256": "8de0a2f2f55e12dc471a780ef7bde2e78df7da37652e246e5227a6fb7650bd85",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC07498.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC07498.jpg",
+      "sha256": "56d9cb0ac4b8bb1d752e59723497d1fc68dc7bcbcc4c7058bc2eb8e01432feca",
+      "source_sha256": "b4dedb0f2b63ee94d967210b200497bf3c8c7322a3f113b125776cd2c1821be1",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC08469.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC08469.jpg",
+      "sha256": "d64e3f9fc3216be3f11285e9d82a1bebe7a24a22cdf968f5e80d15ac5324e5d1",
+      "source_sha256": "1438491eda54edb5803bec58898e95d0a8fc05cb629f0afeba9e499791880460",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC08708.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC08708.jpg",
+      "sha256": "326d7d2c675ba0448f88da320f18992374b69b2454b665a4c4c154e9a36cd630",
+      "source_sha256": "c0318c75ccdb36582e02d0e6e40f96a864cda1d189c973c4ce9b06c9ae52c5e8",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC08766.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC08766.jpg",
+      "sha256": "11265e771a4f3eabf921a1f01bd7688bb2e41a4660d3ceba52f5c0e1740fc3d8",
+      "source_sha256": "76e1c5af896d2153beb8d4055ddef28aaf228fdd6d6cc23bc9031fd46b0308d8",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260613__DSC08910.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260613__DSC08910.jpg",
+      "sha256": "d2918ca57e54859aa945ba8a2d979ba0dbd1f6578b8a66ddbf46b63cdd65a6e0",
+      "source_sha256": "214cdccddd0c151b4ca16e444869a34d786dc8daf2481c28058eed09de9ba0ef",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260626__DSC03542.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC03542.jpg",
+      "sha256": "c91745f9f8afeed1d4a167294f5936051db946a5e9beb20eb2ff6ed0f89f958f",
+      "source_sha256": "58872f613957433f336dde3df34388eaa882e06fe02623d733dea089dd1c1486",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260626__DSC03576.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC03576.jpg",
+      "sha256": "ced0067d857a36f7e930c8b365b3b40ec50085c7bd81ba175b9f81045fc8dbd6",
+      "source_sha256": "42364eb4dbf35071c9f1feaabe802112d24b39dca4fb9950d604a55b5ad50830",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260626__DSC05742.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260626__DSC05742.jpg",
+      "sha256": "8c503bd9a4eeb5bbffd88b9e8a35979b6cb23943b70fa230b8691fd1e9118c1f",
+      "source_sha256": "c0257f2b9c9f93b77ed13f4b1e6489516344d4159dd44551f1f409f541a8fd6c",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260627__DSC07299.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC07299.jpg",
+      "sha256": "cc3f1ef81e7af6a98fb976f6ce191f3ca9c40741aaac210344cd943a36677d0a",
+      "source_sha256": "2028452b9133841e46adcae0eafb96e98020c365d4c9c56c8e89984251575e9a",
+      "orientation_correction_degrees": 0
+    },
+    {
+      "file": "20260627__DSC07348.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260627__DSC07348.jpg",
+      "sha256": "48255a4e603d3cd5c09a46e18485cc2b990e9951f7dacf5ba38c87da00140e9b",
+      "source_sha256": "6a39fd12821b40ad28e53795f9a2fd0a2b12c6b089577934cb19a695f4cb0957",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260703__DSC02083.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260703__DSC02083.jpg",
+      "sha256": "57d2a664126d0c28f855062a9fc101605777d89e0452b1d4cfba53bb7848d785",
+      "source_sha256": "6181ad46d36ac32c22f0524b56745c4e42b40a4fb4d7f62bde8acaeddc584107",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04189.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04189.jpg",
+      "sha256": "ca84002f4f4d9ca49146d4bb15701b1f5fac5a71be75a3609e36f0557e5ef318",
+      "source_sha256": "0f8ac8879dd6c9ed12f88c535b573f7c5f7e363d5d1cd4d5ca65368aef1dd175",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04389.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04389.jpg",
+      "sha256": "3a8398824208faccc20a48a0a4e49b8d59e6a36c62a301e67e7f3a9867420dd2",
+      "source_sha256": "505d60fa68daca878430e4269be179c4911e0683e5603142f1a0b1c71facb7c9",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04489.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04489.jpg",
+      "sha256": "02ecf5caee3d7f62b0ac7f8cee3992943170ad5cb0588d6410b1f61210b1cdc3",
+      "source_sha256": "4529c56855abeb1f51882e9ff2a4413b57dd5ba21b5fbf27b86f7b0e4f005610",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04535.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04535.jpg",
+      "sha256": "708815111d8735f873e2e22f9ea8adbdd70587909a61a2c4ab372d947c3fb57a",
+      "source_sha256": "9660dba8a9b4fed8a841d22b5c1cd4ffec34a0198bf839c7b21eb9f2fd58aa5f",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260710__DSC04888.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260710__DSC04888.jpg",
+      "sha256": "407130542f7fe529eaf97cd3d438995d99bdbf1055dbbdac399b0d4edcf61f52",
+      "source_sha256": "1dec484085394e2d40d0ac52ceb80f974129416189d1df136aebe62e7c322677",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09375.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09375.jpg",
+      "sha256": "3cf51fe214af386ee4e5798024f8c058ae9de81ebb751f1740c2fcd0b1654fdc",
+      "source_sha256": "2aabdfd4ddab925f0db106344a5869a75f1f388725d9095ee84c90e42dd51ecc",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09506.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09506.jpg",
+      "sha256": "4f0d1dcf9789f140c98e82f16732e3fe660eaf84e714503af1abf250b250cd80",
+      "source_sha256": "74de0fc3a69afce4cdbfb0a580f44612b80aaa07f286cfbe36a8f478d55dd491",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09826.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09826.jpg",
+      "sha256": "a5ad0b09b97feba8e328f337f64c57ba2133e60afd3c3db04a429dec8ad47126",
+      "source_sha256": "f19a51dbf16260a8236e3c909eed30c79c8b155ba3a063da27cd348209ff59f1",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09852.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09852.jpg",
+      "sha256": "faa06412efcdf06d661daf980f8f2ced2f47a9e78004e01c233e40b81bbd2115",
+      "source_sha256": "12881a2ec079b547ff2e5a41799da74aa3b104775a8c3a232603450d6370d0e4",
+      "orientation_correction_degrees": 270
+    },
+    {
+      "file": "20260729__DSC09992.jpg",
+      "path": "/Volumes/M4Buffer/workspace/Livehouse-Photography-Agent/data/eval/selection_v1/normalized_images/20260729__DSC09992.jpg",
+      "sha256": "f197aff2b8d5769438b015056424cd75c6574f8ce17a328a508947b0b8a88ebd",
+      "source_sha256": "c08ebe69280b15abe5897cd2a8a030939a9dd22805ae1385058a7be1f6232cdc",
+      "orientation_correction_degrees": 270
+    }
+  ]
+}

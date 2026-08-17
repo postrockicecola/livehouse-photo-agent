@@ -38,9 +38,9 @@ jobs:
           PY
       # Critical-rules-only gate: syntax errors and undefined names (F821-class bugs).
       - run: ruff check --select E9,F63,F7,F82 --exclude archive .
-      # Quality platform Phase-0: contracts + golden hydrate + pinned stage3_scoring smoke.
-      - run: python quality/validate_contracts.py
-      - run: python -m quality.smoke
+      # Quality platform: contracts, smoke, parse validity, human-keep assemble when present.
+      - name: Release gate (PR)
+        run: python scripts/eval/run_release_gate.py --mode pr
       # External-service tests (Ollama / Redis) are marker-excluded; see pytest.ini.
       # requires_langgraph tests FAIL (not skip) if langgraph is missing — see tests/conftest.py.
       - name: Pytest (incl. requires_langgraph production path)

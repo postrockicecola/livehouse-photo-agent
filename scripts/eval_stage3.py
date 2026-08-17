@@ -57,12 +57,19 @@ def _fmt(x: float | None, nd: int = 3) -> str:
     return f"{x:.{nd}f}"
 
 
+def _parse_failed(pred: Any) -> bool:
+    meta = getattr(pred, "parse_meta", None) or {}
+    return str(meta.get("status") or "") == "fail"
+
+
 def build_report(joined: Joined, topks: list[int]) -> dict[str, Any]:
     pairs = joined.pairs
+    scored_pairs = [(lb, p) for lb, p in pairs if not _parse_failed(p)]
+    n_excluded_parse_fail = len(pairs) - len(scored_pairs)
 
     # --- overall ---
-    lo = [lb.overall for lb, p in pairs if lb.overall is not None and p.overall is not None]
-    po = [p.overall for lb, p in pairs if lb.overall is not None and p.overall is not None]
+    lo = [lb.overall for lb, p in scored_pairs if lb.overall is not None and p.overall is not None]
+    po = [p.overall for lb, p in scored_pairs if lb.overall is not None and p.overall is not None]
     overall = {
         "n": len(lo),
         "spearman": M.spearman(lo, po),
@@ -74,8 +81,8 @@ def build_report(joined: Joined, topks: list[int]) -> dict[str, Any]:
     # --- per-dimension (calibrated) ---
     per_dim: dict[str, dict[str, Any]] = {}
     for k in DIM_KEYS:
-        la = [lb.dims[k] for lb, p in pairs if k in lb.dims and k in p.dims_cal]
-        pa = [p.dims_cal[k] for lb, p in pairs if k in lb.dims and k in p.dims_cal]
+        la = [lb.dims[k] for lb, p in scored_pairs if k in lb.dims and k in p.dims_cal]
+        pa = [p.dims_cal[k] for lb, p in scored_pairs if k in lb.dims and k in p.dims_cal]
         per_dim[k] = {
             "n": len(la),
             "mae": M.mae(la, pa),
@@ -88,7 +95,7 @@ def build_report(joined: Joined, topks: list[int]) -> dict[str, Any]:
     calib: dict[str, dict[str, Any]] = {}
     for k in DIM_KEYS:
         lab, raw, cal = [], [], []
-        for lb, p in pairs:
+        for lb, p in scored_pairs:
             if k in lb.dims and k in p.dims_raw and k in p.dims_cal:
                 lab.append(lb.dims[k])
                 raw.append(p.dims_raw[k])
@@ -104,8 +111,8 @@ def build_report(joined: Joined, topks: list[int]) -> dict[str, Any]:
             }
 
     # --- selection precision/recall@k ---
-    sel_scores = [p.overall for lb, p in pairs if lb.keep is not None and p.overall is not None]
-    sel_pos = [bool(lb.keep) for lb, p in pairs if lb.keep is not None and p.overall is not None]
+    sel_scores = [p.overall for lb, p in scored_pairs if lb.keep is not None and p.overall is not None]
+    sel_pos = [bool(lb.keep) for lb, p in scored_pairs if lb.keep is not None and p.overall is not None]
     selection: dict[str, Any] = {"n": len(sel_scores), "n_positives": int(sum(sel_pos))}
     if sel_scores:
         m_keep, m_drop, gap = M.group_mean_separation(sel_scores, sel_pos)
@@ -120,6 +127,10 @@ def build_report(joined: Joined, topks: list[int]) -> dict[str, Any]:
     bias = M.bias_stats(lo, po) if lo else {}
     quintile_calib = M.quintile_calibration(lo, po) if lo else []
 
+    from quality.validity import summarize_validity
+
+    validity = summarize_validity(p.parse_meta for _, p in pairs)
+
     return {
         "matched": joined.n_matched,
         "labels_unmatched": joined.labels_only,
@@ -131,6 +142,11 @@ def build_report(joined: Joined, topks: list[int]) -> dict[str, Any]:
         "selection": selection,
         "bias": bias,
         "quintile_calibration": quintile_calib,
+        "validity": validity,
+        "parse_fail_rate": validity["parse_fail_rate"],
+        "regex_recovery_rate": validity["regex_recovery_rate"],
+        "missing_dim_rate": validity["missing_dim_rate"],
+        "n_excluded_parse_fail": n_excluded_parse_fail,
     }
 
 
@@ -202,6 +218,20 @@ def print_report(rep: dict[str, Any]) -> None:
                 f"  Q{q['quintile']:<2}  {q['range']:<9}  {q['n']:>4}"
                 f"  {q['human_mean']:>8.1f}  {q['model_mean']:>8.1f}  {q['bias_mean']:>+7.1f}"
             )
+
+    validity = rep.get("validity") or {}
+    if validity:
+        print(
+            f"\n[Validity] known={validity.get('n_known', 0)} "
+            f"unknown={validity.get('n_unknown', 0)} "
+            f"coverage={_fmt(validity.get('coverage'), 2)}"
+        )
+        print(
+            f"  parse_fail_rate={_fmt(validity.get('parse_fail_rate'), 3)}  "
+            f"regex_recovery_rate={_fmt(validity.get('regex_recovery_rate'), 3)}  "
+            f"missing_dim_rate={_fmt(validity.get('missing_dim_rate'), 3)}  "
+            f"excluded_from_corr={rep.get('n_excluded_parse_fail', 0)}"
+        )
 
     print(line)
 
@@ -315,6 +345,15 @@ def cmd_run(args: argparse.Namespace) -> int:
                         f"{row.get('baseline_abs_error')} → {row.get('current_abs_error')} "
                         f"(Δ={row.get('delta_abs_error')})"
                     )
+            gate = run.get("gate") or {}
+            if gate.get("result") == "fail":
+                print("Validity gate: FAIL")
+                for check in gate.get("checks") or []:
+                    if check.get("result") == "fail":
+                        print(
+                            f"  {check.get('id')}: {check.get('actual')} "
+                            f"(threshold {check.get('threshold')})"
+                        )
 
     if args.output_md:
         from scripts.eval.report import render_markdown
@@ -324,6 +363,20 @@ def cmd_run(args: argparse.Namespace) -> int:
         Path(args.output_md).parent.mkdir(parents=True, exist_ok=True)
         Path(args.output_md).write_text(md, encoding="utf-8")
         print(f"Markdown report written to {args.output_md}")
+
+    from quality.validity import evaluate_validity_gate
+
+    validity_gate = evaluate_validity_gate(rep.get("validity") or {})
+    if validity_gate.get("result") == "fail":
+        print("Validity gate: FAIL", file=sys.stderr)
+        for check in validity_gate.get("checks") or []:
+            if check.get("result") == "fail":
+                print(
+                    f"  {check.get('id')}: {check.get('actual')} "
+                    f"(threshold {check.get('threshold')})",
+                    file=sys.stderr,
+                )
+        return 1
     return 0
 
 

@@ -1,0 +1,28 @@
+{
+  "schema_version": "selection_eval_dataset.v1",
+  "total": 250,
+  "counts": {
+    "technical_hard": 50,
+    "semantic_defect": 50,
+    "ordinary": 100,
+    "highlight": 50
+  },
+  "sessions": 21,
+  "source_counts": {
+    "golden_apr_jul_2026": 6,
+    "round_001": 115,
+    "round_002": 129
+  },
+  "human_reviewed": 250,
+  "manually_excluded": [
+    "20260528ruanshizi__DSC03026.jpg",
+    "20260528ruanshizi__DSC03152.jpg",
+    "20260710__DSC05511.jpg"
+  ],
+  "near_duplicate_exceptions": [
+    "20260710__DSC04651.jpg"
+  ],
+  "manually_included": [
+    "20260729__DSC09962.jpg"
+  ]
+}

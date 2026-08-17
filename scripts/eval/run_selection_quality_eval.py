@@ -869,6 +869,12 @@ def _score_quality(
     }
 
 
+def _validity_metrics(predictions: list[dict[str, Any]]) -> dict[str, Any]:
+    from quality.validity import parse_meta_from_record, summarize_validity
+
+    return summarize_validity(parse_meta_from_record(row) for row in predictions)
+
+
 def _runtime_metrics(
     predictions: list[dict[str, Any]], config: dict[str, Any]
 ) -> dict[str, Any]:
@@ -982,7 +988,7 @@ def _threshold_failures(
             ]
         )
     failures = []
-    if mode != "stage1_only" and not gate_off:
+    if mode != "stage1_only" and not gate_off and bool(thresholds.get("enforce_semantic_gate")):
         checks.extend(
             [
                 (
@@ -1041,6 +1047,36 @@ def _threshold_failures(
                 "threshold": True,
             }
         )
+    validity_cfg = config.get("validity") or {}
+    validity = report.get("validity") or {}
+    if int(validity.get("n_known") or 0) > 0:
+        if "max_parse_fail_rate" in validity_cfg:
+            checks.append(
+                (
+                    "validity.parse_fail_rate",
+                    float(validity.get("parse_fail_rate") or 0),
+                    "<=",
+                    float(validity_cfg["max_parse_fail_rate"]),
+                )
+            )
+        if "max_regex_recovery_rate" in validity_cfg:
+            checks.append(
+                (
+                    "validity.regex_recovery_rate",
+                    float(validity.get("regex_recovery_rate") or 0),
+                    "<=",
+                    float(validity_cfg["max_regex_recovery_rate"]),
+                )
+            )
+        if "max_missing_dim_rate" in validity_cfg:
+            checks.append(
+                (
+                    "validity.missing_dim_rate",
+                    float(validity.get("missing_dim_rate") or 0),
+                    "<=",
+                    float(validity_cfg["max_missing_dim_rate"]),
+                )
+            )
     operational = config.get("operational") or {}
     runtime = report.get("runtime_metrics") or {}
     if mode != "stage1_only":
@@ -1183,6 +1219,7 @@ def score_predictions(
             else {"available": True, **_score_quality(labels, predictions)}
         ),
         "runtime_metrics": _runtime_metrics(predictions, config),
+        "validity": _validity_metrics(predictions),
         "prediction_metadata": predictions_meta,
         "resolved_thresholds": {
             "thresholds": config.get("thresholds") or {},

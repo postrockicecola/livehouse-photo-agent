@@ -87,6 +87,7 @@ class Prediction:
     overall: Optional[float] = None
     dims_cal: dict[str, float] = field(default_factory=dict)
     dims_raw: dict[str, float] = field(default_factory=dict)
+    parse_meta: Optional[dict[str, Any]] = None
 
     @property
     def key(self) -> str:
@@ -139,12 +140,34 @@ def _extract_prediction(rec: dict[str, Any]) -> Prediction:
     if not dims_raw:
         dims_raw = _clean_dims(postp.get("dimensions_raw"))
 
-    return Prediction(file=str(file), overall=overall, dims_cal=dims_cal, dims_raw=dims_raw)
+    parse_meta = None
+    try:
+        from quality.validity import parse_meta_from_record
+
+        parse_meta = parse_meta_from_record(rec)
+    except Exception:
+        parse_meta = None
+
+    return Prediction(
+        file=str(file),
+        overall=overall,
+        dims_cal=dims_cal,
+        dims_raw=dims_raw,
+        parse_meta=parse_meta,
+    )
 
 
 def load_predictions(path: str | Path) -> list[Prediction]:
-    with open(path, "r", encoding="utf-8") as fh:
-        data = json.load(fh)
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    data: Any
+    if p.suffix == ".jsonl":
+        data = [json.loads(line) for line in text.splitlines() if line.strip()]
+    else:
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            data = [json.loads(line) for line in text.splitlines() if line.strip()]
     if isinstance(data, dict):
         # tolerate {"results": [...]} or {file: record} shapes
         if isinstance(data.get("results"), list):

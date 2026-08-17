@@ -264,6 +264,29 @@ def compose_stage3_semantic_first_prompt() -> str:
     )
 
 
+def compose_stage3_defect_head_prompt() -> str:
+    """Standalone delivery-defect head. No aesthetic score, no 8-dim rubric.
+
+    Use this instead of treating the full Stage3 semantic_gate field as a
+    product rejector. The 7B full-pass gate recall on selection_v1 was ~2%.
+    """
+    schema = (
+        '{"is_present":<true or false>,"type":"<one allowed type or empty>",'
+        '"evidence":"<one visible fact or empty>"}'
+    )
+    return (
+        f"{PROMPT_BLOCKS['domain']}"
+        f"{PROMPT_BLOCKS['contract_tier_a']}"
+        "This task is delivery-defect detection only. Do not score aesthetics.\n"
+        "Allowed type: closed_eyes, heavy_occlusion, no_clear_subject, missed_moment, "
+        "severe_composition_failure, bad_expression, invalid_pose, other.\n"
+        "Mark is_present only for a visible client-delivery defect. "
+        "Intentional silhouette and readable motion blur are not defects.\n"
+        "If no defect: is_present=false, type=\"\", evidence=\"\".\n"
+        f"Emit exactly this shape, filling every <...> from THIS image:\n{schema}\n"
+    )
+
+
 def compose_stage3_semantic_compact_prompt() -> str:
     """A/B candidate for small local VLMs: compact Chinese gate-first contract."""
     return (

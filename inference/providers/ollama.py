@@ -83,6 +83,8 @@ class OllamaProvider(InferenceProvider):
         timeout: int,
         max_retries: int,
         retry_delay: float,
+        json_mode: bool = False,
+        seed: int | None = None,
     ) -> None:
         if endpoint:
             self.endpoint = endpoint.rstrip("/")
@@ -95,6 +97,8 @@ class OllamaProvider(InferenceProvider):
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        self.json_mode = bool(json_mode)
+        self.seed = seed
 
     def generate(self, request: InferenceRequest, *, model_name: str) -> InferenceResponse:
         thumb_side = request.metadata.get("vlm_thumbnail_max_side")
@@ -127,6 +131,17 @@ class OllamaProvider(InferenceProvider):
                     "num_predict": num_predict,
                 },
             }
+            json_mode = request.metadata.get("json_mode")
+            if json_mode is None:
+                json_mode = self.json_mode
+            if json_mode:
+                payload["format"] = "json"
+            seed = request.metadata.get("seed", self.seed)
+            if seed is not None:
+                try:
+                    payload["options"]["seed"] = int(seed)
+                except (TypeError, ValueError):
+                    pass
             try:
                 response = requests.post(url, json=payload, timeout=req_timeout)
                 response.raise_for_status()

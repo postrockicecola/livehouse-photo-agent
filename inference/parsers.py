@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
@@ -20,6 +20,64 @@ logger = logging.getLogger(__name__)
 
 _LOG_CLIP = 6000
 _DEFAULT_FLOAT = 5.0
+
+PARSE_OK = "ok"
+PARSE_MANUAL = "manual"
+PARSE_REGEX = "regex_recovery"
+PARSE_FAIL = "fail"
+
+
+def inspect_raw_dims(data: Any) -> tuple[list[str], list[str], list[str]]:
+    """Return (present, missing, coerced) dim keys from raw JSON before defaults."""
+    if not isinstance(data, dict):
+        return [], list(STAGE3_DIM_KEYS), []
+    nested = data.get("dimensions") if isinstance(data.get("dimensions"), dict) else {}
+    present: list[str] = []
+    missing: list[str] = []
+    coerced: list[str] = []
+    for key in STAGE3_DIM_KEYS:
+        raw = data[key] if key in data else nested.get(key) if key in nested else None
+        if raw is None or raw == "":
+            missing.append(key)
+            continue
+        present.append(key)
+        try:
+            float(raw)
+        except (TypeError, ValueError):
+            coerced.append(key)
+    return present, missing, coerced
+
+
+def stamp_parse_meta(
+    parsed: dict[str, Any],
+    *,
+    status: str,
+    missing_dims: list[str] | tuple[str, ...] = (),
+    coerced_dims: list[str] | tuple[str, ...] = (),
+) -> dict[str, Any]:
+    """Attach validity provenance. Production may still use fallback scores."""
+    parsed["parse_meta"] = {
+        "status": status,
+        "missing_dims": list(missing_dims),
+        "coerced_dims": list(coerced_dims),
+    }
+    return parsed
+
+
+def parse_note_from_parsed(parsed: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Flatten parse_meta for stage3_meta / audit rows."""
+    if not parsed:
+        return {
+            "parse_status": PARSE_FAIL,
+            "missing_dims": list(STAGE3_DIM_KEYS),
+            "coerced_dims": [],
+        }
+    meta = parsed.get("parse_meta") if isinstance(parsed.get("parse_meta"), dict) else {}
+    return {
+        "parse_status": str(meta.get("status") or PARSE_OK),
+        "missing_dims": list(meta.get("missing_dims") or []),
+        "coerced_dims": list(meta.get("coerced_dims") or []),
+    }
 
 
 def norm_bilingual_text(v: Any) -> dict[str, str]:
@@ -230,16 +288,20 @@ def default_stage3_parsed() -> dict[str, Any]:
     """Neutral fallback when the model output cannot be parsed (pipeline keeps running)."""
     dims = {k: float(_DEFAULT_FLOAT) for k in STAGE3_DIM_KEYS}
     empty = {"zh": "", "en": ""}
-    return {
-        "dimensions": dims,
-        "strongest_aspect": dict(empty),
-        "weakest_aspect": dict(empty),
-        "tags": [],
-        "mood_tags": [],
-        "dimension_comments": {},
-        "editing_suggestions": [],
-        "semantic_gate": None,
-    }
+    return stamp_parse_meta(
+        {
+            "dimensions": dims,
+            "strongest_aspect": dict(empty),
+            "weakest_aspect": dict(empty),
+            "tags": [],
+            "mood_tags": [],
+            "dimension_comments": {},
+            "editing_suggestions": [],
+            "semantic_gate": None,
+        },
+        status=PARSE_FAIL,
+        missing_dims=list(STAGE3_DIM_KEYS),
+    )
 
 
 def _explicit_model_error(data: dict[str, Any]) -> bool:
@@ -267,13 +329,17 @@ def _finalize_regex_recovery(recovered: dict[str, Any]) -> dict[str, Any]:
 
 def default_fast_stage3_parsed() -> dict[str, Any]:
     """Neutral fast-mode fallback when JSON cannot be parsed."""
-    return {
-        "score": 55.0,
-        "verdict": {"zh": "解析失败", "en": "Parse failure"},
-        "tags": ["unparsed"],
-        "mood_tags": [],
-        "semantic_gate": None,
-    }
+    return stamp_parse_meta(
+        {
+            "score": 55.0,
+            "verdict": {"zh": "解析失败", "en": "Parse failure"},
+            "tags": ["unparsed"],
+            "mood_tags": [],
+            "semantic_gate": None,
+        },
+        status=PARSE_FAIL,
+        missing_dims=list(STAGE3_DIM_KEYS),
+    )
 
 
 def _pydantic_validate_fast(data: dict[str, Any]) -> dict[str, Any] | None:
@@ -323,9 +389,16 @@ def parse_fast_vlm_response(json_str: str, raw_model_text: str | None = None) ->
     if _explicit_model_error(data):
         return {}
 
+    _, missing_dims, coerced_dims = inspect_raw_dims(data)
+
     pydantic_result = _pydantic_validate_fast(data)
     if pydantic_result is not None:
-        return pydantic_result
+        return stamp_parse_meta(
+            pydantic_result,
+            status=PARSE_OK,
+            missing_dims=missing_dims,
+            coerced_dims=coerced_dims,
+        )
 
     raw_score = data.get("score", _DEFAULT_FLOAT * 10.0)
     try:
@@ -336,22 +409,27 @@ def parse_fast_vlm_response(json_str: str, raw_model_text: str | None = None) ->
 
     verdict = _mirror_bilingual_pair(norm_bilingual_text(data.get("verdict", "")))
 
-    return {
-        "score": score_f,
-        "verdict": verdict,
-        "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
-        "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
-        "dimensions": (
-            dict(data["dimensions"])
-            if isinstance(data.get("dimensions"), dict)
-            else {}
-        ),
-        "semantic_gate": (
-            dict(data["semantic_gate"])
-            if isinstance(data.get("semantic_gate"), dict)
-            else None
-        ),
-    }
+    return stamp_parse_meta(
+        {
+            "score": score_f,
+            "verdict": verdict,
+            "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
+            "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
+            "dimensions": (
+                dict(data["dimensions"])
+                if isinstance(data.get("dimensions"), dict)
+                else {}
+            ),
+            "semantic_gate": (
+                dict(data["semantic_gate"])
+                if isinstance(data.get("semantic_gate"), dict)
+                else None
+            ),
+        },
+        status=PARSE_MANUAL,
+        missing_dims=missing_dims,
+        coerced_dims=coerced_dims,
+    )
 
 
 def parse_dimensional_response(json_str: str, raw_model_text: str | None = None) -> dict[str, Any]:
@@ -375,12 +453,20 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
 
         recovered = _fallback_parse_truncated_json(json_str)
         if recovered:
-            return _finalize_regex_recovery(recovered)
+            return stamp_parse_meta(
+                _finalize_regex_recovery(recovered),
+                status=PARSE_REGEX,
+            )
         return {}
 
     if not isinstance(data, dict):
         recovered = _fallback_parse_truncated_json(json_str)
-        return _finalize_regex_recovery(recovered) if recovered else {}
+        if recovered:
+            return stamp_parse_meta(
+                _finalize_regex_recovery(recovered),
+                status=PARSE_REGEX,
+            )
+        return {}
 
     # Must run before Pydantic: Stage3FullResponse defaults all dims to 5.0, so
     # {"error":"invalid_output"} would otherwise validate as a neutral scorecard.
@@ -388,9 +474,24 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
         logger.warning("Model returned explicit invalid_output sentinel")
         return {}
 
+    _, missing_dims, coerced_dims = inspect_raw_dims(data)
+    if len(missing_dims) == len(STAGE3_DIM_KEYS):
+        recovered = _fallback_parse_truncated_json(json_str)
+        if recovered:
+            return stamp_parse_meta(
+                _finalize_regex_recovery(recovered),
+                status=PARSE_REGEX,
+            )
+        return {}
+
     pydantic_result = _pydantic_validate_full(data)
     if pydantic_result is not None:
-        return pydantic_result
+        return stamp_parse_meta(
+            pydantic_result,
+            status=PARSE_OK,
+            missing_dims=missing_dims,
+            coerced_dims=coerced_dims,
+        )
 
     try:
         dimensions = {}
@@ -426,20 +527,25 @@ def parse_dimensional_response(json_str: str, raw_model_text: str | None = None)
         sa = _mirror_bilingual_pair(norm_bilingual_text(data.get("strongest_aspect", "")))
         wa = _mirror_bilingual_pair(norm_bilingual_text(data.get("weakest_aspect", "")))
 
-        return {
-            "dimensions": dimensions,
-            "strongest_aspect": sa,
-            "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
-            "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
-            "semantic_gate": (
-                dict(data["semantic_gate"])
-                if isinstance(data.get("semantic_gate"), dict)
-                else None
-            ),
-            "weakest_aspect": wa,
-            "dimension_comments": dimension_comments,
-            "editing_suggestions": editing_suggestions,
-        }
+        return stamp_parse_meta(
+            {
+                "dimensions": dimensions,
+                "strongest_aspect": sa,
+                "tags": _coerce_tag_list(data.get("tags", []), max_len=80),
+                "mood_tags": _coerce_tag_list(data.get("mood_tags", []), max_len=80),
+                "semantic_gate": (
+                    dict(data["semantic_gate"])
+                    if isinstance(data.get("semantic_gate"), dict)
+                    else None
+                ),
+                "weakest_aspect": wa,
+                "dimension_comments": dimension_comments,
+                "editing_suggestions": editing_suggestions,
+            },
+            status=PARSE_MANUAL,
+            missing_dims=missing_dims,
+            coerced_dims=coerced_dims,
+        )
     except Exception as e:
         logger.error("Error parsing dimensional response: %s", e)
         return {}

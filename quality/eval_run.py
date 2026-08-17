@@ -67,6 +67,8 @@ def metrics_from_stage3_report(report: Mapping[str, Any]) -> dict[str, Any]:
         },
         "macro_dim_mae": _num(report.get("macro_dim_mae")),
         "parse_fail_rate": _num(report.get("parse_fail_rate")) or 0.0,
+        "regex_recovery_rate": _num(report.get("regex_recovery_rate")) or 0.0,
+        "missing_dim_rate": _num(report.get("missing_dim_rate")) or 0.0,
     }
 
 
@@ -187,7 +189,7 @@ def diff_eval_runs(
         if d is None:
             return 0.0
         name = str(row.get("metric") or "")
-        if "mae" in name or "rmse" in name or "parse_fail" in name:
+        if "mae" in name or "rmse" in name or "parse_fail" in name or "recovery" in name or "missing_dim" in name:
             return -float(d)  # increase is bad → sort high
         return float(d)  # decrease is bad → sort low first via reverse
 
@@ -367,12 +369,27 @@ def emit_from_stage3_report(
     if root.name != run_id:
         root = root / run_id
 
+    validity = report.get("validity") if isinstance(report.get("validity"), dict) else {}
+    from quality.validity import evaluate_validity_gate
+
+    baseline_validity = None
+    if baseline_doc is not None:
+        b_metrics = baseline_doc.get("metrics") if isinstance(baseline_doc.get("metrics"), dict) else {}
+        baseline_validity = {
+            "parse_fail_rate": b_metrics.get("parse_fail_rate"),
+            "regex_recovery_rate": b_metrics.get("regex_recovery_rate"),
+            "missing_dim_rate": b_metrics.get("missing_dim_rate"),
+        }
+    validity_gate = evaluate_validity_gate(validity, baseline=baseline_validity)
+
     counts = {
         "items_total": int(report.get("matched") or 0)
         + len(report.get("labels_unmatched") or []),
         "items_scored": int((report.get("overall") or {}).get("n") or 0),
         "items_matched": int(report.get("matched") or 0),
-        "parse_fail": 0,
+        "parse_fail": int(validity.get("parse_fail") or 0),
+        "regex_recovery": int(validity.get("regex_recovery") or 0),
+        "missing_dim_items": int(validity.get("missing_dim_items") or 0),
     }
     run = build_eval_run(
         suite=suite,
@@ -384,6 +401,7 @@ def emit_from_stage3_report(
         baseline_run_id=baseline_run_id or None,
         protocol=report.get("protocol") if isinstance(report.get("protocol"), dict) else None,
         counts=counts,
+        gate=validity_gate,
         tags=tags,
     )
     diff = None

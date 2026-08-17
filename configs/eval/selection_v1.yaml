@@ -27,6 +27,7 @@ selection:
 thresholds:
   min_technical_recall: 0.96
   min_semantic_recall: 0.90
+  enforce_semantic_gate: false
   max_ordinary_fpr: 0.05
   max_highlight_fpr: 0.02
   max_empty_results: 0
@@ -37,10 +38,18 @@ diagnostics:
   min_overall_spearman: 0.60
   max_overall_mae: 10.0
   max_dimension_macro_mae: 1.30
+  semantic_gate:
+    role: diagnostic
+    min_recall: 0.90
 
 operational:
   min_schema_success_rate: 1.0
   max_fallback_count: 0
+
+validity:
+  max_parse_fail_rate: 0.02
+  max_regex_recovery_rate: 0.05
+  max_missing_dim_rate: 0.10
 
 # Optional account-specific DashScope prices. Leave unset rather than guessing;
 # token totals are always reported, and cost is calculated when both are numeric.

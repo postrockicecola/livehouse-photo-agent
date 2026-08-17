@@ -21,6 +21,8 @@
     "mae_overall": 8.4,
     "rmse_overall": 11.2,
     "parse_fail_rate": 0.0,
+    "regex_recovery_rate": 0.0,
+    "missing_dim_rate": 0.0,
     "n_scored": 32
   },
   "artifact_root": "quality/store/runs/evr_01EXAMPLE000000000000000",

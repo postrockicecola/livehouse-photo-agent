@@ -21,6 +21,7 @@ from inference.parsers import (
     norm_bilingual_text,
     parse_dimensional_response,
     parse_fast_vlm_response,
+    parse_note_from_parsed,
 )
 from inference.types import InferenceRequest, inference_status_ok
 from infra.metrics import record_stage3_early_exit_counts
@@ -362,6 +363,13 @@ def stage3_inference_request_metadata(
 ) -> Dict[str, Any]:
     """Attach Route-B transport constraints without leaking provider concerns into prompts."""
     out = dict(extra or {})
+    out.setdefault("json_mode", True)
+    model_cfg = config.get("model") if isinstance(config.get("model"), Mapping) else {}
+    if "seed" not in out and model_cfg.get("seed") is not None:
+        try:
+            out["seed"] = int(model_cfg["seed"])
+        except (TypeError, ValueError):
+            pass
     route_b = ((config.get("stage3") or {}).get("route_b") or {})
     if not isinstance(route_b, Mapping) or not bool(route_b.get("enabled", False)):
         return out
@@ -875,6 +883,7 @@ def analyze_stage3_fast(
             parse_note["used_fallback_defaults"] = True
         else:
             parsed = sanitize_stage3_parsed(parsed)
+        parse_note.update(parse_note_from_parsed(parsed))
 
         outcome = "fallback_defaults" if used_fallback_defaults else "success"
         src_resp = response
@@ -1218,9 +1227,12 @@ def analyze_with_dimensions(
                 Path(image_path).name,
             )
 
-        outcome = "fallback_defaults" if used_fallback_defaults else "success"
-
         parsed = sanitize_stage3_parsed(parsed)
+        parse_note.update(parse_note_from_parsed(parsed))
+        if used_fallback_defaults:
+            parse_note["parse_status"] = "fail"
+
+        outcome = "fallback_defaults" if used_fallback_defaults else "success"
 
         src_resp = response
         if parse_note.get("parse_attempts") == 2 and response_r is not None:

@@ -59,6 +59,11 @@ def build_inference_router_from_model_config(model_config: Mapping[str, Any]) ->
     fb_model = model_config.get("fallback_model_name") or None
     routers_o: list[InferenceRouter] = []
     for base in urls:
+        seed = model_config.get("seed")
+        try:
+            seed_i = int(seed) if seed is not None else None
+        except (TypeError, ValueError):
+            seed_i = None
         opp = OllamaProvider(
             endpoint=base,
             temperature=float(model_config["temperature"]),
@@ -66,6 +71,8 @@ def build_inference_router_from_model_config(model_config: Mapping[str, Any]) ->
             timeout=int(model_config["timeout"]),
             max_retries=int(model_config["max_retries"]),
             retry_delay=float(model_config["retry_delay"]),
+            json_mode=bool(model_config.get("json_mode", False)),
+            seed=seed_i,
         )
         routers_o.append(
             InferenceRouter(
