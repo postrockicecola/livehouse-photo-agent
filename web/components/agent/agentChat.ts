@@ -129,7 +129,13 @@ export type AgentStreamDone = {
   base_dir: string;
 };
 
+export type AgentStreamStatus = {
+  phase: string;
+  message: string;
+};
+
 export type AgentStreamCallbacks = {
+  onStatus?: (status: AgentStreamStatus) => void;
   onToken?: (text: string) => void;
   onToolCall?: (call: AgentToolCall) => void;
   onGuardrail?: (ev: AgentGuardrailEvent) => void;
@@ -172,6 +178,12 @@ export async function streamAgentChat(
       return;
     }
     switch (ev.type) {
+      case "status":
+        cb.onStatus?.({
+          phase: String(ev.phase ?? ""),
+          message: String(ev.message ?? ""),
+        });
+        break;
       case "token":
         receivedToken = true;
         cb.onToken?.(String(ev.text ?? ""));

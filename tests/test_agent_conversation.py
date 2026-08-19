@@ -287,7 +287,10 @@ def _collect(events):
 def test_stream_chat_real_streams_tokens_from_stream_fn():
     agent = ConversationalAgent(lambda msgs: "unused")
     stream_fn = lambda msgs: iter(["Hel", "lo ", "world"])
-    text, tools, done = _collect(agent.stream_chat("hi", stream_fn=stream_fn))
+    events = list(agent.stream_chat("hi", stream_fn=stream_fn))
+    text, tools, done = _collect(events)
+    statuses = [e for e in events if e["type"] == "status"]
+    assert [e["phase"] for e in statuses] == ["thinking", "answering"]
     assert text == "Hello world"
     assert tools == []
     assert done is not None and done["reply"] == "Hello world"

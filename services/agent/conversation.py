@@ -755,6 +755,7 @@ class ConversationalAgent:
 
         Event shapes (all dicts with a ``type`` key):
 
+        - ``{"type": "status", "phase", "message"}`` — immediate progress feedback
         - ``{"type": "tool_call", "tool", "args", "ok"}`` — a skill just ran
         - ``{"type": "token", "text"}`` — typing-effect chunk of the *finalized* reply
           (not live model tokens; see :meth:`_stream_answer`)
@@ -774,6 +775,11 @@ class ConversationalAgent:
                 return
         self._turn_user_text = user_text
         self.memory.add_user(user_text)
+        yield {
+            "type": "status",
+            "phase": "thinking",
+            "message": "正在理解你的请求…",
+        }
 
         match = route_gallery_intent(user_text) if self._skills is not None else None
         if self._imperative_requested():
@@ -924,6 +930,11 @@ class ConversationalAgent:
         SSE ``token`` events therefore do **not** imply lower time-to-first-byte than
         non-stream chat; they are a display animation over the finalized string.
         """
+        yield {
+            "type": "status",
+            "phase": "answering",
+            "message": "正在整理并校验结果…",
+        }
         acc = ""
         for piece in self._iter_final_tokens(messages, stream_fn):
             acc += piece

@@ -238,6 +238,8 @@ CREATE TABLE IF NOT EXISTS model_run_attempts (
   error_type TEXT,
   error_message TEXT,
   primary_skipped INTEGER NOT NULL DEFAULT 0 CHECK (primary_skipped IN (0, 1)),
+  endpoint TEXT,
+  fallback_reason TEXT,
   created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
   UNIQUE(model_run_id, seq)
 );

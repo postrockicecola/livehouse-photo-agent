@@ -14,6 +14,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import queue
+import threading
 from pathlib import Path
 from typing import Any, Optional
 
@@ -461,34 +463,61 @@ def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
     )
     agent = runner.agent
 
+    def _prepare_event(ev: dict[str, Any]) -> dict[str, Any]:
+        if ev.get("type") != "done":
+            return ev
+        turns = _persist_turn(
+            conv_id,
+            req.message,
+            str(ev.get("reply") or ""),
+            events=list(getattr(agent, "_events", []) or []),
+            guardrail_events=events,
+            working_memory=dict(getattr(agent, "working_memory", {}) or {}),
+        )
+        tr = dict(getattr(agent, "last_trace", {}) or ev.get("trace") or {})
+        return {
+            **ev,
+            "base_dir": base_dir,
+            "memory_turns": turns,
+            "trace": tr,
+            "final_answer": getattr(agent, "last_final_answer", None) or ev.get("final_answer"),
+            "guardrail_events": [
+                {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
+                for e in events if e.triggered
+            ],
+        }
+
     def _gen():
-        try:
-            for ev in runner.stream(req.message):
-                if ev.get("type") == "done":
-                    turns = _persist_turn(
-                        conv_id,
-                        req.message,
-                        str(ev.get("reply") or ""),
-                        events=list(getattr(agent, "_events", []) or []),
-                        guardrail_events=events,
-                        working_memory=dict(getattr(agent, "working_memory", {}) or {}),
-                    )
-                    tr = dict(getattr(agent, "last_trace", {}) or ev.get("trace") or {})
-                    ev = {
-                        **ev,
-                        "base_dir": base_dir,
-                        "memory_turns": turns,
-                        "trace": tr,
-                        "final_answer": getattr(agent, "last_final_answer", None) or ev.get("final_answer"),
-                        "guardrail_events": [
-                            {"kind": e.kind, "triggered": e.triggered, "matches": e.matches, "detail": e.detail}
-                            for e in events if e.triggered
-                        ],
-                    }
-                yield _sse(ev)
-        except Exception as exc:
-            logger.exception("agent stream failed")
-            yield _sse({"type": "error", "error": f"model call failed: {exc}", "base_dir": base_dir})
+        event_queue: queue.Queue[object] = queue.Queue()
+        finished = object()
+
+        def _produce() -> None:
+            try:
+                for ev in runner.stream(req.message):
+                    event_queue.put(_prepare_event(ev))
+            except Exception as exc:
+                logger.exception("agent stream failed")
+                event_queue.put(
+                    {"type": "error", "error": f"model call failed: {exc}", "base_dir": base_dir}
+                )
+            finally:
+                event_queue.put(finished)
+
+        threading.Thread(
+            target=_produce,
+            name=f"agent-sse-{req.session_id[:24]}",
+            daemon=True,
+        ).start()
+        while True:
+            try:
+                item = event_queue.get(timeout=15.0)
+            except queue.Empty:
+                yield ": keep-alive\n\n"
+                continue
+            if item is finished:
+                break
+            if isinstance(item, dict):
+                yield _sse(item)
 
     return StreamingResponse(_gen(), media_type="text/event-stream", headers=headers)
 

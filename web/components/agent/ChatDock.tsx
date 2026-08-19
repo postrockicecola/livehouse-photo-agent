@@ -30,6 +30,7 @@ type ChatTurn = {
   guardrails?: AgentGuardrailEvent[];
   error?: boolean;
   streaming?: boolean;
+  streamStatus?: string;
 };
 
 /** Collect basenames from search/select metadata in this turn (for vibe preview pool). */
@@ -1095,7 +1096,13 @@ export function ChatDock({
       setTurns((prev) => [
         ...prev,
         { role: "user", text: message },
-        { role: "assistant", text: "", toolCalls: [], streaming: true },
+        {
+          role: "assistant",
+          text: "",
+          toolCalls: [],
+          streaming: true,
+          streamStatus: "正在连接 Agent…",
+        },
       ]);
       setSending(true);
 
@@ -1130,11 +1137,17 @@ export function ChatDock({
           );
         };
         const { receivedToken } = await streamAgentChat(apiBase, body, {
+          onStatus: (status) =>
+            patchLastAssistant((t) => ({ ...t, streamStatus: status.message || t.streamStatus })),
           onToken: (text) =>
-            patchLastAssistant((t) => ({ ...t, text: t.text + text })),
+            patchLastAssistant((t) => ({ ...t, text: t.text + text, streamStatus: undefined })),
           onToolCall: (call) => {
             turnToolCalls.push(call);
-            patchLastAssistant((t) => ({ ...t, toolCalls: [...(t.toolCalls ?? []), call] }));
+            patchLastAssistant((t) => ({
+              ...t,
+              toolCalls: [...(t.toolCalls ?? []), call],
+              streamStatus: "工具执行完成，正在整理结果…",
+            }));
             // Open Gallery preview as soon as the write skill returns — don't wait for the
             // model's final prose (which often claims success without a CTA).
             emitOnce([call]);
@@ -1151,13 +1164,20 @@ export function ChatDock({
               toolCalls: calls ?? t.toolCalls,
               guardrails: info.guardrail_events,
               streaming: false,
+              streamStatus: undefined,
             }));
             const doneCalls = calls ?? turnToolCalls;
             emitOnce(doneCalls);
             advancePromptPhase(doneCalls);
           },
           onError: (msg) =>
-            patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false })),
+            patchLastAssistant((t) => ({
+              ...t,
+              text: msg,
+              error: true,
+              streaming: false,
+              streamStatus: undefined,
+            })),
         });
 
         // SSE opened but yielded no content (e.g. proxy buffering) → non-stream fallback.
@@ -1170,6 +1190,7 @@ export function ChatDock({
             guardrails: data.guardrail_events,
             error: Boolean(data.error),
             streaming: false,
+            streamStatus: undefined,
           }));
           emitGalleryUiActions(
             data.tool_calls ?? [],
@@ -1189,6 +1210,7 @@ export function ChatDock({
             guardrails: data.guardrail_events,
             error: Boolean(data.error),
             streaming: false,
+            streamStatus: undefined,
           }));
           emitGalleryUiActions(
             data.tool_calls ?? [],
@@ -1198,7 +1220,13 @@ export function ChatDock({
           if (!data.error) advancePromptPhase(data.tool_calls);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : streamErr instanceof Error ? streamErr.message : "请求失败";
-          patchLastAssistant((t) => ({ ...t, text: msg, error: true, streaming: false }));
+          patchLastAssistant((t) => ({
+            ...t,
+            text: msg,
+            error: true,
+            streaming: false,
+            streamStatus: undefined,
+          }));
         }
       } finally {
         setSending(false);
@@ -1363,10 +1391,10 @@ export function ChatDock({
                             : "border border-white/[0.06] bg-white/[0.03] text-white/75",
                       ].join(" ")}
                     >
-                      {t.streaming && !t.text && !t.toolCalls?.length ? (
+                      {t.streaming && !t.text ? (
                         <div className="flex items-center gap-1 text-white/40">
                           <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40" />
-                          思考中…
+                          {t.streamStatus || "思考中…"}
                         </div>
                       ) : (
                         <div>

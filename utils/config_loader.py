@@ -66,6 +66,17 @@ class ConfigLoader:
             "queue_wait_timeout_seconds": 60,
             "fallback_model_name": "",
             "fallback_num_predict": None,
+            "fallback": {
+                "enabled": False,
+                "provider": "",
+                "endpoint": "",
+                "model_name": "",
+                "max_concurrent_requests": 1,
+                "circuit_breaker": {
+                    "failure_threshold": 3,
+                    "recovery_timeout_seconds": 60,
+                },
+            },
             "max_concurrent_requests": 2,
             "max_inference_queue_size": 2,
             "inference_batch_size": 1,
@@ -186,6 +197,14 @@ class ConfigLoader:
         api_key_env = str(route_b.get("api_key_env") or "").strip()
         if api_key_env:
             out["api_key"] = (os.environ.get(api_key_env) or "").strip()
+        fallback = out.get("fallback")
+        ollama_host = os.environ.get("OLLAMA_HOST", "").strip()
+        if (
+            ollama_host
+            and isinstance(fallback, dict)
+            and str(fallback.get("provider") or "").strip().lower() == "ollama"
+        ):
+            out["fallback"] = {**fallback, "endpoint": ollama_host}
         out["use_inference_layer"] = True
         out["route_b_enabled"] = True
         return out

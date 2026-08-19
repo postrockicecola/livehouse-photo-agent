@@ -311,13 +311,31 @@ stage3:
     temperature: 0.0
     num_predict: 1024
     timeout: 180
-    max_retries: 3
+    # Cross-API failover owns the second chance; avoid multiplying provider retries.
+    max_retries: 0
     retry_delay: 1.0
     max_concurrent_requests: 2
     max_inference_queue_size: 30
     queue_wait_timeout_seconds: 300
     inference_hard_timeout_seconds: 240
     thumbnail_max_side: 1600
+    # Retryable failures only (timeout/transport/429/5xx) fail over to local Ollama.
+    # Auth and request errors (400/401/403) remain visible instead of being masked.
+    fallback:
+      enabled: true
+      provider: "ollama"
+      endpoint: "http://localhost:11434"
+      model_name: "qwen2.5vl:7b"
+      temperature: 0.0
+      num_predict: 1024
+      timeout: 240
+      max_retries: 1
+      retry_delay: 1.0
+      json_mode: true
+      max_concurrent_requests: 1
+      circuit_breaker:
+        failure_threshold: 3
+        recovery_timeout_seconds: 60
   # fast_first: fast VLM on every Stage3 candidate; full 8-dim only when early-exit rules say so
   # full_only: legacy — dimensional prompt on every candidate (higher latency)
   strategy: fast_first

@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from concurrent.futures import Future
 from typing import Any, Mapping
 
+from inference.providers.base import InferenceProvider
 from inference.providers.mock import MockProvider
 from inference.providers.ollama import OllamaProvider, resolve_ollama_base_urls
 from inference.providers.vllm import VLLMProvider, resolve_vllm_base_urls
@@ -17,75 +19,112 @@ logger = logging.getLogger(__name__)
 RouterLike = InferenceRouter | RoundRobinInferenceRouter
 
 
+def _build_provider(
+    provider: str,
+    config: Mapping[str, Any],
+    *,
+    endpoint: str | None = None,
+) -> InferenceProvider:
+    if provider == "mock":
+        return MockProvider()
+    if provider in ("vllm", "openai"):
+        return VLLMProvider(
+            endpoint=endpoint,
+            temperature=float(config.get("temperature", 0.0)),
+            num_predict=int(config.get("num_predict", 512)),
+            timeout=int(config.get("timeout", 120)),
+            max_retries=int(config.get("max_retries", 0)),
+            retry_delay=float(config.get("retry_delay", 1.0)),
+            api_key=config.get("api_key") or None,
+        )
+    if provider != "ollama":
+        raise ValueError(f"Unsupported inference provider: {provider}")
+    seed = config.get("seed")
+    try:
+        seed_i = int(seed) if seed is not None else None
+    except (TypeError, ValueError):
+        seed_i = None
+    return OllamaProvider(
+        endpoint=endpoint,
+        temperature=float(config.get("temperature", 0.0)),
+        num_predict=int(config.get("num_predict", 512)),
+        timeout=int(config.get("timeout", 120)),
+        max_retries=int(config.get("max_retries", 0)),
+        retry_delay=float(config.get("retry_delay", 1.0)),
+        json_mode=bool(config.get("json_mode", False)),
+        seed=seed_i,
+    )
+
+
+def _cross_api_fallback(
+    model_config: Mapping[str, Any],
+) -> tuple[InferenceProvider, str, Mapping[str, Any]] | None:
+    raw = model_config.get("fallback")
+    if not isinstance(raw, Mapping) or not bool(raw.get("enabled", False)):
+        return None
+    provider = str(raw.get("provider") or "").strip().lower()
+    endpoint = str(raw.get("endpoint") or "").strip()
+    model_name = str(raw.get("model_name") or "").strip()
+    if not provider or not endpoint or not model_name:
+        raise ValueError(
+            "Enabled model.fallback requires provider, endpoint, and model_name"
+        )
+    config = {**dict(model_config), **dict(raw)}
+    api_key_env = str(raw.get("api_key_env") or "").strip()
+    if api_key_env:
+        config["api_key"] = (os.environ.get(api_key_env) or "").strip()
+    return _build_provider(provider, config, endpoint=endpoint), model_name, raw
+
+
 def build_inference_router_from_model_config(model_config: Mapping[str, Any]) -> RouterLike:
     """Build primary (+ optional fallback) routing from a model section dict (yaml / ``ConfigLoader``)."""
     provider = str(model_config.get("provider", "ollama") or "ollama").strip().lower()
-    if provider == "mock":
-        primary_provider = MockProvider()
-        return InferenceRouter(
-            primary_provider=primary_provider,
-            primary_model_name=str(model_config.get("model_name", "mock-vlm")),
-        )
-
     if provider in ("vllm", "openai"):
         urls = resolve_vllm_base_urls(model_config)
-        fb_model = model_config.get("fallback_model_name") or None
-        api_key = model_config.get("api_key") or None
-        routers_v: list[InferenceRouter] = []
-        for base in urls:
-            vp = VLLMProvider(
-                endpoint=base,
-                temperature=float(model_config["temperature"]),
-                num_predict=int(model_config["num_predict"]),
-                timeout=int(model_config["timeout"]),
-                max_retries=int(model_config["max_retries"]),
-                retry_delay=float(model_config["retry_delay"]),
-                api_key=api_key,
-            )
-            routers_v.append(
-                InferenceRouter(
-                    primary_provider=vp,
-                    primary_model_name=str(model_config["model_name"]),
-                    fallback_provider=vp,
-                    fallback_model_name=fb_model,
-                )
-            )
-        if len(routers_v) == 1:
-            return routers_v[0]
-        logger.info("Inference round-robin across %s vLLM endpoints: %s", len(routers_v), urls)
-        return RoundRobinInferenceRouter(routers_v)
+    elif provider == "ollama":
+        urls = resolve_ollama_base_urls(model_config)
+    elif provider == "mock":
+        urls = [None]
+    else:
+        raise ValueError(f"Unsupported inference provider: {provider}")
 
-    urls = resolve_ollama_base_urls(model_config)
-    fb_model = model_config.get("fallback_model_name") or None
-    routers_o: list[InferenceRouter] = []
+    cross_fallback = _cross_api_fallback(model_config)
+    legacy_fallback_model = model_config.get("fallback_model_name") or None
+    routers: list[InferenceRouter] = []
     for base in urls:
-        seed = model_config.get("seed")
-        try:
-            seed_i = int(seed) if seed is not None else None
-        except (TypeError, ValueError):
-            seed_i = None
-        opp = OllamaProvider(
-            endpoint=base,
-            temperature=float(model_config["temperature"]),
-            num_predict=int(model_config["num_predict"]),
-            timeout=int(model_config["timeout"]),
-            max_retries=int(model_config["max_retries"]),
-            retry_delay=float(model_config["retry_delay"]),
-            json_mode=bool(model_config.get("json_mode", False)),
-            seed=seed_i,
-        )
-        routers_o.append(
+        primary = _build_provider(provider, model_config, endpoint=base)
+        fallback_provider = primary
+        fallback_model = legacy_fallback_model
+        fallback_options: Mapping[str, Any] = {}
+        if cross_fallback is not None:
+            fallback_provider, fallback_model, fallback_options = cross_fallback
+        breaker = fallback_options.get("circuit_breaker") or {}
+        if not isinstance(breaker, Mapping):
+            breaker = {}
+        routers.append(
             InferenceRouter(
-                primary_provider=opp,
+                primary_provider=primary,
                 primary_model_name=str(model_config["model_name"]),
-                fallback_provider=opp,
-                fallback_model_name=fb_model,
+                fallback_provider=fallback_provider,
+                fallback_model_name=fallback_model,
+                fallback_retryable_only=cross_fallback is not None,
+                circuit_breaker_failure_threshold=int(
+                    breaker.get("failure_threshold", 3)
+                    if cross_fallback is not None
+                    else 0
+                ),
+                circuit_breaker_recovery_seconds=float(
+                    breaker.get("recovery_timeout_seconds", 60.0)
+                ),
+                fallback_max_concurrent_requests=int(
+                    fallback_options.get("max_concurrent_requests", 1)
+                ),
             )
         )
-    if len(routers_o) == 1:
-        return routers_o[0]
-    logger.info("Inference round-robin across %s Ollama endpoints: %s", len(routers_o), urls)
-    return RoundRobinInferenceRouter(routers_o)
+    if len(routers) == 1:
+        return routers[0]
+    logger.info("Inference round-robin across %s %s endpoints: %s", len(routers), provider, urls)
+    return RoundRobinInferenceRouter(routers)
 
 
 def inference_client_from_model_config(

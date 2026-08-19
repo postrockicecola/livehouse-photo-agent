@@ -103,6 +103,10 @@ def build_empty_ledger() -> dict[str, Any]:
         "fallback_provider": None,
         "primary_model": None,
         "final_model": None,
+        "primary_endpoint": None,
+        "fallback_endpoint": None,
+        "fallback_reason": None,
+        "circuit_state": "closed",
         "queue_wait_degraded": False,
         "router_fallback_used": False,
         "primary_latency_ms": None,
@@ -125,6 +129,8 @@ def append_inference_attempt(
     error_type: str | None = None,
     error_message: str | None = None,
     primary_skipped: bool = False,
+    endpoint: str | None = None,
+    fallback_reason: str | None = None,
 ) -> None:
     """Append one provider hop to in-memory ledger (later persisted to ``model_run_attempts``)."""
     attempts = ledger.setdefault("attempts", [])
@@ -139,6 +145,10 @@ def append_inference_attempt(
             "error_type": error_type,
             "error_message": (msg[:500] if msg else None),
             "primary_skipped": bool(primary_skipped),
+            "endpoint": (str(endpoint).strip()[:500] if endpoint else None),
+            "fallback_reason": (
+                str(fallback_reason).strip()[:120] if fallback_reason else None
+            ),
         }
     )
 
@@ -157,7 +167,7 @@ def compute_outcome_attribution(*, ledger: dict[str, Any], payload_status: str) 
     """
     attempts: list[dict[str, Any]] = list(ledger.get("attempts") or [])
     st = str(payload_status or "").upper()
-    success = st == "SUCCESS"
+    success = st in ("SUCCESS", "DEGRADED")
 
     if not attempts:
         return "unknown_success" if success else "exception"

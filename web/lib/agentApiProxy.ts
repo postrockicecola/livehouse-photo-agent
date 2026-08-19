@@ -23,11 +23,22 @@ export async function proxyAgentApi(req: NextRequest, pathSuffix: string): Promi
   }
   try {
     const res = await fetch(url, init);
+    const contentType = res.headers.get("content-type") ?? "application/json";
+    if (contentType.toLowerCase().includes("text/event-stream")) {
+      return new NextResponse(res.body, {
+        status: res.status,
+        headers: {
+          "content-type": contentType,
+          "cache-control": res.headers.get("cache-control") ?? "no-cache, no-transform",
+          "x-accel-buffering": "no",
+        },
+      });
+    }
     const body = await res.text();
     return new NextResponse(body, {
       status: res.status,
       headers: {
-        "content-type": res.headers.get("content-type") ?? "application/json",
+        "content-type": contentType,
       },
     });
   } catch {

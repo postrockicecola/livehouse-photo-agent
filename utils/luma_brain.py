@@ -106,6 +106,14 @@ def _migrate_model_run_attempts_table(conn: sqlite3.Connection) -> None:
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name='model_run_attempts' LIMIT 1"
     ).fetchone()
     if t is not None:
+        cols = {
+            str(r["name"])
+            for r in conn.execute("PRAGMA table_info(model_run_attempts)").fetchall()
+        }
+        for name in ("endpoint", "fallback_reason"):
+            if name not in cols:
+                conn.execute(f"ALTER TABLE model_run_attempts ADD COLUMN {name} TEXT")
+        conn.commit()
         return
     conn.execute(
         """
@@ -121,6 +129,8 @@ def _migrate_model_run_attempts_table(conn: sqlite3.Connection) -> None:
           error_type TEXT,
           error_message TEXT,
           primary_skipped INTEGER NOT NULL DEFAULT 0 CHECK (primary_skipped IN (0, 1)),
+          endpoint TEXT,
+          fallback_reason TEXT,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
           UNIQUE(model_run_id, seq)
         )
@@ -2662,8 +2672,8 @@ def replace_model_run_attempts(
                 """
                 INSERT INTO model_run_attempts (
                     model_run_id, seq, role, provider_id, model_name, latency_ms,
-                    ok, error_type, error_message, primary_skipped
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ok, error_type, error_message, primary_skipped, endpoint, fallback_reason
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     int(model_run_id),
@@ -2676,6 +2686,8 @@ def replace_model_run_attempts(
                     a.get("error_type"),
                     (str(a.get("error_message") or ""))[:2000] or None,
                     1 if a.get("primary_skipped") else 0,
+                    (str(a.get("endpoint") or ""))[:500] or None,
+                    (str(a.get("fallback_reason") or ""))[:120] or None,
                 ),
             )
         conn.commit()
@@ -2697,7 +2709,8 @@ def list_model_run_attempts_for_runs(
     rows = conn.execute(
         f"""
         SELECT id, model_run_id, seq, role, provider_id, model_name, latency_ms,
-               ok, error_type, error_message, primary_skipped, created_at
+               ok, error_type, error_message, primary_skipped, endpoint,
+               fallback_reason, created_at
         FROM model_run_attempts
         WHERE model_run_id IN ({qm})
         ORDER BY model_run_id ASC, seq ASC
