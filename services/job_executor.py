@@ -23,6 +23,7 @@ from typing import Any
 
 from celery.utils.log import get_task_logger
 
+from infra.otel_bootstrap import set_current_span_attributes
 from infra.worker_manager import WorkerManager, long_task_heartbeat
 from services.gallery_film_prewarm import enqueue_gallery_cinestill_prewarm
 from services.job_artifacts import (
@@ -161,6 +162,15 @@ class JobExecutor:
         session_id = claimed.get("session_id")
         provider = str(claimed.get("provider") or "ollama")
         model_name = str(claimed.get("model_name") or "")
+        set_current_span_attributes(
+            **{
+                "livehouse.job_id": job_id,
+                "livehouse.job_type": job_type,
+                "livehouse.trace_id": trace_id,
+                "livehouse.worker_id": worker_id,
+                "livehouse.provider": provider,
+            }
+        )
 
         if job_type == STAGE_JOB_TYPE:
             return self._run_pipeline_stage_job(

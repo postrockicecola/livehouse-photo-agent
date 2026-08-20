@@ -13,11 +13,13 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-from api.agent_routes import router as agent_router
-from api.gallery_routes import configure_gallery_routes, router as gallery_router
-from api.infra_routes import router as infra_router
-from utils.http_security import cors_allow_origins
 
+from api.agent_routes import router as agent_router
+from api.gallery_routes import configure_gallery_routes
+from api.gallery_routes import router as gallery_router
+from api.infra_routes import router as infra_router
+from infra.otel_bootstrap import configure_otel_from_env, instrument_fastapi_app
+from utils.http_security import cors_allow_origins
 
 _REPO_ROOT = Path(__file__).resolve().parent
 
@@ -84,14 +86,10 @@ BASE_DIR, GALLERY_PORT = _parse_gallery_cli()
 RESULTS_JSON = os.path.join(BASE_DIR, "analysis_results.json")
 configure_gallery_routes(BASE_DIR)
 
-try:
-    from infra.otel_bootstrap import configure_otel_from_env
-
-    configure_otel_from_env()
-except Exception:
-    pass
+configure_otel_from_env()
 
 app = FastAPI(title="Livehouse Gallery API", version="1.0.0")
+instrument_fastapi_app(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_allow_origins(),

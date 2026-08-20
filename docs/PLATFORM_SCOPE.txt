@@ -43,8 +43,9 @@ Batch E hooks (scaffolding, not full platform)
    LIVEHOUSE_SCOPE_QUOTA_FAIL_OPEN=1 (emergency escape hatch only).
 
 4. LIVEHOUSE_OTEL=1 (+ optional OTEL_EXPORTER_OTLP_ENDPOINT)
-   Optional TracerProvider bootstrap (infra/otel_bootstrap.py).
-   No Alertmanager / Grafana shipped.
+   TracerProvider + FastAPI/Celery/requests instrumentation (infra/otel_bootstrap.py).
+   Compose profile "observability" ships Collector, Tempo, Prometheus,
+   Alertmanager, and provisioned Grafana data sources/dashboard.
 
 5. HTTP security (local-demo friendly, fail-closed off-loopback)
    LIVEHOUSE_OPS_TOKEN / LIVEHOUSE_INFRA_TOKEN — mutating infra + luma-professional.

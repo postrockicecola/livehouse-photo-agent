@@ -44,14 +44,16 @@ def pipeline_tracing_settings(config: Mapping[str, Any] | None) -> dict[str, Any
     env_on = os.environ.get("LIVEHOUSE_PIPELINE_TRACE", "").strip().lower() in ("1", "true", "yes", "on")
     debug_env = os.environ.get("LIVEHOUSE_PIPELINE_TRACE_DEBUG", "").strip().lower() in ("1", "true", "yes", "on")
     debug_img = (os.environ.get("LIVEHOUSE_PIPELINE_TRACE_IMAGE") or "").strip()
+    otel_env = os.environ.get("LIVEHOUSE_OTEL", "").strip().lower() in ("1", "true", "yes", "on")
     otel_raw = raw.get("opentelemetry") or {}
     otel = otel_raw if isinstance(otel_raw, dict) else {}
+    otel_enabled = bool(otel.get("enabled")) or otel_env
     return {
-        "enabled": bool(pt.get("enabled")) or env_on,
+        "enabled": bool(pt.get("enabled")) or env_on or otel_enabled,
         "emit_jsonl": bool(pt.get("emit_jsonl", True)),
         "debug": bool(pt.get("debug")) or debug_env,
         "debug_image": str(pt.get("debug_image") or debug_img or "").strip(),
-        "otel_enabled": bool(otel.get("enabled")),
+        "otel_enabled": otel_enabled,
         "otel_tracer_name": str(otel.get("tracer_name") or "livehouse.pipeline"),
     }
 
@@ -259,14 +261,46 @@ class PipelineTraceSession:
         )
 
     def append_document(self, doc: dict[str, Any]) -> None:
-        if not self.emit_jsonl or self._jsonl_path is None:
+        if self.emit_jsonl and self._jsonl_path is not None:
+            line = json.dumps(doc, ensure_ascii=False)
+            with self._write_lock:
+                with open(self._jsonl_path, "a", encoding="utf-8") as f:
+                    f.write(line + "\n")
+            if self.debug:
+                logger.info("pipeline_trace %s", line[:500])
+        self._emit_otel_document(doc)
+
+    def _emit_otel_document(self, doc: Mapping[str, Any]) -> None:
+        """Export recorded stage timings as OTEL spans without changing JSONL."""
+        if self._otel is None:
             return
-        line = json.dumps(doc, ensure_ascii=False)
-        with self._write_lock:
-            with open(self._jsonl_path, "a", encoding="utf-8") as f:
-                f.write(line + "\n")
-        if self.debug:
-            logger.info("pipeline_trace %s", line[:500])
+        base_attrs = {
+            "livehouse.job_trace_id": str(doc.get("job_trace_id") or ""),
+            "livehouse.image_trace_id": str(doc.get("image_trace_id") or ""),
+            "livehouse.image": str(doc.get("image") or ""),
+        }
+        for raw in doc.get("spans") or []:
+            if not isinstance(raw, Mapping):
+                continue
+            try:
+                attrs = dict(base_attrs)
+                attrs.update(
+                    {
+                        f"livehouse.{k}": v
+                        for k, v in dict(raw.get("attributes") or {}).items()
+                        if isinstance(v, (str, bool, int, float))
+                    }
+                )
+                start_ns = int(raw.get("start_unix_ms") or 0) * 1_000_000
+                end_ns = int(raw.get("end_unix_ms") or 0) * 1_000_000
+                span = self._otel.start_span(
+                    f"livehouse.pipeline.{raw.get('name') or 'stage'}",
+                    attributes=attrs,
+                    start_time=start_ns or None,
+                )
+                span.end(end_time=end_ns or None)
+            except Exception:
+                logger.debug("OTEL pipeline span export failed", exc_info=True)
 
     def maybe_otel_span(self, name: str, **attrs: Any) -> Any:
         if self._otel is None:
@@ -289,21 +323,25 @@ class _OtelSpanCm:
         self._name = name
         self._attrs = attrs
         self._span = None
+        self._cm = None
 
     def __enter__(self) -> None:
         try:
-            self._span = self._tracer.start_span(self._name)
-            for k, v in self._attrs.items():
-                if v is not None:
-                    self._span.set_attribute(str(k), str(v) if not isinstance(v, (bool, int, float)) else v)
+            attrs = {
+                str(k): str(v) if not isinstance(v, (bool, int, float)) else v
+                for k, v in self._attrs.items()
+                if v is not None
+            }
+            self._cm = self._tracer.start_as_current_span(self._name, attributes=attrs)
+            self._span = self._cm.__enter__()
         except Exception:
             self._span = None
         return None
 
     def __exit__(self, *args: Any) -> None:
         try:
-            if self._span is not None:
-                self._span.end()
+            if self._cm is not None:
+                self._cm.__exit__(*args)
         except Exception:
             pass
         return None

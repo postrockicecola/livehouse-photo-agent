@@ -392,8 +392,10 @@ observability:
     debug: false
     debug_image: ""
   opentelemetry:
-    # Process spans when enabled here *and/or* LIVEHOUSE_OTEL=1 (infra/otel_bootstrap.py).
-    # Optional OTEL_EXPORTER_OTLP_ENDPOINT; otherwise console exporter. No Alertmanager shipped.
+    # LIVEHOUSE_OTEL=1 configures the process exporter and enables pipeline spans.
+    # This flag enables pipeline spans when a TracerProvider is configured externally.
+    # Optional OTEL_EXPORTER_OTLP_ENDPOINT; otherwise console exporter.
+    # Collector/Tempo/Prometheus/Alertmanager/Grafana: deploy Compose "observability" profile.
     enabled: false
     tracer_name: "livehouse.pipeline"
 

@@ -13,8 +13,10 @@ python -m py_compile \
   utils/luma_brain.py \
   utils/brain_backend.py \
   inference/queue.py \
+  infra/metrics.py \
   infra/scope_quota.py \
   infra/otel_bootstrap.py \
+  infra/prometheus_server.py \
   harness/reliability_scenarios.py \
   scripts/eval/export_experiment_report.py
 
@@ -35,6 +37,7 @@ python -m pytest -q \
   tests/test_reliability_chaos.py \
   tests/test_brain_backend.py \
   tests/test_scope_quota.py \
+  tests/test_observability.py \
   tests/test_artifact_content_digest.py
 
 echo "deploy_smoke: OK"

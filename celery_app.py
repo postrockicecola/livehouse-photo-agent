@@ -20,8 +20,9 @@ if str(_REPO_ROOT) not in sys.path:
 
 from celery import Celery
 
+from infra import prometheus_server as _prometheus_server  # noqa: F401
+from infra.otel_bootstrap import configure_otel_from_env, instrument_celery
 from utils.logging_setup import configure_logging
-
 
 BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
@@ -75,9 +76,5 @@ if _beat_schedule:
     celery_app.conf.beat_schedule = _beat_schedule
 
 configure_logging()
-try:
-    from infra.otel_bootstrap import configure_otel_from_env
-
-    configure_otel_from_env()
-except Exception:
-    pass
+configure_otel_from_env()
+instrument_celery()

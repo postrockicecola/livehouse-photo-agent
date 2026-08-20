@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from celery_app import celery_app
+from infra.otel_bootstrap import otel_span
 from services.job_executor import JobExecutor
 
 
@@ -22,4 +23,5 @@ def run_job(self, job_id: int) -> Dict[str, Any]:
 
     Business lifecycle is entirely ``jobs.status`` + ``job_events`` (Celery task state is not authoritative).
     """
-    return JobExecutor(self).run(job_id)
+    with otel_span("livehouse.job.run", **{"livehouse.job_id": job_id}):
+        return JobExecutor(self).run(job_id)

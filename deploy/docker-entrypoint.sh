@@ -34,6 +34,10 @@ case "${1:-}" in
     ;;
   celery-worker)
     wait_redis
+    prom_dir="${PROMETHEUS_MULTIPROC_DIR:-/tmp/livehouse-prometheus}"
+    export PROMETHEUS_MULTIPROC_DIR="$prom_dir"
+    mkdir -p "$prom_dir"
+    rm -f "$prom_dir"/*.db
     pool="${LIVEHOUSE_EXECUTOR_CLASS:-general}"
     queues="${LIVEHOUSE_WORKER_QUEUES:-celery}"
     conc="${LIVEHOUSE_WORKER_CONCURRENCY:-}"

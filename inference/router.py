@@ -125,13 +125,25 @@ class InferenceRouter:
             record_provider_failure,
             record_provider_request,
         )
+        from infra.otel_bootstrap import otel_span
 
         pid = provider.provider_id
         record_provider_request(pid)
         t0 = time.perf_counter()
-        res = provider.generate(request, model_name=model_name)
-        latency_ms = int((time.perf_counter() - t0) * 1000)
-        res.provider_hop_ms = latency_ms
+        with otel_span(
+            "livehouse.inference.provider",
+            **{
+                "livehouse.provider": pid,
+                "livehouse.model": model_name,
+                "livehouse.endpoint": _provider_endpoint(provider),
+            },
+        ) as span:
+            res = provider.generate(request, model_name=model_name)
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+            res.provider_hop_ms = latency_ms
+            if span is not None:
+                span.set_attribute("livehouse.inference.latency_ms", latency_ms)
+                span.set_attribute("livehouse.inference.status", str(res.status))
         record_inference_latency(pid, latency_ms)
         if not _infer_ok(res.status):
             record_provider_failure(pid)

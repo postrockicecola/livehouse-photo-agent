@@ -1,0 +1,11 @@
+route:
+  receiver: local
+  group_by: [alertname, job]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  # Alerts remain visible in Alertmanager. Replace this receiver with Slack,
+  # email, PagerDuty, or a webhook for production notifications.
+  - name: local

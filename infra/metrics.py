@@ -12,7 +12,13 @@ from collections import defaultdict, deque
 from typing import Any
 
 try:  # Optional dependency.
-    from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+    from prometheus_client import (  # type: ignore[import-not-found]
+        CONTENT_TYPE_LATEST,
+        Counter,
+        Gauge,
+        Histogram,
+        generate_latest,
+    )
 
     _PROM_AVAILABLE = True
 except Exception:  # pragma: no cover - optional runtime dependency
@@ -39,6 +45,8 @@ _INFERENCE_Q_THROUGHPUT_RING: deque[tuple[float, int]] = deque(maxlen=400)
 _INFERENCE_Q_BUSY_RING: deque[tuple[float, float]] = deque(maxlen=400)
 
 _STAGE3_FF: dict[str, int] = {"fast_only": 0, "full": 0}
+_PROM_JOB_STATUSES: set[str] = set()
+_PROM_WORKER_STATUSES: set[str] = set()
 
 if _PROM_AVAILABLE:
     _P_PROVIDER_REQUESTS = Counter(
@@ -324,9 +332,61 @@ def prometheus_enabled() -> bool:
     return _PROM_AVAILABLE
 
 
+def refresh_cluster_prometheus_gauges(conn: Any | None = None) -> None:
+    """Refresh SQLite-authoritative gauges immediately before an API scrape."""
+    if not _PROM_AVAILABLE:
+        return
+    owned_conn = conn is None
+    if owned_conn:
+        from utils.luma_brain import brain_connect
+
+        conn = brain_connect()
+    try:
+        now = int(time.time())
+        jobs = {
+            str(r["status"]): int(r["c"])
+            for r in conn.execute(
+                "SELECT status, COUNT(*) AS c FROM jobs GROUP BY status ORDER BY status"
+            ).fetchall()
+        }
+        workers = {
+            str(r["status"]): int(r["c"])
+            for r in conn.execute(
+                "SELECT status, COUNT(*) AS c FROM workers GROUP BY status ORDER BY status"
+            ).fetchall()
+        }
+        total = int(conn.execute("SELECT COUNT(*) AS c FROM workers").fetchone()["c"])
+        fresh = int(
+            conn.execute(
+                "SELECT COUNT(*) AS c FROM workers "
+                "WHERE last_heartbeat IS NOT NULL AND last_heartbeat >= ?",
+                (now - 120,),
+            ).fetchone()["c"]
+        )
+        with _LOCK:
+            all_job_statuses = _PROM_JOB_STATUSES | set(jobs)
+            all_worker_statuses = _PROM_WORKER_STATUSES | set(workers)
+            _PROM_JOB_STATUSES.update(jobs)
+            _PROM_WORKER_STATUSES.update(workers)
+        for status in all_job_statuses:
+            _P_JOBS_STATUS.labels(status=status).set(jobs.get(status, 0))
+        _P_WORKERS.labels(kind="total").set(total)
+        _P_WORKERS.labels(kind="fresh_within_120s").set(fresh)
+        for status in all_worker_statuses:
+            _P_WORKERS.labels(kind=f"status:{status}").set(workers.get(status, 0))
+    finally:
+        if owned_conn:
+            conn.close()
+
+
 def render_prometheus_metrics() -> tuple[bytes, str]:
     if not _PROM_AVAILABLE or generate_latest is None:  # pragma: no cover - optional runtime dependency
         return b"# prometheus_client not installed\n", CONTENT_TYPE_LATEST
+    try:
+        refresh_cluster_prometheus_gauges()
+    except Exception:
+        # A metrics scrape must remain available while SQLite is starting or migrating.
+        pass
     return generate_latest(), CONTENT_TYPE_LATEST
 
 

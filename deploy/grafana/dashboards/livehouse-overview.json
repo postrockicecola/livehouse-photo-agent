@@ -1,0 +1,65 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "targets": [{"expr": "sum by (status) (livehouse_jobs_status_count)", "legendFormat": "{{status}}", "refId": "A"}],
+      "title": "Jobs by status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "targets": [{"expr": "sum by (provider) (rate(livehouse_provider_requests_total[5m]))", "legendFormat": "{{provider}}", "refId": "A"}],
+      "title": "Provider requests",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "targets": [{"expr": "max(livehouse_inference_queue_depth)", "legendFormat": "waiting", "refId": "A"}, {"expr": "max(livehouse_inference_queue_active)", "legendFormat": "active", "refId": "B"}],
+      "title": "Inference queue",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 4,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, provider) (rate(livehouse_inference_latency_ms_bucket[5m])))", "legendFormat": "p95 {{provider}}", "refId": "A"}],
+      "title": "Inference latency p95",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 5,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "targets": [{"expr": "sum by (provider) (rate(livehouse_provider_failures_total[5m])) / clamp_min(sum by (provider) (rate(livehouse_provider_requests_total[5m])), 1)", "legendFormat": "{{provider}}", "refId": "A"}],
+      "title": "Provider failure rate",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "tags": ["livehouse", "observability"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "Livehouse Overview",
+  "uid": "livehouse-overview",
+  "version": 1
+}

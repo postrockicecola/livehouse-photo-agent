@@ -501,7 +501,8 @@ B7. 可观测性与运维  ★★
   · 结构化日志、trace_id / job_id 关联
   · 事件时间线（job_events）vs 指标（Prometheus 风格 Golden Signals）
   · 延迟拆解：queue_wait_ms / inference_ms / total_latency_ms
-  · OpenTelemetry 基础（本仓为可选 bootstrap）
+  · OpenTelemetry：FastAPI / Celery / requests 自动埋点及 pipeline span
+  · Compose observability profile：Collector / Tempo / Prometheus / Alertmanager / Grafana
   · 混沌场景：僵尸 claim、重复投递、fallback 掩盖主故障
 
 

@@ -1,0 +1,42 @@
+groups:
+  - name: livehouse
+    rules:
+      - alert: LivehouseApiDown
+        expr: up{job="livehouse-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Livehouse API metrics target is down
+
+      - alert: LivehouseWorkerMetricsDown
+        expr: up{job=~"livehouse-worker-.*"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Livehouse worker metrics target is down
+
+      - alert: LivehouseProviderFailureRateHigh
+        expr: |
+          sum(rate(livehouse_provider_failures_total[5m]))
+          /
+          clamp_min(sum(rate(livehouse_provider_requests_total[5m])), 1)
+          > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: VLM provider failure rate exceeds 10%
+
+      - alert: LivehouseInferenceQueueSaturated
+        expr: |
+          livehouse_inference_queue_depth
+          >=
+          livehouse_inference_queue_max_inflight
+          and livehouse_inference_queue_max_inflight > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Inference queue has remained saturated

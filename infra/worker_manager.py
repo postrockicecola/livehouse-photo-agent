@@ -314,3 +314,10 @@ def stop_brain_worker_idle_heartbeat(**_kwargs: Any) -> None:
         _stop_idle_heartbeat_thread()
     except Exception:
         logger.exception("idle heartbeat thread stop failed")
+    if os.environ.get("PROMETHEUS_MULTIPROC_DIR"):
+        try:
+            from prometheus_client import multiprocess  # type: ignore[import-not-found]
+
+            multiprocess.mark_process_dead(os.getpid())
+        except Exception:
+            logger.exception("Prometheus multiprocess cleanup failed")

@@ -18,6 +18,15 @@ python-multipart>=0.0.9
 celery>=5.4
 redis>=5.0
 
+# Production observability (Prometheus metrics + OTLP traces).
+prometheus-client>=0.26
+opentelemetry-api>=1.44
+opentelemetry-sdk>=1.44
+opentelemetry-exporter-otlp-proto-http>=1.44
+opentelemetry-instrumentation-fastapi>=0.65b0
+opentelemetry-instrumentation-requests>=0.65b0
+opentelemetry-instrumentation-celery>=0.65b0
+
 # CLIP embeddings for gallery similarity / diversity (optional at runtime if unused)
 open-clip-torch>=2.20
 

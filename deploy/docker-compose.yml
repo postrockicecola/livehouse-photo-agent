@@ -21,6 +21,9 @@ volumes:
   livehouse-work:
   ollama-models:
   vllm-cache:
+  prometheus-data:
+  grafana-data:
+  tempo-data:
 
 services:
   redis:
@@ -51,6 +54,9 @@ services:
       LIVEHOUSE_GALLERY_PREVIEWS_DIR: ${LIVEHOUSE_GALLERY_PREVIEWS_DIR:-}
       LIVEHOUSE_INGEST_TOKEN: ${LIVEHOUSE_INGEST_TOKEN:-}
       OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      LIVEHOUSE_OTEL: ${LIVEHOUSE_OTEL:-0}
+      OTEL_SERVICE_NAME: livehouse-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
     volumes:
       - livehouse-brain:/data/brain
       - livehouse-work:/data/work
@@ -73,6 +79,9 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       LUMA_BRAIN_DB: /data/brain/luma_brain.db
       LIVEHOUSE_CONFIG: configs/livehouse.docker.yaml
+      LIVEHOUSE_OTEL: ${LIVEHOUSE_OTEL:-0}
+      OTEL_SERVICE_NAME: livehouse-celery-beat
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
     volumes:
       - livehouse-brain:/data/brain
     depends_on:
@@ -98,6 +107,13 @@ services:
       LIVEHOUSE_EXECUTOR_CLASS: general
       LIVEHOUSE_GALLERY_PREVIEWS_DIR: ${LIVEHOUSE_GALLERY_PREVIEWS_DIR:-}
       OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      LIVEHOUSE_OTEL: ${LIVEHOUSE_OTEL:-0}
+      OTEL_SERVICE_NAME: livehouse-worker-general
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+      PROMETHEUS_MULTIPROC_DIR: /tmp/livehouse-prometheus
+      LIVEHOUSE_METRICS_PORT: 9100
+    expose:
+      - "9100"
     volumes:
       - livehouse-brain:/data/brain
       - livehouse-work:/data/work
@@ -129,6 +145,13 @@ services:
       LIVEHOUSE_EXECUTOR_CLASS: vlm
       LIVEHOUSE_GALLERY_PREVIEWS_DIR: ${LIVEHOUSE_GALLERY_PREVIEWS_DIR:-}
       OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      LIVEHOUSE_OTEL: ${LIVEHOUSE_OTEL:-0}
+      OTEL_SERVICE_NAME: livehouse-worker-vlm
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+      PROMETHEUS_MULTIPROC_DIR: /tmp/livehouse-prometheus
+      LIVEHOUSE_METRICS_PORT: 9100
+    expose:
+      - "9100"
     volumes:
       - livehouse-brain:/data/brain
       - livehouse-work:/data/work
@@ -239,3 +262,71 @@ services:
     labels:
       livehouse.role: inference
       livehouse.backend: vllm
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    profiles: [observability]
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    networks: [livehouse-net]
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    profiles: [observability]
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    networks: [livehouse-net]
+    volumes:
+      - ./tempo/config.yaml:/etc/tempo/config.yaml:ro
+      - tempo-data:/var/tempo
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    profiles: [observability]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}
+    networks: [livehouse-net]
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - api
+      - alertmanager
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    profiles: [observability]
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
+    networks: [livehouse-net]
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    profiles: [observability]
+    networks: [livehouse-net]
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - tempo
+    restart: unless-stopped
