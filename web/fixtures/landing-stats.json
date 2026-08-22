@@ -1,13 +1,13 @@
 {
   "archive_root": "/archive/redacted",
-  "sessions_total": 57,
-  "photos_total": 44510,
-  "exported_photos_total": 5110,
+  "sessions_total": 58,
+  "photos_total": 48544,
+  "exported_photos_total": 5554,
   "avg_processing_sec": 435,
   "auto_reject_rate_pct": 89,
   "average_keep_rate_pct": 11,
-  "total_runtime_sec": 24795,
-  "total_runtime_hours": 6.9,
+  "total_runtime_sec": 25230,
+  "total_runtime_hours": 7.0,
   "auto_filter_rate_pct": 89,
   "source": "showcase_catalog"
 }

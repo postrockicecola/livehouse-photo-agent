@@ -1,7 +1,30 @@
 {
   "archive_root": "/archive",
-  "count": 57,
+  "count": 58,
   "sessions": [
+    {
+      "session_key": "Session 59",
+      "session_dir": "/archive/session-59",
+      "previews_dir": "/archive/session-59/Previews",
+      "preview_count": 4034,
+      "has_analysis_results": true,
+      "cover_path_quoted": "/showcase/covers/session-59.jpg",
+      "brain_session_id": 59,
+      "photos_ingested": 4034,
+      "photos_analyzed": 1848,
+      "source": "showcase_catalog",
+      "last_job_status": "SUCCEEDED",
+      "funnel": {
+        "imported": 4034,
+        "filtered": 3187,
+        "scored": 1848,
+        "picked": 555,
+        "exported": 444
+      },
+      "cover_portrait_path_quoted": "/showcase/covers/session-59-portrait.jpg",
+      "session_date": "2026-08-15",
+      "band_name": "闪星乐队"
+    },
     {
       "session_key": "Session 58",
       "session_dir": "/archive/session-58",
@@ -1284,26 +1307,33 @@
     }
   ],
   "active": {
-    "session_key": "Session 58",
-    "session_dir": "/archive/session-58",
-    "previews_dir": "/archive/session-58/Previews",
-    "preview_count": 4218,
+    "session_key": "Session 59",
+    "session_dir": "/archive/session-59",
+    "previews_dir": "/archive/session-59/Previews",
+    "preview_count": 4034,
     "has_analysis_results": true,
-    "cover_path_quoted": "/showcase/covers/session-58.jpg",
-    "cover_portrait_path_quoted": "/showcase/covers/session-58-portrait.jpg",
-    "session_date": "2026-08-08",
-    "band_name": "汉堡黄",
+    "cover_path_quoted": "/showcase/covers/session-59.jpg",
+    "cover_portrait_path_quoted": "/showcase/covers/session-59-portrait.jpg",
+    "session_date": "2026-08-15",
+    "band_name": "闪星乐队",
     "venue": "",
     "funnel": {
-      "imported": 4218,
-      "filtered": 3332,
-      "scored": 1933,
-      "picked": 528,
-      "exported": 422
+      "imported": 4034,
+      "filtered": 3187,
+      "scored": 1848,
+      "picked": 555,
+      "exported": 444
     },
-    "photos_ingested": 4218
+    "photos_ingested": 4034
   },
   "recent_deliveries": [
+    {
+      "session_key": "Session 59",
+      "session_date": "2026-08-15",
+      "photos_imported": 4034,
+      "photos_exported": 444,
+      "previews_dir": "/archive/session-59/Previews"
+    },
     {
       "session_key": "Session 58",
       "session_date": "2026-08-08",
@@ -1352,13 +1382,6 @@
       "photos_imported": 2948,
       "photos_exported": 383,
       "previews_dir": "/archive/session-52/Previews"
-    },
-    {
-      "session_key": "Session 51",
-      "session_date": "2026-06-26",
-      "photos_imported": 21,
-      "photos_exported": 3,
-      "previews_dir": "/archive/session-51/Previews"
     }
   ]
 }

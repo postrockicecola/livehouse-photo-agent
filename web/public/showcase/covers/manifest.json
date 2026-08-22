@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-09T12:35:39.740858+00:00",
+  "generated_at": "2026-08-22T04:47:45.807297+00:00",
   "tool": "build_session_covers",
   "privacy": "EXIF/ICC stripped; opaque session-NN filenames; no absolute paths",
-  "count": 57,
+  "count": 58,
   "covers": [
     {
       "slug": "session-01",
@@ -573,6 +573,16 @@
       "source_portrait_basename": "1-1-13.png",
       "date": "2026-08-08",
       "band": "汉堡黄",
+      "venue": ""
+    },
+    {
+      "slug": "session-59",
+      "path": "/showcase/covers/session-59.jpg",
+      "path_portrait": "/showcase/covers/session-59-portrait.jpg",
+      "source_basename": "DSC07404.jpg",
+      "source_portrait_basename": "DSC07404.jpg",
+      "date": "2026-08-15",
+      "band": "闪星乐队",
       "venue": ""
     }
   ]
