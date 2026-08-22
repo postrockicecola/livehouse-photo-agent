@@ -116,7 +116,7 @@ model:
   fallback_num_predict:
   
   # Generation options
-  temperature: 0.8                    # Higher temperature for varied scores
+  temperature: 0.0                    # Scoring must be deterministic; do not sample rubric scores
   num_predict: 512                    # Max tokens (JSON+comments needs headroom; 180 truncates mid-string)
   
   # Retry configuration
@@ -315,7 +315,8 @@ stage3:
     max_retries: 0
     retry_delay: 1.0
     max_concurrent_requests: 2
-    max_inference_queue_size: 30
+    # Admission slots ≈ workers. Larger values admit many cloud jobs before 2 workers drain them.
+    max_inference_queue_size: 4
     queue_wait_timeout_seconds: 300
     inference_hard_timeout_seconds: 240
     thumbnail_max_side: 1600

@@ -285,8 +285,8 @@ def _mirror_bilingual_pair(d: dict[str, str]) -> dict[str, str]:
 
 
 def default_stage3_parsed() -> dict[str, Any]:
-    """Neutral fallback when the model output cannot be parsed (pipeline keeps running)."""
-    dims = {k: float(_DEFAULT_FLOAT) for k in STAGE3_DIM_KEYS}
+    """Hard-degrade fallback when the model output cannot be parsed (must not rank as mid scores)."""
+    dims = {k: 0.0 for k in STAGE3_DIM_KEYS}
     empty = {"zh": "", "en": ""}
     return stamp_parse_meta(
         {
@@ -328,10 +328,10 @@ def _finalize_regex_recovery(recovered: dict[str, Any]) -> dict[str, Any]:
 
 
 def default_fast_stage3_parsed() -> dict[str, Any]:
-    """Neutral fast-mode fallback when JSON cannot be parsed."""
+    """Hard-degrade fast fallback when JSON cannot be parsed (score 0, not a mid keep)."""
     return stamp_parse_meta(
         {
-            "score": 55.0,
+            "score": 0.0,
             "verdict": {"zh": "解析失败", "en": "Parse failure"},
             "tags": ["unparsed"],
             "mood_tags": [],

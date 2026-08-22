@@ -57,3 +57,14 @@ def test_should_run_full_for_ambiguous_debug_info():
         fast, debug_info={"contrast": 8.0, "edge_ratio": 0.003}
     )
     assert not should_run_full_after_fast(fast, debug_info={"blur_type": "none", "contrast": 30})
+
+
+def test_should_run_full_skips_parse_fallback():
+    assert not should_run_full_after_fast(
+        {"score": 90, "tags": ["unparsed"], "outcome": "fallback_defaults"},
+        debug_info={"ambiguous_tags": ["no_face"]},
+    )
+    assert not should_run_full_after_fast(
+        {"score": 90, "tags": ["moment"], "used_fallback_defaults": True},
+        debug_info={"blur_type": "motion_blur"},
+    )

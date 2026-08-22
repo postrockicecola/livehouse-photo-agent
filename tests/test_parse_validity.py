@@ -7,6 +7,7 @@ from inference.parsers import (
     PARSE_FAIL,
     PARSE_OK,
     PARSE_REGEX,
+    default_fast_stage3_parsed,
     default_stage3_parsed,
     parse_dimensional_response,
 )
@@ -62,6 +63,10 @@ def test_default_fallback_is_fail() -> None:
     fb = default_stage3_parsed()
     assert fb["parse_meta"]["status"] == PARSE_FAIL
     assert fb["parse_meta"]["missing_dims"] == list(STAGE3_DIM_KEYS)
+    assert all(float(v) == 0.0 for v in fb["dimensions"].values())
+    fast = default_fast_stage3_parsed()
+    assert fast["score"] == 0.0
+    assert "unparsed" in fast["tags"]
 
 
 def test_validity_gate_fails_when_rates_rise() -> None:

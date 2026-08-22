@@ -398,11 +398,16 @@ def should_run_full_after_fast(
     """
     score = float(result_fast.get("score") or result_fast.get("fast_ai_score") or 0.0)
     tags = list(result_fast.get("tags") or [])
+    outcome = str(result_fast.get("outcome") or "").strip().lower()
+    if outcome == "fallback_defaults" or bool(result_fast.get("used_fallback_defaults")):
+        return False
+    tags_l = [str(t).lower() for t in tags]
+    if "unparsed" in tags_l:
+        return False
 
     if score >= 85:
         return True
 
-    tags_l = [str(t).lower() for t in tags]
     if any("moment" in t for t in tags_l) or any("emotion" in t for t in tags_l):
         return True
 

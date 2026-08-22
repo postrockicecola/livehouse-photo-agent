@@ -179,14 +179,13 @@ def reorder_stage3_work_by_fast_score(
 
 def vlm_priority_for_rank(*, rank_one_based: int, batch_size: int) -> int:
     """
-    Map batch processing rank to VLM ``queue_priority``.
+    Map Stage2 rank to ``queue.PriorityQueue`` key (smaller integer is served first).
 
-    Rank 1 = highest Stage2 score → largest priority integer so backends that prefer higher
-    ``priority`` admit those requests first.
+    Rank 1 = highest Stage2 score → priority 1 so keepers admit before weaker frames.
     """
     n = max(0, int(batch_size))
     r = max(1, min(int(rank_one_based), n)) if n else 1
-    return max(1, n - r + 1)
+    return r
 
 
 __all__ = [
