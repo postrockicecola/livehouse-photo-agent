@@ -1190,10 +1190,18 @@ export default function HomePage() {
     setBusy("enhance");
     setActionMsg("");
     try {
-      const res = await fetch(`${API_BASE}/api/tasks/analyze`, { method: "POST" });
+      const sourceDir = (galleryBasePath || "").trim();
+      const qs = sourceDir
+        ? `?${new URLSearchParams({ source_dir: sourceDir })}`
+        : "";
+      const res = await fetch(`${API_BASE}/api/tasks/analyze${qs}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.detail ?? "任务提交失败");
-      setActionMsg(`AI 强化任务已提交: ${data.task_id}`);
+      const id = data.job_id ?? data.run_task_id ?? data.task_id;
+      const already = data.status === "already_running";
+      setActionMsg(
+        already ? `分析已在进行: job ${id}` : `AI 强化任务已提交: job ${id}`,
+      );
     } catch (e: unknown) {
       setActionMsg(`任务提交失败: ${e instanceof Error ? e.message : "unknown"}`);
     } finally {

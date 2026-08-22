@@ -193,6 +193,7 @@ services:
       GALLERY_HOOK: http://api:8080/api/ingest/check_new_images
       LUMA_ARCHIVE_ROOT: /data/archive
       DEVICE_ID: ${DEVICE_ID:-docker-ingest-1}
+      LIVEHOUSE_INGEST_TOKEN: ${LIVEHOUSE_INGEST_TOKEN:-}
     volumes:
       - livehouse-brain:/data/brain
       - ${LUMA_ARCHIVE_HOST_PATH:-../Livehouse_Archive}:/data/archive

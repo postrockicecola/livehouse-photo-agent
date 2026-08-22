@@ -308,6 +308,9 @@ func triggerGalleryCheck(url string, timeout time.Duration) {
 		return
 	}
 	req.Header.Set("User-Agent", "livehouse-ingest-worker/1")
+	if tok := strings.TrimSpace(os.Getenv("LIVEHOUSE_INGEST_TOKEN")); tok != "" {
+		req.Header.Set("X-Luma-Token", tok)
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		logWarnf("gallery hook failed: %v", err)

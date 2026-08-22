@@ -90,6 +90,18 @@ def test_infra_mutating_requires_ops_token_off_loopback(monkeypatch):
     assert r2.status_code in (404, 400, 200)
 
 
+def test_analyze_and_export_require_ops_token_when_configured(monkeypatch):
+    monkeypatch.setenv("LIVEHOUSE_OPS_TOKEN", "secret-ops")
+    monkeypatch.delenv("LIVEHOUSE_ALLOW_INSECURE_LOCAL", raising=False)
+    from gallery_server import app
+
+    client = TestClient(app, raise_server_exceptions=False)
+    r = client.post("/api/tasks/analyze", params={"source_dir": "/tmp/previews"})
+    assert r.status_code == 401
+    r_export = client.post("/api/export-images", json={"images": ["a.jpg"]})
+    assert r_export.status_code == 401
+
+
 def test_cors_origins_not_wildcard():
     from utils.http_security import cors_allow_origins
 

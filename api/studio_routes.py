@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Any
 
 from celery import Celery
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+
+from utils.http_security import require_ops_auth
 
 from utils.logging_context import new_trace_id
 from utils.luma_brain import brain_connect, create_analyze_path_job, create_job
@@ -203,7 +205,7 @@ def studio_get_ingest_config():
 
 
 @router.put("/api/studio/ingest-config")
-def studio_put_ingest_config(body: IngestConfigPutBody):
+def studio_put_ingest_config(body: IngestConfigPutBody, _ops: None = Depends(require_ops_auth)):
     from utils.studio_ingest_config import save_ingest_config
 
     try:
@@ -345,7 +347,7 @@ def studio_status(
 
 
 @router.put("/api/studio/active-session")
-def studio_set_active_session(body: ActiveSessionBody):
+def studio_set_active_session(body: ActiveSessionBody, _ops: None = Depends(require_ops_auth)):
     previews = Path(body.previews_dir).expanduser().resolve()
     if not previews.is_dir():
         raise HTTPException(status_code=400, detail=f"previews_dir is not a directory: {body.previews_dir}")
@@ -366,7 +368,7 @@ def studio_set_active_session(body: ActiveSessionBody):
 
 
 @router.post("/api/studio/analyze")
-def studio_start_analyze(body: AnalyzeBody):
+def studio_start_analyze(body: AnalyzeBody, _ops: None = Depends(require_ops_auth)):
     previews = Path(body.previews_dir).expanduser().resolve()
     if not previews.is_dir():
         raise HTTPException(status_code=400, detail=f"previews_dir is not a directory: {body.previews_dir}")
@@ -386,7 +388,7 @@ def studio_start_analyze(body: AnalyzeBody):
 
 
 @router.post("/api/studio/analyze-bulk")
-def studio_start_analyze_bulk(body: AnalyzeBulkBody):
+def studio_start_analyze_bulk(body: AnalyzeBulkBody, _ops: None = Depends(require_ops_auth)):
     """Queue a full (or checkpointed) analyze job for every current session.
 
     Each session remains one ``ANALYZE_SESSION`` / ``ANALYZE_PATH`` job via

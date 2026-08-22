@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from celery import Celery
-from fastapi import APIRouter, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -48,6 +48,7 @@ from services.result_service import (
     load_gallery_page,
     read_orientation_degrees_from_raw,
 )
+from utils.http_security import require_ops_auth
 from utils.logging_context import new_trace_id
 from utils.luma_brain import brain_connect, create_analyze_path_job
 
@@ -920,7 +921,7 @@ def post_gallery_pairwise_preferences(req: PairwisePreferencesPostRequest):
 
 
 @router.post("/api/export-images")
-def export_images(req: ExportRequest):
+def export_images(req: ExportRequest, _ops: None = Depends(require_ops_auth)):
     from utils.json_safe import json_safe
 
     specs = _export_specs_list(req)
@@ -965,7 +966,7 @@ def export_images(req: ExportRequest):
 
 
 @router.post("/api/export-images/prewarm")
-def prewarm_export_images(req: ExportRequest):
+def prewarm_export_images(req: ExportRequest, _ops: None = Depends(require_ops_auth)):
     """Warm exact export-size film caches without creating an export folder."""
     specs = _export_specs_list(req)
     if not specs:
@@ -1413,20 +1414,40 @@ def enqueue_analysis(
     source_dir: str | None = Query(default=None),
     max_workers: int | None = Query(default=None),
     enable_checkpoint: bool = Query(default=True),
+    _ops: None = Depends(require_ops_auth),
 ):
     """
     API owns job creation (DB SSOT); Celery only executes ``tasks.run_job`` with ``job_id``.
     Response includes ``job_id`` and ``status=QUEUED`` so clients can query ``jobs`` / infra APIs immediately.
+    ``source_dir`` defaults to the active Previews directory when omitted.
     """
-    if not source_dir or not str(source_dir).strip():
+    resolved = (source_dir or "").strip() or str(_runtime_base_dir() or "").strip()
+    if not resolved:
         raise HTTPException(status_code=400, detail="source_dir is required")
+
+    from utils.studio_sessions import find_brain_session_id, find_runnable_analyze_job_id
 
     trace_id = new_trace_id("analyze_path")
     conn = brain_connect()
     try:
+        sid = find_brain_session_id(conn, resolved)
+        existing_id = find_runnable_analyze_job_id(
+            conn,
+            previews_dir=resolved,
+            brain_session_id=sid,
+        )
+        if existing_id is not None:
+            return {
+                "ok": True,
+                "job_id": existing_id,
+                "status": "already_running",
+                "trace_id": trace_id,
+                "source_dir": resolved,
+                "message": "analysis already queued or running for this session",
+            }
         job_id = create_analyze_path_job(
             conn,
-            source_dir=str(source_dir).strip(),
+            source_dir=resolved,
             config_path=config_path,
             max_workers=max_workers,
             enable_checkpoint=enable_checkpoint,
@@ -1447,12 +1468,14 @@ def enqueue_analysis(
         "status": "QUEUED",
         "trace_id": trace_id,
         "run_task_id": task.id,
+        "task_id": task.id,
         "task_name": "tasks.run_job",
+        "source_dir": resolved,
     }
 
 
 @router.post("/api/tasks/prewarm-gallery-film")
-def enqueue_prewarm_gallery_film():
+def enqueue_prewarm_gallery_film(_ops: None = Depends(require_ops_auth)):
     """Optional manual trigger; normally prewarm runs on gallery load and after analyze."""
     base = _runtime_base_dir()
     task_id = try_enqueue_gallery_cinestill_prewarm(source_dir=base)
@@ -1656,6 +1679,7 @@ def get_similar_photos(
 def index_session_embeddings(
     session_id: int | None = Query(None, description="Session to index; None = latest active"),
     force_reindex: bool = Query(False, description="Re-generate embeddings even if already indexed"),
+    _ops: None = Depends(require_ops_auth),
 ):
     """Batch-generate CLIP embeddings for all ANALYZED photos in a session.
 
