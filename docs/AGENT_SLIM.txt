@@ -54,6 +54,7 @@ Runtime
   services/agent/mcp_gallery.py        Cursor MCP adapter (stdio Content-Length; latest_session)
   services/agent/conversation.py       ConversationalAgent entry
   services/agent/chat_backend.py
+  services/agent/infer_scheduler.py    Agent→model HTTP admit/priority (P0; not VLM)
   services/agent/guardrails.py
   services/agent/store.py              prefs / memory (session-scoped anon owner)
   services/agent/context_governance.py

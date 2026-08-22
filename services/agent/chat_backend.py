@@ -35,6 +35,7 @@ import requests
 from inference.providers.ollama import resolve_ollama_base_urls
 from inference.providers.vllm import chat_completions_url, resolve_vllm_base_urls
 from services.agent.conversation import ChatFn, StreamChatFn
+from services.agent.infer_scheduler import wrap_chat_fn
 from services.agent.tool_protocol import (  # noqa: F401 — re-export for callers/tests
     content_from_assistant_message,
     native_tools_enabled,
@@ -151,6 +152,9 @@ def build_chat_fn(
 
     Native tools: ``LIVEHOUSE_AGENT_NATIVE_TOOLS=auto`` (default) enables for
     openai/vllm, keeps ollama on text protocol unless explicitly ``1``.
+
+    Returned ``ChatFn`` is admitted through :mod:`services.agent.infer_scheduler`
+    unless ``LIVEHOUSE_AGENT_INFER_SCHEDULER=0``.
     """
     provider = str(model_config.get("provider", "ollama") or "ollama").strip().lower()
     model_name = str(model_name or model_config.get("model_name") or "llava").strip()
@@ -169,7 +173,7 @@ def build_chat_fn(
 
     if provider in ("vllm", "openai"):
         urls = resolve_vllm_base_urls(model_config)
-        return _openai_chat_fn(
+        raw = _openai_chat_fn(
             endpoint=urls[0],
             model_name=model_name,
             temperature=temperature,
@@ -178,9 +182,10 @@ def build_chat_fn(
             api_key=(model_config.get("api_key") or None),
             tools=use_tools,
         )
+        return wrap_chat_fn(raw)
 
     urls = resolve_ollama_base_urls(model_config)
-    return _ollama_chat_fn(
+    raw = _ollama_chat_fn(
         endpoint=urls[0],
         model_name=model_name,
         temperature=temperature,
@@ -188,6 +193,7 @@ def build_chat_fn(
         timeout=eff_timeout,
         tools=use_tools,
     )
+    return wrap_chat_fn(raw)
 
 
 def build_chat_fn_from_config(
