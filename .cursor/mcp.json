@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "livehouse-gallery": {
+      "command": ".venv/bin/python",
+      "args": ["scripts/run_mcp_gallery.py"]
+    }
+  }
+}

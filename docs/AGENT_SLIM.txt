@@ -51,7 +51,7 @@ Runtime
                                       recipes still own 朋友圈/最炸/高潮/交片)
   services/agent/curation_jobs.py      Async delivery job store + worker
   services/agent/specialists.py        retrieve/select/style allowlists
-  services/agent/mcp_gallery.py        Cursor MCP adapter (stdio JSON-RPC)
+  services/agent/mcp_gallery.py        Cursor MCP adapter (stdio Content-Length; latest_session)
   services/agent/conversation.py       ConversationalAgent entry
   services/agent/chat_backend.py
   services/agent/guardrails.py
