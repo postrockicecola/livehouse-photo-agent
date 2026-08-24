@@ -35,6 +35,106 @@ type Props = {
   onToggleLikeReason?: (reason: CurationLikeReason) => void;
 };
 
+type StylePresetDefinition = {
+  id: string;
+  label: string;
+  filmVariant: string;
+  group: string;
+  optical: OpticalConsoleState;
+};
+
+function opticalLook(values: Partial<OpticalConsoleState>): OpticalConsoleState {
+  return { ...OPTICAL_NEUTRAL, ...values };
+}
+
+/** Curated combinations: a film emulsion plus a tuned optical treatment. */
+const CURATED_STYLE_PRESETS: StylePresetDefinition[] = [
+  {
+    id: "look_retro_warm_memory",
+    label: "复古 · 暖金回忆",
+    filmVariant: "film_gold_200",
+    group: "复古",
+    optical: opticalLook({ air: 28, halation: 20, dream: 18, time: 46, wear: 22 }),
+  },
+  {
+    id: "look_retro_faded_roll",
+    label: "复古 · 褪色胶卷",
+    filmVariant: "film_expired_slide",
+    group: "复古",
+    optical: opticalLook({ air: 22, night: 18, dream: 20, time: 58, wear: 48 }),
+  },
+  {
+    id: "look_retro_hk_memory",
+    label: "复古 · 港风旧梦",
+    filmVariant: "film_wong_kar_wai",
+    group: "复古",
+    optical: opticalLook({ air: 36, halation: 42, night: 45, dream: 30, time: 42 }),
+  },
+  {
+    id: "look_dream_soft_bloom",
+    label: "梦幻 · 柔焦花雾",
+    filmVariant: "film_portra_400",
+    group: "梦幻",
+    optical: opticalLook({ air: 30, halation: 6, dream: 36, time: 12 }),
+  },
+  {
+    id: "look_dream_neon_haze",
+    label: "梦幻 · 霓虹迷雾",
+    filmVariant: "film_neon_haze",
+    group: "梦幻",
+    optical: opticalLook({ air: 22, halation: 8, night: 24, dream: 28, time: 14 }),
+  },
+  {
+    id: "look_dream_shoegaze",
+    label: "梦幻 · Shoegaze",
+    filmVariant: "film_teal_magenta",
+    group: "梦幻",
+    optical: opticalLook({ air: 30, halation: 6, night: 30, dream: 32, flow: 8, time: 20 }),
+  },
+  {
+    id: "look_vivid_slide",
+    label: "浓彩 · 反转片",
+    filmVariant: "film_velvia_50",
+    group: "浓彩",
+    optical: opticalLook({ air: 18, halation: 14, time: 20 }),
+  },
+  {
+    id: "look_vivid_candy",
+    label: "浓彩 · 糖果铬彩",
+    filmVariant: "film_candy_chrome",
+    group: "浓彩",
+    optical: opticalLook({ air: 24, halation: 22, dream: 16, time: 18 }),
+  },
+  {
+    id: "look_vivid_summer",
+    label: "浓彩 · 盛夏热浪",
+    filmVariant: "film_mexico_sun",
+    group: "浓彩",
+    optical: opticalLook({ air: 30, halation: 30, dream: 12, time: 24 }),
+  },
+  {
+    id: "look_romance_rose",
+    label: "浪漫 · 玫瑰恋曲",
+    filmVariant: "film_rose_gold",
+    group: "浪漫",
+    optical: opticalLook({ air: 48, halation: 30, dream: 54, time: 26 }),
+  },
+  {
+    id: "look_romance_portra",
+    label: "浪漫 · 暖调人像",
+    filmVariant: "film_portra_400",
+    group: "浪漫",
+    optical: opticalLook({ air: 38, halation: 22, dream: 36, time: 28 }),
+  },
+  {
+    id: "look_romance_sunset",
+    label: "浪漫 · 日落电影",
+    filmVariant: "film_sunset_chrome",
+    group: "浪漫",
+    optical: opticalLook({ air: 46, halation: 38, dream: 42, time: 32 }),
+  },
+];
+
 /** ``op_kernel`` film looks — rendered on demand via ``GET /api/lab/film-render`` (must match backend ``FILM_VARIANT_IDS``). */
 const FILM_STYLE_PRESETS = [
   { id: "film_livehouse", label: "Film · Livehouse" },
@@ -102,10 +202,13 @@ function adjustmentsActive(adj: Record<string, number> | null | undefined): bool
 type StyleStripEntry = {
   id: string;
   label: string;
+  group?: string;
   /** Image path query fragment (already ``encodeURIComponent``-safe from gallery API). */
   pathQuoted: string | null;
   /** When set, URL uses ``/api/lab/film-render`` with ``path=pathQuoted``. */
   filmVariant?: string;
+  /** Curated optical treatment bundled with this preset. */
+  optical?: OpticalConsoleState;
   /** Numeric grade params for ``film_automated`` (sent as ``&adjust=<json>``). */
   adjust?: Record<string, number> | null;
   score?: number;
@@ -155,10 +258,22 @@ function buildStyleEntries(item: GalleryItem): StyleStripEntry[] {
     });
   }
 
+  for (const p of CURATED_STYLE_PRESETS) {
+    rows.push({
+      id: p.id,
+      label: p.label,
+      group: p.group,
+      pathQuoted: filmSourceQuoted,
+      filmVariant: p.filmVariant,
+      optical: p.optical,
+    });
+  }
+
   for (const p of FILM_STYLE_PRESETS) {
     rows.push({
       id: p.id,
       label: p.label,
+      group: "经典",
       pathQuoted: filmSourceQuoted,
       filmVariant: p.id,
     });
@@ -189,7 +304,11 @@ function pathsEqualForExport(a: string | null | undefined, b: string | null | un
   }
 }
 
-export function styleEntryToGalleryExportItem(item: GalleryItem, entry: StyleStripEntry): GalleryExportItem | null {
+export function styleEntryToGalleryExportItem(
+  item: GalleryItem,
+  entry: StyleStripEntry,
+  optical: Record<string, number> | null = null,
+): GalleryExportItem | null {
   const catalogFile = catalogBasenameForExport(item);
   if (!catalogFile || !stripEntryEnabled(entry)) return null;
   const rotate = Number(item.rotate_degrees ?? 0);
@@ -203,6 +322,7 @@ export function styleEntryToGalleryExportItem(item: GalleryItem, entry: StyleStr
       ...(entry.filmVariant === AUTOMATED_VARIANT_ID && entry.adjust
         ? { automated_adjust: entry.adjust }
         : {}),
+      ...(optical ? { optical } : {}),
     };
   }
   if (!entry.pathQuoted?.trim()) return null;
@@ -215,7 +335,9 @@ function entryMatchesChosenExport(entry: StyleStripEntry, chosen: GalleryExportI
     return (
       Boolean(entry.filmVariant) &&
       entry.filmVariant === chosen.film_variant &&
-      pathsEqualForExport(entry.pathQuoted, chosen.film_source_path_quoted)
+      pathsEqualForExport(entry.pathQuoted, chosen.film_source_path_quoted) &&
+      JSON.stringify(opticalStateToApiPayload(entry.optical ?? OPTICAL_NEUTRAL)) ===
+        JSON.stringify(chosen.optical ?? null)
     );
   }
   if ((chosen.alternate_jpeg_path_quoted || "").trim()) {
@@ -749,7 +871,13 @@ function LutStripThumb({
 }: LutStripThumbProps) {
   const thumbMax = 360;
   const plainUrl = stripPlainImageUrl(apiBase, entry, thumbMax, rotateDeg);
-  const filmUrl = stripFilmImageUrl(apiBase, entry, thumbMax, rotateDeg);
+  const filmUrl = stripFilmImageUrl(
+    apiBase,
+    entry,
+    thumbMax,
+    rotateDeg,
+    opticalStateToApiPayload(entry.optical ?? OPTICAL_NEUTRAL),
+  );
   const disabled = !plainUrl && !filmUrl;
   const initial = plainUrl ?? filmUrl ?? "";
 
@@ -898,24 +1026,38 @@ function StyleSelector({
         Luma · Emulsion
       </span>
       <div ref={scrollRef} className="lab-lut-scroll px-8 sm:px-10">
-        {entries.map((entry) => {
+        {entries.map((entry, index) => {
           const enabled = stripEntryEnabled(entry);
           const selected = entry.id === selectedId && enabled;
           const exportPicked = entryMatchesChosenExport(entry, chosenExport);
+          const previousGroup = index > 0 ? entries[index - 1]?.group : undefined;
+          const showGroup = Boolean(entry.group && entry.group !== previousGroup);
           return (
-            <LutStripThumb
-              key={entry.id}
-              entry={entry}
-              apiBase={apiBase}
-              rotateDeg={rotateDeg}
-              selected={selected}
-              exportPicked={exportPicked}
-              onSelect={() => onSelect(entry.id)}
-              onWarmFilmPreview={() => {
-                const u = stripFilmImageUrl(apiBase, entry, MAIN_PREVIEW_FILM_MAX, rotateDeg);
-                preloadFilmPreviewUrl(u);
-              }}
-            />
+            <div key={entry.id} className="flex shrink-0 items-end gap-1.5">
+              {showGroup ? (
+                <span className="mb-5 [writing-mode:vertical-rl] font-mono text-[7px] tracking-[0.16em] text-white/25">
+                  {entry.group}
+                </span>
+              ) : null}
+              <LutStripThumb
+                entry={entry}
+                apiBase={apiBase}
+                rotateDeg={rotateDeg}
+                selected={selected}
+                exportPicked={exportPicked}
+                onSelect={() => onSelect(entry.id)}
+                onWarmFilmPreview={() => {
+                  const u = stripFilmImageUrl(
+                    apiBase,
+                    entry,
+                    MAIN_PREVIEW_FILM_MAX,
+                    rotateDeg,
+                    opticalStateToApiPayload(entry.optical ?? OPTICAL_NEUTRAL),
+                  );
+                  preloadFilmPreviewUrl(u);
+                }}
+              />
+            </div>
           );
         })}
       </div>
@@ -972,10 +1114,17 @@ export function LabCompareModal({
   );
   const opticalPending = opticalCacheKey(optical) !== opticalCacheKey(debouncedOptical);
 
-  const onStripSelect = useCallback((id: string) => {
-    suppressScrollSyncUntil.current = Date.now() + 180;
-    setSelectedId(id);
-  }, []);
+  const onStripSelect = useCallback(
+    (id: string) => {
+      suppressScrollSyncUntil.current = Date.now() + 180;
+      setSelectedId(id);
+      const entry = entries.find((candidate) => candidate.id === id);
+      const nextOptical = entry?.optical ?? OPTICAL_NEUTRAL;
+      setOptical(nextOptical);
+      setDebouncedOptical(nextOptical);
+    },
+    [entries],
+  );
 
   useEffect(() => {
     if (!item) {
@@ -1055,16 +1204,30 @@ export function LabCompareModal({
       .map((id) => entries.find((e) => e.id === id))
       .filter((e): e is StyleStripEntry => Boolean(e?.filmVariant))
       .map((e) =>
-        stripFilmImageUrl(apiBase, e, MAIN_PREVIEW_FILM_MAX, rotateDeg, opticalApiPayload),
+        stripFilmImageUrl(
+          apiBase,
+          e,
+          MAIN_PREVIEW_FILM_MAX,
+          rotateDeg,
+          opticalStateToApiPayload(e.optical ?? OPTICAL_NEUTRAL),
+        ),
       );
     preloadFilmPreviewUrls(urls);
-  }, [isOpen, item, selectedId, enabledEntryIds, entries, apiBase, rotateDeg, opticalApiPayload]);
+  }, [isOpen, item, selectedId, enabledEntryIds, entries, apiBase, rotateDeg]);
 
   useEffect(() => {
     if (!isOpen || !item) return;
     const urls = entries
       .filter((e) => e.filmVariant && stripEntryEnabled(e))
-      .map((e) => stripFilmImageUrl(apiBase, e, MAIN_PREVIEW_FILM_MAX, rotateDeg));
+      .map((e) =>
+        stripFilmImageUrl(
+          apiBase,
+          e,
+          MAIN_PREVIEW_FILM_MAX,
+          rotateDeg,
+          opticalStateToApiPayload(e.optical ?? OPTICAL_NEUTRAL),
+        ),
+      );
     preloadFilmPreviewUrls(urls);
   }, [isOpen, item?.path, item?.file, entries, apiBase, rotateDeg]);
 
@@ -1082,9 +1245,9 @@ export function LabCompareModal({
       const base = cur >= 0 ? cur : 0;
       const next = (base + delta + enabledEntryIds.length) % enabledEntryIds.length;
       suppressScrollSyncUntil.current = Date.now() + 180;
-      setSelectedId(enabledEntryIds[next]!);
+      onStripSelect(enabledEntryIds[next]!);
     },
-    [enabledEntryIds, selectedId],
+    [enabledEntryIds, selectedId, onStripSelect],
   );
 
   useEffect(() => {
@@ -1119,8 +1282,11 @@ export function LabCompareModal({
   }, [onClose, isOpen, stepStripSelection]);
 
   const finalExportSpec = useMemo(
-    () => (item && selected ? styleEntryToGalleryExportItem(item, selected) : null),
-    [item, selected],
+    () =>
+      item && selected
+        ? styleEntryToGalleryExportItem(item, selected, opticalStateToApiPayload(optical))
+        : null,
+    [item, selected, optical],
   );
   const canSetFinalResult = Boolean(onPickExportStyle && finalExportSpec);
 

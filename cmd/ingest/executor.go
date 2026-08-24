@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -17,7 +19,7 @@ import (
 // SD brain + gallery hook → process_brain_ingested → tasks.run_job (see README / ARCH_MAP).
 //
 // Updates ss.Status and returns a non-nil error on failure paths (state is still persisted by caller patterns).
-func runSession(sessionDir string, ss *SessionState, workers int, pipelineCmd string, archiveRoot string, stateMu *sync.Mutex, repoRoot string) error {
+func runSession(ctx context.Context, sessionDir string, ss *SessionState, workers int, pipelineCmd string, archiveRoot string, stateMu *sync.Mutex, repoRoot string) error {
 	sessionStart := time.Now()
 	stateMu.Lock()
 	ss.Status = "running"
@@ -29,8 +31,7 @@ func runSession(sessionDir string, ss *SessionState, workers int, pipelineCmd st
 
 	arwN := countARWFiles(effectiveRawDirForARW(sessionDir))
 	if arwN > 0 {
-		cmd := exec.Command("go", "run", "./cmd/preview-extractor", "--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers))
-		cmd.Dir = repoRoot
+		cmd := previewExtractorCommandContext(ctx, repoRoot, sessionDir, workers)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
@@ -67,7 +68,14 @@ func runSession(sessionDir string, ss *SessionState, workers int, pipelineCmd st
 	if strings.TrimSpace(pipelineCmd) != "" {
 		cmdText := expandPipelineCommand(pipelineCmd, archiveRoot, sessionDir)
 		logExef("starting Python pipeline: %s", cmdText)
-		pc := exec.Command("sh", "-c", cmdText)
+		pc := exec.CommandContext(ctx, "sh", "-c", cmdText)
+		pc.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		pc.Cancel = func() error {
+			if pc.Process == nil {
+				return nil
+			}
+			return syscall.Kill(-pc.Process.Pid, syscall.SIGKILL)
+		}
 		pc.Dir = repoRoot
 		pc.Stdout = os.Stdout
 		pc.Stderr = os.Stderr
@@ -99,6 +107,23 @@ func runSession(sessionDir string, ss *SessionState, workers int, pipelineCmd st
 	}
 	logSuccessf("session done: %s", sessionDir)
 	return nil
+}
+
+func previewExtractorCommand(repoRoot, sessionDir string, workers int) *exec.Cmd {
+	return previewExtractorCommandContext(context.Background(), repoRoot, sessionDir, workers)
+}
+
+func previewExtractorCommandContext(ctx context.Context, repoRoot, sessionDir string, workers int) *exec.Cmd {
+	args := []string{"--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers)}
+	if configured := strings.TrimSpace(os.Getenv("LIVEHOUSE_PREVIEW_EXTRACTOR")); configured != "" {
+		return exec.CommandContext(ctx, configured, args...)
+	}
+	if binary, err := exec.LookPath("preview-extractor"); err == nil {
+		return exec.CommandContext(ctx, binary, args...)
+	}
+	cmd := exec.CommandContext(ctx, "go", append([]string{"run", "./cmd/preview-extractor"}, args...)...)
+	cmd.Dir = repoRoot
+	return cmd
 }
 
 func expandPipelineCommand(template, archiveRoot, sessionDir string) string {

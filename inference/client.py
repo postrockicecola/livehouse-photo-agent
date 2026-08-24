@@ -141,7 +141,10 @@ def inference_client_from_model_config(
         _ht = model_config.get("inference_hard_timeout_seconds")
         hard_to = None if _ht is None or _ht == "" else int(_ht)
     mq = max(1, int(max_inference_queue_size))
-    _mbs = model_config.get("max_batch_size", 1)
+    _mbs = model_config.get(
+        "max_batch_size",
+        model_config.get("inference_batch_size", 1),
+    )
     _baw = model_config.get("batch_aggregate_window_ms", 0)
     max_batch_size = int(_mbs) if _mbs is not None else 1
     batch_aggregate_window_ms = float(_baw or 0)

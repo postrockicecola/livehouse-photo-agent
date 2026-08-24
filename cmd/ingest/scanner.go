@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 )
 
 // scanOnce discovers sessions, updates JSON state, and may start one pipeline run in a goroutine.
-func scanOnce(archiveRoot string, st *WorkerState, stableSeconds int, workers int, pipelineCmd string, maxPerScan int, verbose bool, stateFile string, stateMu *sync.Mutex, pipelineRunning *bool, onlySession string, repoRoot string) error {
+func scanOnce(ctx context.Context, archiveRoot string, st *WorkerState, stableSeconds int, workers int, pipelineCmd string, maxPerScan int, verbose bool, stateFile string, stateMu *sync.Mutex, pipelineRunning *bool, onlySession string, repoRoot string) error {
 	stateMu.Lock()
 	var sessionDirs []string
 	var err error
@@ -106,7 +107,7 @@ func scanOnce(archiveRoot string, st *WorkerState, stableSeconds int, workers in
 				saveState(stateFile, st)
 				stateMu.Unlock()
 			}()
-			if err := runSession(sd, sess, workers, pipelineCmd, archiveRoot, stateMu, repoRoot); err != nil {
+			if err := runSession(ctx, sd, sess, workers, pipelineCmd, archiveRoot, stateMu, repoRoot); err != nil {
 				logErrf("runSession: %v", err)
 			}
 		}()

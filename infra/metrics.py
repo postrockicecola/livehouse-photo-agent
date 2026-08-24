@@ -68,7 +68,22 @@ if _PROM_AVAILABLE:
         "livehouse_inference_latency_ms",
         "Inference latency in milliseconds",
         ["provider"],
-        buckets=(50, 100, 200, 400, 800, 1500, 3000, 6000, 12000),
+        buckets=(
+            50,
+            100,
+            200,
+            400,
+            800,
+            1500,
+            3000,
+            6000,
+            12000,
+            30000,
+            60000,
+            120000,
+            300000,
+            600000,
+        ),
     )
     _P_JOBS_STATUS = Gauge(
         "livehouse_jobs_status_count",
@@ -100,7 +115,22 @@ if _PROM_AVAILABLE:
     _P_INFERENCE_Q_E2E = Histogram(
         "livehouse_inference_queue_job_ms",
         "Wall time from admission to job completion (queue + infer)",
-        buckets=(50, 100, 200, 400, 800, 1500, 3000, 6000, 12000, 180000),
+        buckets=(
+            50,
+            100,
+            200,
+            400,
+            800,
+            1500,
+            3000,
+            6000,
+            12000,
+            30000,
+            60000,
+            120000,
+            300000,
+            600000,
+        ),
     )
     _P_STAGE3_FAST_FIRST = Counter(
         "livehouse_stage3_fast_first_routing_total",
@@ -252,6 +282,7 @@ def inference_queue_runtime_snapshot() -> dict[str, Any]:
         "avg_queue_wait_ms": avg_qwait,
         "throughput_img_per_sec_30s": round(img_per_sec, 4) if img_per_sec is not None else None,
         "gpu_util_estimate_30s": round(gpu_est, 4) if gpu_est is not None else None,
+        "worker_busy_ratio_30s": round(gpu_est, 4) if gpu_est is not None else None,
     }
     _merge_real_gpu_telemetry(out, fallback_estimate=gpu_est)
     return out

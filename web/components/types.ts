@@ -31,6 +31,8 @@ export type GalleryExportItem = {
   alternate_jpeg_path_quoted?: string | null;
   /** When ``film_variant === "film_automated"``: per-image VLM grade params. */
   automated_adjust?: Record<string, number> | null;
+  /** Lab optical look (dream/halation/grain/etc.); preserved in final export. */
+  optical?: Record<string, number> | null;
 };
 
 /** A folded (non-representative) frame in a ``sort=diverse`` group. */

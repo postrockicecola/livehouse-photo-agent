@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from utils.atomic_files import atomic_write_text
 from utils.runtime_paths import resolve_runtime_file, runtime_dir, runtime_file_path
 
 
@@ -258,7 +259,7 @@ def write_latest_session_pointer(previews_dir: str | Path) -> Path | None:
 
     path = runtime_file_path(archive_root, "latest_session.json")
     try:
-        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        atomic_write_text(path, json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
     except OSError:
         return None
     return path

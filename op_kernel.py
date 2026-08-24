@@ -978,10 +978,10 @@ def _halation_tint_from_light(
     magenta = float(np.clip((avg_r + avg_b - 2.0 * avg_g) / 0.38, 0.0, 1.0))
     blue_led = float(np.clip((avg_b - avg_r) / 0.26, 0.0, 1.0))
 
-    warm_t = np.array([1.08, 0.40, 0.14], dtype=np.float32)
-    mag_t = np.array([1.02, 0.30, 0.78], dtype=np.float32)
+    warm_t = np.array([1.02, 0.58, 0.30], dtype=np.float32)
+    mag_t = np.array([1.00, 0.44, 0.80], dtype=np.float32)
     blue_t = np.array([0.38, 0.62, 1.10], dtype=np.float32)
-    neutral_t = np.array([1.02, 0.48, 0.32], dtype=np.float32)
+    neutral_t = np.array([1.00, 0.62, 0.48], dtype=np.float32)
 
     w_warm = max(0.0, warmth) * (1.0 - 0.65 * blue_led)
     w_mag = magenta * (1.0 - 0.5 * max(0.0, warmth))
@@ -1060,7 +1060,7 @@ def _film_halation_apply(
     hal_g *= red_guard
     hal_b *= red_guard
     if subject_soft is not None:
-        sub = 1.0 - 0.55 * subject_soft * (1.0 - grad_gate * 0.35)
+        sub = 1.0 - 0.78 * subject_soft * (1.0 - grad_gate * 0.35)
         hal_r *= sub
         hal_g *= sub
         hal_b *= sub
@@ -1072,9 +1072,9 @@ def _film_halation_apply(
     gain_r, gain_g, gain_b = float(tint[0]), float(tint[1]), float(tint[2])
 
     out = rgb.copy()
-    out[:, :, 0] += hal_r * 0.068 * strength * gain_r
-    out[:, :, 1] += hal_g * 0.018 * strength * gain_g
-    out[:, :, 2] += hal_b * 0.036 * strength * gain_b
+    out[:, :, 0] += hal_r * 0.042 * strength * gain_r
+    out[:, :, 1] += hal_g * 0.024 * strength * gain_g
+    out[:, :, 2] += hal_b * 0.032 * strength * gain_b
     return np.clip(out, 0.0, 1.0)
 
 
@@ -2115,13 +2115,13 @@ def _radial_dist_norm(h: int, w: int, eps: float = 1e-6) -> np.ndarray:
 
 
 def _optical_ui_to_unit(value: float) -> float:
-    """Map UI slider 0–100 (or legacy 0–1) to internal strength (aggressive curve)."""
+    """Map UI slider 0–100 (or legacy 0–1) to a controllable internal strength."""
     v = float(value)
     if v > 1.0:
         v = v / 100.0
     v = float(np.clip(v, 0.0, 1.0))
-    # Ease-in: mid slider values land much harder than linear (100 still = full).
-    return float(np.clip(np.power(v, 0.48), 0.0, 1.0))
+    # Gentle toe: low/mid slider values should not jump straight to heavy diffusion.
+    return float(np.clip(np.power(v, 1.20), 0.0, 1.0))
 
 
 def _lh_directional_blur_rgb(
@@ -2316,7 +2316,7 @@ def _lh_dream_soften_apply(
     subject_soft: np.ndarray | None = None,
     eps: float = 1e-6,
 ) -> np.ndarray:
-    """Local contrast reduction + edge-aware softening (not beauty filter)."""
+    """Highlight diffusion with strong subject/edge protection."""
     s = _optical_ui_to_unit(dream_strength)
     if s <= 1e-6:
         return rgb
@@ -2324,15 +2324,17 @@ def _lh_dream_soften_apply(
     lum = _lh_luminance(rgb)
     if subject_soft is None:
         subject_soft, _, _ = _subject_readability_masks(rgb, lum, h, w, eps)
-    blur_l = cv2.GaussianBlur(lum, (0, 0), 12.0)
+    blur_l = cv2.GaussianBlur(lum, (0, 0), 8.0)
     local = lum - blur_l
-    lum_soft = blur_l + local * (1.0 - 0.88 * s)
+    lum_soft = blur_l + local * (1.0 - 0.34 * s)
     scale = lum_soft / (lum + eps)
     out = np.clip(rgb * scale[:, :, None], 0.0, 1.0)
     edge = _lh_edge_strength_map(lum, eps)
-    soft_mask = np.clip((edge - 0.04) / 0.24, 0.0, 1.0) * (1.0 - subject_soft * 0.32)
-    blurred = cv2.GaussianBlur(out, (0, 0), 3.5 + 7.0 * s)
-    mix = np.clip(soft_mask * (0.22 + 0.78 * s), 0.0, 0.75)[:, :, None]
+    edge_guard = 1.0 - 0.88 * np.clip((edge - 0.03) / 0.30, 0.0, 1.0)
+    highlight_air = np.clip((lum - 0.38) / 0.52, 0.0, 1.0) ** 0.72
+    soft_mask = highlight_air * edge_guard * (1.0 - subject_soft * 0.78)
+    blurred = cv2.GaussianBlur(out, (0, 0), 1.2 + 2.8 * s)
+    mix = np.clip(soft_mask * (0.06 + 0.28 * s), 0.0, 0.28)[:, :, None]
     return np.clip(out * (1.0 - mix) + blurred * mix, 0.0, 1.0)
 
 
@@ -2374,7 +2376,7 @@ def apply_optical_console_enhancements(
             img,
             h,
             w,
-            bloom_strength=0.92 + 3.15 * air_s,
+            bloom_strength=0.24 + 1.55 * air_s,
             bloom_damp=bloom_damp,
             subject_soft=subject_soft,
             seed=seed,
@@ -2386,7 +2388,7 @@ def apply_optical_console_enhancements(
         img = _film_halation_apply(
             img,
             lum,
-            0.92 + 2.35 * hal_s,
+            0.18 + 0.92 * hal_s,
             light_rim_hint=None,
             subject_soft=subject_soft,
             seed=seed,

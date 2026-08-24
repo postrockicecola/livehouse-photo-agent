@@ -83,6 +83,10 @@ class VLLMProvider(InferenceProvider):
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.api_key = (api_key or "").strip() or None
+        self._session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_connections=4, pool_maxsize=16)
+        self._session.mount("http://", adapter)
+        self._session.mount("https://", adapter)
 
     def _max_size(self, request: InferenceRequest) -> tuple[int, int]:
         thumb_side = request.metadata.get("vlm_thumbnail_max_side")
@@ -98,8 +102,8 @@ class VLLMProvider(InferenceProvider):
         img_base64 = ImageProcessor.get_optimized_base64(request.image_path, max_size=self._max_size(request))
         read_cap = request.metadata.get("inference_read_timeout_seconds")
         read_timeout = max(1, int(read_cap) if read_cap is not None else int(self.timeout))
-        connect_t = min(60, max(10, read_timeout // 3))
-        req_timeout = (connect_t, read_timeout)
+        deadline_raw = request.metadata.get("inference_deadline_monotonic")
+        deadline = float(deadline_raw) if deadline_raw is not None else None
         num_predict = int(request.metadata.get("num_predict", self.num_predict))
 
         headers = {"Content-Type": "application/json"}
@@ -132,7 +136,25 @@ class VLLMProvider(InferenceProvider):
         attempts = self.max_retries + 1
         for attempt in range(attempts):
             try:
-                response = requests.post(self.url, json=payload, headers=headers, timeout=req_timeout)
+                attempt_read_timeout = read_timeout
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        return InferenceResponse(
+                            status="error",
+                            error="inference deadline exceeded",
+                            error_type="timeout",
+                            model=model_name,
+                        )
+                    attempt_read_timeout = max(1, min(read_timeout, int(remaining)))
+                connect_t = min(60, max(1, attempt_read_timeout // 3))
+                req_timeout = (connect_t, attempt_read_timeout)
+                response = self._session.post(
+                    self.url,
+                    json=payload,
+                    headers=headers,
+                    timeout=req_timeout,
+                )
                 response.raise_for_status()
                 result = response.json()
                 return self._parse_success(result, model_name)

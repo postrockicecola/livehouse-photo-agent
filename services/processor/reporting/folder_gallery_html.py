@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Mapping
 from services.processor.pipeline_image_ops import is_delivery_pipeline_mode
 from services.processor.reporting.audit_io import load_audit_jsonl
 from services.processor.reporting.dimension_display import score_to_percent_bar
+from utils.atomic_files import atomic_write_text
 from utils.stage3_dimensions import STAGE3_DIM_LABELS, STAGE3_DIM_ORDER
 
 logger = logging.getLogger(__name__)
@@ -679,7 +680,7 @@ def write_folder_gallery_pages(
         html = render_folder_gallery_html(title, image_files, audit_data)
         gallery_file = folder_path / "gallery.html"
         try:
-            gallery_file.write_text(html, encoding="utf-8")
+            atomic_write_text(gallery_file, html)
             written.append(gallery_file)
             logger.info("   ✅ 已生成 %s 分类详情页: %s", folder_type, gallery_file)
         except OSError as e:

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -20,7 +21,14 @@ type arwCandidate struct {
 	Mod  int64
 }
 
+type stableARWObservation struct {
+	Size      int64
+	Mod       int64
+	FirstSeen time.Time
+}
+
 func runSDIngestLoop(
+	ctx context.Context,
 	db *sql.DB,
 	sdMount string,
 	archiveRoot string,
@@ -35,17 +43,24 @@ func runSDIngestLoop(
 
 	ticker := time.NewTicker(poll)
 	defer ticker.Stop()
+	stableFiles := make(map[string]stableARWObservation)
 
 	for {
-		_, err := sdScanOnce(db, sdMount, archiveRoot, deviceID, workers, repoRoot, galleryHook)
+		_, err := sdScanOnce(ctx, db, sdMount, archiveRoot, deviceID, workers, repoRoot, galleryHook, stableFiles)
 		if err != nil {
 			logErrf("sd scan error: %v", err)
 		}
-		<-ticker.C
+		select {
+		case <-ticker.C:
+		case <-ctx.Done():
+			logScanf("SD ingest shutting down")
+			return
+		}
 	}
 }
 
 func sdScanOnce(
+	ctx context.Context,
 	db *sql.DB,
 	sdMount string,
 	archiveRoot string,
@@ -53,6 +68,7 @@ func sdScanOnce(
 	workers int,
 	repoRoot string,
 	galleryHook string,
+	stableFiles map[string]stableARWObservation,
 ) (ingested int, err error) {
 	sdMount = strings.TrimSpace(sdMount)
 	if sdMount == "" {
@@ -73,6 +89,38 @@ func sdScanOnce(
 	if len(cands) == 0 {
 		return 0, nil
 	}
+	stableSeconds := 5
+	if raw := strings.TrimSpace(os.Getenv("LUMA_SD_STABLE_SECONDS")); raw != "" {
+		if parsed, parseErr := time.ParseDuration(raw + "s"); parseErr == nil {
+			stableSeconds = max(1, int(parsed.Seconds()))
+		}
+	}
+	now := time.Now()
+	stableCutoff := now.Unix() - int64(stableSeconds)
+	stable := cands[:0]
+	seen := make(map[string]struct{}, len(cands))
+	for _, cand := range cands {
+		seen[cand.Path] = struct{}{}
+		previous, observed := stableFiles[cand.Path]
+		if !observed || previous.Size != cand.Size || previous.Mod != cand.Mod {
+			stableFiles[cand.Path] = stableARWObservation{
+				Size: cand.Size, Mod: cand.Mod, FirstSeen: now,
+			}
+			continue
+		}
+		if cand.Mod <= stableCutoff && now.Sub(previous.FirstSeen) >= time.Duration(stableSeconds)*time.Second {
+			stable = append(stable, cand)
+		}
+	}
+	for path := range stableFiles {
+		if _, ok := seen[path]; !ok {
+			delete(stableFiles, path)
+		}
+	}
+	cands = stable
+	if len(cands) == 0 {
+		return 0, nil
+	}
 
 	// Split the card into per-day sessions by each file's own EXIF date so a
 	// mixed card (e.g. yesterday + today) never collapses into one majority-date
@@ -80,7 +128,7 @@ func sdScanOnce(
 	groups := groupCandidatesBySession(repoRoot, cands)
 	var total int
 	for _, key := range sortedSessionKeys(groups) {
-		n, err := ingestSessionGroup(db, key, groups[key], archiveRoot, deviceID, workers, repoRoot, galleryHook)
+		n, err := ingestSessionGroup(ctx, db, key, groups[key], archiveRoot, deviceID, workers, repoRoot, galleryHook)
 		total += n
 		if err != nil {
 			return total, err
@@ -127,6 +175,7 @@ func sortedSessionKeys(groups map[string][]arwCandidate) []string {
 }
 
 func ingestSessionGroup(
+	ctx context.Context,
 	db *sql.DB,
 	sessionKey string,
 	cands []arwCandidate,
@@ -197,7 +246,7 @@ func ingestSessionGroup(
 		return nNew, err
 	}
 	logExef("run preview_extractor for session %s", filepath.Base(sessionDir))
-	if err := runPreviewExtractor(repoRoot, sessionDir, workers); err != nil {
+	if err := runPreviewExtractor(ctx, repoRoot, sessionDir, workers); err != nil {
 		logWarnf("preview_extractor failed (raw archived): %v", err)
 	}
 
@@ -286,17 +335,15 @@ func listARWWithPool(root string, workers int) ([]arwCandidate, error) {
 	return out, nil
 }
 
-func runPreviewExtractor(repoRoot, sessionDir string, workers int) error {
-	cmd := execCommandPreviewExtractor(repoRoot, sessionDir, workers)
+func runPreviewExtractor(ctx context.Context, repoRoot, sessionDir string, workers int) error {
+	cmd := execCommandPreviewExtractor(ctx, repoRoot, sessionDir, workers)
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 	return cmd.Run()
 }
 
-func execCommandPreviewExtractor(repoRoot, sessionDir string, workers int) *exec.Cmd {
-	c := exec.Command("go", "run", "./cmd/preview-extractor", "--base-dir", sessionDir, "--workers", fmt.Sprintf("%d", workers))
-	c.Dir = repoRoot
-	return c
+func execCommandPreviewExtractor(ctx context.Context, repoRoot, sessionDir string, workers int) *exec.Cmd {
+	return previewExtractorCommandContext(ctx, repoRoot, sessionDir, workers)
 }
 
 // triggerGalleryCheck fires the recommended main-path hook (POST check_new_images →
@@ -317,4 +364,7 @@ func triggerGalleryCheck(url string, timeout time.Duration) {
 		return
 	}
 	_ = resp.Body.Close()
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		logWarnf("gallery hook returned HTTP %d", resp.StatusCode)
+	}
 }

@@ -37,7 +37,7 @@ def main() -> None:
         "--only",
         type=str,
         default="",
-        help="Comma-separated scenario ids (default: all). See docs/RELIABILITY.md.",
+        help="Comma-separated scenario ids (default: all). See docs/learning/05-durable-jobs.md.",
     )
     args = parser.parse_args()
 

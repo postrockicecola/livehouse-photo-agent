@@ -112,6 +112,13 @@ def scenario_dead_letter_after_retries() -> ChaosScenarioResult:
                     )
                 st = fail_job_retryable(conn, job_id=jid, error_message="simulated failure")
                 statuses.append(st)
+                if st == "FAILED_RETRYABLE":
+                    # Advance the scenario's logical clock past retry backoff without sleeping.
+                    conn.execute(
+                        "UPDATE jobs SET updated_at=? WHERE id=?",
+                        (int(time.time()) - 600, jid),
+                    )
+                    conn.commit()
             row = get_job(conn, job_id=jid)
             final = str(row["status"]) if row else None
             ok = final == "DEAD_LETTERED" and statuses[-1] == "DEAD_LETTERED"

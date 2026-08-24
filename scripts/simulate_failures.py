@@ -137,7 +137,7 @@ def main() -> None:
         default="all",
         help=(
             "Failure scenario to run. Use chaos-matrix for the full SSOT+dispatch matrix "
-            "(isolated DB per sub-scenario); see docs/RELIABILITY.md."
+            "(isolated DB per sub-scenario); see docs/learning/05-durable-jobs.md."
         ),
     )
     args = parser.parse_args()

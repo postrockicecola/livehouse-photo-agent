@@ -13,6 +13,7 @@ import json
 import os
 import shutil
 import subprocess
+import threading
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -43,6 +44,7 @@ from services.film_render_service import (
 )
 from services.edit_adjustments import EditAdjustments, parse_edit_adjustments_response
 from services.image_service import ImageService
+from services.optical_params import OpticalConsoleParams, parse_optical_console
 from services.path_service import PathResolver
 from services.result_service import (
     load_gallery_page,
@@ -50,7 +52,7 @@ from services.result_service import (
 )
 from utils.http_security import require_ops_auth
 from utils.logging_context import new_trace_id
-from utils.luma_brain import brain_connect, create_analyze_path_job
+from utils.luma_brain import brain_connect, create_analyze_path_job, get_job
 
 router = APIRouter()
 
@@ -62,6 +64,12 @@ BASE_DIR = os.getcwd()
 _CELERY_BROKER = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 _CELERY_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 celery_client = Celery("livehouse_api", broker=_CELERY_BROKER, backend=_CELERY_BACKEND)
+_FILM_RENDER_SLOTS = threading.BoundedSemaphore(
+    max(1, int(os.getenv("LIVEHOUSE_API_FILM_RENDER_SLOTS", "2")))
+)
+_EMBEDDING_SLOTS = threading.BoundedSemaphore(
+    max(1, int(os.getenv("LIVEHOUSE_API_EMBEDDING_SLOTS", "1")))
+)
 
 # ``_runtime_base_dir`` is hot; cache until session ref or results JSON mtimes change.
 _gallery_active_dir_cache: tuple[tuple[str, float, float, float], str] | None = None
@@ -71,6 +79,19 @@ def configure_gallery_routes(base_dir: str) -> None:
     global BASE_DIR, _gallery_active_dir_cache
     BASE_DIR = base_dir
     _gallery_active_dir_cache = None
+
+
+def _embedding_capacity():
+    if not _EMBEDDING_SLOTS.acquire(blocking=False):
+        raise HTTPException(
+            status_code=429,
+            detail="embedding capacity exhausted",
+            headers={"Retry-After": "5"},
+        )
+    try:
+        yield
+    finally:
+        _EMBEDDING_SLOTS.release()
 
 
 class ExportImageSpec(BaseModel):
@@ -85,6 +106,8 @@ class ExportImageSpec(BaseModel):
     alternate_jpeg_path_quoted: str | None = None
     # When ``film_variant == film_automated``: per-image VLM grade params.
     automated_adjust: dict[str, float] | None = None
+    # Lab optical treatment bundled with a curated preset or manual adjustment.
+    optical: dict[str, float] | None = None
 
     @field_validator("rotate", mode="before")
     @classmethod
@@ -103,7 +126,7 @@ class ExportRequest(BaseModel):
     # When true, images without an explicit ``film_variant`` use persisted session vibe.
     use_session_vibe: bool = False
     # Gallery uses a Celery task so the HTTP request does not hold the whole export open.
-    background: bool = False
+    background: bool = True
 
 
 class VibeResolveRequest(BaseModel):
@@ -185,12 +208,17 @@ def _export_processing_opts() -> dict[str, int | bool]:
         from_raw = True
     else:
         from_raw = bool(proc.get("export_film_from_raw", True))
-    jpeg_ms = int(proc.get("export_film_jpeg_max_side", 3200) or 3200)
+    jpeg_ms = int(proc.get("export_film_jpeg_max_side", 4096) or 4096)
     raw_ms = int(proc.get("export_film_raw_max_side", jpeg_ms) or jpeg_ms)
+    jpeg_quality = int(proc.get("export_film_jpeg_quality", 95) or 95)
+    jpeg_subsampling = int(proc.get("export_film_jpeg_subsampling", 0))
     return {
         "export_film_from_raw": from_raw,
+        "export_film_raw_half_size": bool(proc.get("export_film_raw_half_size", False)),
         "export_film_jpeg_max_side": max(256, min(4096, jpeg_ms)),
         "export_film_raw_max_side": max(256, min(4096, raw_ms)),
+        "export_film_jpeg_quality": max(80, min(100, jpeg_quality)),
+        "export_film_jpeg_subsampling": max(0, min(2, jpeg_subsampling)),
     }
 
 
@@ -662,22 +690,31 @@ def get_film_render(
     eff_rotate = rotate
     if rotate == 0:
         eff_rotate = _auto_capture_rotation(str(src_abs))
-    try:
-        cached = render_film_to_cache(
-            src_path=src_abs,
-            variant_id=variant,
-            rotate=eff_rotate,
-            max_side=max_side,
-            cache_root=cache_root,
-            cache_key_extra=lab_film_cache_extra,
-            optical=optical_p1,
-            adjustments=adjustments,
-            intensity=float(intensity),
+    if not _FILM_RENDER_SLOTS.acquire(blocking=False):
+        raise HTTPException(
+            status_code=429,
+            detail="film render capacity exhausted",
+            headers={"Retry-After": "2"},
         )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="film render failed") from e
+    try:
+        try:
+            cached = render_film_to_cache(
+                src_path=src_abs,
+                variant_id=variant,
+                rotate=eff_rotate,
+                max_side=max_side,
+                cache_root=cache_root,
+                cache_key_extra=lab_film_cache_extra,
+                optical=optical_p1,
+                adjustments=adjustments,
+                intensity=float(intensity),
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="film render failed") from e
+    finally:
+        _FILM_RENDER_SLOTS.release()
 
     return FileResponse(
         str(cached),
@@ -1029,8 +1066,8 @@ def _export_images_impl(
     from utils.runtime_paths import runtime_dir as previews_runtime_dir
 
     film_export_cache = previews_runtime_dir(base_dir, create=True) / "film_export_cache"
-    _EXPORT_FILM_CACHE_TAG = "exportFilmV16"
-    _EXPORT_RAW_CACHE_TAG = "exportFilmRawDevelopV1"
+    _EXPORT_FILM_CACHE_TAG = "exportFilmV17"
+    _EXPORT_RAW_CACHE_TAG = "exportFilmRawDevelopV2"
 
     def _render_film_to_jpeg(
         src: Path,
@@ -1042,6 +1079,7 @@ def _export_images_impl(
         max_side: int,
         cache_tag: str,
         adjustments: EditAdjustments | None = None,
+        optical: OpticalConsoleParams | None = None,
         intensity: float = 1.0,
         raw_half_size: bool = False,
     ) -> str | None:
@@ -1060,9 +1098,12 @@ def _export_images_impl(
                 max_side=int(max_side),
                 cache_root=film_export_cache,
                 cache_key_extra=cache_tag,
+                optical=optical,
                 adjustments=adjustments,
                 intensity=float(intensity),
                 raw_half_size=raw_half_size,
+                jpeg_quality=int(export_opts["export_film_jpeg_quality"]),
+                jpeg_subsampling=int(export_opts["export_film_jpeg_subsampling"]),
             )
             if dest_dir is not None:
                 shutil.copy2(cached, dest_dir / dest_basename)
@@ -1100,6 +1141,11 @@ def _export_images_impl(
                 EditAdjustments(**{k: float(v) for k, v in (spec.automated_adjust or {}).items()
                                    if k in EditAdjustments().as_dict()})
                 if is_automated
+                else None
+            )
+            spec_optical = (
+                parse_optical_console(json.dumps(spec.optical))
+                if spec.optical
                 else None
             )
             if is_automated:
@@ -1160,6 +1206,7 @@ def _export_images_impl(
                         max_side=int(export_opts["export_film_jpeg_max_side"]),
                         cache_tag=_EXPORT_FILM_CACHE_TAG,
                         adjustments=spec_adjustments if vid == AUTOMATED_VARIANT_ID else None,
+                        optical=spec_optical,
                         intensity=grade_i,
                     )
                     if err is None:
@@ -1202,8 +1249,9 @@ def _export_images_impl(
                     max_side=int(export_opts["export_film_raw_max_side"]),
                     cache_tag=_EXPORT_RAW_CACHE_TAG,
                     adjustments=spec_adjustments if variant_graded == AUTOMATED_VARIANT_ID else None,
+                    optical=spec_optical,
                     intensity=grade_i,
-                    raw_half_size=True,
+                    raw_half_size=bool(export_opts["export_film_raw_half_size"]),
                 )
                 return (
                     (True, [])
@@ -1263,6 +1311,8 @@ def _export_images_impl(
                     ).strip()
                 if is_automated and spec_adjustments is not None:
                     row["automated_adjust"] = spec_adjustments.as_dict()
+                if spec.optical:
+                    row["optical"] = dict(spec.optical)
                 export_feedback_items.append(row)
         except Exception as e:
             errors.append(f"{image_name}: {e}")
@@ -1437,11 +1487,15 @@ def enqueue_analysis(
             brain_session_id=sid,
         )
         if existing_id is not None:
+            existing = get_job(conn, job_id=existing_id) or {}
+            job_trace_id = str(existing.get("trace_id") or "")
             return {
                 "ok": True,
                 "job_id": existing_id,
                 "status": "already_running",
-                "trace_id": trace_id,
+                "trace_id": job_trace_id,
+                "job_trace_id": job_trace_id,
+                "request_trace_id": trace_id,
                 "source_dir": resolved,
                 "message": "analysis already queued or running for this session",
             }
@@ -1632,6 +1686,7 @@ def get_similar_photos(
     path: str = Query(..., description="Absolute or gallery-relative path of the source image"),
     top_k: int = Query(10, ge=1, le=50, description="Maximum results"),
     session_id: int | None = Query(None, description="Restrict corpus to one session (None = all)"),
+    _capacity: None = Depends(_embedding_capacity),
 ):
     """Return visually similar photos ranked by CLIP cosine similarity.
 
@@ -1680,6 +1735,7 @@ def index_session_embeddings(
     session_id: int | None = Query(None, description="Session to index; None = latest active"),
     force_reindex: bool = Query(False, description="Re-generate embeddings even if already indexed"),
     _ops: None = Depends(require_ops_auth),
+    _capacity: None = Depends(_embedding_capacity),
 ):
     """Batch-generate CLIP embeddings for all ANALYZED photos in a session.
 

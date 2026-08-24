@@ -23,12 +23,12 @@ def test_ollama_payload_sets_format_json_and_seed(monkeypatch) -> None:
     )
     captured: dict = {}
 
-    def fake_post(url, json=None, timeout=None):
+    def fake_post(_session, url, json=None, timeout=None):
         captured["url"] = url
         captured["payload"] = json
         return _FakeResponse()
 
-    monkeypatch.setattr("inference.providers.ollama.requests.post", fake_post)
+    monkeypatch.setattr("inference.providers.ollama.requests.Session.post", fake_post)
     provider = OllamaProvider(
         endpoint="http://127.0.0.1:11434",
         temperature=0.0,
@@ -58,11 +58,11 @@ def test_ollama_constructor_json_mode_default(monkeypatch) -> None:
     )
     captured: dict = {}
 
-    def fake_post(url, json=None, timeout=None):
+    def fake_post(_session, url, json=None, timeout=None):
         captured["payload"] = json
         return _FakeResponse()
 
-    monkeypatch.setattr("inference.providers.ollama.requests.post", fake_post)
+    monkeypatch.setattr("inference.providers.ollama.requests.Session.post", fake_post)
     provider = OllamaProvider(
         endpoint="http://127.0.0.1:11434",
         temperature=0.2,

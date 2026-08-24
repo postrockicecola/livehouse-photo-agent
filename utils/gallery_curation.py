@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 from pathlib import Path
 from typing import Any, Literal
@@ -197,6 +198,20 @@ def _sanitize_export_entry(raw: Any) -> dict[str, Any] | None:
         v = raw.get(key)
         if isinstance(v, str) and v.strip():
             out[key] = v.strip()
+    for key in ("automated_adjust", "optical"):
+        values = raw.get(key)
+        if not isinstance(values, dict):
+            continue
+        clean: dict[str, float] = {}
+        for param, value in values.items():
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(number):
+                clean[str(param)] = number
+        if clean:
+            out[key] = clean
     return out
 
 

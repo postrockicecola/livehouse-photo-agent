@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -45,6 +46,21 @@ from utils.luma_brain import (
     count_active_jobs_for_worker,
     get_job,
 )
+
+
+@contextmanager
+def _artifact_publish_lock(source_dir: str):
+    """Serialize artifact publishers for one session across worker processes."""
+    import fcntl
+
+    lock_path = Path(source_dir) / ".luma_pipeline_staged" / "artifact-publish.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+b") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 logger = get_task_logger(__name__)
 
@@ -202,12 +218,14 @@ class JobExecutor:
                 session_id=session_id,
                 trace_id=trace_id,
                 job_type=job_type,
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             lifecycle.start_pipeline_inferencing(
                 job_id,
                 source_dir=source_dir,
                 trace_id=trace_id,
                 job_type=job_type,
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             logger.info(
                 "job start",
@@ -243,12 +261,16 @@ class JobExecutor:
                 runner.run_stage3_vlm(
                     max_workers=max_workers, conn=None, enable_checkpoint=enable_checkpoint
                 )
-                write_out = runner.run_write_artifact()
+                with _artifact_publish_lock(source_dir):
+                    lifecycle.assert_active_claim(job_id, claimed)
+                    write_out = runner.run_write_artifact()
+                    lifecycle.assert_active_claim(job_id, claimed)
 
             pipeline_result = {"artifact_paths": write_out.get("artifact_paths") or {}}
 
             # Outcome ledger only (jobs already progressed via lifecycle.* above).
             if job_type == "ANALYZE_SESSION" and pipeline_session_id is not None:
+                lifecycle.assert_active_claim(job_id, claimed)
                 finalize_session_if_needed(conn, pipeline_session_id)
 
             total_latency_ms = max(0, int(time.time() * 1000) - run_started_ms)
@@ -405,6 +427,7 @@ class JobExecutor:
                 session_id=session_id,
                 trace_id=trace_id,
                 job_type=STAGE_JOB_TYPE,
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             t1 = time.perf_counter()
             lifecycle.start_pipeline_inferencing(
@@ -412,6 +435,7 @@ class JobExecutor:
                 source_dir=source_dir,
                 trace_id=trace_id,
                 job_type=STAGE_JOB_TYPE,
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             t2 = time.perf_counter()
             runner = PipelineStageRunner(
@@ -445,11 +469,15 @@ class JobExecutor:
                 )
                 inference_wall = int(stage_result.get("inference_wall_ms") or 0)
             elif stage_name == "WRITE_ARTIFACT":
-                stage_result = runner.run_write_artifact()
+                with _artifact_publish_lock(source_dir):
+                    lifecycle.assert_active_claim(job_id, claimed)
+                    stage_result = runner.run_write_artifact()
+                    lifecycle.assert_active_claim(job_id, claimed)
                 inference_wall = int(float(stage_result.get("writing_wall_seconds") or 0.0) * 1000.0)
                 ap = stage_result.get("artifact_paths") or {}
                 artifact_paths = ap if isinstance(ap, dict) else None
             elif stage_name == "FINALIZE":
+                lifecycle.assert_active_claim(job_id, claimed)
                 finalize_session_if_needed(conn, int(session_id) if session_id is not None else None)
                 stage_result = {"session_id": session_id}
             else:
@@ -465,6 +493,7 @@ class JobExecutor:
                     "trace_id": trace_id,
                     "stage_summary": stage_result,
                 },
+                **JobLifecycle.claim_fence_kwargs(claimed),
             )
             t4 = time.perf_counter()
             preprocess_ms = max(0, int((t1 - t0) * 1000))

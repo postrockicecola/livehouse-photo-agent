@@ -18,7 +18,11 @@ from api.agent_routes import router as agent_router
 from api.gallery_routes import configure_gallery_routes
 from api.gallery_routes import router as gallery_router
 from api.infra_routes import router as infra_router
-from infra.otel_bootstrap import configure_otel_from_env, instrument_fastapi_app
+from infra.otel_bootstrap import (
+    configure_otel_from_env,
+    instrument_celery,
+    instrument_fastapi_app,
+)
 from utils.http_security import cors_allow_origins
 
 _REPO_ROOT = Path(__file__).resolve().parent
@@ -87,6 +91,7 @@ RESULTS_JSON = os.path.join(BASE_DIR, "analysis_results.json")
 configure_gallery_routes(BASE_DIR)
 
 configure_otel_from_env()
+instrument_celery()
 
 app = FastAPI(title="Livehouse Gallery API", version="1.0.0")
 instrument_fastapi_app(app)
@@ -131,17 +136,28 @@ def healthz():
     conn = brain_connect()
     try:
         report = health_report(conn, provider=provider, endpoint=endpoint)
-        return report
+        return JSONResponse(status_code=200 if report.get("ok") else 503, content=report)
     finally:
         conn.close()
 
 
+@app.get("/livez")
+def livez():
+    """Process liveness only; dependency failures must not trigger restart loops."""
+    return {"ok": True}
+
+
 @app.get("/readyz")
 def readyz():
-    from infra.health import db_health
+    from infra.health import broker_health, db_health
 
     db = db_health()
-    return {"ok": bool(db.get("ok")), "checks": {"db": db}}
+    broker = broker_health()
+    report = {
+        "ok": bool(db.get("ok")) and bool(broker.get("ok")),
+        "checks": {"db": db, "broker": broker},
+    }
+    return JSONResponse(status_code=200 if report["ok"] else 503, content=report)
 
 
 @app.get("/metrics")

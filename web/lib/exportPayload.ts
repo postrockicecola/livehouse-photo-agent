@@ -14,12 +14,16 @@ export function serializeExportRequestBody(
     let rot = Number(row.rotate ?? 0);
     if (!Number.isFinite(rot)) rot = 0;
     rot = Math.trunc(rot);
-    const out: Record<string, string | number> = { file, rotate: rot };
+    const out: Record<string, unknown> = { file, rotate: rot };
     const fv = typeof row.film_variant === "string" ? row.film_variant.trim() : "";
     if (fv) {
       out.film_variant = fv;
       const fs = typeof row.film_source_path_quoted === "string" ? row.film_source_path_quoted.trim() : "";
       if (fs) out.film_source_path_quoted = fs;
+      if (fv === "film_automated" && row.automated_adjust) {
+        out.automated_adjust = row.automated_adjust;
+      }
+      if (row.optical) out.optical = row.optical;
     }
     const alt = typeof row.alternate_jpeg_path_quoted === "string" ? row.alternate_jpeg_path_quoted.trim() : "";
     if (alt && !fv) out.alternate_jpeg_path_quoted = alt;

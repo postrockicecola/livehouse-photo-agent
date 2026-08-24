@@ -78,7 +78,7 @@ jobs:
       - run: pnpm build
 
   go:
-    name: Go (vet + build)
+    name: Go (test race + vet + build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,4 +86,5 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go vet ./...
+      - run: go test -race ./...
       - run: go build ./...

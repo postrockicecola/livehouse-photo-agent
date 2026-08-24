@@ -17,7 +17,14 @@ def test_write_and_read_curation_v2(tmp_path):
             "b.jpg": {"verdict": "rejected", "reject_reasons": ["blur_bad"]},
             "c.jpg": {"verdict": "pass"},
         },
-        export_by_file={"a.jpg": {"file": "a.jpg", "rotate": 90, "film_variant": "film_cinestill_800t"}},
+        export_by_file={
+            "a.jpg": {
+                "file": "a.jpg",
+                "rotate": 90,
+                "film_variant": "film_cinestill_800t",
+                "optical": {"dream": 70, "halation": 30},
+            }
+        },
     )
     assert path is not None
     data = read_gallery_curation(previews)
@@ -27,6 +34,7 @@ def test_write_and_read_curation_v2(tmp_path):
     assert curation_liked_keys(data) == {"a.jpg"}
     assert curation_keys_by_verdict(data, "rejected") == {"b.jpg"}
     assert "a.jpg" in data["export_by_file"]
+    assert data["export_by_file"]["a.jpg"]["optical"] == {"dream": 70.0, "halation": 30.0}
 
 
 def test_legacy_selected_keys_migrates_to_liked(tmp_path):

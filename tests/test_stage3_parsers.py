@@ -82,7 +82,7 @@ def test_route_b_nested_dimensions_are_parsed() -> None:
 def test_default_stage3_shape():
     fb = default_stage3_parsed()
     assert len(fb["dimensions"]) == len(STAGE3_DIM_KEYS)
-    assert all(fb["dimensions"][k] == 5.0 for k in STAGE3_DIM_KEYS)
+    assert all(fb["dimensions"][k] == 0.0 for k in STAGE3_DIM_KEYS)
     assert fb["strongest_aspect"] == {"zh": "", "en": ""}
 
 

@@ -8,7 +8,9 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd/ingest/ ./cmd/ingest/
-RUN CGO_ENABLED=1 go build -o /out/ingest_worker ./cmd/ingest
+COPY cmd/preview-extractor/ ./cmd/preview-extractor/
+RUN CGO_ENABLED=1 go build -o /out/ingest_worker ./cmd/ingest \
+    && CGO_ENABLED=0 go build -o /out/preview-extractor ./cmd/preview-extractor
 
 FROM debian:bookworm-slim
 
@@ -19,10 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY --from=build /out/ingest_worker /usr/local/bin/ingest_worker
+COPY --from=build /out/preview-extractor /usr/local/bin/preview-extractor
 COPY cmd/ingest/luma_brain_schema.sql /app/luma_brain_schema.sql
 
 ENV LUMA_REPO_ROOT=/app \
     LUMA_ARCHIVE_ROOT=/data/archive \
+    LIVEHOUSE_PREVIEW_EXTRACTOR=/usr/local/bin/preview-extractor \
     GALLERY_HOOK=http://api:8080/api/ingest/check_new_images
 
 VOLUME ["/data/archive", "/data/brain"]

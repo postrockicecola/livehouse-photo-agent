@@ -1,17 +1,22 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
 func main() {
 	loadDotEnv()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	defaultArchive := defaultArchiveRoot()
 
@@ -55,7 +60,7 @@ func main() {
 			log.Fatalf("luma brain: %v", err)
 		}
 		defer db.Close()
-		runSDIngestLoop(db, strings.TrimSpace(*sdMount), *archiveRoot, deviceIDResolved, time.Duration(max(1, poll))*time.Second, *workers, repoRoot, galleryHookResolved)
+		runSDIngestLoop(ctx, db, strings.TrimSpace(*sdMount), *archiveRoot, deviceIDResolved, time.Duration(max(1, poll))*time.Second, *workers, repoRoot, galleryHookResolved)
 		return
 	}
 
@@ -87,9 +92,24 @@ func main() {
 	log.Printf("ingest-worker started | archive=%s repo_root=%s poll=%ds stable=%ds workers=%d max_per_scan=%d", *archiveRoot, repoRoot, poll, *stableSeconds, *workers, *maxPerScan)
 	log.Printf("pipeline template: %s", *pipelineCmd)
 	for {
-		if err := scanOnce(*archiveRoot, state, *stableSeconds, *workers, *pipelineCmd, *maxPerScan, *verbose, sf, &stateMu, &pipelineRunning, *onlySession, repoRoot); err != nil {
+		if err := scanOnce(ctx, *archiveRoot, state, *stableSeconds, *workers, *pipelineCmd, *maxPerScan, *verbose, sf, &stateMu, &pipelineRunning, *onlySession, repoRoot); err != nil {
 			log.Printf("scan error: %v", err)
 		}
-		<-ticker.C
+		select {
+		case <-ticker.C:
+		case <-ctx.Done():
+			log.Printf("ingest-worker shutting down; waiting for active session")
+			deadline := time.Now().Add(10 * time.Second)
+			for time.Now().Before(deadline) {
+				stateMu.Lock()
+				running := pipelineRunning
+				stateMu.Unlock()
+				if !running {
+					break
+				}
+				time.Sleep(100 * time.Millisecond)
+			}
+			return
+		}
 	}
 }

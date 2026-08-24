@@ -64,7 +64,7 @@ def test_generate_success_via_mocked_http(monkeypatch):
     )
     captured = {}
 
-    def fake_post(url, json=None, headers=None, timeout=None):
+    def fake_post(_session, url, json=None, headers=None, timeout=None):
         captured["url"] = url
         captured["payload"] = json
         captured["headers"] = headers
@@ -76,7 +76,7 @@ def test_generate_success_via_mocked_http(monkeypatch):
             }
         )
 
-    monkeypatch.setattr("inference.providers.vllm.requests.post", fake_post)
+    monkeypatch.setattr("inference.providers.vllm.requests.Session.post", fake_post)
     prov = VLLMProvider(
         endpoint="http://vllm:8000",
         temperature=0.0,
@@ -107,10 +107,10 @@ def test_generate_http_error_sets_status_code(monkeypatch):
     err = requests.HTTPError("500 Server Error")
     err.response = _FakeResponse(status_code=500)
 
-    def fake_post(url, json=None, headers=None, timeout=None):
+    def fake_post(_session, url, json=None, headers=None, timeout=None):
         return _FakeResponse(raise_exc=err)
 
-    monkeypatch.setattr("inference.providers.vllm.requests.post", fake_post)
+    monkeypatch.setattr("inference.providers.vllm.requests.Session.post", fake_post)
     prov = VLLMProvider(
         endpoint="http://vllm:8000",
         temperature=0.0,
@@ -135,7 +135,7 @@ def test_generate_retries_cloud_rate_limit(monkeypatch):
     err.response = _FakeResponse(status_code=429)
     calls = 0
 
-    def fake_post(url, json=None, headers=None, timeout=None):
+    def fake_post(_session, url, json=None, headers=None, timeout=None):
         nonlocal calls
         calls += 1
         if calls == 1:
@@ -144,7 +144,7 @@ def test_generate_retries_cloud_rate_limit(monkeypatch):
             json_body={"choices": [{"message": {"content": "{}"}}]}
         )
 
-    monkeypatch.setattr("inference.providers.vllm.requests.post", fake_post)
+    monkeypatch.setattr("inference.providers.vllm.requests.Session.post", fake_post)
     monkeypatch.setattr("inference.providers.vllm.time.sleep", lambda _: None)
     prov = VLLMProvider(
         endpoint="https://cloud.example/v1",

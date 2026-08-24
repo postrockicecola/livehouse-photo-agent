@@ -48,6 +48,13 @@ STRUCTURED_KEYS: tuple[str, ...] = (
 )
 
 _ATTACHED_FILES: set[str] = set()
+_STANDARD_LOG_RECORD_KEYS = frozenset(
+    {
+        *logging.makeLogRecord({}).__dict__.keys(),
+        "message",
+        "asctime",
+    }
+)
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
@@ -96,6 +103,17 @@ def structured_values(record: logging.LogRecord) -> dict[str, Any]:
     return {k: _coerce_field(k, getattr(record, k, None)) for k in STRUCTURED_KEYS}
 
 
+def additional_values(record: logging.LogRecord) -> dict[str, Any]:
+    """Preserve caller-supplied ``extra`` fields without serializing LogRecord internals."""
+    return {
+        key: value
+        for key, value in record.__dict__.items()
+        if key not in _STANDARD_LOG_RECORD_KEYS
+        and key not in STRUCTURED_KEYS
+        and not key.startswith("_")
+    }
+
+
 class StructuredTextFormatter(logging.Formatter):
     """Human-readable line; optional key=value tail for fields that were set."""
 
@@ -123,6 +141,7 @@ class JsonLineFormatter(logging.Formatter):
             "msg": record.getMessage(),
         }
         payload.update(structured_values(record))
+        payload.update(additional_values(record))
         if record.exc_info:
             payload["exc_info"] = self.formatException(record.exc_info)
         try:

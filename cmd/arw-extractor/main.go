@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -16,13 +17,7 @@ type ARWExtractor struct {
 	outputDir string
 }
 
-// JPEG 标记
-const (
-	SOI  = 0xFFD8 // Start of Image
-	EOI  = 0xFFD9 // End of Image
-	APP1 = 0xFFE1 // EXIF 数据
-	SOS  = 0xFFDA // Start of Scan
-)
+const jpegSOI = 0xFFD8
 
 // NewARWExtractor 创建新的提取器
 func NewARWExtractor(inputDir, outputDir string) *ARWExtractor {
@@ -34,42 +29,14 @@ func NewARWExtractor(inputDir, outputDir string) *ARWExtractor {
 
 // ExtractJPEG 从ARW文件中提取JPEG预览
 func (e *ARWExtractor) ExtractJPEG(arwPath string) ([]byte, error) {
-	file, err := os.Open(arwPath)
+	data, err := exec.Command("exiftool", "-PreviewImage", "-b", arwPath).Output()
 	if err != nil {
-		return nil, fmt.Errorf("无法打开文件 %s: %v", arwPath, err)
+		return nil, fmt.Errorf("无法从 %s 提取预览: %v", arwPath, err)
 	}
-	defer file.Close()
-
-	// 读取文件内容
-	content, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取文件 %s: %v", arwPath, err)
-	}
-
-	// 查找 JPEG 数据
-	jpegData := e.findJPEGData(content)
-	if jpegData == nil {
+	if len(data) < 4 || data[0] != 0xFF || data[1] != 0xD8 {
 		return nil, fmt.Errorf("未找到JPEG数据在 %s 中", arwPath)
 	}
-
-	return jpegData, nil
-}
-
-// findJPEGData 在ARW文件中查找JPEG数据
-func (e *ARWExtractor) findJPEGData(content []byte) []byte {
-	// 查找 JPEG SOI 标记 (0xFFD8)
-	for i := 0; i < len(content)-1; i++ {
-		if content[i] == 0xFF && content[i+1] == 0xD8 {
-			// 找到 SOI，现在查找 EOI (0xFFD9)
-			for j := i + 2; j < len(content)-1; j++ {
-				if content[j] == 0xFF && content[j+1] == 0xD9 {
-					// 找到 EOI，返回JPEG数据
-					return content[i : j+2]
-				}
-			}
-		}
-	}
-	return nil
+	return data, nil
 }
 
 // ProcessARWFile 处理单个ARW文件
@@ -88,12 +55,40 @@ func (e *ARWExtractor) ProcessARWFile(arwPath string) error {
 	}
 
 	// 保存JPEG文件
-	if err := os.WriteFile(jpgPath, jpegData, 0644); err != nil {
+	if err := writeFileAtomic(jpgPath, jpegData, 0644); err != nil {
 		return fmt.Errorf("无法保存JPEG文件 %s: %v", jpgPath, err)
 	}
 
 	fmt.Printf("✅ 已保存: %s (%d bytes)\n", jpgFileName, len(jpegData))
 	return nil
+}
+
+func writeFileAtomic(path string, data []byte, mode os.FileMode) (err error) {
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	defer func() {
+		_ = tmp.Close()
+		if err != nil {
+			_ = os.Remove(tmpName)
+		}
+	}()
+	if err = tmp.Chmod(mode); err != nil {
+		return err
+	}
+	if _, err = tmp.Write(data); err != nil {
+		return err
+	}
+	if err = tmp.Sync(); err != nil {
+		return err
+	}
+	if err = tmp.Close(); err != nil {
+		return err
+	}
+	err = os.Rename(tmpName, path)
+	return err
 }
 
 // Process 处理整个文件夹
@@ -162,7 +157,7 @@ func VerifyJPEG(jpgPath string) error {
 
 	// 检查JPEG标记
 	marker := binary.BigEndian.Uint16(header)
-	if marker != SOI {
+	if marker != jpegSOI {
 		return fmt.Errorf("不是有效的JPEG文件 (标记: 0x%04X)", marker)
 	}
 

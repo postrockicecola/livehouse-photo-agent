@@ -19,7 +19,7 @@ import threading
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -38,6 +38,22 @@ from services.agent.skills.memory import register_memory_skills
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+_AGENT_SLOTS = threading.BoundedSemaphore(
+    max(1, int(os.getenv("LIVEHOUSE_API_AGENT_SLOTS", "2")))
+)
+
+
+def _agent_capacity():
+    if not _AGENT_SLOTS.acquire(blocking=False):
+        raise HTTPException(
+            status_code=429,
+            detail="agent capacity exhausted",
+            headers={"Retry-After": "3"},
+        )
+    try:
+        yield
+    finally:
+        _AGENT_SLOTS.release()
 
 
 class ChatRequest(BaseModel):
@@ -411,7 +427,10 @@ def _sse(obj: dict[str, Any]) -> str:
 
 
 @router.post("/api/agent/chat/stream")
-def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
+def agent_chat_stream(
+    req: ChatRequest,
+    _capacity: None = Depends(_agent_capacity),
+) -> StreamingResponse:
     """Server-Sent Events variant of :func:`agent_chat`.
 
     Emits ``tool_call`` as skills run, then ``token`` chunks as a *typing effect*
@@ -523,7 +542,10 @@ def agent_chat_stream(req: ChatRequest) -> StreamingResponse:
 
 
 @router.post("/api/agent/chat", response_model=ChatResponse)
-def agent_chat(req: ChatRequest) -> ChatResponse:
+def agent_chat(
+    req: ChatRequest,
+    _capacity: None = Depends(_agent_capacity),
+) -> ChatResponse:
     base_dir = _resolve_base_dir(req.previews_dir)
 
     owner = store.owner_key(None, req.session_id)

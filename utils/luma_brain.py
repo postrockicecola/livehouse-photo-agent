@@ -1008,39 +1008,63 @@ def seed_analyze_session_jobs(
 
     Returns the same shape as tasks.create_analysis_jobs for API compatibility.
     """
-    rows = conn.execute(
-        """
-        SELECT DISTINCT p.session_id
-        FROM photos p
-        WHERE p.status = 'INGESTED'
-          AND p.session_id IS NOT NULL
-        ORDER BY p.session_id ASC
-        LIMIT ?
-        """,
-        (max(1, limit),),
-    ).fetchall()
-    session_ids = [int(r["session_id"]) for r in rows]
     created_ids: list[int] = []
     skipped_sessions: list[int] = []
-    for sid in session_ids:
-        existing = conn.execute(
+    now = int(time.time())
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        rows = conn.execute(
             """
-            SELECT id
-            FROM jobs
-            WHERE job_type = ?
-              AND session_id = ?
-              AND status IN (
-                'QUEUED','CLAIMED','PREPROCESSING','INFERENCING','POSTPROCESSING','FAILED_RETRYABLE'
-              )
-            LIMIT 1
+            SELECT DISTINCT p.session_id
+            FROM photos p
+            WHERE p.status = 'INGESTED'
+              AND p.session_id IS NOT NULL
+            ORDER BY p.session_id ASC
+            LIMIT ?
             """,
-            (job_type, sid),
-        ).fetchone()
-        if existing is not None:
-            skipped_sessions.append(sid)
-            continue
-        job_id = create_job(conn, job_type=job_type, session_id=sid, trace_id=trace_id)
-        created_ids.append(job_id)
+            (max(1, limit),),
+        ).fetchall()
+        session_ids = [int(r["session_id"]) for r in rows]
+        for sid in session_ids:
+            existing = conn.execute(
+                """
+                SELECT id
+                FROM jobs
+                WHERE job_type = ?
+                  AND session_id = ?
+                  AND status IN (
+                    'QUEUED','CLAIMED','PREPROCESSING','INFERENCING',
+                    'POSTPROCESSING','FAILED_RETRYABLE'
+                  )
+                LIMIT 1
+                """,
+                (job_type, sid),
+            ).fetchone()
+            if existing is not None:
+                skipped_sessions.append(sid)
+                continue
+            cur = conn.execute(
+                """
+                INSERT INTO jobs (
+                    job_type, session_id, status, attempt, max_attempts,
+                    enqueued_at, created_at, updated_at, trace_id
+                ) VALUES (?, ?, 'QUEUED', 0, 3, ?, ?, ?, ?)
+                """,
+                (job_type, sid, now, now, now, trace_id),
+            )
+            job_id = int(cur.lastrowid)
+            append_job_event(
+                conn,
+                job_id=job_id,
+                to_status="QUEUED",
+                message="job enqueued",
+                payload={"priority": 0, "max_attempts": 3},
+            )
+            created_ids.append(job_id)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     return {
         "ok": True,
         "job_type": job_type,
@@ -1070,6 +1094,7 @@ def list_runnable_analyze_jobs_for_ingested_sessions(
     """
     runnable_qm = _status_placeholders(_RUNNABLE_JOB_STATUSES)
     scope_frag, scope_args = _jobs_scope_sql_fragment(namespace, project_key, table_alias="j")
+    now = int(time.time())
     rows = conn.execute(
         f"""
         SELECT DISTINCT j.id
@@ -1077,6 +1102,17 @@ def list_runnable_analyze_jobs_for_ingested_sessions(
         WHERE j.job_type = ?
           AND j.status IN ({runnable_qm})
           AND j.session_id IS NOT NULL
+          AND (
+            j.status != 'FAILED_RETRYABLE'
+            OR COALESCE(j.updated_at, 0) <= ? - (
+              CASE
+                WHEN j.attempt <= 1 THEN 5
+                WHEN j.attempt = 2 THEN 15
+                WHEN j.attempt = 3 THEN 45
+                ELSE 300
+              END + (j.id % 7)
+            )
+          )
           AND (j.depends_on_job_id IS NULL OR (
             SELECT d.status FROM jobs d WHERE d.id = j.depends_on_job_id
           ) = 'SUCCEEDED')
@@ -1084,7 +1120,7 @@ def list_runnable_analyze_jobs_for_ingested_sessions(
         ORDER BY j.enqueued_at ASC, j.id ASC
         LIMIT ?
         """,
-        (job_type, *_RUNNABLE_JOB_STATUSES, *scope_args, max(1, limit)),
+        (job_type, *_RUNNABLE_JOB_STATUSES, now, *scope_args, max(1, limit)),
     ).fetchall()
     return [int(r[0]) for r in rows]
 
@@ -1109,17 +1145,29 @@ def list_runnable_job_ids_for_dispatch(
     runnable_qm = _status_placeholders(_RUNNABLE_JOB_STATUSES)
     dep = _sql_dependency_satisfied()
     scope_frag, scope_args = _jobs_scope_sql_fragment(namespace, project_key, table_alias="jobs")
+    now = int(time.time())
     rows = conn.execute(
         f"""
         SELECT id FROM jobs
         WHERE status IN ({runnable_qm})
           AND attempt < max_attempts
+          AND (
+            status != 'FAILED_RETRYABLE'
+            OR COALESCE(updated_at, 0) <= ? - (
+              CASE
+                WHEN attempt <= 1 THEN 5
+                WHEN attempt = 2 THEN 15
+                WHEN attempt = 3 THEN 45
+                ELSE 300
+              END + (id % 7)
+            )
+          )
           AND {dep}
           {scope_frag}
         ORDER BY priority DESC, enqueued_at ASC, id ASC
         LIMIT ?
         """,
-        (*_RUNNABLE_JOB_STATUSES, *scope_args, cap),
+        (*_RUNNABLE_JOB_STATUSES, now, *scope_args, cap),
     ).fetchall()
     return [int(r[0]) for r in rows]
 
@@ -1128,6 +1176,33 @@ def get_job(conn: sqlite3.Connection, *, job_id: int) -> dict[str, Any] | None:
     """Load one job by id."""
     row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
     return dict(row) if row is not None else None
+
+
+def assert_active_claim(
+    conn: sqlite3.Connection,
+    *,
+    job_id: int,
+    claim_generation: int,
+    worker_id: int,
+) -> None:
+    """Reject side effects from a cancelled, requeued, or otherwise stale executor."""
+    row = conn.execute(
+        "SELECT status, claim_generation, worker_id FROM jobs WHERE id=?",
+        (job_id,),
+    ).fetchone()
+    if row is None:
+        raise ClaimFenceError(f"job {job_id}: claim row no longer exists")
+    if (
+        str(row["status"]) not in JOB_STATUSES_ACTIVE_PIPELINE
+        or int(row["claim_generation"] or 0) != int(claim_generation)
+        or row["worker_id"] is None
+        or int(row["worker_id"]) != int(worker_id)
+    ):
+        raise ClaimFenceError(
+            f"job {job_id}: side-effect fence rejected "
+            f"status={row['status']!r} generation={row['claim_generation']!r} "
+            f"worker_id={row['worker_id']!r}"
+        )
 
 
 def list_job_ids_by_trace_id(conn: sqlite3.Connection, *, trace_id: str) -> list[int]:
@@ -1983,8 +2058,23 @@ def claim_jobs(
     try:
         runnable_qm = _status_placeholders(_RUNNABLE_JOB_STATUSES)
         dep = _sql_dependency_satisfied()
-        where = f"status IN ({runnable_qm}) AND attempt < max_attempts AND {dep}"
-        args: list[Any] = list(_RUNNABLE_JOB_STATUSES)
+        where = f"""
+            status IN ({runnable_qm})
+            AND attempt < max_attempts
+            AND (
+                status != 'FAILED_RETRYABLE'
+                OR COALESCE(updated_at, 0) <= ? - (
+                    CASE
+                        WHEN attempt <= 1 THEN 5
+                        WHEN attempt = 2 THEN 15
+                        WHEN attempt = 3 THEN 45
+                        ELSE 300
+                    END + (id % 7)
+                )
+            )
+            AND {dep}
+        """
+        args: list[Any] = [*_RUNNABLE_JOB_STATUSES, now]
         if job_type is not None:
             where += " AND job_type = ?"
             args.append(job_type)
@@ -2079,6 +2169,7 @@ def update_job_status(
     total_latency_ms: int | None = None,
     fence_claim_generation: int | None = None,
     fence_worker_id: int | None = None,
+    enforce_documented_transition: bool = False,
 ) -> None:
     """
     Update ``jobs.status`` (+ optional metrics / error columns) and append ``job_events``.
@@ -2105,6 +2196,12 @@ def update_job_status(
         if row is None:
             raise ValueError(f"job id not found: {job_id}")
         from_status = str(row["status"])
+        if enforce_documented_transition and not job_transition_is_documented_ssot(
+            from_status, to_status
+        ):
+            raise ValueError(
+                f"job {job_id}: undocumented transition {from_status!r} -> {to_status!r}"
+            )
         if fence_claim_generation is not None:
             cur_gen = int(row["claim_generation"] or 0)
             if cur_gen != int(fence_claim_generation):
@@ -2126,6 +2223,14 @@ def update_job_status(
 
         sets = ["status = ?", "updated_at = ?"]
         vals: list[Any] = [to_status, now]
+        if to_status == "CANCELLED":
+            sets.extend(
+                [
+                    "claim_generation = COALESCE(claim_generation, 0) + 1",
+                    "worker_id = NULL",
+                    "claimed_at = NULL",
+                ]
+            )
         if to_status in ("PREPROCESSING", "INFERENCING", "POSTPROCESSING") and from_status in ("QUEUED", "CLAIMED"):
             sets.append("started_at = COALESCE(started_at, ?)")
             vals.append(now)
@@ -2969,6 +3074,10 @@ def requeue_stuck_jobs(
     """
     Move stale active jobs back to QUEUED and clear worker claim.
 
+    Claims that already consumed their ``max_attempts`` budget are moved to
+    ``DEAD_LETTERED`` instead. Requeueing those rows would leave them permanently
+    unclaimable because :func:`claim_jobs` requires ``attempt < max_attempts``.
+
     **Does not** increment ``attempt`` — this path recovers a **lost / abandoned claim**, not a failed
     execution retry (see module comment on ``attempt`` above).
 
@@ -2999,7 +3108,8 @@ def requeue_stuck_jobs(
         active_qm = _status_placeholders(_ACTIVE_JOB_STATUSES)
         rows = conn.execute(
             f"""
-            SELECT j.id, j.status, j.worker_id, w.last_heartbeat
+            SELECT j.id, j.status, j.worker_id, j.attempt, j.max_attempts,
+                   w.last_heartbeat
             FROM jobs j
             LEFT JOIN workers w ON w.id = j.worker_id
             WHERE j.status IN ({active_qm})
@@ -3019,22 +3129,44 @@ def requeue_stuck_jobs(
         if not rows:
             conn.commit()
             return []
-        job_ids = [int(r["id"]) for r in rows]
-        qm = ",".join("?" * len(job_ids))
-        conn.execute(
-            f"""
-            UPDATE jobs
-            SET status = 'QUEUED',
-                worker_id = NULL,
-                claimed_at = NULL,
-                started_at = NULL,
-                finished_at = NULL,
-                claim_generation = COALESCE(claim_generation, 0) + 1,
-                updated_at = ?
-            WHERE id IN ({qm})
-            """,
-            (now, *job_ids),
-        )
+        requeue_ids = [
+            int(r["id"])
+            for r in rows
+            if int(r["max_attempts"] or 0) <= 0
+            or int(r["attempt"] or 0) < int(r["max_attempts"] or 0)
+        ]
+        exhausted_ids = [int(r["id"]) for r in rows if int(r["id"]) not in requeue_ids]
+        if requeue_ids:
+            qm = ",".join("?" * len(requeue_ids))
+            conn.execute(
+                f"""
+                UPDATE jobs
+                SET status = 'QUEUED',
+                    worker_id = NULL,
+                    claimed_at = NULL,
+                    started_at = NULL,
+                    finished_at = NULL,
+                    claim_generation = COALESCE(claim_generation, 0) + 1,
+                    updated_at = ?
+                WHERE id IN ({qm})
+                """,
+                (now, *requeue_ids),
+            )
+        if exhausted_ids:
+            qm = ",".join("?" * len(exhausted_ids))
+            conn.execute(
+                f"""
+                UPDATE jobs
+                SET status = 'DEAD_LETTERED',
+                    worker_id = NULL,
+                    claimed_at = NULL,
+                    finished_at = ?,
+                    claim_generation = COALESCE(claim_generation, 0) + 1,
+                    updated_at = ?
+                WHERE id IN ({qm})
+                """,
+                (now, now, *exhausted_ids),
+            )
         for row in rows:
             payload: dict[str, Any] = {
                 "stale_after_seconds": stale_after_seconds,
@@ -3044,16 +3176,23 @@ def requeue_stuck_jobs(
                 payload["worker_id"] = int(row["worker_id"])
             if row["last_heartbeat"] is not None:
                 payload["worker_last_heartbeat"] = int(row["last_heartbeat"])
+            exhausted = int(row["id"]) in exhausted_ids
+            payload["attempt"] = int(row["attempt"] or 0)
+            payload["max_attempts"] = int(row["max_attempts"] or 0)
             append_job_event(
                 conn,
                 job_id=int(row["id"]),
                 from_status=str(row["status"]),
-                to_status="QUEUED",
-                message=reason,
+                to_status="DEAD_LETTERED" if exhausted else "QUEUED",
+                message=(
+                    f"{reason}; dead-lettered because claim budget is exhausted"
+                    if exhausted
+                    else reason
+                ),
                 payload=payload,
             )
         conn.commit()
-        return job_ids
+        return requeue_ids
     except Exception:
         conn.rollback()
         raise

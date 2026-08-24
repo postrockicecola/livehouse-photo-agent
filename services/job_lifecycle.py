@@ -165,6 +165,8 @@ class JobLifecycle:
         to_status: str,
         message: str,
         payload: dict[str, Any] | None = None,
+        fence_claim_generation: int | None = None,
+        fence_worker_id: int | None = None,
     ) -> None:
         from utils.luma_brain import update_job_status
 
@@ -174,6 +176,9 @@ class JobLifecycle:
             to_status=to_status,
             message=message,
             payload=payload,
+            fence_claim_generation=fence_claim_generation,
+            fence_worker_id=fence_worker_id,
+            enforce_documented_transition=True,
         )
 
     def start_pipeline_preprocessing(
@@ -184,6 +189,8 @@ class JobLifecycle:
         session_id: Any,
         trace_id: str,
         job_type: str,
+        fence_claim_generation: int | None = None,
+        fence_worker_id: int | None = None,
     ) -> None:
         self.update_status(
             job_id,
@@ -195,6 +202,8 @@ class JobLifecycle:
                 "trace_id": trace_id,
                 "job_type": job_type,
             },
+            fence_claim_generation=fence_claim_generation,
+            fence_worker_id=fence_worker_id,
         )
 
     def start_pipeline_inferencing(
@@ -204,18 +213,33 @@ class JobLifecycle:
         source_dir: str | None,
         trace_id: str,
         job_type: str,
+        fence_claim_generation: int | None = None,
+        fence_worker_id: int | None = None,
     ) -> None:
         self.update_status(
             job_id,
             to_status="INFERENCING",
             message="running aesthetic pipeline",
             payload={"source_dir": source_dir, "trace_id": trace_id, "job_type": job_type},
+            fence_claim_generation=fence_claim_generation,
+            fence_worker_id=fence_worker_id,
         )
 
     def succeed(self, job_id: int, **kwargs: Any) -> None:
         from utils.luma_brain import mark_job_succeeded
 
         mark_job_succeeded(self._conn, job_id=job_id, **kwargs)
+
+    def assert_active_claim(self, job_id: int, claimed: dict[str, Any]) -> None:
+        from utils.luma_brain import assert_active_claim
+
+        fence = self.claim_fence_kwargs(claimed)
+        assert_active_claim(
+            self._conn,
+            job_id=job_id,
+            claim_generation=int(fence["fence_claim_generation"]),
+            worker_id=int(fence["fence_worker_id"]),
+        )
 
     def fail_permanent(
         self,

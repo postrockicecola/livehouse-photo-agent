@@ -180,8 +180,11 @@ processing:
   # Gallery batch export: ``graded_from_raw/`` = rawpy develop + user film variant (slow, high quality).
   # Override: LIVEHOUSE_EXPORT_FILM_FROM_RAW=0|1
   export_film_from_raw: true
-  export_film_jpeg_max_side: 3200
-  export_film_raw_max_side: 3200
+  export_film_jpeg_max_side: 4096
+  export_film_raw_max_side: 4096
+  export_film_raw_half_size: false
+  export_film_jpeg_quality: 95
+  export_film_jpeg_subsampling: 0  # 4:4:4，保留舞台灯光与高饱和边缘的颜色细节
 
   # Session vibe (homepage natural language → film_* preset). Persisted: Previews/runtime/session_vibe.json
   vibe_film:

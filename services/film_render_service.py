@@ -358,7 +358,7 @@ def _apply_variant(
     else:
         out = fn(rgb)
     out = np.asarray(out, dtype=np.uint8)
-    if optical and optical.is_active():
+    if optical and optical.has_optical_effects():
         from op_kernel import apply_optical_console_enhancements
 
         baked = variant_id == "film_livehouse"
@@ -404,6 +404,81 @@ def apply_grade_intensity(
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+_STYLE_BRIGHTNESS_BIAS_EV: dict[str, float] = {
+    # Preserve the intended mood while keeping all presets inside a common readability envelope.
+    "film_gold_200": -0.08,
+    "film_expired_slide": -0.10,
+    "film_wong_kar_wai": -0.08,
+    "film_fuji_classic_neg": -0.06,
+    "film_kodachrome_64": -0.05,
+    "film_black_mist": 0.12,
+    "film_neon_haze": 0.10,
+    "film_teal_magenta": 0.06,
+    "film_rose_gold": 0.10,
+    "film_portra_400": 0.08,
+    "film_sunset_chrome": 0.08,
+    "film_retro_literary_portrait": 0.08,
+}
+
+
+def _sample_luminance(rgb_u8: np.ndarray, max_side: int = 768) -> np.ndarray:
+    h, w = rgb_u8.shape[:2]
+    stride = max(1, int(np.ceil(max(h, w) / max_side)))
+    rgb = np.asarray(rgb_u8[::stride, ::stride], dtype=np.float32) / 255.0
+    return 0.2126 * rgb[:, :, 0] + 0.7152 * rgb[:, :, 1] + 0.0722 * rgb[:, :, 2]
+
+
+def _robust_mid_luminance(rgb_u8: np.ndarray) -> float:
+    lum = _sample_luminance(rgb_u8)
+    h, w = lum.shape
+    y0, y1 = int(h * 0.15), max(int(h * 0.85), int(h * 0.15) + 1)
+    x0, x1 = int(w * 0.15), max(int(w * 0.85), int(w * 0.15) + 1)
+    center = lum[y0:y1, x0:x1]
+    center_mid = float(np.percentile(center, 45.0)) if center.size else float(np.median(lum))
+    global_mid = float(np.percentile(lum, 50.0))
+    return max(1e-4, 0.68 * center_mid + 0.32 * global_mid)
+
+
+def normalize_grade_luminance(
+    src_u8: np.ndarray,
+    graded_u8: np.ndarray,
+    variant_id: str,
+    *,
+    manual_exposure_ev: float = 0.0,
+    adaptive: bool = True,
+) -> np.ndarray:
+    """Bound preset brightness drift while retaining dark-stage mood and highlight color."""
+    src_mid = _robust_mid_luminance(src_u8)
+    graded_mid = _robust_mid_luminance(graded_u8)
+    auto_ev = 0.0
+    if adaptive:
+        target_mid = float(np.clip(max(src_mid, 0.16), 0.16, 0.42))
+        target_mid *= 2.0 ** _STYLE_BRIGHTNESS_BIAS_EV.get(variant_id, 0.0)
+        auto_ev = float(np.log2(max(1e-4, target_mid) / max(1e-4, graded_mid)))
+        auto_ev = float(np.clip(auto_ev, -0.35, 0.75))
+
+        lum = _sample_luminance(graded_u8)
+        p95 = float(np.percentile(lum, 95.0))
+        if p95 > 1e-4 and auto_ev > 0.0:
+            highlight_limited_ev = float(np.log2(0.92 / p95) + 0.20)
+            auto_ev = min(auto_ev, max(0.12, highlight_limited_ev))
+
+    manual_ev = float(np.clip(manual_exposure_ev, -1.5, 1.5))
+    total_ev = float(np.clip(auto_ev + manual_ev, -1.5, 1.5))
+    if abs(total_ev) < 1e-3:
+        return graded_u8
+
+    out = np.asarray(graded_u8, dtype=np.float32) / 255.0
+    out *= 2.0 ** total_ev
+    if total_ev > 0.0:
+        # Smooth shoulder instead of hard clipping bright stage LEDs after an exposure lift.
+        knee = 0.82
+        over = np.maximum(out - knee, 0.0)
+        shoulder = knee + (1.0 - knee) * (1.0 - np.exp(-over / (1.0 - knee)))
+        out = np.where(out > knee, shoulder, out)
+    return (np.clip(out, 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)
+
+
 def _cache_file_name(
     src: Path,
     variant_id: str,
@@ -414,6 +489,8 @@ def _cache_file_name(
     adjust_cache_token: str = "",
     intensity: float = 1.0,
     raw_half_size: bool = False,
+    jpeg_quality: int | None = None,
+    jpeg_subsampling: int | None = None,
 ) -> str:
     inten = clamp_grade_intensity(intensity)
     try:
@@ -421,13 +498,15 @@ def _cache_file_name(
         meta = (
             f"{src.resolve()}|{variant_id}|r={rotate}|m={max_side}|mtime_ns={st.st_mtime_ns}|"
             f"{cache_key_extra}|opt={optical_cache_token}|adj={adjust_cache_token}|"
-            f"i={inten:.3f}|raw_half={int(raw_half_size)}|p=filmWorkV16"
+            f"i={inten:.3f}|raw_half={int(raw_half_size)}|q={jpeg_quality}|"
+            f"sub={jpeg_subsampling}|p=filmWorkV19"
         )
     except OSError:
         meta = (
             f"{src}|{variant_id}|r={rotate}|m={max_side}|mtime_ns=0|{cache_key_extra}|"
             f"opt={optical_cache_token}|adj={adjust_cache_token}|i={inten:.3f}|"
-            f"raw_half={int(raw_half_size)}|p=filmWorkV16"
+            f"raw_half={int(raw_half_size)}|q={jpeg_quality}|sub={jpeg_subsampling}|"
+            "p=filmWorkV19"
         )
     return hashlib.sha256(meta.encode()).hexdigest() + ".jpg"
 
@@ -444,6 +523,8 @@ def render_film_to_cache(
     adjustments: EditAdjustments | None = None,
     intensity: float = 1.0,
     raw_half_size: bool = False,
+    jpeg_quality: int | None = None,
+    jpeg_subsampling: int | None = None,
 ) -> Path:
     optical = optical or None
     inten = clamp_grade_intensity(intensity)
@@ -458,6 +539,8 @@ def render_film_to_cache(
         adjust_cache_token=adjustments.cache_token() if adjustments else "",
         intensity=inten,
         raw_half_size=raw_half_size,
+        jpeg_quality=jpeg_quality,
+        jpeg_subsampling=jpeg_subsampling,
     )
     if out.is_file():
         return out
@@ -468,6 +551,13 @@ def render_film_to_cache(
         variant_id,
     )
     processed = _apply_variant(rgb, variant_id, optical=optical, adjustments=adjustments)
+    processed = normalize_grade_luminance(
+        rgb,
+        processed,
+        variant_id,
+        manual_exposure_ev=optical.exposure if optical else 0.0,
+        adaptive=variant_id != AUTOMATED_VARIANT_ID,
+    )
     processed = apply_grade_intensity(rgb, processed, inten)
     im = Image.fromarray(processed)
     jpeg_orient = read_exif_orientation_tag(src_path)
@@ -479,12 +569,20 @@ def render_film_to_cache(
 
     tmp = out.with_name(f"{out.stem}.{secrets.token_hex(8)}.tmp.jpg")
     fast_thumb = max_side <= 900
+    quality = int(max(1, min(100, jpeg_quality))) if jpeg_quality is not None else (
+        84 if fast_thumb else 88
+    )
+    save_options: dict[str, int | bool] = {
+        "quality": quality,
+        "optimize": not fast_thumb,
+    }
+    if jpeg_subsampling is not None:
+        save_options["subsampling"] = int(jpeg_subsampling)
     try:
         im.save(
             tmp,
             format="JPEG",
-            quality=84 if fast_thumb else 88,
-            optimize=not fast_thumb,
+            **save_options,
         )
         os.replace(tmp, out)
     except Exception:

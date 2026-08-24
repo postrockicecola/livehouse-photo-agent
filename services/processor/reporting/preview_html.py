@@ -2,6 +2,8 @@
 from pathlib import Path
 from typing import Dict, Mapping
 
+from utils.atomic_files import atomic_write_text
+
 
 def build_preview_html(
     stats: Dict[str, int],
@@ -228,5 +230,5 @@ def write_preview_html_with_folders(
 
     preview_file = source_dir / "preview.html"
     html = build_preview_html(stats, best_count, keep_count, trash_count)
-    preview_file.write_text(html, encoding="utf-8")
+    atomic_write_text(preview_file, html)
     return preview_file

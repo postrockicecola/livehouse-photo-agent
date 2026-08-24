@@ -113,6 +113,8 @@ class _InferenceJob:
     client_future: concurrent_futures.Future[dict[str, Any]] | None = None
     infer_latency_ms: int | None = None
     queue_wait_ms_for_log: int | None = None
+    admission_wait_ms: int = 0
+    provider_queue_wait_ms: int = 0
 
 
 @dataclass(frozen=True)
@@ -625,9 +627,10 @@ class PrioritizedInferenceQueue:
         fut: concurrent_futures.Future[dict[str, Any]] = concurrent_futures.Future()
         job = _InferenceJob(
             request=req,
-            enqueued_mono=admit_mono,
+            enqueued_mono=t_adm0,
             admitted_mono=admit_mono,
             client_future=fut,
+            admission_wait_ms=max(0, int(bp_wait * 1000)),
         )
         lane.pq.put((priority, next(lane.seq), job))
         self._publish_metrics()
@@ -678,6 +681,7 @@ class PrioritizedInferenceQueue:
         try:
             return fut.result(timeout=cap)
         except concurrent_futures.TimeoutError:
+            fut.cancel()
             return {
                 "status": "error",
                 "error": f"Inference queue client wait exceeded {cap:.0f}s",
@@ -745,7 +749,11 @@ class PrioritizedInferenceQueue:
     def _prepare_infer_request(self, job: _InferenceJob) -> InferenceRequest:
         md_base = dict(job.request.metadata)
         if self._inference_read_timeout is not None:
-            md_base["inference_read_timeout_seconds"] = self._inference_read_timeout
+            deadline = job.enqueued_mono + self._inference_read_timeout
+            md_base["inference_deadline_monotonic"] = deadline
+            md_base["inference_read_timeout_seconds"] = max(
+                1, int(deadline - time.monotonic())
+            )
         return replace(job.request, metadata=md_base)
 
     def _ledger_create_run_start(
@@ -893,6 +901,8 @@ class PrioritizedInferenceQueue:
         meta = dict(payload.get("metadata") or {})
         ledger = dict(meta.get("inference_ledger") or {})
         meta["queue_wait_sec"] = wait_sec
+        meta["admission_wait_ms"] = job.admission_wait_ms
+        meta["provider_queue_wait_ms"] = job.provider_queue_wait_ms
         meta["degraded"] = bool(force_fallback or ledger.get("router_fallback_used"))
         payload["metadata"] = meta
         ok_inference = inference_status_ok(str(payload.get("status") or ""))
@@ -1056,7 +1066,35 @@ class PrioritizedInferenceQueue:
                 ),
             )
 
+        job.provider_queue_wait_ms = max(
+            0, int((time.monotonic() - job.admitted_mono) * 1000)
+        )
         infer_t0 = time.perf_counter()
+        if force_fallback and not self.router.fallback_model_name:
+            response = InferenceResponse(
+                status="error",
+                error="inference queue wait deadline exceeded and no fallback is configured",
+                error_type=ERROR_TIMEOUT,
+                model=job.request.model_name or self.router.primary_model_name,
+                metadata={
+                    "inference_ledger": {
+                        "attempts": [],
+                        "error_type": ERROR_TIMEOUT,
+                        "fallback_reason": "queue_wait_timeout_no_fallback",
+                        "end_to_end_latency_ms": max(0, int(wait * 1000)),
+                        "provider_latency_ms": 0,
+                    }
+                },
+            )
+            return self._finalize_infer_payload(
+                job,
+                infer_req,
+                response,
+                run_id=run_id,
+                infer_t0=infer_t0,
+                wait_sec=wait,
+                force_fallback=False,
+            )
         try:
             response = self.router.infer(
                 infer_req,
@@ -1103,6 +1141,11 @@ class PrioritizedInferenceQueue:
                     batch_size=len(jobs),
                 ),
             )
+        now_mono = time.monotonic()
+        for job in jobs:
+            job.provider_queue_wait_ms = max(
+                0, int((now_mono - job.admitted_mono) * 1000)
+            )
         infer_t0 = time.perf_counter()
         try:
             responses = self.router.infer_batch(
@@ -1143,6 +1186,18 @@ class PrioritizedInferenceQueue:
         while not self._stop.is_set():
             jobs = self._collect_jobs_for_lane(lane)
             if not jobs:
+                continue
+            runnable: list[_InferenceJob] = []
+            for job in jobs:
+                cfut = job.client_future
+                if cfut is None or cfut.set_running_or_notify_cancel():
+                    runnable.append(job)
+                    continue
+                job.done.set()
+                lane.admission.release()
+            jobs = runnable
+            if not jobs:
+                self._publish_metrics()
                 continue
             batch_id = f"ibatch_{next(self._batch_seq):010d}"
             for j in jobs:

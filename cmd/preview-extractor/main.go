@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -91,39 +92,39 @@ func main() {
 			if file.IsDir() || (!isJPEGExt(ext) && !isRAWExt(ext)) {
 				continue
 			}
-				atomic.AddInt64(&total, 1)
-				wg.Add(1)
-				semaphore <- struct{}{}
+			atomic.AddInt64(&total, 1)
+			wg.Add(1)
+			semaphore <- struct{}{}
 
-				go func(fName, srcDir, dstDir, fileExt string) {
-					defer wg.Done()
-					defer func() { <-semaphore }()
+			go func(fName, srcDir, dstDir, fileExt string) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
 
-					srcFile := filepath.Join(srcDir, fName)
-					dstName := fName
-					if isRAWExt(fileExt) {
-						dstName = strings.TrimSuffix(fName, filepath.Ext(fName)) + ".jpg"
-					}
-					dstFile := filepath.Join(dstDir, dstName)
+				srcFile := filepath.Join(srcDir, fName)
+				dstName := fName
+				if isRAWExt(fileExt) {
+					dstName = strings.TrimSuffix(fName, filepath.Ext(fName)) + ".jpg"
+				}
+				dstFile := filepath.Join(dstDir, dstName)
 
-					if _, err := os.Stat(dstFile); err == nil {
-						atomic.AddInt64(&ok, 1)
-						return 
-					}
-
-					var err error
-					if isJPEGExt(fileExt) {
-						err = copyFile(srcFile, dstFile)
-					} else {
-						err = extractPreviewJPEG(srcFile, dstFile)
-					}
-					if err != nil {
-						log.Printf("提取失败 %s: %v", fName, err)
-						atomic.AddInt64(&fail, 1)
-						return
-					}
+				if _, err := os.Stat(dstFile); err == nil {
 					atomic.AddInt64(&ok, 1)
-				}(file.Name(), rawPath, previewPath, ext)
+					return
+				}
+
+				var err error
+				if isJPEGExt(fileExt) {
+					err = copyFile(srcFile, dstFile)
+				} else {
+					err = extractPreviewJPEG(srcFile, dstFile)
+				}
+				if err != nil {
+					log.Printf("提取失败 %s: %v", fName, err)
+					atomic.AddInt64(&fail, 1)
+					return
+				}
+				atomic.AddInt64(&ok, 1)
+			}(file.Name(), rawPath, previewPath, ext)
 		}
 	}
 
@@ -202,22 +203,51 @@ func findRawDirs(root string) ([]string, error) {
 }
 
 func copyFile(src, dst string) error {
-	data, err := os.ReadFile(src)
+	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(dst, data, 0644)
+	defer in.Close()
+	return atomicWriteFile(dst, func(out *os.File) error {
+		_, err := io.Copy(out, in)
+		return err
+	})
 }
 
 func extractPreviewJPEG(src, dst string) error {
-	cmd := exec.Command("exiftool", "-PreviewImage", "-b", src)
-	outFile, err := os.Create(dst)
+	return atomicWriteFile(dst, func(out *os.File) error {
+		cmd := exec.Command("exiftool", "-PreviewImage", "-b", src)
+		cmd.Stdout = out
+		return cmd.Run()
+	})
+}
+
+func atomicWriteFile(dst string, write func(*os.File) error) (err error) {
+	tmp, err := os.CreateTemp(filepath.Dir(dst), "."+filepath.Base(dst)+".tmp-*")
 	if err != nil {
 		return err
 	}
-	defer outFile.Close()
-	cmd.Stdout = outFile
-	return cmd.Run()
+	tmpName := tmp.Name()
+	defer func() {
+		_ = tmp.Close()
+		if err != nil {
+			_ = os.Remove(tmpName)
+		}
+	}()
+	if err = tmp.Chmod(0644); err != nil {
+		return err
+	}
+	if err = write(tmp); err != nil {
+		return err
+	}
+	if err = tmp.Sync(); err != nil {
+		return err
+	}
+	if err = tmp.Close(); err != nil {
+		return err
+	}
+	err = os.Rename(tmpName, dst)
+	return err
 }
 
 func isJPEGExt(ext string) bool {

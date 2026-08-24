@@ -1052,18 +1052,6 @@ class PipelineStageRunner:
                 _emit_stage3_trace(None, pipeline_err=str(exc))
                 return
 
-            if conn is not None and self.job_id is not None and int(self.job_id) > 0:
-                try:
-                    _record_model_run_for_stage3(
-                        conn,
-                        job_id=int(self.job_id),
-                        provider=str(pipe.model_provider),
-                        model_name=str(pipe.model_name),
-                        result=result,
-                    )
-                except Exception:
-                    logger.exception("model_run ledger failed", extra=make_log_extra(job_id=self.job_id))
-
             if result.get("error"):
                 with tally:
                     fb += 1
@@ -1285,30 +1273,6 @@ class PipelineStageRunner:
                 "stage3_full_count": 0,
                 "stage3_early_exit_ratio": 0.0,
             }
-            _ff_job_id = self.job_id
-            _ff_provider = str(pipe.model_provider)
-            _ff_model = str(pipe.model_name)
-
-            def _record_model_run_ff(_file_path: str, _result: Dict[str, Any]) -> None:
-                """Per-image model_run ledger write for the fast_first path.
-
-                Opens its own connection so concurrent future callbacks are safe.
-                """
-                if _ff_job_id is None or int(_ff_job_id) <= 0:
-                    return
-                from utils.luma_brain import brain_connect as _bc
-                _c = _bc()
-                try:
-                    _record_model_run_for_stage3(
-                        _c,
-                        job_id=int(_ff_job_id),
-                        provider=_ff_provider,
-                        model_name=_ff_model,
-                        result=_result,
-                    )
-                finally:
-                    _c.close()
-
             hooks_ff = Stage3FastFirstHooks(
                 append_audit_line=lambda pth, ai: append_aesthetic_audit_line(
                     config=pipe.config,
@@ -1328,7 +1292,8 @@ class PipelineStageRunner:
                 model_provider=str(pipe.model_provider),
                 model_name=str(pipe.model_name),
                 pipeline_trace_session=self._pipeline_trace_session(),
-                record_model_run=_record_model_run_ff,
+                # InferenceQueue is the single writer for model_runs.
+                record_model_run=None,
             )
             run_stage3_fast_first(
                 pipe.vlm,

@@ -173,11 +173,13 @@ def run_brain_job_once(self, worker_id: int | None = None, job_type: str | None 
                 job_id,
                 to_status="PREPROCESSING",
                 message="brain worker preprocessing",
+                **JobLifecycle.claim_fence_kwargs(job),
             )
             lifecycle.update_status(
                 job_id,
                 to_status="INFERENCING",
                 message="brain worker inferencing",
+                **JobLifecycle.claim_fence_kwargs(job),
             )
             lifecycle.succeed(
                 job_id,
@@ -186,6 +188,7 @@ def run_brain_job_once(self, worker_id: int | None = None, job_type: str | None 
                 postprocess_ms=30,
                 total_latency_ms=200,
                 payload={"worker_id": wid, "mode": "demo_once"},
+                **JobLifecycle.claim_fence_kwargs(job),
             )
             wm.heartbeat(inflight=count_active_jobs_for_worker(conn, wid), status="ONLINE")
             return {
@@ -205,6 +208,7 @@ def run_brain_job_once(self, worker_id: int | None = None, job_type: str | None 
                     error_code=error_name,
                     error_message=error_message,
                     payload={"worker_id": wid, "mode": "demo_once"},
+                    **JobLifecycle.claim_fence_kwargs(job),
                 )
             else:
                 lifecycle.fail_retryable(
@@ -212,6 +216,7 @@ def run_brain_job_once(self, worker_id: int | None = None, job_type: str | None 
                     error_code=error_name,
                     error_message=error_message,
                     payload={"worker_id": wid, "mode": "demo_once"},
+                    **JobLifecycle.claim_fence_kwargs(job),
                 )
             wm.heartbeat(inflight=count_active_jobs_for_worker(conn, wid), status="ERROR")
             raise

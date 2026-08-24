@@ -296,6 +296,11 @@ def run_curation_job(job_id: str) -> dict[str, Any]:
             public = _row_to_public(row)
             public["ok"] = status == "done"
             return public
+        if status == "running":
+            public = _row_to_public(row)
+            public["ok"] = True
+            public["already_running"] = True
+            return public
         if _timed_out(row):
             now = time.time()
             conn.execute(
@@ -312,19 +317,21 @@ def run_curation_job(job_id: str) -> dict[str, Any]:
             return public
         if status == "queued":
             now = time.time()
-            conn.execute(
+            claimed = conn.execute(
                 """
                 UPDATE curation_jobs
                 SET status='running', started_at=?, updated_at=?
                 WHERE job_id=? AND status='queued'
                 """,
                 (now, now, job_id),
-            )
+            ).rowcount
             conn.commit()
             row = _get_row(conn, job_id)
-            if row is None or str(row["status"]) != "running":
+            if claimed != 1 or row is None or str(row["status"]) != "running":
                 public = _row_to_public(_get_row(conn, job_id)) if row else {"ok": False}
-                public["ok"] = public.get("status") == "cancelled"
+                public["ok"] = public.get("status") in {"running", "cancelled", "done"}
+                if public.get("status") == "running":
+                    public["already_running"] = True
                 return public
 
         goal_args = json.loads(row["goal_json"] or "{}")

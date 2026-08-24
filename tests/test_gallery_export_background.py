@@ -63,15 +63,20 @@ class GalleryExportBackgroundTests(unittest.TestCase):
             (raw_dir / "DSC0001.ARW").write_bytes(b"raw")
             cached = Path(tmp) / "cached.jpg"
             cached.write_bytes(b"cached")
-            req = ExportRequest(items=[{"file": "DSC0001.jpg"}])
+            req = ExportRequest(
+                items=[{"file": "DSC0001.jpg", "optical": {"dream": 70, "halation": 30}}]
+            )
 
             with (
                 patch(
                     "api.gallery_routes._export_processing_opts",
                     return_value={
                         "export_film_from_raw": True,
+                        "export_film_raw_half_size": False,
                         "export_film_jpeg_max_side": 3200,
                         "export_film_raw_max_side": 3200,
+                        "export_film_jpeg_quality": 95,
+                        "export_film_jpeg_subsampling": 0,
                     },
                 ),
                 patch("api.gallery_routes.path_allowed_for_film_render", return_value=True),
@@ -88,7 +93,24 @@ class GalleryExportBackgroundTests(unittest.TestCase):
             self.assertFalse((session / "exported_images").exists())
             self.assertEqual(render.call_count, 2)
             self.assertTrue(
-                any(call.kwargs.get("raw_half_size") is True for call in render.call_args_list)
+                all(call.kwargs.get("jpeg_quality") == 95 for call in render.call_args_list)
+            )
+            self.assertTrue(
+                all(call.kwargs.get("jpeg_subsampling") == 0 for call in render.call_args_list)
+            )
+            self.assertTrue(
+                all(
+                    call.kwargs["optical"].dream == 70
+                    and call.kwargs["optical"].halation == 30
+                    for call in render.call_args_list
+                )
+            )
+            self.assertTrue(
+                any(
+                    call.kwargs["src_path"].suffix == ".ARW"
+                    and call.kwargs.get("raw_half_size") is False
+                    for call in render.call_args_list
+                )
             )
 
 

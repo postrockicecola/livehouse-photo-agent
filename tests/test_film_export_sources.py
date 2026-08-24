@@ -98,6 +98,19 @@ class FilmExportSourcesTests(unittest.TestCase):
         )
         self.assertNotEqual(full, half)
 
+    def test_jpeg_export_settings_change_cache_key(self):
+        source = Path("DSC0001.jpg")
+        standard = _cache_file_name(source, "film_cinestill_800t", 0, 3200)
+        high_quality = _cache_file_name(
+            source,
+            "film_cinestill_800t",
+            0,
+            3200,
+            jpeg_quality=95,
+            jpeg_subsampling=0,
+        )
+        self.assertNotEqual(standard, high_quality)
+
 
 if __name__ == "__main__":
     unittest.main()

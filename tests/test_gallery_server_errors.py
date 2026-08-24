@@ -9,9 +9,11 @@ def test_healthz_ok():
 
     client = TestClient(app)
     r = client.get("/healthz")
-    assert r.status_code == 200
+    assert r.status_code in {200, 503}
     body = r.json()
     assert "status" in body or "ok" in body or isinstance(body, dict)
+    if "ok" in body:
+        assert r.status_code == (200 if body["ok"] else 503)
 
 
 def test_unhandled_exception_does_not_leak_message():

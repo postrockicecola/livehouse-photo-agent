@@ -80,7 +80,7 @@ stop_from_pid_file() {
   fi
   # shellcheck disable=SC1090
   source "$PID_FILE"
-  for name in next_pid fastapi_pid celery_pid redis_pid; do
+  for name in next_pid fastapi_pid celery_beat_pid celery_pid redis_pid; do
     local_pid="${!name:-}"
     if [[ -n "${local_pid}" ]] && kill -0 "${local_pid}" >/dev/null 2>&1; then
       log "Stopping ${name} (${local_pid})"
@@ -175,6 +175,7 @@ fi
 
 redis_pid=""
 celery_pid=""
+celery_beat_pid=""
 fastapi_pid=""
 next_pid=""
 
@@ -206,6 +207,15 @@ log "Starting Celery worker..."
 ) &
 celery_pid="$!"
 
+log "Starting Celery Beat maintenance scheduler..."
+(
+  cd "$ROOT_DIR"
+  export PYTHONPATH="$ROOT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+  celery -A celery_app.celery_app beat -l info \
+    --schedule "$RUNTIME_DIR/celerybeat-schedule" >"$LOG_DIR/celery-beat.log" 2>&1
+) &
+celery_beat_pid="$!"
+
 if is_port_open "$FASTAPI_PORT"; then
   log "Replacing existing listener on :$FASTAPI_PORT (reload gallery_server with current code)"
   kill_port_listeners "$FASTAPI_PORT"
@@ -232,6 +242,7 @@ fi
 cat >"$PID_FILE" <<EOF
 redis_pid=${redis_pid}
 celery_pid=${celery_pid}
+celery_beat_pid=${celery_beat_pid}
 fastapi_pid=${fastapi_pid}
 next_pid=${next_pid}
 EOF

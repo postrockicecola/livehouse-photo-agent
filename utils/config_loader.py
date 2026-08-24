@@ -115,8 +115,11 @@ class ConfigLoader:
             "max_workers": 2,
             "enable_checkpoint": True,
             "export_film_from_raw": True,
-            "export_film_jpeg_max_side": 3200,
-            "export_film_raw_max_side": 3200,
+            "export_film_jpeg_max_side": 4096,
+            "export_film_raw_max_side": 4096,
+            "export_film_raw_half_size": False,
+            "export_film_jpeg_quality": 95,
+            "export_film_jpeg_subsampling": 0,
             "vibe_film": {
                 "enabled": True,
                 "llm_on_miss": True,

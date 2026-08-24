@@ -29,6 +29,11 @@ export function OpticalConsolePanel({
     onChange({ ...value, [key]: n });
   };
 
+  const setExposure = (raw: number) => {
+    const n = Math.max(-1.5, Math.min(1.5, Math.round(raw * 100) / 100));
+    onChange({ ...value, exposure: n });
+  };
+
   const applyPreset = (id: OpticalPresetId) => {
     const hit = OPTICAL_PRESETS.find((p) => p.id === id);
     if (hit) {
@@ -81,6 +86,31 @@ export function OpticalConsolePanel({
         </div>
 
         <div className="space-y-3.5">
+          <label className="block">
+            <div className="mb-1 flex items-baseline justify-between gap-2">
+              <span className="text-[10px] font-light text-white/48">曝光</span>
+              <span className="text-[8px] tracking-widest text-white/28">
+                {value.exposure > 0 ? "+" : ""}
+                {value.exposure.toFixed(2)} EV
+              </span>
+            </div>
+            <input
+              type="range"
+              min={-1.5}
+              max={1.5}
+              step={0.05}
+              value={value.exposure}
+              disabled={!filmMode}
+              onChange={(e) => setExposure(Number(e.target.value))}
+              onPointerUp={() => onScrubEnd?.()}
+              onKeyUp={() => onScrubEnd?.()}
+              className="optical-slider w-full disabled:opacity-30"
+              aria-valuetext={`曝光 ${value.exposure.toFixed(2)} EV`}
+            />
+            <p className="mt-0.5 text-[8px] font-light text-white/16">
+              自动亮度校正后的手动微调
+            </p>
+          </label>
           {OPTICAL_SLIDERS.map((def) => {
             const v = value[def.key] as number;
             return (

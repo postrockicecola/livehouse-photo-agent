@@ -99,6 +99,10 @@ class OllamaProvider(InferenceProvider):
         self.retry_delay = retry_delay
         self.json_mode = bool(json_mode)
         self.seed = seed
+        self._session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_connections=4, pool_maxsize=16)
+        self._session.mount("http://", adapter)
+        self._session.mount("https://", adapter)
 
     def generate(self, request: InferenceRequest, *, model_name: str) -> InferenceResponse:
         thumb_side = request.metadata.get("vlm_thumbnail_max_side")
@@ -115,8 +119,8 @@ class OllamaProvider(InferenceProvider):
         read_cap = request.metadata.get("inference_read_timeout_seconds")
         read_timeout = int(read_cap) if read_cap is not None else int(self.timeout)
         read_timeout = max(1, read_timeout)
-        connect_t = min(60, max(10, read_timeout // 3))
-        req_timeout = (connect_t, read_timeout)
+        deadline_raw = request.metadata.get("inference_deadline_monotonic")
+        deadline = float(deadline_raw) if deadline_raw is not None else None
         num_predict = int(request.metadata.get("num_predict", self.num_predict))
 
         attempts = self.max_retries + 1
@@ -143,7 +147,20 @@ class OllamaProvider(InferenceProvider):
                 except (TypeError, ValueError):
                     pass
             try:
-                response = requests.post(url, json=payload, timeout=req_timeout)
+                attempt_read_timeout = read_timeout
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        return InferenceResponse(
+                            status="error",
+                            error="inference deadline exceeded",
+                            error_type="timeout",
+                            model=model_name,
+                        )
+                    attempt_read_timeout = max(1, min(read_timeout, int(remaining)))
+                connect_t = min(60, max(1, attempt_read_timeout // 3))
+                req_timeout = (connect_t, attempt_read_timeout)
+                response = self._session.post(url, json=payload, timeout=req_timeout)
                 response.raise_for_status()
                 result = response.json()
                 return InferenceResponse(

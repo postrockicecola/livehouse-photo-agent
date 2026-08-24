@@ -34,6 +34,21 @@ STUCK_SCAN_LIMIT = max(1, int(os.getenv("LUMA_STUCK_SCAN_LIMIT", "200")))
 DISPATCH_BEAT_ENABLED = os.getenv("LUMA_DISPATCH_BEAT_ENABLED", "1").strip().lower() not in {"0", "false", "no"}
 DISPATCH_BEAT_INTERVAL_SECONDS = max(15, int(os.getenv("LUMA_DISPATCH_BEAT_INTERVAL_SECONDS", "60")))
 DISPATCH_CANDIDATE_LIMIT = max(1, min(5000, int(os.getenv("LUMA_DISPATCH_CANDIDATE_LIMIT", "500"))))
+INGEST_RECONCILE_ENABLED = os.getenv("LUMA_INGEST_RECONCILE_ENABLED", "1").strip().lower() not in {
+    "0",
+    "false",
+    "no",
+}
+INGEST_RECONCILE_INTERVAL_SECONDS = max(
+    15, int(os.getenv("LUMA_INGEST_RECONCILE_INTERVAL_SECONDS", "60"))
+)
+TASK_SOFT_TIME_LIMIT_SECONDS = max(
+    60, int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT_SECONDS", "3600"))
+)
+TASK_TIME_LIMIT_SECONDS = max(
+    TASK_SOFT_TIME_LIMIT_SECONDS + 30,
+    int(os.getenv("CELERY_TASK_TIME_LIMIT_SECONDS", "3900")),
+)
 
 celery_app = Celery(
     "livehouse_tasks",
@@ -46,6 +61,15 @@ celery_app.conf.update(
     task_track_started=True,
     worker_prefetch_multiplier=1,
     task_acks_late=True,
+    task_acks_on_failure_or_timeout=False,
+    task_reject_on_worker_lost=True,
+    task_soft_time_limit=TASK_SOFT_TIME_LIMIT_SECONDS,
+    task_time_limit=TASK_TIME_LIMIT_SECONDS,
+    broker_transport_options={
+        "visibility_timeout": max(
+            300, int(os.getenv("CELERY_VISIBILITY_TIMEOUT_SECONDS", "7200"))
+        )
+    },
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
@@ -71,6 +95,11 @@ if DISPATCH_BEAT_ENABLED:
         "task": "tasks.dispatch_runnable_jobs",
         "schedule": DISPATCH_BEAT_INTERVAL_SECONDS,
         "kwargs": {"candidate_limit": DISPATCH_CANDIDATE_LIMIT},
+    }
+if INGEST_RECONCILE_ENABLED:
+    _beat_schedule["reconcile-ingested-photos"] = {
+        "task": "tasks.process_brain_ingested",
+        "schedule": INGEST_RECONCILE_INTERVAL_SECONDS,
     }
 if _beat_schedule:
     celery_app.conf.beat_schedule = _beat_schedule

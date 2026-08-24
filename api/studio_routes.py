@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from utils.http_security import require_ops_auth
 
 from utils.logging_context import new_trace_id
-from utils.luma_brain import brain_connect, create_analyze_path_job, create_job
+from utils.luma_brain import brain_connect, create_analyze_path_job, create_job, get_job
 from utils.runtime_session import write_latest_session_pointer
 from utils.studio_sessions import (
     active_session_from_archive,
@@ -144,11 +144,15 @@ def _enqueue_studio_analyze(
             brain_session_id=sid,
         )
         if existing_id is not None:
+            existing = get_job(conn, job_id=existing_id) or {}
+            job_trace_id = str(existing.get("trace_id") or "")
             return {
                 "ok": True,
                 "job_id": existing_id,
                 "status": "already_running",
-                "trace_id": trace_id,
+                "trace_id": job_trace_id,
+                "job_trace_id": job_trace_id,
+                "request_trace_id": trace_id,
                 "previews_dir": str(previews),
                 "session_key": previews.parent.name,
                 "message": "analysis already queued or running for this session",

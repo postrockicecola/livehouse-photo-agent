@@ -1,6 +1,7 @@
 /** Lab single-image optical console (情绪控制台) — maps to ``GET /api/lab/film-render?optical=``. */
 
 export type OpticalConsoleState = {
+  exposure: number;
   air: number;
   halation: number;
   night: number;
@@ -43,6 +44,7 @@ export type OpticalPreset = {
 };
 
 export const OPTICAL_NEUTRAL: OpticalConsoleState = {
+  exposure: 0,
   air: 0,
   halation: 0,
   night: 0,
@@ -59,6 +61,7 @@ export const OPTICAL_PRESETS: OpticalPreset[] = [
     id: "livehouse",
     label: "Livehouse",
     values: {
+      exposure: 0,
       air: 58,
       halation: 52,
       night: 62,
@@ -73,6 +76,7 @@ export const OPTICAL_PRESETS: OpticalPreset[] = [
     id: "shoegaze",
     label: "Shoegaze",
     values: {
+      exposure: 0,
       air: 72,
       halation: 38,
       night: 68,
@@ -87,6 +91,7 @@ export const OPTICAL_PRESETS: OpticalPreset[] = [
     id: "jazz_night",
     label: "Jazz",
     values: {
+      exposure: 0,
       air: 42,
       halation: 28,
       night: 52,
@@ -101,6 +106,7 @@ export const OPTICAL_PRESETS: OpticalPreset[] = [
     id: "vhs_memory",
     label: "VHS",
     values: {
+      exposure: 0,
       air: 55,
       halation: 48,
       night: 72,
@@ -115,6 +121,7 @@ export const OPTICAL_PRESETS: OpticalPreset[] = [
     id: "dream_pop",
     label: "Dream Pop",
     values: {
+      exposure: 0,
       air: 68,
       halation: 42,
       night: 58,
@@ -138,13 +145,16 @@ const SLIDER_KEYS: (keyof OpticalConsoleState)[] = [
 ];
 
 export function opticalStateIsNeutral(state: OpticalConsoleState): boolean {
-  return SLIDER_KEYS.every((k) => state[k] <= 0);
+  return Math.abs(state.exposure) <= 1e-3 && SLIDER_KEYS.every((k) => state[k] <= 0);
 }
 
 /** Payload for API — omit zeros and fixed defaults where inactive. */
 export function opticalStateToApiPayload(state: OpticalConsoleState): Record<string, number> | null {
   if (opticalStateIsNeutral(state)) return null;
   const out: Record<string, number> = {};
+  if (Math.abs(state.exposure) > 1e-3) {
+    out.exposure = Math.round(state.exposure * 100) / 100;
+  }
   for (const k of SLIDER_KEYS) {
     const v = Math.round(state[k]);
     if (v > 0) out[k] = v;

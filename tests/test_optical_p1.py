@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import unittest
 
+import cv2
 import numpy as np
 
-from op_kernel import apply_optical_p1_enhancements
-from services.film_render_service import _apply_variant
+from op_kernel import apply_optical_console_enhancements, apply_optical_p1_enhancements
+from services.film_render_service import _apply_variant, normalize_grade_luminance
 from services.optical_params import OpticalP1Params, parse_optical_p1
 
 
@@ -24,6 +25,13 @@ class OpticalP1Tests(unittest.TestCase):
         self.assertIsNone(parse_optical_p1('{"flow": 0, "wear": 0}'))
         self.assertIsNone(parse_optical_p1(None))
         self.assertIsNone(parse_optical_p1(""))
+
+    def test_parse_exposure_only_is_active_and_clamped(self) -> None:
+        p = parse_optical_p1('{"exposure": 4}')
+        self.assertIsNotNone(p)
+        assert p is not None
+        self.assertEqual(p.exposure, 1.5)
+        self.assertIn("ev+1.50", p.cache_token())
 
     def test_apply_optical_p1_identity(self) -> None:
         rgb = np.random.default_rng(0).integers(0, 255, (240, 360, 3), dtype=np.uint8)
@@ -45,6 +53,16 @@ class OpticalP1Tests(unittest.TestCase):
         worn = apply_optical_p1_enhancements(rgb, flow=0, wear=40)
         self.assertFalse(np.array_equal(base, worn))
 
+    def test_dream_effect_preserves_subject_edge_detail(self) -> None:
+        rgb = np.full((240, 360, 3), 25, dtype=np.uint8)
+        for y in range(50, 190, 12):
+            for x in range(90, 270, 12):
+                rgb[y : y + 6, x : x + 6] = 220
+        dreamy = apply_optical_console_enhancements(rgb, dream=75)
+        before = cv2.Laplacian(cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY), cv2.CV_32F).var()
+        after = cv2.Laplacian(cv2.cvtColor(dreamy, cv2.COLOR_RGB2GRAY), cv2.CV_32F).var()
+        self.assertGreater(after / before, 0.45)
+
     def test_apply_variant_with_optical_p1(self) -> None:
         rgb = np.random.default_rng(3).integers(0, 255, (256, 384, 3), dtype=np.uint8)
         plain = _apply_variant(rgb, "film_livehouse")
@@ -57,6 +75,25 @@ class OpticalP1Tests(unittest.TestCase):
         )
         self.assertEqual(plain.shape, stacked.shape)
         self.assertFalse(np.array_equal(plain, stacked))
+
+    def test_adaptive_luminance_lifts_dark_grade(self) -> None:
+        src = np.full((120, 180, 3), 42, dtype=np.uint8)
+        graded = np.full_like(src, 18)
+        out = normalize_grade_luminance(src, graded, "film_black_mist")
+        self.assertGreater(float(np.median(out)), float(np.median(graded)))
+        self.assertLessEqual(int(out.max()), 255)
+
+    def test_manual_exposure_applies_without_adaptive_correction(self) -> None:
+        src = np.full((80, 120, 3), 80, dtype=np.uint8)
+        graded = np.full_like(src, 80)
+        out = normalize_grade_luminance(
+            src,
+            graded,
+            "film_automated",
+            manual_exposure_ev=0.5,
+            adaptive=False,
+        )
+        self.assertGreater(float(np.median(out)), 80.0)
 
 
 if __name__ == "__main__":

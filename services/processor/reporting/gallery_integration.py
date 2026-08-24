@@ -8,6 +8,7 @@ from utils.repo_paths import repo_root
 
 from engine.operators.image_processor import ImageProcessor
 from services.processor.reporting.audit_io import load_audit_jsonl
+from utils.atomic_files import atomic_write_text
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 logger = logging.getLogger(__name__)
@@ -209,8 +210,10 @@ def write_analysis_results_json(source_dir: Path, folders: Dict[str, Path], audi
     """Write analysis_results.json next to source images."""
     results = build_analysis_results(source_dir, folders, audit_file)
     output_path = source_dir / "analysis_results.json"
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+    atomic_write_text(
+        output_path,
+        json.dumps(results, ensure_ascii=False, indent=2) + "\n",
+    )
     logger.info("   [gallery] analysis_results.json → %s （%s 条）", output_path, len(results))
     return output_path
 
@@ -237,8 +240,7 @@ python gallery_server.py
 
     written: list[Path] = []
     script_path = source_dir / "start_gallery.sh"
-    script_path.write_text(script_content, encoding="utf-8")
-    script_path.chmod(0o755)
+    atomic_write_text(script_path, script_content, mode=0o755)
     written.append(script_path)
 
     bat_content = f"""@echo off
@@ -254,7 +256,7 @@ python gallery_server.py
 """
 
     bat_path = source_dir / "start_gallery.bat"
-    bat_path.write_text(bat_content, encoding="utf-8")
+    atomic_write_text(bat_path, bat_content)
     written.append(bat_path)
 
     logger.info("   [gallery] 备用启动脚本: %s | %s", script_path, bat_path)

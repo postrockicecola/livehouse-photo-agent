@@ -77,6 +77,7 @@ function buildFilmRenderUrl(
   maxSide: number,
   rotateDeg = 0,
   adjustPayload: Record<string, number> | null = null,
+  opticalPayload: Record<string, number> | null = null,
   intensity?: number | null,
 ) {
   const path = filmPathQueryValue(sourcePathQuoted);
@@ -85,12 +86,16 @@ function buildFilmRenderUrl(
     adjustPayload && Object.keys(adjustPayload).length > 0
       ? `&adjust=${encodeURIComponent(JSON.stringify(adjustPayload))}`
       : "";
+  const optical =
+    opticalPayload && Object.keys(opticalPayload).length > 0
+      ? `&optical=${encodeURIComponent(JSON.stringify(opticalPayload))}`
+      : "";
   const intenNum = Number(intensity);
   const inten =
     Number.isFinite(intenNum) && Math.abs(intenNum - 1) > 1e-3
       ? `&intensity=${encodeURIComponent(String(Math.min(1.75, Math.max(0, intenNum))))}`
       : "";
-  return `${apiBase}/api/lab/film-render?path=${path}&variant=${encodeURIComponent(variant)}&max_side=${maxSide}${rot}${adj}${inten}`;
+  return `${apiBase}/api/lab/film-render?path=${path}&variant=${encodeURIComponent(variant)}&max_side=${maxSide}${rot}${adj}${optical}${inten}`;
 }
 
 /** 与批量导出一致的有效规格（含默认胶片 / 会话 Vibe 覆盖默认 livehouse）。 */
@@ -157,7 +162,16 @@ export function buildExportPreviewUrl(
     const pq = (spec.film_source_path_quoted ?? "").trim();
     if (!pq) return null;
     const adj = fv === "film_automated" ? spec.automated_adjust ?? null : null;
-    return buildFilmRenderUrl(apiBase, pq, fv, maxSide, rotate, adj, options?.intensity);
+    return buildFilmRenderUrl(
+      apiBase,
+      pq,
+      fv,
+      maxSide,
+      rotate,
+      adj,
+      spec.optical ?? null,
+      options?.intensity,
+    );
   }
   const alt = (spec.alternate_jpeg_path_quoted ?? "").trim();
   if (alt) return buildImageUrl(apiBase, alt, maxSide, rotate);

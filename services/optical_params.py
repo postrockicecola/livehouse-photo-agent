@@ -12,6 +12,7 @@ import numpy as np
 class OpticalConsoleParams:
     """Optical console sliders (0–100 UI scale unless noted)."""
 
+    exposure: float = 0.0
     air: float = 0.0
     halation: float = 0.0
     night: float = 0.0
@@ -23,6 +24,8 @@ class OpticalConsoleParams:
 
     def cache_token(self) -> str:
         parts: list[str] = []
+        if abs(self.exposure) > 1e-3:
+            parts.append(f"ev{self.exposure:+.2f}")
         for key in ("air", "halation", "night", "dream", "flow", "time", "wear"):
             v = getattr(self, key)
             if v > 0.0:
@@ -32,6 +35,9 @@ class OpticalConsoleParams:
         return "|".join(parts)
 
     def is_active(self) -> bool:
+        return abs(self.exposure) > 1e-3 or self.has_optical_effects()
+
+    def has_optical_effects(self) -> bool:
         return any(
             getattr(self, k) > 0.0
             for k in ("air", "halation", "night", "dream", "flow", "time", "wear")
@@ -55,6 +61,7 @@ def parse_optical_console(raw: str | None) -> OpticalConsoleParams | None:
     if not isinstance(data, dict):
         raise ValueError("optical must be a JSON object")
     params = OpticalConsoleParams(
+        exposure=_coerce_exposure(data.get("exposure", 0.0)),
         air=_coerce_strength(data.get("air", 0.0)),
         halation=_coerce_strength(data.get("halation", 0.0)),
         night=_coerce_strength(data.get("night", 0.0)),
@@ -66,6 +73,7 @@ def parse_optical_console(raw: str | None) -> OpticalConsoleParams | None:
     )
     flow_angle = float(max(-90.0, min(90.0, params.flow_angle)))
     params = OpticalConsoleParams(
+        exposure=params.exposure,
         air=params.air,
         halation=params.halation,
         night=params.night,
@@ -88,6 +96,16 @@ def _coerce_strength(value: Any) -> float:
     except (TypeError, ValueError):
         return 0.0
     return float(max(0.0, min(100.0, v)))
+
+
+def _coerce_exposure(value: Any) -> float:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    if v != v:
+        return 0.0
+    return float(max(-1.5, min(1.5, v)))
 
 
 def _strength_multiplier(ui: float, *, span: float = 1.75) -> float:

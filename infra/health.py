@@ -15,7 +15,9 @@ def db_health() -> dict[str, Any]:
     try:
         conn = brain_connect()
         try:
+            conn.execute("BEGIN IMMEDIATE")
             conn.execute("SELECT 1").fetchone()
+            conn.rollback()
             return {"ok": True}
         finally:
             conn.close()
@@ -27,9 +29,24 @@ def provider_health(provider: str, endpoint: str) -> dict[str, Any]:
     p = (provider or "ollama").strip().lower()
     if p == "mock":
         return {"ok": True, "provider": p, "detail": "mock provider"}
+    base = endpoint.rstrip("/")
+    if p in {"vllm", "openai"}:
+        if base.endswith("/v1"):
+            url = f"{base}/models"
+        else:
+            url = f"{base}/health"
+    else:
+        url = f"{base}/api/tags"
     try:
-        resp = requests.get(f"{endpoint.rstrip('/')}/api/tags", timeout=2.5)
-        return {"ok": resp.status_code == 200, "provider": p, "status_code": resp.status_code}
+        resp = requests.get(url, timeout=2.5)
+        if p in {"vllm", "openai"} and resp.status_code == 404 and not base.endswith("/v1"):
+            resp = requests.get(f"{base}/v1/models", timeout=2.5)
+        return {
+            "ok": resp.status_code == 200,
+            "provider": p,
+            "status_code": resp.status_code,
+            "probe": url,
+        }
     except Exception as exc:
         return {"ok": False, "provider": p, "error": str(exc)}
 
@@ -43,7 +60,7 @@ def worker_freshness(conn: Any, fresh_seconds: int = 120) -> dict[str, Any]:
             (now - fresh_seconds,),
         ).fetchone()["c"]
     )
-    return {"ok": total == 0 or fresh > 0, "total": total, "fresh": fresh, "fresh_window_seconds": fresh_seconds}
+    return {"ok": fresh > 0, "total": total, "fresh": fresh, "fresh_window_seconds": fresh_seconds}
 
 
 def broker_health() -> dict[str, Any]:
