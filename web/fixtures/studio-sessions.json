@@ -1,7 +1,75 @@
 {
   "archive_root": "/archive",
-  "count": 58,
+  "count": 61,
   "sessions": [
+    {
+      "session_key": "Session 62",
+      "session_dir": "/archive/session-62",
+      "previews_dir": "/archive/session-62/Previews",
+      "preview_count": 1504,
+      "has_analysis_results": true,
+      "cover_path_quoted": "/showcase/covers/session-62.jpg",
+      "brain_session_id": 62,
+      "photos_ingested": 1504,
+      "photos_analyzed": 689,
+      "source": "showcase_catalog",
+      "last_job_status": "SUCCEEDED",
+      "funnel": {
+        "imported": 1504,
+        "filtered": 1188,
+        "scored": 689,
+        "picked": 264,
+        "exported": 211
+      },
+      "cover_portrait_path_quoted": "/showcase/covers/session-62-portrait.jpg",
+      "session_date": "2026-08-28",
+      "band_name": "Temples"
+    },
+    {
+      "session_key": "Session 61",
+      "session_dir": "/archive/session-61",
+      "previews_dir": "/archive/session-61/Previews",
+      "preview_count": 0,
+      "has_analysis_results": false,
+      "cover_path_quoted": "",
+      "brain_session_id": 61,
+      "photos_ingested": 0,
+      "photos_analyzed": 0,
+      "source": "showcase_catalog",
+      "last_job_status": "",
+      "funnel": {
+        "imported": 0,
+        "filtered": 0,
+        "scored": 0,
+        "picked": 0,
+        "exported": 0
+      },
+      "session_date": "2026-08-26",
+      "band_name": "Chris James"
+    },
+    {
+      "session_key": "Session 60",
+      "session_dir": "/archive/session-60",
+      "previews_dir": "/archive/session-60/Previews",
+      "preview_count": 4480,
+      "has_analysis_results": true,
+      "cover_path_quoted": "/showcase/covers/session-60.jpg",
+      "brain_session_id": 60,
+      "photos_ingested": 4480,
+      "photos_analyzed": 2053,
+      "source": "showcase_catalog",
+      "last_job_status": "SUCCEEDED",
+      "funnel": {
+        "imported": 4480,
+        "filtered": 3539,
+        "scored": 2053,
+        "picked": 672,
+        "exported": 538
+      },
+      "cover_portrait_path_quoted": "/showcase/covers/session-60-portrait.jpg",
+      "session_date": "2026-08-23",
+      "band_name": "孙盛希"
+    },
     {
       "session_key": "Session 59",
       "session_dir": "/archive/session-59",
@@ -1307,26 +1375,40 @@
     }
   ],
   "active": {
-    "session_key": "Session 59",
-    "session_dir": "/archive/session-59",
-    "previews_dir": "/archive/session-59/Previews",
-    "preview_count": 4034,
+    "session_key": "Session 62",
+    "session_dir": "/archive/session-62",
+    "previews_dir": "/archive/session-62/Previews",
+    "preview_count": 1504,
     "has_analysis_results": true,
-    "cover_path_quoted": "/showcase/covers/session-59.jpg",
-    "cover_portrait_path_quoted": "/showcase/covers/session-59-portrait.jpg",
-    "session_date": "2026-08-15",
-    "band_name": "闪星乐队",
+    "cover_path_quoted": "/showcase/covers/session-62.jpg",
+    "cover_portrait_path_quoted": "/showcase/covers/session-62-portrait.jpg",
+    "session_date": "2026-08-28",
+    "band_name": "Temples",
     "venue": "",
     "funnel": {
-      "imported": 4034,
-      "filtered": 3187,
-      "scored": 1848,
-      "picked": 555,
-      "exported": 444
+      "imported": 1504,
+      "filtered": 1188,
+      "scored": 689,
+      "picked": 264,
+      "exported": 211
     },
-    "photos_ingested": 4034
+    "photos_ingested": 1504
   },
   "recent_deliveries": [
+    {
+      "session_key": "Session 62",
+      "session_date": "2026-08-28",
+      "photos_imported": 1504,
+      "photos_exported": 211,
+      "previews_dir": "/archive/session-62/Previews"
+    },
+    {
+      "session_key": "Session 60",
+      "session_date": "2026-08-23",
+      "photos_imported": 4480,
+      "photos_exported": 538,
+      "previews_dir": "/archive/session-60/Previews"
+    },
     {
       "session_key": "Session 59",
       "session_date": "2026-08-15",
@@ -1368,20 +1450,6 @@
       "photos_imported": 1444,
       "photos_exported": 87,
       "previews_dir": "/archive/session-54/Previews"
-    },
-    {
-      "session_key": "Session 53",
-      "session_date": "2026-07-03",
-      "photos_imported": 46,
-      "photos_exported": 6,
-      "previews_dir": "/archive/session-53/Previews"
-    },
-    {
-      "session_key": "Session 52",
-      "session_date": "2026-06-27",
-      "photos_imported": 2948,
-      "photos_exported": 383,
-      "previews_dir": "/archive/session-52/Previews"
     }
   ]
 }
