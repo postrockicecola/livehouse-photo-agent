@@ -210,8 +210,14 @@ export default function EvalPage() {
 
         <div className="mt-12 flex flex-wrap gap-3">
           <Link
-            href="/infra?tour=1"
+            href="/eval/agent"
             className="rounded-full bg-white px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0a0a0a]"
+          >
+            Agent Daily Dashboard
+          </Link>
+          <Link
+            href="/infra?tour=1"
+            className="rounded-full border border-white/20 px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/70"
           >
             Infra walkthrough
           </Link>

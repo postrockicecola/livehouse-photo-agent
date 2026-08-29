@@ -24,3 +24,33 @@ jobs:
           name: nightly-eval
           path: reports/eval/release_gate/
           if-no-files-found: ignore
+
+  agent-daily:
+    name: Agent evaluation (live daily)
+    runs-on: [self-hosted, agent-eval]
+    timeout-minutes: 30
+    env:
+      LIVEHOUSE_AGENT_EVAL_REPORTS_DIR: ${{ vars.AGENT_EVAL_REPORTS_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Assert local model backend
+        run: curl --fail --silent --show-error http://127.0.0.1:11434/api/tags >/dev/null
+      - name: Run production Agent evaluation
+        run: |
+          archive_dir="${LIVEHOUSE_AGENT_EVAL_REPORTS_DIR:-$GITHUB_WORKSPACE/reports/agent_eval}"
+          python agent_eval/run_eval.py --archive-dir "$archive_dir"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-eval-daily-${{ github.run_id }}
+          path: |
+            reports/evaluation_trace.json
+            reports/evaluation_score.json
+            reports/latest.html
+          if-no-files-found: warn
+          retention-days: 30

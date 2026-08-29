@@ -298,6 +298,7 @@ export const APP_PRIMARY_NAV: NavLink[] = [
 /** App shell — secondary routes. */
 export const APP_MORE_NAV: NavLink[] = [
   { label: "Eval", href: "/eval" },
+  { label: "Agent Daily", href: "/eval/agent" },
   { label: "Settings", href: "/config" },
   { label: "Site", href: "/" },
 ];

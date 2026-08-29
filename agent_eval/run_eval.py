@@ -44,6 +44,65 @@ from services.agent.skills.memory import register_memory_skills  # noqa: E402
 from utils.config_loader import ConfigLoader  # noqa: E402
 
 
+def _archive_report(
+    report: dict[str, Any],
+    archive_root: Path,
+    *,
+    trace_path: Path,
+    score_path: Path,
+    html_path: Path,
+) -> None:
+    """Persist one immutable dashboard run and refresh its compact history index."""
+    run = report["run"]
+    run_id = str(run["run_id"])
+    run_dir = archive_root / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(trace_path, run_dir / "evaluation_trace.json")
+    shutil.copy2(score_path, run_dir / "evaluation_score.json")
+    shutil.copy2(html_path, run_dir / "report.html")
+
+    metrics = report["metrics"]
+    item = {
+        "run_id": run_id,
+        "started_at": run.get("started_at"),
+        "completed_at": run.get("completed_at"),
+        "duration_ms": run.get("duration_ms"),
+        "passed": bool(report.get("passed")),
+        "overall_score": report["score"].get("overall_score"),
+        "behavior_success_rate": metrics["behavior"].get("success_rate"),
+        "intent_accuracy": metrics["behavior"].get("intent_accuracy"),
+        "quality_score": metrics["quality"].get("quality_score"),
+        "trajectory_score": metrics["trajectory"].get("trajectory_score"),
+        "p95_latency_ms": metrics["runtime"].get("p95_latency_ms"),
+        "average_tokens": metrics["runtime"].get("average_tokens"),
+        "model": run.get("model") or {},
+        "case_count": run.get("case_count"),
+        "threshold_failure_count": len(report.get("threshold_failures") or []),
+        "regression_count": len((report.get("regression") or {}).get("regressions") or []),
+    }
+    index_path = archive_root / "index.json"
+    runs: list[dict[str, Any]] = []
+    if index_path.is_file():
+        try:
+            current = json.loads(index_path.read_text(encoding="utf-8"))
+            if isinstance(current, dict) and isinstance(current.get("runs"), list):
+                runs = [row for row in current["runs"] if isinstance(row, dict)]
+        except (OSError, json.JSONDecodeError):
+            runs = []
+    runs = [item, *(row for row in runs if row.get("run_id") != run_id)][:365]
+    archive_root.mkdir(parents=True, exist_ok=True)
+    temporary = index_path.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps(
+            {"schema_version": "agent_evaluation_index.v1", "runs": runs},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    temporary.replace(index_path)
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -389,6 +448,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--score", type=Path, default=ROOT / "reports" / "evaluation_score.json"
     )
+    parser.add_argument(
+        "--archive-dir",
+        type=Path,
+        help="Also persist this run under an immutable dashboard history directory",
+    )
     parser.add_argument("--save-baseline", action="store_true")
     parser.add_argument("--native-tools", action="store_true")
     parser.add_argument("--max-tool-rounds", type=int, default=3)
@@ -420,6 +484,14 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(report["score"], ensure_ascii=False, indent=2), encoding="utf-8"
         )
         render_report(report, args.report)
+        if args.archive_dir:
+            _archive_report(
+                report,
+                args.archive_dir.expanduser().resolve(),
+                trace_path=args.trace,
+                score_path=args.score,
+                html_path=args.report,
+            )
         if args.save_baseline:
             args.baseline.write_text(
                 json.dumps(

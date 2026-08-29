@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from api.agent_routes import router as agent_router
+from api.eval_routes import router as eval_router
 from api.gallery_routes import configure_gallery_routes
 from api.gallery_routes import router as gallery_router
 from api.infra_routes import router as infra_router
@@ -105,6 +106,7 @@ app.add_middleware(
 app.include_router(gallery_router)
 app.include_router(infra_router)
 app.include_router(agent_router)
+app.include_router(eval_router)
 
 
 @app.exception_handler(Exception)
