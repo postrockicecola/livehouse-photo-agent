@@ -110,10 +110,51 @@ export function LandingOutcomeSection() {
           </div>
         </div>
 
+        <div className="mt-14 border-y border-white/[0.07] py-8 sm:py-10">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-sky-200/55">
+                Daily Agent Evaluation
+              </p>
+              <h3 className="mt-3 text-2xl font-light tracking-tight text-white/[0.88]">
+                每天验证 Agent，而不是只展示一次成功。
+              </h3>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/38">
+                固定评估集每天运行生产 LangGraph 路径，检查行为契约、工具选择、摄影质量、延迟与成本；
+                同时和审核过的 baseline 比较，尽早发现模型、Prompt 或工作流回归。
+              </p>
+              <Link
+                href="/eval/agent"
+                className="mt-6 inline-flex rounded-full border border-sky-200/25 bg-sky-200/[0.07] px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80 transition-colors hover:border-sky-100/40 hover:text-white"
+              >
+                查看 Daily Eval Dashboard
+              </Link>
+            </div>
+            <dl className="grid gap-px overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.07] sm:grid-cols-3 lg:grid-cols-1">
+              {[
+                ["Behavior", "意图、工具与回答契约"],
+                ["Regression", "相对 baseline 的质量变化"],
+                ["Runtime", "延迟、Token 与调用预算"],
+              ].map(([label, detail]) => (
+                <div key={label} className="bg-[#0d0d0d] px-4 py-4">
+                  <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">{label}</dt>
+                  <dd className="mt-1 text-[11px] text-white/30">{detail}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Link
-            href="/infra?tour=1"
+            href="/eval/agent"
             className="inline-flex rounded-full bg-white px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0a0a0a] transition-opacity hover:opacity-90"
+          >
+            Daily Agent Eval
+          </Link>
+          <Link
+            href="/infra?tour=1"
+            className="inline-flex rounded-full border border-white/20 px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/70 transition-colors hover:border-white/35 hover:text-white"
           >
             打开作业 walkthrough
           </Link>

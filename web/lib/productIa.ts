@@ -121,6 +121,7 @@ export const LANDING_NAV: NavLink[] = [
   { label: "结果", href: "#outcome", description: "一次运行的交付指标" },
   { label: "画廊", href: "#gallery", description: "筛选与确认" },
   { label: "主链路", href: "#workflow", description: "门控 → 作业 → VLM" },
+  { label: "Daily 评测", href: "/eval/agent", description: "Agent 每日质量与回归趋势" },
 ];
 
 export type WorkflowStep = {
