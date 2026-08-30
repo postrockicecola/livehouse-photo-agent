@@ -42,3 +42,30 @@ def test_compress_working_memory_keeps_forty_files():
     assert len(wm["last_files"]) == 40
     block = working_memory_prompt_block(wm)
     assert "img_000.jpg" in block and "img_039.jpg" in block
+
+
+def test_active_task_is_compact_and_prompted_for_cross_turn_resume():
+    wm = compress_working_memory(
+        {
+            "active_task": {
+                "active_goal": "选出20张演出照片并导出",
+                "last_request": "先找主唱和吉他手",
+                "status": "in_progress",
+                "steps": [
+                    {"id": "step_1", "tool": "gallery_search", "status": "completed"},
+                    {"id": "step_2", "tool": "gallery_select", "status": "pending"},
+                ],
+                "completed_steps": ["step_1"],
+                "constraints": {"limit": 20, "subject": "主唱和吉他手"},
+                "last_error": "",
+            }
+        }
+    )
+
+    task = wm["active_task"]
+    assert task["schema_version"] == "gallery_task.v1"
+    assert task["completed_steps"] == ["step_1"]
+    block = working_memory_prompt_block(wm)
+    assert "选出20张演出照片并导出" in block
+    assert "gallery_select [pending]" in block
+    assert "do not make them restate the original goal" in block

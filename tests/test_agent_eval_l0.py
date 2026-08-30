@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from quality.agent_cases import load_agent_cases, load_router_paraphrases, validate_agent_chat_case
 from quality.validate_contracts import validate_document
+from scripts.eval.agent_case_score import aggregate_scores, score_case
 from scripts.eval.eval_agent_chat_cases import evaluate as eval_chat_cases
 from scripts.eval.eval_agent_router_paraphrases import evaluate as eval_router
 
@@ -82,3 +83,27 @@ def test_eval_agent_judge_mock_smoke_gate() -> None:
     from scripts.eval.eval_agent_judge import main
 
     assert main(["--mock", "--suite", "smoke"]) == 0
+
+
+def test_agent_case_score_tracks_recovery_and_task_completion() -> None:
+    row = score_case(
+        case={
+            "id": "recover",
+            "expect": {"recovery_expected": True, "task_status": "completed"},
+        },
+        reply="完成",
+        tool_calls=[{"tool": "gallery_search", "ok": True, "metadata": {"files": ["a.jpg"]}}],
+        working_memory={"active_task": {"status": "completed"}, "last_files": ["a.jpg"]},
+        prefs={},
+        backend="langgraph",
+        elapsed_ms=10,
+        events=[
+            {"type": "plan_evaluation", "ok": False, "reason": "empty"},
+            {"type": "tool_call", "tool": "gallery_search", "ok": True},
+        ],
+    )
+    assert row["ok"] is True
+    assert row["recovery_success"] is True
+    metrics = aggregate_scores([row])
+    assert metrics["recovery_rate"] == 1.0
+    assert metrics["task_completion_rate"] == 1.0

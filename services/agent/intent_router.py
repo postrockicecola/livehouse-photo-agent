@@ -105,11 +105,14 @@ class RouteMatch:
 
     ``select_after_search``: after ``gallery_search`` succeeds, also run
     ``gallery_select`` on the returned ``files`` (选出 / 初选 / 交片).
+    ``confidence``: confidence in executing this route without model planning.
+    Lower-confidence compound matches remain useful as candidate plans.
     """
 
     rule_id: str
     calls: list[RoutedCall] = field(default_factory=list)
     select_after_search: bool = False
+    confidence: float = 1.0
 
 
 def _is_negated(text: str, match: re.Match[str], *, window: int = _NEGATION_WINDOW) -> bool:
@@ -280,6 +283,9 @@ def route_gallery_intent(user_text: str) -> Optional[RouteMatch]:
             rule_id="shortlist_select",
             calls=[RoutedCall("gallery_search", args)],
             select_after_search=True,
+            # Regex extraction captured the broad intent, but compound preferences
+            # benefit from model validation before any selection side effect.
+            confidence=0.75,
         )
 
     pick_verb = _positive_match(text, _PICK_VERB_RE) is not None

@@ -190,6 +190,7 @@ def test_contrast_shortlist_attaches_panorama_query() -> None:
     assert m.rule_id == "shortlist_select"
     assert m.calls[0].args.get("query") == "全景"
     assert m.select_after_search is True
+    assert m.confidence < 0.8
 
 
 def test_count_prefix_shared_constant() -> None:

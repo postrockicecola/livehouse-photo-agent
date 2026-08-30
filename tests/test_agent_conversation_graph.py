@@ -19,6 +19,7 @@ from services.agent.conversation import ConversationalAgent, ConversationMemory
 from services.agent.conversation_graph import (
     ANSWER_BRANCH_CHECKLIST,
     GALLERY_CHAT_MAPPING,
+    evaluate_planned_execution,
     select_answer_branch,
     tool_calls_have_cite_files,
 )
@@ -57,6 +58,26 @@ def _search_skill(files: list[str]):
                 ok=True,
                 output=f"{len(files)} hits",
                 metadata={"files": list(files), "count": len(files)},
+            )
+
+    return _Search()
+
+
+def _recovering_search_skill(files: list[str]):
+    class _Search:
+        name = "gallery_search"
+        description = "search with optional relaxed constraints"
+        parameters = {
+            "type": "object",
+            "properties": {"relaxed": {"type": "boolean"}},
+        }
+
+        def run(self, args):
+            hits = list(files) if args.get("relaxed") else []
+            return SkillResult(
+                ok=True,
+                output=f"{len(hits)} hits",
+                metadata={"files": hits, "count": len(hits)},
             )
 
     return _Search()
@@ -133,6 +154,7 @@ def test_gallery_chat_mapping_mentions_subgraph():
     assert "ConversationalAgent.chat" in GALLERY_CHAT_MAPPING
     assert "node: plan" in GALLERY_CHAT_MAPPING.values()
     assert "node: execute_plan" in GALLERY_CHAT_MAPPING.values()
+    assert "node: evaluate" in GALLERY_CHAT_MAPPING.values()
     assert "node: decide" in GALLERY_CHAT_MAPPING.values()
 
 
@@ -141,6 +163,87 @@ def test_tool_calls_have_cite_files():
     assert tool_calls_have_cite_files([{"metadata": {"selected_keys": ["b.jpg"]}}])
     assert not tool_calls_have_cite_files([{"metadata": {"files": []}}])
     assert not tool_calls_have_cite_files([{"tool": "echo", "metadata": {}}])
+
+
+@pytest.mark.parametrize(
+    "tool_calls,reason",
+    [
+        (
+            [{"tool": "gallery_search", "ok": False, "metadata": {"error": "boom"}}],
+            "planned tool failed",
+        ),
+        (
+            [{"tool": "gallery_search", "ok": True, "metadata": {"count": 0, "files": []}}],
+            "returned no files",
+        ),
+        (
+            [{"tool": "gallery_search", "ok": True, "metadata": {"count": 2, "files": ["a", "b"]}}],
+            "only 2 of 10",
+        ),
+    ],
+    ids=["tool_failure", "empty_search", "insufficient_results"],
+)
+def test_evaluate_planned_execution_requests_recovery(tool_calls, reason):
+    route = {
+        "calls": [{"tool": "gallery_search", "args": {"limit": 10}}],
+        "select_after_search": True,
+    }
+    assert reason in str(evaluate_planned_execution(route, tool_calls))
+
+
+def test_evaluate_planned_execution_accepts_sufficient_results():
+    route = {
+        "calls": [{"tool": "gallery_search", "args": {"limit": 10}}],
+        "select_after_search": True,
+    }
+    tool_calls = [
+        {
+            "tool": "gallery_search",
+            "ok": True,
+            "metadata": {"count": 6, "files": [f"{i}.jpg" for i in range(6)]},
+        },
+        {
+            "tool": "gallery_select",
+            "ok": True,
+            "metadata": {"selected_keys": [f"{i}.jpg" for i in range(6)]},
+        },
+    ]
+    assert evaluate_planned_execution(route, tool_calls) is None
+
+
+def test_evaluate_planned_execution_rejects_duplicates_and_selection_shortfall():
+    search_route = {
+        "calls": [{"tool": "gallery_search", "args": {"limit": 4}}],
+        "select_after_search": False,
+    }
+    duplicate_search = [
+        {
+            "tool": "gallery_search",
+            "ok": True,
+            "metadata": {"files": ["a.jpg", "A.JPG"]},
+        }
+    ]
+    assert "duplicate" in str(evaluate_planned_execution(search_route, duplicate_search))
+
+    selection_route = {
+        "calls": [{"tool": "gallery_search", "args": {"limit": 10}}],
+        "select_after_search": True,
+    }
+    selection_shortfall = [
+        {
+            "tool": "gallery_search",
+            "ok": True,
+            "metadata": {"files": [f"{i}.jpg" for i in range(10)]},
+        },
+        {
+            "tool": "gallery_select",
+            "ok": True,
+            "metadata": {"selected_keys": ["0.jpg", "1.jpg"]},
+        },
+    ]
+    assert "selection kept only 2 of 10" in str(
+        evaluate_planned_execution(selection_route, selection_shortfall)
+    )
 
 
 def test_answer_branch_checklist_matches_test_classes():
@@ -217,7 +320,11 @@ def test_enforce_langgraph_available_fails_when_missing(monkeypatch):
 class TestSemanticPlanNode:
     def test_structured_selection_runs_plan_execute_plan_answer(self):
         reg = SkillRegistry()
-        reg.register(_search_skill(["guitar_01.jpg", "guitar_02.jpg"]))
+        reg.register(
+            _search_skill(
+                ["guitar_01.jpg", "guitar_02.jpg", *[f"guitar_{i:02}.jpg" for i in range(3, 11)]]
+            )
+        )
         reg.register(_select_skill())
         model_calls: list[list[dict[str, str]]] = []
 
@@ -245,6 +352,53 @@ class TestSemanticPlanNode:
         assert len(model_calls) == 1, "plan path must skip the decide-model round"
         assert res.trace["rule_id"] == "shortlist_semantic_goal"
         assert "guitar_01.jpg" in res.reply
+        task = res.working_memory["active_task"]
+        assert task["status"] == "completed"
+        assert [step["status"] for step in task["steps"]] == ["completed", "completed"]
+        assert task["constraints"]["subject"] == "吉他手"
+
+    def test_empty_planned_search_replans_with_changed_arguments(self):
+        reg = SkillRegistry()
+        reg.register(_recovering_search_skill(["wide_01.jpg", "wide_02.jpg"]))
+        reg.register(_select_skill())
+        agent = ConversationalAgent(
+            _scripted_chat(
+                [
+                    json.dumps({"tool": "gallery_search", "args": {"relaxed": True}}),
+                    json.dumps(
+                        {
+                            "tool": "gallery_select",
+                            "args": {"files": ["wide_01.jpg", "wide_02.jpg"]},
+                        }
+                    ),
+                    "放宽条件后保留 {ref_0} 和 {ref_1}。",
+                ]
+            ),
+            memory=ConversationMemory(system_prompt="test"),
+            skills=reg,
+            wrap_tool_output=False,
+        )
+
+        res = agent.chat("帮我选10张最有张力的吉他手照片发小红书")
+
+        assert [tc["tool"] for tc in res.tool_calls] == [
+            "gallery_search",
+            "gallery_search",
+            "gallery_select",
+        ]
+        assert res.tool_calls[0]["metadata"]["files"] == []
+        assert res.tool_calls[1]["args"]["relaxed"] is True
+        assert "wide_01.jpg" in res.reply
+        task = res.working_memory["active_task"]
+        assert task["status"] == "completed"
+        assert task["last_error"] == ""
+        assert any(step["status"] == "failed" for step in task["steps"])
+        assert any(
+            event.get("type") == "plan_evaluation"
+            and event.get("ok") is False
+            and "no files" in str(event.get("reason") or "")
+            for event in res.events
+        )
 
     def test_stream_plan_emits_search_and_select_events(self):
         reg = SkillRegistry()

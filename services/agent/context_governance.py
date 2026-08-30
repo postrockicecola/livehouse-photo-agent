@@ -34,6 +34,53 @@ DEFAULT_WORKING_MEMORY_FILES = 100
 DEFAULT_SELECTION_HISTORY_RECORDS = 20
 DEFAULT_SELECTION_HISTORY_FILES = DEFAULT_WORKING_MEMORY_FILES
 DEFAULT_SELECTION_HISTORY_PROMPT_FILES = 30
+DEFAULT_TASK_STEPS = 12
+
+
+def _compact_task_state(working: dict[str, Any]) -> dict[str, Any]:
+    raw = working.get("active_task")
+    if not isinstance(raw, dict) or not str(raw.get("active_goal") or "").strip():
+        return {}
+    steps: list[dict[str, Any]] = []
+    for index, step in enumerate(raw.get("steps") or []):
+        if not isinstance(step, dict):
+            continue
+        tool = str(step.get("tool") or "").strip()
+        if not tool:
+            continue
+        steps.append(
+            {
+                "id": str(step.get("id") or f"step_{index + 1}")[:40],
+                "tool": tool[:80],
+                "status": str(step.get("status") or "pending")[:32],
+            }
+        )
+        if len(steps) >= DEFAULT_TASK_STEPS:
+            break
+    valid_ids = {step["id"] for step in steps}
+    completed = [
+        str(step_id)
+        for step_id in (raw.get("completed_steps") or [])
+        if str(step_id) in valid_ids
+    ]
+    constraints = raw.get("constraints")
+    if not isinstance(constraints, dict):
+        constraints = {}
+    compact_constraints = {
+        str(key)[:80]: value
+        for key, value in list(constraints.items())[:12]
+        if isinstance(value, (str, int, float, bool, type(None)))
+    }
+    return {
+        "schema_version": "gallery_task.v1",
+        "active_goal": truncate_text(str(raw.get("active_goal") or ""), 500, label="goal"),
+        "last_request": truncate_text(str(raw.get("last_request") or ""), 300, label="request"),
+        "status": str(raw.get("status") or "planning")[:32],
+        "steps": steps,
+        "completed_steps": completed,
+        "constraints": compact_constraints,
+        "last_error": truncate_text(str(raw.get("last_error") or ""), 300, label="error"),
+    }
 
 
 def _compact_selection_history(
@@ -145,6 +192,9 @@ def compress_working_memory(
     ):
         if working.get(key) is not None:
             out[key] = working[key]
+    task = _compact_task_state(working)
+    if task:
+        out["active_task"] = task
     return out
 
 
@@ -198,6 +248,30 @@ def working_memory_prompt_block(working: dict[str, Any]) -> str:
         lines.append(f"- last_tool: {compact['last_tool']}")
     if files:
         lines.append(f"- last_files ({len(files)}): {', '.join(files)}")
+    task = compact.get("active_task")
+    if isinstance(task, dict):
+        lines.extend(
+            [
+                "",
+                "[Active Task / 当前任务]",
+                f"- goal: {task.get('active_goal')}",
+                f"- status: {task.get('status')}",
+            ]
+        )
+        if task.get("last_request"):
+            lines.append(f"- latest request: {task.get('last_request')}")
+        for step in task.get("steps") or []:
+            lines.append(
+                f"- {step.get('id')}: {step.get('tool')} [{step.get('status')}]"
+            )
+        if task.get("constraints"):
+            lines.append(f"- constraints: {task.get('constraints')}")
+        if task.get("last_error"):
+            lines.append(f"- last_error: {task.get('last_error')}")
+        lines.append(
+            "Continue or revise this task when the user says 继续/再/上次; do not make "
+            "them restate the original goal."
+        )
     archive_hits = compact.get("last_archive_hits") or []
     if compact.get("last_archive_query"):
         lines.append(f"- last_archive_query: {compact['last_archive_query']}")

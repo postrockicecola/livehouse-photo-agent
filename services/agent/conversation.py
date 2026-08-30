@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -64,6 +65,10 @@ Summarizer = Callable[[list["Message"]], str]
 # Optional observability hook: one structured event per tool / turn boundary.
 TurnHook = Callable[[dict[str, Any]], None]
 SelectionExperienceLoader = Callable[[dict[str, Any], str], list[dict[str, Any]]]
+_TASK_CONTINUATION_RE = re.compile(
+    r"(继续|接着|上次|上一轮|刚才|再|然后|改成|调整|排除|剔除|continue|resume|again)",
+    re.IGNORECASE,
+)
 
 
 class SelectionRecord(TypedDict):
@@ -455,7 +460,74 @@ class ConversationalAgent:
             self.working_memory["pending_curation_status"] = str(meta.get("status") or "queued")
         if name in ("poll_curation_job", "cancel_curation_job") and meta.get("status"):
             self.working_memory["pending_curation_status"] = str(meta["status"])
+        self._update_active_task_from_tool(name, args, result)
         self.working_memory = compress_working_memory(self.working_memory)
+
+    def _update_active_task_from_tool(
+        self,
+        name: str,
+        args: dict[str, Any],
+        result: SkillResult,
+    ) -> None:
+        meta = getattr(result, "metadata", None) or {}
+        raw = self.working_memory.get("active_task")
+        task = dict(raw) if isinstance(raw, dict) else {}
+        if not task:
+            task = {
+                "schema_version": "gallery_task.v1",
+                "active_goal": self._turn_user_text,
+                "last_request": self._turn_user_text,
+                "status": "in_progress",
+                "steps": [],
+                "completed_steps": [],
+                "constraints": {},
+                "last_error": "",
+            }
+        steps = [dict(step) for step in (task.get("steps") or []) if isinstance(step, dict)]
+        step = next(
+            (
+                candidate
+                for candidate in steps
+                if candidate.get("tool") == name
+                and candidate.get("status") in ("pending", "in_progress")
+            ),
+            None,
+        )
+        if step is None:
+            step = {"id": f"step_{len(steps) + 1}", "tool": name, "status": "pending"}
+            steps.append(step)
+
+        files = meta.get("files") or meta.get("selected_keys") or []
+        empty_search = name in ("gallery_search", "archive_search") and not files
+        failed = not bool(result.ok) or empty_search
+        if failed:
+            step["status"] = "failed"
+            task["status"] = "needs_attention"
+            task["last_error"] = (
+                str(result.error or "")
+                or f"{name} returned no files"
+            )
+        elif name == "submit_curation_job" and str(meta.get("status") or "") not in ("done", "failed"):
+            step["status"] = "waiting"
+            task["status"] = "waiting"
+            task["last_error"] = ""
+        else:
+            step["status"] = "completed"
+            completed = [str(value) for value in (task.get("completed_steps") or [])]
+            if str(step["id"]) not in completed:
+                completed.append(str(step["id"]))
+            task["completed_steps"] = completed
+            task["status"] = "in_progress"
+            task["last_error"] = ""
+
+        constraints = dict(task.get("constraints") or {})
+        for key in ("query", "limit", "recipe", "replace"):
+            if isinstance(args.get(key), (str, int, float, bool)):
+                constraints[key] = args[key]
+        task["constraints"] = constraints
+        task["steps"] = steps
+        task["last_request"] = self._turn_user_text
+        self.working_memory["active_task"] = task
 
     def _record_tool_decision(self, tool: str, args: dict[str, Any]) -> None:
         """Persist the model's tool-call JSON as an assistant turn (before dispatch)."""
@@ -480,6 +552,70 @@ class ConversationalAgent:
 
     def _on_plan(self, specialist: Optional[str], rule_id: Optional[str]) -> None:
         self._turn_specialist = str(specialist or "general")
+        existing = self.working_memory.get("active_task")
+        if isinstance(existing, dict) and _TASK_CONTINUATION_RE.search(self._turn_user_text):
+            task = dict(existing)
+            task["last_request"] = self._turn_user_text
+            task["status"] = "in_progress"
+            task["last_error"] = ""
+            self.working_memory["active_task"] = task
+            self.working_memory = compress_working_memory(self.working_memory)
+            return
+        if not rule_id and self._turn_specialist == "general":
+            return
+
+        match = route_gallery_intent(self._turn_user_text) if rule_id else None
+        steps: list[dict[str, str]] = []
+        constraints: dict[str, Any] = {}
+        if match is not None:
+            for index, call in enumerate(match.calls, start=1):
+                steps.append(
+                    {"id": f"step_{index}", "tool": call.tool, "status": "pending"}
+                )
+                for key in ("query", "limit", "recipe"):
+                    if isinstance(call.args.get(key), (str, int, float, bool)):
+                        constraints[key] = call.args[key]
+                goal = call.args.get("selection_goal")
+                if isinstance(goal, dict):
+                    for key in ("count", "subject", "style", "platform"):
+                        if isinstance(goal.get(key), (str, int, float, bool)):
+                            constraints[key] = goal[key]
+            if match.select_after_search:
+                steps.append(
+                    {
+                        "id": f"step_{len(steps) + 1}",
+                        "tool": "gallery_select",
+                        "status": "pending",
+                    }
+                )
+        self.working_memory["active_task"] = {
+            "schema_version": "gallery_task.v1",
+            "active_goal": self._turn_user_text,
+            "last_request": self._turn_user_text,
+            "status": "planning",
+            "steps": steps,
+            "completed_steps": [],
+            "constraints": constraints,
+            "last_error": "",
+        }
+        self.working_memory = compress_working_memory(self.working_memory)
+
+    def _complete_active_task(self) -> None:
+        raw = self.working_memory.get("active_task")
+        if not isinstance(raw, dict):
+            return
+        task = dict(raw)
+        if task.get("status") == "waiting":
+            return
+        steps = [step for step in (task.get("steps") or []) if isinstance(step, dict)]
+        if task.get("last_error"):
+            task["status"] = "needs_attention"
+        elif any(step.get("status") == "pending" for step in steps):
+            task["status"] = "paused"
+        else:
+            task["status"] = "completed"
+        self.working_memory["active_task"] = task
+        self.working_memory = compress_working_memory(self.working_memory)
 
     def _graph_kwargs(self) -> dict[str, Any]:
         return {
@@ -571,6 +707,7 @@ class ConversationalAgent:
             "rule_id": match.rule_id,
             "calls": [{"tool": call.tool, "args": dict(call.args)} for call in match.calls],
             "select_after_search": match.select_after_search,
+            "confidence": float(match.confidence),
         }
         self._turn_specialist = assign_specialist(self._turn_user_text, planned_route=planned)
         tool_calls: list[dict[str, Any]] = []
@@ -602,6 +739,7 @@ class ConversationalAgent:
             "rule_id": match.rule_id,
             "calls": [{"tool": call.tool, "args": dict(call.args)} for call in match.calls],
             "select_after_search": match.select_after_search,
+            "confidence": float(match.confidence),
         }
 
     def _execute_planned_route(
@@ -638,6 +776,7 @@ class ConversationalAgent:
             rule_id=str(payload.get("rule_id") or "planned"),
             calls=calls,
             select_after_search=bool(payload.get("select_after_search")),
+            confidence=float(payload.get("confidence") or 1.0),
         )
         return self._execute_route_match(match)
 
@@ -1176,6 +1315,7 @@ class ConversationalAgent:
 
         if self._guardrails is not None:
             reply = self._guardrails.mediate_output(reply)
+        self._complete_active_task()
         fa = build_final_answer(
             reply, tool_calls=tool_calls, working_memory=self.working_memory
         )

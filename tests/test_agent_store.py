@@ -121,12 +121,30 @@ def test_working_memory_persists_and_clears_on_reset(conn):
     store.set_working_memory(
         conn,
         cid,
-        {"last_tool": "gallery_search", "last_files": files, "last_query": "交片"},
+        {
+            "last_tool": "gallery_search",
+            "last_files": files,
+            "last_query": "交片",
+            "active_task": {
+                "active_goal": "选出40张交片",
+                "last_request": "继续上次任务",
+                "status": "in_progress",
+                "steps": [
+                    {"id": "step_1", "tool": "gallery_search", "status": "completed"},
+                    {"id": "step_2", "tool": "gallery_select", "status": "pending"},
+                ],
+                "completed_steps": ["step_1"],
+                "constraints": {"limit": 40},
+                "last_error": "",
+            },
+        },
     )
     wm = store.get_working_memory(conn, cid)
     assert wm["last_tool"] == "gallery_search"
     assert len(wm["last_files"]) == 40
     assert wm["last_files"][0] == "keep_0.jpg"
+    assert wm["active_task"]["active_goal"] == "选出40张交片"
+    assert wm["active_task"]["steps"][1]["status"] == "pending"
 
     store.reset_conversation(conn, owner, "s", "gallery")
     assert store.get_working_memory(conn, cid) == {}

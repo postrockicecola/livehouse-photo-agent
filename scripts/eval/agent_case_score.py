@@ -56,6 +56,23 @@ def score_case(
     exp = case.get("expect") or {}
     got_route = route_id_from_backend(backend, rule_id)
     reasons: list[str] = []
+    event_rows = [event for event in (events or []) if isinstance(event, dict)]
+    recovery_index = next(
+        (
+            index
+            for index, event in enumerate(event_rows)
+            if event.get("type") == "plan_evaluation" and event.get("ok") is False
+        ),
+        None,
+    )
+    recovery_attempted = recovery_index is not None
+    recovery_success = bool(
+        recovery_index is not None
+        and any(
+            event.get("type") == "tool_call" and event.get("ok") is True
+            for event in event_rows[recovery_index + 1 :]
+        )
+    )
 
     route_ok = True
     if "route" in exp:
@@ -101,6 +118,16 @@ def score_case(
 
     if "max_tool_calls" in exp and not live and len(tool_calls) > int(exp["max_tool_calls"]):
         reasons.append(f"too many tool calls: {len(tool_calls)}")
+
+    if exp.get("recovery_expected") and not recovery_success:
+        reasons.append("expected successful recovery after a failed candidate plan")
+    if exp.get("recovery_expected") is False and recovery_attempted:
+        reasons.append("unexpected candidate-plan recovery")
+
+    task = (working_memory or {}).get("active_task")
+    task_status = str(task.get("status") or "") if isinstance(task, dict) else ""
+    if exp.get("task_status") and task_status != str(exp["task_status"]):
+        reasons.append(f"task_status {task_status!r} != {exp['task_status']!r}")
 
     if exp.get("pref_key"):
         if live:
@@ -155,6 +182,10 @@ def score_case(
         "grounded_ok": grounded_ok,
         "empty_honest": empty_honest,
         "allow_empty": bool(exp.get("allow_empty")),
+        "recovery_expected": bool(exp.get("recovery_expected")),
+        "recovery_attempted": recovery_attempted,
+        "recovery_success": recovery_success,
+        "task_status": task_status or None,
         "files": files[:12],
         "elapsed_ms": elapsed_ms,
         "reply": (reply or "")[:240],
@@ -178,6 +209,8 @@ def aggregate_scores(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "json_leak_rate": 0.0,
             "grounded_rate": 0.0,
             "empty_honesty_rate": 0.0,
+            "recovery_rate": 0.0,
+            "task_completion_rate": 0.0,
             "mean_tool_calls": 0.0,
             "p50_latency_ms": 0.0,
             "p95_latency_ms": 0.0,
@@ -189,6 +222,8 @@ def aggregate_scores(rows: list[dict[str, Any]]) -> dict[str, Any]:
     lat = sorted(int(r.get("elapsed_ms") or 0) for r in rows)
     route_rows = [r for r in rows if r.get("route_ok") is not None]
     empty_eval = [r for r in rows if r.get("allow_empty")]
+    recovery_eval = [r for r in rows if r.get("recovery_expected")]
+    task_eval = [r for r in rows if r.get("task_status") is not None]
 
     return {
         "total": n,
@@ -200,6 +235,16 @@ def aggregate_scores(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "grounded_rate": _pct([1.0 if r.get("grounded_ok") else 0.0 for r in rows]),
         "empty_honesty_rate": _pct([1.0 if r.get("empty_honest") else 0.0 for r in empty_eval])
         if empty_eval
+        else 1.0,
+        "recovery_rate": _pct(
+            [1.0 if r.get("recovery_success") else 0.0 for r in recovery_eval]
+        )
+        if recovery_eval
+        else 1.0,
+        "task_completion_rate": _pct(
+            [1.0 if r.get("task_status") == "completed" else 0.0 for r in task_eval]
+        )
+        if task_eval
         else 1.0,
         "mean_tool_calls": round(sum(int(r.get("tool_calls") or 0) for r in rows) / n, 3),
         "p50_latency_ms": float(lat[len(lat) // 2]),

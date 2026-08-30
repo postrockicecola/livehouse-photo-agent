@@ -2,7 +2,8 @@
 
 Graph shape::
 
-    START → plan ─┬→ execute_plan → answer → END   # all intent_router hits
+    START → plan ─┬→ execute_plan → evaluate ─┬→ answer → END
+                  │                           └→ decide → act ⟲
                   └→ decide → act → decide ⟲ → answer → END
                                 ↘ answer (plain / forced)
 
@@ -44,6 +45,8 @@ class ChatTurnState(TypedDict, total=False):
     selection_goal: Optional[dict[str, Any]]
     planned_route: Optional[dict[str, Any]]
     plan_rule_id: Optional[str]
+    plan_confidence: float
+    recovery_reason: Optional[str]
     specialist: Optional[str]
 
 
@@ -84,6 +87,74 @@ ANSWER_BRANCH_CHECKLIST: tuple[dict[str, str], ...] = (
 
 AnswerBranchId = Literal["film_direct", "lean_refs", "direct_no_files", "plain_no_tools"]
 FILM_GRADE_TOOLS = frozenset({"apply_film_vibe", "recommend_film_for_photo"})
+MIN_DIRECT_PLAN_CONFIDENCE = 0.8
+MIN_RESULT_RATIO = 0.5
+
+
+def evaluate_planned_execution(
+    planned_route: dict[str, Any] | None,
+    tool_calls: list[dict[str, Any]] | None,
+) -> Optional[str]:
+    """Return a recovery reason when a deterministic candidate missed its goal."""
+    calls = [tc for tc in (tool_calls or []) if isinstance(tc, dict)]
+    if not calls:
+        return "candidate plan executed no tools"
+
+    failed = [str(tc.get("tool") or "unknown") for tc in calls if not bool(tc.get("ok"))]
+    if failed:
+        return f"planned tool failed: {', '.join(failed)}"
+
+    search = next((tc for tc in reversed(calls) if tc.get("tool") == "gallery_search"), None)
+    if search is None:
+        return None
+    meta = search.get("metadata") if isinstance(search.get("metadata"), dict) else {}
+    files = [str(x) for x in (meta.get("files") or []) if str(x or "").strip()]
+    if not files:
+        return "gallery search returned no files"
+    normalized = [value.rsplit("/", 1)[-1].lower() for value in files]
+    if len(normalized) != len(set(normalized)):
+        return "gallery search returned duplicate files"
+
+    route = planned_route if isinstance(planned_route, dict) else {}
+    target = 0
+    for planned_call in route.get("calls") or []:
+        if not isinstance(planned_call, dict) or planned_call.get("tool") != "gallery_search":
+            continue
+        args = planned_call.get("args") if isinstance(planned_call.get("args"), dict) else {}
+        try:
+            target = max(0, int(args.get("limit") or 0))
+        except (TypeError, ValueError):
+            target = 0
+        break
+    if (
+        bool(route.get("select_after_search"))
+        and target > 1
+        and len(files) < target
+        and len(files) / target < MIN_RESULT_RATIO
+    ):
+        return f"gallery search returned only {len(files)} of {target} requested files"
+    if bool(route.get("select_after_search")):
+        selection = next(
+            (tc for tc in reversed(calls) if tc.get("tool") == "gallery_select"),
+            None,
+        )
+        if selection is None:
+            return "candidate plan did not execute gallery selection"
+        selected_meta = (
+            selection.get("metadata")
+            if isinstance(selection.get("metadata"), dict)
+            else {}
+        )
+        selected = [
+            str(x)
+            for x in (selected_meta.get("selected_keys") or selected_meta.get("files") or [])
+            if str(x or "").strip()
+        ]
+        if not selected:
+            return "gallery selection returned no files"
+        if target > 1 and len(selected) < target and len(selected) / target < MIN_RESULT_RATIO:
+            return f"gallery selection kept only {len(selected)} of {target} requested files"
+    return None
 
 
 def tool_calls_have_cite_files(tool_calls: list[dict[str, Any]] | None) -> bool:
@@ -199,7 +270,7 @@ def compile_chat_turn_graph(
         return payload
 
     def plan(state: ChatTurnState) -> dict[str, Any]:
-        """Route every deterministic Gallery intent before any model tool decision."""
+        """Produce a candidate Gallery plan before any model tool decision."""
         from services.agent.specialists import assign_specialist
 
         user_text = str(state.get("user_text") or "")
@@ -209,6 +280,8 @@ def compile_chat_turn_graph(
                     "selection_goal": None,
                     "planned_route": None,
                     "plan_rule_id": None,
+                    "plan_confidence": 0.0,
+                    "recovery_reason": None,
                     "specialist": assign_specialist(user_text),
                 }
             )
@@ -221,6 +294,8 @@ def compile_chat_turn_graph(
                     "selection_goal": None,
                     "planned_route": None,
                     "plan_rule_id": None,
+                    "plan_confidence": 0.0,
+                    "recovery_reason": None,
                     "specialist": assign_specialist(user_text),
                 }
             )
@@ -237,18 +312,26 @@ def compile_chat_turn_graph(
             "rule_id": match.rule_id,
             "calls": calls,
             "select_after_search": match.select_after_search,
+            "confidence": float(match.confidence),
         }
         return _emit_plan(
             {
                 "selection_goal": goal,
                 "planned_route": planned,
                 "plan_rule_id": match.rule_id,
+                "plan_confidence": float(match.confidence),
+                "recovery_reason": None,
                 "specialist": assign_specialist(user_text, planned_route=planned),
             }
         )
 
     def route_after_plan(state: ChatTurnState) -> Literal["execute_plan", "decide"]:
-        if state.get("planned_route") and execute_planned_route is not None:
+        confidence = float(state.get("plan_confidence") or 0.0)
+        if (
+            state.get("planned_route")
+            and execute_planned_route is not None
+            and confidence >= MIN_DIRECT_PLAN_CONFIDENCE
+        ):
             return "execute_plan"
         return "decide"
 
@@ -258,12 +341,49 @@ def compile_chat_turn_graph(
         if not isinstance(route, dict) or execute_planned_route is None:
             return {"force_answer": False}
         tool_calls, observations = execute_planned_route(route)
+        seen = [
+            f"{tc.get('tool')}:{json.dumps(tc.get('args') or {}, sort_keys=True, ensure_ascii=False)}"
+            for tc in tool_calls
+            if isinstance(tc, dict) and str(tc.get("tool") or "").strip()
+        ]
         return {
             "tool_calls": list(tool_calls),
             "observations": list(observations),
-            "force_answer": True,
+            "seen_keys": seen,
+            "rounds_used": 1 if tool_calls else 0,
+            "force_answer": False,
             "pending_call": None,
         }
+
+    def evaluate_plan(state: ChatTurnState) -> dict[str, Any]:
+        """Check candidate-plan outcomes and expose misses to the model for recovery."""
+        reason = evaluate_planned_execution(
+            state.get("planned_route"),
+            state.get("tool_calls"),
+        )
+        if reason:
+            _emit(
+                {
+                    "type": "plan_evaluation",
+                    "ok": False,
+                    "reason": reason,
+                    "rule_id": state.get("plan_rule_id"),
+                }
+            )
+            return {"recovery_reason": reason, "force_answer": False}
+        _emit(
+            {
+                "type": "plan_evaluation",
+                "ok": True,
+                "rule_id": state.get("plan_rule_id"),
+            }
+        )
+        return {"recovery_reason": None, "force_answer": True}
+
+    def route_after_evaluate(state: ChatTurnState) -> Literal["decide", "answer"]:
+        if state.get("recovery_reason"):
+            return "decide"
+        return "answer"
 
     def decide(state: ChatTurnState) -> dict[str, Any]:
         max_rounds = int(state.get("max_rounds") or 0)
@@ -291,6 +411,22 @@ def compile_chat_turn_graph(
 
         specialist = str(state.get("specialist") or "general")
         messages = list(memory.messages())
+        planned_route = state.get("planned_route")
+        recovery_reason = str(state.get("recovery_reason") or "").strip()
+        if isinstance(planned_route, dict):
+            if recovery_reason:
+                instruction = (
+                    "The deterministic candidate plan did not satisfy the user goal: "
+                    f"{recovery_reason}. Inspect the tool observations, then choose a different "
+                    "tool or meaningfully changed arguments. Do not repeat an identical call."
+                )
+            else:
+                instruction = (
+                    "A low-confidence candidate plan was proposed but not executed. Treat it as "
+                    "a hint, validate it against the user request, and choose the best tool call: "
+                    f"{json.dumps(planned_route, ensure_ascii=False)}"
+                )
+            messages.append({"role": "system", "content": instruction})
         allowed = specialist_tool_names(specialist)
         if allowed is not None:
             messages = messages + [
@@ -501,6 +637,7 @@ def compile_chat_turn_graph(
     g = StateGraph(ChatTurnState)
     g.add_node("plan", plan)
     g.add_node("execute_plan", execute_plan)
+    g.add_node("evaluate", evaluate_plan)
     g.add_node("decide", decide)
     g.add_node("act", act)
     g.add_node("answer", answer)
@@ -510,7 +647,12 @@ def compile_chat_turn_graph(
         route_after_plan,
         {"execute_plan": "execute_plan", "decide": "decide"},
     )
-    g.add_edge("execute_plan", "answer")
+    g.add_edge("execute_plan", "evaluate")
+    g.add_conditional_edges(
+        "evaluate",
+        route_after_evaluate,
+        {"decide": "decide", "answer": "answer"},
+    )
     g.add_conditional_edges("decide", route_after_decide, {"act": "act", "answer": "answer"})
     g.add_edge("act", "decide")
     g.add_edge("answer", END)
@@ -542,6 +684,8 @@ def _initial_chat_state(
         "selection_goal": None,
         "planned_route": None,
         "plan_rule_id": None,
+        "plan_confidence": 0.0,
+        "recovery_reason": None,
         "specialist": None,
     }
 
@@ -659,9 +803,10 @@ def iter_chat_turn_updates(
 
 GALLERY_CHAT_MAPPING = {
     "ConversationMemory": "closed over by decide/answer nodes",
-    "intent_router (all deterministic hits)": "node: plan",
+    "intent_router candidate plan": "node: plan",
     "specialist allowlist": "node: plan / decide / act",
     "deterministic planned tools": "node: execute_plan",
+    "planned outcome / recovery gate": "node: evaluate",
     "model tool JSON": "node: decide",
     "SkillRegistry.dispatch": "node: act",
     "forced / plain / film final answer": "node: answer",
