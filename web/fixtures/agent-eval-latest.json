@@ -1,0 +1,143 @@
+{
+  "schema_version": "agent_evaluation.v1",
+  "run": {
+    "run_id": "agent-eval-20260805-230949-430f2ca1",
+    "started_at": "2026-08-05T15:09:49.249174+00:00",
+    "completed_at": "2026-08-05T15:10:47.697460+00:00",
+    "duration_ms": 58448.804,
+    "model": {
+      "provider": "ollama",
+      "model_name": "qwen2.5:7b-instruct",
+      "native_tools": false
+    },
+    "case_count": 3
+  },
+  "metrics": {
+    "behavior": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 1,
+      "intent_accuracy": 1,
+      "preferred_tool_score": 1
+    },
+    "trajectory": {
+      "average_steps": 3,
+      "average_tool_calls": 1,
+      "reflection_count": 0,
+      "retry_count": 0,
+      "loop_count": 0,
+      "max_depth": 4,
+      "trajectory_score": 97.2222
+    },
+    "runtime": {
+      "total_latency_ms": 58425.035,
+      "p50_latency_ms": 19559.016,
+      "p95_latency_ms": 26017.277,
+      "average_llm_calls": 2,
+      "average_tokens": 3429.6667,
+      "average_cost_usd": 0,
+      "token_source": "estimated",
+      "cost_score": 100
+    },
+    "quality": {
+      "eligible_cases": 1,
+      "precision_at_k": 0.5,
+      "recall_at_k": 1,
+      "ndcg": 0.6309,
+      "map": 0.5,
+      "quality_score": 65.77
+    },
+    "failure_counts": {}
+  },
+  "score": {
+    "overall_score": 89.31,
+    "task_success": 100,
+    "quality": 65.77,
+    "cost": 100,
+    "trajectory": 97.22
+  },
+  "thresholds": {
+    "min_behavior_success_rate": 0.8,
+    "min_intent_accuracy": 0.9,
+    "min_overall_score": 80,
+    "max_loop_count": 0
+  },
+  "threshold_failures": [],
+  "regression": {
+    "available": true,
+    "passed": true,
+    "regressions": [],
+    "deltas": {
+      "behavior_success": 0,
+      "quality": 0,
+      "average_steps": 0,
+      "average_tool_calls": 0,
+      "average_tokens": 0.0008,
+      "p95_latency_ms": 0.1632
+    },
+    "summary": "No blocking regression detected."
+  },
+  "passed": true,
+  "cases": [
+    {
+      "id": "routed_quality_filter",
+      "description": "Deterministic quality intent selects the search skill.",
+      "user_input": "剔糊过曝的图",
+      "passed": true,
+      "workflow_passed": true,
+      "expected_intent": "exclude_low_quality",
+      "actual_intent": "exclude_low_quality",
+      "tools": ["gallery_search"],
+      "steps": 2,
+      "tool_calls": 1,
+      "llm_calls": 1,
+      "latency_ms": 19559.016,
+      "tokens": 2668,
+      "trajectory_score": 100,
+      "quality_score": null,
+      "failed_checks": [],
+      "failure": null,
+      "trace_id": "2f82836f29d74217952d4e84e7deb191"
+    },
+    {
+      "id": "semantic_drummer_search",
+      "description": "Semantic request is planned through the real LangGraph tool loop.",
+      "user_input": "找鼓手特写",
+      "passed": true,
+      "workflow_passed": true,
+      "expected_intent": "langgraph",
+      "actual_intent": "langgraph",
+      "tools": ["gallery_search"],
+      "steps": 4,
+      "tool_calls": 1,
+      "llm_calls": 3,
+      "latency_ms": 26017.277,
+      "tokens": 4324,
+      "trajectory_score": 91.6667,
+      "quality_score": 65.77,
+      "failed_checks": [],
+      "failure": null,
+      "trace_id": null
+    },
+    {
+      "id": "gallery_statistics",
+      "description": "Agent chooses the gallery statistics skill and explains the result.",
+      "user_input": "这场大概什么水平",
+      "passed": true,
+      "workflow_passed": true,
+      "expected_intent": "langgraph",
+      "actual_intent": "langgraph",
+      "tools": ["gallery_stats"],
+      "steps": 3,
+      "tool_calls": 1,
+      "llm_calls": 2,
+      "latency_ms": 12848.742,
+      "tokens": 3297,
+      "trajectory_score": 100,
+      "quality_score": null,
+      "failed_checks": [],
+      "failure": null,
+      "trace_id": null
+    }
+  ]
+}
