@@ -1,12 +1,11 @@
 """Health/readiness checks for infra components."""
 from __future__ import annotations
 
+import os
 import time
 from typing import Any
 
 import requests
-
-from infra.metrics import queue_backlog_snapshot
 
 
 def db_health() -> dict[str, Any]:
@@ -64,13 +63,34 @@ def worker_freshness(conn: Any, fresh_seconds: int = 120) -> dict[str, Any]:
 
 
 def broker_health() -> dict[str, Any]:
-    q = queue_backlog_snapshot()
-    return {
-        "ok": not bool(q.get("celery_unavailable")),
-        "celery_unavailable": bool(q.get("celery_unavailable")),
-        "redis_error": q.get("redis_error"),
-        "redis_list_len": q.get("redis_list_len"),
-    }
+    broker = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    client = None
+    try:
+        from redis import Redis
+
+        client = Redis.from_url(
+            broker,
+            socket_connect_timeout=1.0,
+            socket_timeout=1.0,
+        )
+        ok = bool(client.ping())
+        redis_list_len = int(client.llen("celery"))
+        return {
+            "ok": ok,
+            "celery_unavailable": not ok,
+            "redis_error": None,
+            "redis_list_len": redis_list_len,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "celery_unavailable": True,
+            "redis_error": str(exc),
+            "redis_list_len": None,
+        }
+    finally:
+        if client is not None:
+            client.close()
 
 
 def health_report(conn: Any, *, provider: str, endpoint: str) -> dict[str, Any]:

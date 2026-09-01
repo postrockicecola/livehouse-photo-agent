@@ -1,0 +1,7 @@
+.git
+**/__pycache__
+**/*.pyc
+.venv
+venv
+web/node_modules
+web/.next
