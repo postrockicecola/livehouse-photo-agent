@@ -12,9 +12,6 @@ import type {
   AgentEvalHistoryItem,
   AgentEvalReport,
 } from "@/lib/agentEval";
-import { getApiBase } from "@/lib/apiBase";
-
-const API_BASE = getApiBase();
 
 function number(value: number | null | undefined, digits = 1): string {
   return value == null || !Number.isFinite(value) ? "—" : value.toFixed(digits);
@@ -221,8 +218,8 @@ export default function AgentEvalDashboard() {
     setError("");
     try {
       const [latestResponse, historyResponse] = await Promise.all([
-        fetch(`${API_BASE}/api/eval/agent/latest?include_cases=true`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/eval/agent/runs?limit=30`, { cache: "no-store" }),
+        fetch("/api/eval/agent/latest?include_cases=true", { cache: "no-store" }),
+        fetch("/api/eval/agent/runs?limit=30", { cache: "no-store" }),
       ]);
       if (!latestResponse.ok) throw new Error(`latest report: HTTP ${latestResponse.status}`);
       if (!historyResponse.ok) throw new Error(`run history: HTTP ${historyResponse.status}`);
