@@ -855,12 +855,17 @@ def clip_rank_rows(
         meta["n_previews"] = 0
         return [], sims_by_file, meta
 
-    cache_dir = Path(base_dir).expanduser().resolve() / ".clip_text_cache"
+    gallery_dir = Path(base_dir).expanduser().resolve()
+    cache_dir = gallery_dir / ".clip_text_cache"
     hits = EmbeddingService.find_similar_to_text(
         q,
         paths,
         top_k=max(1, int(top_k)),
         cache_dir=cache_dir,
+        vector_db_path=gallery_dir / ".gallery_vectors.sqlite3",
+    )
+    meta["vector_backend"] = (
+        str(hits[0].get("backend") or "unknown") if hits else "sqlite_vec"
     )
     out: list[dict[str, Any]] = []
     hit_sims: list[float] = []

@@ -29,6 +29,7 @@ opentelemetry-instrumentation-celery>=0.65b0
 
 # CLIP embeddings for gallery similarity / diversity (optional at runtime if unused)
 open-clip-torch>=2.20
+sqlite-vec>=0.1.9
 
 # Structured LLM output — Pydantic-validated responses from vLLM / OpenAI-compatible backends
 # Used by VLLMProvider.generate_structured() and the instructor usage example in schemas.py.

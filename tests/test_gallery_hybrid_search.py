@@ -1,12 +1,15 @@
 """Hybrid gallery_search merge + why-line enrichment (no CLIP model required)."""
 from __future__ import annotations
 
+import numpy as np
+
 from services.agent.skills.gallery_common import (
     _matched_query_terms,
     _pick_why,
     hybrid_merge_rows,
 )
 from services.agent.skills.gallery_search import GallerySearchSkill
+from services.embedding_service import EmbeddingService
 
 
 def _row(file: str, *, overall: float, atmosphere: float = 0.0, tags: list[str] | None = None) -> dict:
@@ -123,3 +126,55 @@ def test_gallery_search_hybrid_path_with_mocked_clip(tmp_path, monkeypatch) -> N
     why_map = {p["file"]: p["why"] for p in result.metadata.get("pick_reasons") or []}
     assert "hit.jpg" in why_map
     assert "clip" in why_map["hit.jpg"] or "match" in why_map["hit.jpg"]
+
+
+def test_text_search_uses_persistent_sqlite_vec_index(tmp_path, monkeypatch) -> None:
+    close = tmp_path / "close.jpg"
+    far = tmp_path / "far.jpg"
+    close.write_bytes(b"close")
+    far.write_bytes(b"far")
+    query_vector = np.zeros(512, dtype=np.float32)
+    query_vector[0] = 1.0
+
+    monkeypatch.setattr(
+        EmbeddingService,
+        "embed_text",
+        classmethod(lambda cls, _query: query_vector),
+    )
+
+    def fake_embed_image(cls, path):
+        vector = np.zeros(512, dtype=np.float32)
+        vector[0 if path.name == "close.jpg" else 1] = 1.0
+        return vector
+
+    monkeypatch.setattr(
+        EmbeddingService,
+        "embed_image",
+        classmethod(fake_embed_image),
+    )
+    db_path = tmp_path / ".gallery_vectors.sqlite3"
+    hits = EmbeddingService.find_similar_to_text(
+        "close",
+        [close, far],
+        top_k=2,
+        vector_db_path=db_path,
+    )
+    assert [hit["file_name"] for hit in hits] == ["close.jpg", "far.jpg"]
+    assert hits[0]["backend"] == "sqlite_vec"
+    assert db_path.is_file()
+
+    def fail_if_reembedded(cls, path):
+        raise AssertionError(f"unchanged vector should come from sqlite-vec: {path}")
+
+    monkeypatch.setattr(
+        EmbeddingService,
+        "embed_image",
+        classmethod(fail_if_reembedded),
+    )
+    cached_hits = EmbeddingService.find_similar_to_text(
+        "close",
+        [close, far],
+        top_k=1,
+        vector_db_path=db_path,
+    )
+    assert cached_hits[0]["file_name"] == "close.jpg"

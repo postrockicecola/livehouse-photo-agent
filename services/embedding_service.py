@@ -3,10 +3,10 @@
 Architecture
 ------------
 - Model:  OpenAI ``ViT-B-32`` via ``open-clip-torch`` (512-D L2-normalised float32).
-- Storage: ``photo_embeddings`` SQLite table (BLOB); keyed by ``(photo_id, model_name)``.
+- Storage: ``photo_embeddings`` SQLite table (BLOB) plus per-gallery ``sqlite-vec`` indexes.
   ``photos.vector_ref`` is updated to the model name so the schema comment stays accurate.
-- Retrieval: brute-force numpy cosine similarity (corpus @ query).  Adequate up to ~50k
-  photos at sub-10 ms; a vector-DB sidecar (sqlite-vec / Faiss) can be slotted in later.
+- Retrieval: Gallery text search uses sqlite-vec cosine KNN; legacy callers without a vector
+  DB path retain the in-memory numpy implementation.
 - Graceful degradation: if ``open-clip-torch`` or ``torch`` are not installed the service
   logs a single warning and all public methods return ``None`` / empty results.
 
@@ -45,6 +45,7 @@ class EmbeddingService:
     _device: str = "cpu"
     _available: bool | None = None  # None = not yet probed
     _lock = threading.Lock()
+    _vector_db_lock = threading.Lock()
 
     # ------------------------------------------------------------------
     # Model lifecycle
@@ -161,15 +162,32 @@ class EmbeddingService:
         *,
         top_k: int = 10,
         cache_dir: str | Path | None = None,
+        vector_db_path: str | Path | None = None,
     ) -> list[dict[str, Any]]:
         """Rank local image paths by CLIP similarity to a text *query*.
 
-        Optional *cache_dir* stores per-file ``.npy`` embeddings (keyed by basename + mtime)
-        so gallery RAG does not re-encode every turn.
+        When *vector_db_path* is provided, sqlite-vec incrementally indexes changed files and
+        executes cosine KNN in the database. Otherwise, *cache_dir* retains the legacy numpy
+        path for non-gallery callers.
         """
         query_emb = cls.embed_text(query)
         if query_emb is None:
             return []
+
+        if vector_db_path is not None:
+            try:
+                return cls._find_similar_to_text_vector_db(
+                    query_emb,
+                    image_paths,
+                    top_k=top_k,
+                    vector_db_path=vector_db_path,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "sqlite-vec query failed for %s; falling back to numpy: %s",
+                    vector_db_path,
+                    exc,
+                )
 
         cache_root = Path(cache_dir) if cache_dir else None
         if cache_root is not None:
@@ -207,9 +225,155 @@ class EmbeddingService:
                     "file_path": row["file_path"],
                     "file_name": row["file_name"],
                     "similarity": float(scores[idx]),
+                    "backend": "numpy_cache",
                 }
             )
         return out
+
+    @classmethod
+    def _find_similar_to_text_vector_db(
+        cls,
+        query_emb: np.ndarray,
+        image_paths: list[str | Path],
+        *,
+        top_k: int,
+        vector_db_path: str | Path,
+    ) -> list[dict[str, Any]]:
+        """Incrementally sync a gallery sqlite-vec index and run cosine KNN."""
+        import sqlite3
+
+        import sqlite_vec
+
+        db_path = Path(vector_db_path).expanduser().resolve()
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        requested: dict[str, Path] = {}
+        for raw in image_paths:
+            path = Path(raw).expanduser().resolve()
+            if path.is_file():
+                requested[str(path)] = path
+        if not requested:
+            return []
+
+        with cls._vector_db_lock, sqlite3.connect(str(db_path), timeout=10.0) as conn:
+            conn.enable_load_extension(True)
+            sqlite_vec.load(conn)
+            conn.enable_load_extension(False)
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS gallery_vector_items (
+                    id INTEGER PRIMARY KEY,
+                    file_path TEXT NOT NULL UNIQUE,
+                    mtime_ns INTEGER NOT NULL,
+                    model_name TEXT NOT NULL
+                )
+                """
+            )
+            conn.execute(
+                f"""
+                CREATE VIRTUAL TABLE IF NOT EXISTS gallery_vectors USING vec0(
+                    embedding float[{_EMBED_DIM}] distance_metric=cosine
+                )
+                """
+            )
+
+            models = {
+                str(row[0])
+                for row in conn.execute(
+                    "SELECT DISTINCT model_name FROM gallery_vector_items"
+                ).fetchall()
+            }
+            if models and models != {_CLIP_MODEL_NAME}:
+                conn.execute("DELETE FROM gallery_vectors")
+                conn.execute("DELETE FROM gallery_vector_items")
+
+            existing = {
+                str(row[1]): (int(row[0]), int(row[2]))
+                for row in conn.execute(
+                    """
+                    SELECT id, file_path, mtime_ns
+                    FROM gallery_vector_items
+                    WHERE model_name = ?
+                    """,
+                    (_CLIP_MODEL_NAME,),
+                ).fetchall()
+            }
+            allowed_ids: set[int] = set()
+            for file_path, path in requested.items():
+                mtime_ns = path.stat().st_mtime_ns
+                current = existing.get(file_path)
+                if current is not None and current[1] == mtime_ns:
+                    allowed_ids.add(current[0])
+                    continue
+
+                vector = cls.embed_image(path)
+                if vector is None:
+                    continue
+                if current is None:
+                    cursor = conn.execute(
+                        """
+                        INSERT INTO gallery_vector_items(file_path, mtime_ns, model_name)
+                        VALUES (?, ?, ?)
+                        """,
+                        (file_path, mtime_ns, _CLIP_MODEL_NAME),
+                    )
+                    item_id = int(cursor.lastrowid)
+                else:
+                    item_id = current[0]
+                    conn.execute(
+                        """
+                        UPDATE gallery_vector_items
+                        SET mtime_ns = ?, model_name = ?
+                        WHERE id = ?
+                        """,
+                        (mtime_ns, _CLIP_MODEL_NAME, item_id),
+                    )
+                    conn.execute("DELETE FROM gallery_vectors WHERE rowid = ?", (item_id,))
+                conn.execute(
+                    "INSERT INTO gallery_vectors(rowid, embedding) VALUES (?, ?)",
+                    (item_id, sqlite_vec.serialize_float32(vector)),
+                )
+                allowed_ids.add(item_id)
+
+            total = int(
+                conn.execute("SELECT COUNT(*) FROM gallery_vector_items").fetchone()[0]
+            )
+            if not allowed_ids or total == 0:
+                return []
+            nearest = conn.execute(
+                """
+                SELECT rowid, distance
+                FROM gallery_vectors
+                WHERE embedding MATCH ? AND k = ?
+                ORDER BY distance
+                """,
+                (sqlite_vec.serialize_float32(query_emb), total),
+            ).fetchall()
+            paths_by_id = {
+                int(row[0]): str(row[1])
+                for row in conn.execute(
+                    "SELECT id, file_path FROM gallery_vector_items"
+                ).fetchall()
+            }
+
+        results: list[dict[str, Any]] = []
+        for item_id, distance in nearest:
+            item_id = int(item_id)
+            if item_id not in allowed_ids:
+                continue
+            file_path = paths_by_id.get(item_id)
+            if not file_path:
+                continue
+            results.append(
+                {
+                    "file_path": file_path,
+                    "file_name": Path(file_path).name,
+                    "similarity": 1.0 - float(distance),
+                    "backend": "sqlite_vec",
+                }
+            )
+            if len(results) >= max(1, int(top_k)):
+                break
+        return results
 
     # ------------------------------------------------------------------
     # Similarity maths
