@@ -1,0 +1,27 @@
+{
+  "schema_version": "agent_evaluation_index.v1",
+  "count": 1,
+  "runs": [
+    {
+      "run_id": "agent-eval-20260805-230949-430f2ca1",
+      "started_at": "2026-08-05T15:09:49.249174+00:00",
+      "completed_at": "2026-08-05T15:10:47.697460+00:00",
+      "passed": true,
+      "overall_score": 89.31,
+      "behavior_success_rate": 1,
+      "intent_accuracy": 1,
+      "quality_score": 65.77,
+      "trajectory_score": 97.2222,
+      "p95_latency_ms": 26017.277,
+      "average_tokens": 3429.6667,
+      "model": {
+        "provider": "ollama",
+        "model_name": "qwen2.5:7b-instruct",
+        "native_tools": false
+      },
+      "case_count": 3,
+      "threshold_failure_count": 0,
+      "regression_count": 0
+    }
+  ]
+}

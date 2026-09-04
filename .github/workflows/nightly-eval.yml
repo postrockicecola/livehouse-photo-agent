@@ -29,6 +29,8 @@ jobs:
     name: Agent evaluation (live daily)
     runs-on: [self-hosted, agent-eval]
     timeout-minutes: 30
+    permissions:
+      contents: write
     env:
       LIVEHOUSE_AGENT_EVAL_REPORTS_DIR: ${{ vars.AGENT_EVAL_REPORTS_DIR }}
     steps:
@@ -41,9 +43,34 @@ jobs:
       - name: Assert local model backend
         run: curl --fail --silent --show-error http://127.0.0.1:11434/api/tags >/dev/null
       - name: Run production Agent evaluation
+        id: agent_eval
         run: |
-          archive_dir="${LIVEHOUSE_AGENT_EVAL_REPORTS_DIR:-$GITHUB_WORKSPACE/reports/agent_eval}"
+          archive_dir="${LIVEHOUSE_AGENT_EVAL_REPORTS_DIR:-$HOME/.livehouse/agent_eval}"
+          mkdir -p "$archive_dir"
+          set +e
           python agent_eval/run_eval.py --archive-dir "$archive_dir"
+          status=$?
+          set -e
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" -gt 1 ]; then
+            exit "$status"
+          fi
+      - name: Export Vercel Agent evaluation snapshots
+        run: |
+          archive_dir="${LIVEHOUSE_AGENT_EVAL_REPORTS_DIR:-$HOME/.livehouse/agent_eval}"
+          python scripts/export_agent_eval_showcase.py --archive-dir "$archive_dir"
+      - name: Publish Vercel Agent evaluation snapshots
+        run: |
+          git add web/fixtures/agent-eval-latest.json web/fixtures/agent-eval-history.json
+          if git diff --cached --quiet; then
+            echo "Agent evaluation snapshots are unchanged."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "Update daily Agent evaluation snapshot."
+          git pull --rebase origin main
+          git push origin HEAD:main
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,3 +81,6 @@ jobs:
             reports/latest.html
           if-no-files-found: warn
           retention-days: 30
+      - name: Enforce Agent evaluation quality gate
+        if: steps.agent_eval.outputs.exit_code == '1'
+        run: exit 1

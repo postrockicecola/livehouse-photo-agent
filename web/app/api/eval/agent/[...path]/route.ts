@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import agentEvalHistory from "@/fixtures/agent-eval-history.json";
 import agentEvalLatest from "@/fixtures/agent-eval-latest.json";
-import type { AgentEvalHistoryItem, AgentEvalReport } from "@/lib/agentEval";
+import type { AgentEvalHistory, AgentEvalHistoryItem, AgentEvalReport } from "@/lib/agentEval";
 import { isLandingOnly, isShowcase } from "@/lib/dataSource";
 import { galleryApiOrigin } from "@/lib/studioPyRunner";
 
 export const dynamic = "force-dynamic";
 
 const latest = agentEvalLatest as AgentEvalReport;
+const history = agentEvalHistory as AgentEvalHistory;
 
 function historyItem(report: AgentEvalReport): AgentEvalHistoryItem {
   return {
@@ -35,10 +37,13 @@ function fixtureResponse(req: NextRequest, path: string[]): NextResponse | null 
     return NextResponse.json(includeCases ? latest : { ...latest, cases: undefined });
   }
   if (resource === "runs") {
+    const requestedLimit = Number(req.nextUrl.searchParams.get("limit") ?? 30);
+    const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(365, requestedLimit)) : 30;
+    const runs = (history.runs.length ? history.runs : [historyItem(latest)]).slice(0, limit);
     return NextResponse.json({
       schema_version: "agent_evaluation_index.v1",
-      count: 1,
-      runs: [historyItem(latest)],
+      count: runs.length,
+      runs,
     });
   }
   return null;
