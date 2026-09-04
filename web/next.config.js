@@ -2,6 +2,9 @@
 
 /** @returns {string | null} FastAPI origin for rewrites; null = landing-only (no backend proxy). */
 function resolveGalleryOrigin() {
+  if (process.env.VERCEL === "1") {
+    return null;
+  }
   const landingOnly = process.env.LANDING_ONLY;
   if (landingOnly === "1" || landingOnly === "true") {
     return null;
