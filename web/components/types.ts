@@ -42,6 +42,8 @@ export type GalleryGroupMember = {
   path_quoted?: string;
   before_path_quoted?: string;
   overall_score?: number;
+  score_status?: "scored" | "unscored" | "rejected";
+  score_source?: string;
   category?: string;
   rotate_degrees?: number;
 };
@@ -64,6 +66,8 @@ export type GalleryItem = {
   width?: number;
   height?: number;
   overall_score?: number;
+  score_status?: "scored" | "unscored" | "rejected";
+  score_source?: string;
   energy?: number;
   technical?: number;
   composition?: number;

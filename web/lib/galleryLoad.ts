@@ -78,6 +78,8 @@ export function normalizeRowToItem(row: unknown, previewsBase: string): GalleryI
   if (typeof o.orientation === "string") item.orientation = o.orientation;
 
   item.overall_score = num(o.overall_score ?? (o.scores as Record<string, unknown> | undefined)?.overall, 0);
+  if (o.score_status === "scored" || o.score_status === "unscored" || o.score_status === "rejected") item.score_status = o.score_status;
+  if (typeof o.score_source === "string") item.score_source = o.score_source;
   item.energy = num(o.energy, 0);
   item.technical = num(o.technical, 0);
   item.composition = num(o.composition, 0);

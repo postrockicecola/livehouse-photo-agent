@@ -1,84 +1,85 @@
-"""
-Persisted Stage3 VLM cache: ``imagehash.phash`` 64-bit int keys plus Hamming similarity.
+"""Stage3 result cache keyed by SHA-256 of file content and scoring context.
 
-Fingerprints match ``debug_info["phash"]`` from Stage2 (`image_phash_int`). Near-duplicates
-reuse when Hamming distance is at or below ``max_hamming`` (default allows distance < 8).
-
-Integration example::
-
-    from services.cache.stage3_cache import Stage3PHashCache, stage3_cache_from_config
-
-    # From YAML (processing.stage3_vlm_cache)
-    cache = stage3_cache_from_config(config)
-
-    # Or manual
-    cache = Stage3PHashCache(max_hamming=7, persist_path=Path(\"/tmp/stage3_cache.json\"))
-
-    phash = int(debug_info.get(\"phash\") or 0)
-    hit = cache.get_cached_result(phash)
-    if hit is not None:
-        meta = hit.pop(\"__stage3_cache_meta__\", {})
-        # attach meta to stage3_meta, skip VLM
-        ...
-
-    # After real inference
-    cache.store_result(phash, result_dict)
-    cache.maybe_persist()
-
-    stats = cache.metrics_dict()
-    # hit_rate, saved_inference_count, …
+The historical class name and metric names remain compatible with callers. Perceptual
+hashes are only suitable for grouping; they must never authorize reuse of a score.
 """
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import logging
+import math
 import threading
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from engine.operators.stage2_prefilter import hamming_64
 from utils.json_safe import json_safe
 
 logger = logging.getLogger(__name__)
 
-CACHE_JSON_VERSION = 2
-CACHE_HASH_ALGO = "imagehash.phash"
+CACHE_JSON_VERSION = 3
+CACHE_HASH_ALGO = "sha256.content+scoring-v2"
 
 # Ephemeral key attached to returned dicts; stripped on store.
 CACHE_HIT_META_KEY = "__stage3_cache_meta__"
 
 
+def stage3_content_key(image_path: str, context: Mapping[str, Any]) -> str | None:
+    """Fail closed on unreadable files; include prompts, model and calibration inputs."""
+    digest = hashlib.sha256()
+    try:
+        with open(image_path, "rb") as image_file:
+            for chunk in iter(lambda: image_file.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except OSError:
+        return None
+    digest.update(b"\0" + json.dumps(json_safe(context), sort_keys=True, ensure_ascii=False).encode())
+    return digest.hexdigest()
+
+
+def _valid_key(key: Any) -> bool:
+    return isinstance(key, str) and len(key) == 64 and all(c in "0123456789abcdef" for c in key)
+
+
 def _is_storable_result(result: Mapping[str, Any]) -> bool:
-    if bool(result.get("error")):
+    if result.get("error") or result.get("inference_degraded") or result.get("used_fallback_defaults"):
         return False
-    outcome = str((result.get("stage3_meta") or {}).get("outcome") or "")
-    if outcome == "fallback_defaults":
+    meta = result.get("stage3_meta") or {}
+    if meta.get("used_fallback_defaults") or meta.get("parse_status") == "fail":
+        return False
+    try:
+        if not math.isfinite(float(result["score"])) or not 0 <= float(result["score"]) <= 100:
+            return False
+    except (KeyError, ValueError, TypeError):
+        return False
+    outcome = str(meta.get("outcome") or "")
+    if outcome in {"fallback_defaults", "parse_failed", "vlm_error", "degraded_inference"}:
         return False
     return True
 
 
 class Stage3PHashCache:
     """
-    Thread-safe cache: exact phash key, plus nearest-neighbor within Hamming threshold.
+    Thread-safe content cache. ``max_hamming`` is retained as an ignored legacy option.
     """
 
     def __init__(
         self,
         *,
-        max_hamming: int = 7,
+        max_hamming: int = 0,
         persist_path: Path | str | None = None,
         on_persist: Callable[[], None] | None = None,
         max_entries: int = 4096,
     ) -> None:
-        self._max_hamming = max(0, int(max_hamming))
+        self._max_hamming = 0
         self._max_entries = max(1, int(max_entries))
         self._persist_path = Path(persist_path) if persist_path else None
         self._on_persist = on_persist
         self._lock = threading.Lock()
         # LRU via OrderedDict (move_to_end on hit/store; popitem(last=False) evicts).
-        self._by_phash: OrderedDict[int, dict[str, Any]] = OrderedDict()
+        self._by_phash: OrderedDict[str, dict[str, Any]] = OrderedDict()
 
         self._lookups = 0
         self._hits_exact = 0
@@ -91,51 +92,22 @@ class Stage3PHashCache:
     def max_hamming(self) -> int:
         return self._max_hamming
 
-    def get_cached_result(self, phash: int) -> dict[str, Any] | None:
-        """
-        Return a deep copy of a matching Stage3 result, or ``None``.
-
-        On hit, the dict includes ``__stage3_cache_meta__`` with
-        ``kind`` (``exact`` | ``similar``), ``matched_phash``, ``hamming``.
-        Pop this key before persisting or using as a normal result payload.
-        """
-        ph = int(phash)
+    def get_cached_result(self, key: str | None) -> dict[str, Any] | None:
+        """Return a deep copy only on exact content/context match."""
         with self._lock:
             self._lookups += 1
-            if ph == 0:
+            if not _valid_key(key):
                 self._misses += 1
                 return None
 
-            if ph in self._by_phash:
+            if key in self._by_phash:
                 self._hits_exact += 1
                 self._saved_inferences += 1
-                self._by_phash.move_to_end(ph)
-                out = copy.deepcopy(self._by_phash[ph])
+                self._by_phash.move_to_end(key)
+                out = copy.deepcopy(self._by_phash[key])
                 out[CACHE_HIT_META_KEY] = {
                     "kind": "exact",
-                    "matched_phash": ph,
-                    "hamming": 0,
-                }
-                return out
-
-            best_p: int | None = None
-            best_d = self._max_hamming + 1
-            # Cap similar scan cost on large caches (still O(n) but bounded by max_entries).
-            for k in self._by_phash:
-                d = hamming_64(ph, k)
-                if d < best_d:
-                    best_d = d
-                    best_p = k
-
-            if best_p is not None and best_d <= self._max_hamming:
-                self._hits_similar += 1
-                self._saved_inferences += 1
-                self._by_phash.move_to_end(best_p)
-                out = copy.deepcopy(self._by_phash[best_p])
-                out[CACHE_HIT_META_KEY] = {
-                    "kind": "similar",
-                    "matched_phash": int(best_p),
-                    "hamming": int(best_d),
+                    "content_key": key,
                 }
                 return out
 
@@ -147,18 +119,17 @@ class Stage3PHashCache:
             self._by_phash.popitem(last=False)
             self._evictions += 1
 
-    def store_result(self, phash: int, result: Mapping[str, Any]) -> None:
-        """Store a successful Stage3 dict under ``phash`` (ignored if phash is 0 or result not storable)."""
-        ph = int(phash)
-        if ph == 0:
+    def store_result(self, key: str | None, result: Mapping[str, Any]) -> None:
+        """Store only valid content keys and successful results."""
+        if not _valid_key(key):
             return
         if not _is_storable_result(result):
             return
         to_store = copy.deepcopy(dict(result))
         to_store.pop(CACHE_HIT_META_KEY, None)
         with self._lock:
-            self._by_phash[ph] = to_store
-            self._by_phash.move_to_end(ph)
+            self._by_phash[key] = to_store
+            self._by_phash.move_to_end(key)
             self._evict_if_needed_unlocked()
 
     def clear(self) -> None:
@@ -185,7 +156,7 @@ class Stage3PHashCache:
             }
 
     def save_to_json(self, path: Path | str | None = None) -> None:
-        """Persist ``{phash: result}`` as JSON (uses ``json_safe`` for numpy, etc.)."""
+        """Persist content keys and results (uses ``json_safe`` for numpy, etc.)."""
         p = Path(path) if path else self._persist_path
         if not p:
             return
@@ -214,7 +185,7 @@ class Stage3PHashCache:
         with open(p, encoding="utf-8") as f:
             data = json.load(f)
         ha = data.get("hash_algo")
-        if ha != CACHE_HASH_ALGO:
+        if ha != CACHE_HASH_ALGO or data.get("version") != CACHE_JSON_VERSION:
             logger.info(
                 "stage3_vlm_cache: skipping load from %s (hash_algo=%r expected %s). Delete or migrate file to repopulate.",
                 p,
@@ -228,12 +199,8 @@ class Stage3PHashCache:
             if not merge:
                 self._by_phash.clear()
             for ks, val in entries.items():
-                try:
-                    k = int(ks)
-                except (TypeError, ValueError):
-                    continue
-                if isinstance(val, dict):
-                    self._by_phash[k] = val
+                if _valid_key(ks) and isinstance(val, dict) and _is_storable_result(val):
+                    self._by_phash[ks] = val
                     loaded += 1
             self._evict_if_needed_unlocked()
         logger.info("stage3_vlm_cache loaded %s entries from %s", loaded, p)
@@ -250,7 +217,7 @@ def stage3_cache_from_config(config: Mapping[str, Any]) -> Stage3PHashCache | No
     raw = (config.get("processing") or {}).get("stage3_vlm_cache")
     if not isinstance(raw, dict) or not raw.get("enabled", False):
         return None
-    max_h = int(raw.get("max_hamming", 7) or 7)
+    max_h = 0
     max_entries = int(raw.get("max_entries", 4096) or 4096)
     path_raw = raw.get("persist_path")
     persist_path = Path(str(path_raw)) if path_raw else None

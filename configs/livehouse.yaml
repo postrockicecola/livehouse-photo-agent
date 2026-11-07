@@ -26,6 +26,9 @@ paths:
 # PROCESSING & FILTERING THRESHOLDS (OpenCV Stage 1 & 2)
 # ==============================================================
 quality_thresholds:
+  analysis_long_edge: 1024            # Reference scale for all CV quality metrics
+  highlight_luma_threshold: 230
+  shadow_luma_threshold: 30
   # Sharpness/Blur Detection
   laplacian_variance_min: 30          # Minimum for non-severe blur
   laplacian_variance_slight_blur: 50  # Threshold for slight blur penalty
@@ -243,7 +246,7 @@ processing:
     phash_near_dup:
       enabled: true
       max_hamming: 10                # perceptual hash (pHash) distance for burst / near-dup clustering
-      keep_per_cluster: 2            # Keep up to this many images per similarity cluster
+      keep_per_cluster: 1            # Only identical decoded pixels are removed before VLM
 
   # Homepage / ``GET /api/gallery/results``: fold burst frames for browsing (disk unchanged).
   gallery_view_dedupe:
@@ -275,7 +278,7 @@ processing:
   taste_profile:
     min_liked: 5                     # Min selected images before rebuild / personalized sort
 
-  # Stage3 VLM: skip duplicate inference for burst / similar frames (`imagehash.phash` in debug_info.phash).
+  # Stage3 VLM: reuse only identical file content and matching model/prompts/scoring context.
   stage3_vlm_cache:
     enabled: true
     max_hamming: 0                 # Route B fail-closed: never reuse a semantic pass for a merely similar image
@@ -288,7 +291,10 @@ processing:
     dynamic_batch_gating: true        # scale top-k by job size + distribution-based threshold
     stage3_threshold: 0.60            # slightly looser so haze/motion keepers stay in pool
     top_k_ratio: 0.28                 # multiplied by batch scale (>1000 → tighter); see max_candidates
-    max_candidates: 30                # Route B: cloud Stage3 sees only the strongest 20–30 candidates
+    max_candidates: 30                # Base budget; scale for larger sessions up to the limit
+    candidate_budget_per_1000: 30
+    max_candidates_limit: 120
+    diversity_reserve: 8              # Reserve coverage across capture order and lighting
     ambiguous_reserve: 8              # preserve difficult motion/haze candidates inside the cap
     estimated_vlm_seconds_per_image: 22.0   # for est. GPU time saved in logs
     # Optional overrides: dynamic_percentile_floor, dynamic_z_sigma, dynamic_threshold_cap
@@ -340,7 +346,7 @@ stage3:
       circuit_breaker:
         failure_threshold: 3
         recovery_timeout_seconds: 60
-  # fast_first: fast VLM on every Stage3 candidate; full 8-dim only when early-exit rules say so
+  # fast_first: fast VLM ranks every candidate; selective full analysis adds explanations
   # full_only: legacy — dimensional prompt on every candidate (higher latency)
   strategy: fast_first
   # Cap on how many images may run full dimensional VLM per batch (among those that pass early-exit rules).
@@ -366,7 +372,7 @@ stage4_editing:
   mode: numeric                   # numeric = machine-appliable grade (Automated); text = human suggestions
   num_predict: 384
   min_score: 0                    # skip Stage4 when Stage3 score below this
-  skip_on_fallback_defaults: true # skip when Stage3 used neutral dimension fallback
+  skip_on_fallback_defaults: true # skip when Stage3 parsing failed
   skip_on_cache_hit: true         # do not re-run Stage4 when Stage3 VLM cache hit
 
 # ==============================================================

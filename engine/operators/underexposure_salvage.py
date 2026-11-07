@@ -196,9 +196,8 @@ def _ev_to_target_p50(p50: float, cfg: Mapping[str, Any]) -> float:
 def _preview_metrics(gray: np.ndarray, ev: float) -> Dict[str, float]:
     g = np.clip(gray.astype(np.float32) * (2.0**float(ev)), 0.0, 255.0)
     p01, p50, p99 = (float(x) for x in np.percentile(g, [1, 50, 99]))
-    # Match Stage1 adaptive highlight mass (lightweight): pixels near white after lift.
-    t_high = float(np.clip(np.percentile(g, 98.5) + 4.0, 200.0, 255.0))
-    highlight_frac = float(np.mean(g >= t_high))
+    # Use a fixed bright-area threshold, consistent with Stage1 exposure semantics.
+    highlight_frac = float(np.mean(g >= 230.0))
     # Sobel magnitude proxy for structure retention (cheap vs Canny).
     # Downsample for speed on large previews.
     h, w = g.shape[:2]

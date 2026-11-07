@@ -186,8 +186,11 @@ def append_aesthetic_audit_line(
         semantic_gate.get("mode") == "hard"
         and semantic_gate.get("status") == "reject"
     )
-    if semantic_hard_reject:
+    if semantic_hard_reject or ai_data.get("score_status") == "rejected":
         target_folder = folders["trash"]
+    elif ai_data.get("score_status") == "unscored":
+        # Keep unevaluated frames available for review; no quality verdict exists.
+        target_folder = folders["keep"]
     elif score >= classification_cfg["best_threshold"]:
         target_folder = folders["best"]
     elif score >= classification_cfg["keep_threshold"]:
@@ -220,6 +223,9 @@ def append_aesthetic_audit_line(
             "dimensions": ai_data.get("dimensions", {}),
             "weakness": ai_data.get("weakness", ""),
         }
+        for field in ("score_source", "score_status", "candidate_priority"):
+            if field in ai_data:
+                log_entry[field] = ai_data[field]
         mood_tags = ai_data.get("mood_tags")
         if isinstance(mood_tags, list) and mood_tags:
             log_entry["mood_tags"] = mood_tags
@@ -510,7 +516,7 @@ def apply_stage3_candidates_gating(
     if thresh is not None:
         pool = [r for r in pool if float(r["_stage2_norm"]) >= t_eff]
 
-    pool.sort(key=lambda x: float(x["_stage2_norm"]), reverse=True)
+    pool.sort(key=lambda x: (-float(x["_stage2_norm"]), str(x["file_name"])))
 
     if ratio is not None:
         rat = float(r_eff)
@@ -541,36 +547,63 @@ def apply_stage3_candidates_gating(
         except (TypeError, ValueError):
             cap_n = None
 
+    diversity_reserve = max(0, int(sg.get("diversity_reserve", 0) or 0))
+    diversity_admitted = 0
+    if cap_n is not None and cap_n > 0:
+        budget = max(0, int(sg.get("candidate_budget_per_1000", 0) or 0))
+        limit = max(cap_n, int(sg.get("max_candidates_limit", cap_n) or cap_n))
+        cap_n = min(limit, max(cap_n, math.ceil(batch_n / 1000) * budget))
+
     if cap_n is not None and cap_n >= 0:
-        if amb_reserve > 0 and cap_n > 0:
-            reserve_n = min(amb_reserve, cap_n)
-            primary_cap = max(0, cap_n - reserve_n)
-            primary = kept[:primary_cap]
-            primary_names = {str(r["file_name"]) for r in primary}
-            # Prefer ambiguous frames already above the Stage2 threshold (pool),
-            # then fall back to below-threshold ambiguous so haze/motion keepers survive.
-            amb_pool = [
-                r
-                for r in pool
-                if str(r["file_name"]) not in primary_names and row_ambiguous_tags(r)
-            ]
-            if len(amb_pool) < reserve_n:
-                seen_amb = {str(r["file_name"]) for r in amb_pool} | primary_names
-                extra = [
-                    r
-                    for r in enriched
-                    if str(r["file_name"]) not in seen_amb and row_ambiguous_tags(r)
-                ]
-                extra.sort(key=lambda x: float(x["_stage2_norm"]), reverse=True)
-                amb_pool = amb_pool + extra
-            amb_picked = amb_pool[:reserve_n]
-            amb_admitted = len(amb_picked)
-            used = primary_names | {str(r["file_name"]) for r in amb_picked}
-            filler = [r for r in kept if str(r["file_name"]) not in used]
-            remain = cap_n - len(primary) - len(amb_picked)
-            kept = primary + amb_picked + filler[: max(0, remain)]
-        else:
-            kept = kept[:cap_n]
+        amb_slots = min(amb_reserve, cap_n)
+        diversity_slots = min(diversity_reserve, cap_n - amb_slots)
+        primary = kept[:max(0, cap_n - amb_slots - diversity_slots)]
+        used = {str(r["file_name"]) for r in primary}
+        amb_pool = sorted(
+            (r for r in enriched if str(r["file_name"]) not in used and row_ambiguous_tags(r)),
+            key=lambda r: (-float(r["_stage2_norm"]), str(r["file_name"])),
+        )
+        amb_picked = amb_pool[:amb_slots]
+        amb_admitted = len(amb_picked)
+        selected = primary + amb_picked
+        used.update(str(r["file_name"]) for r in amb_picked)
+
+        # Filename order approximates capture order when timestamps are unavailable.
+        # Reserve coverage across the session and lighting, independent of priority.
+        ordered = sorted(enriched, key=lambda r: str(r["file_name"]))
+        bins = min(8, max(1, diversity_slots))
+        time_bin = {str(r["file_name"]): i * bins // max(1, len(ordered))
+                    for i, r in enumerate(ordered)}
+
+        def coverage_keys(row):
+            dbg = row.get("debug_info") or {}
+            keys = [("time", time_bin[str(row["file_name"])])]
+            for field in ("brightness", "saturation"):
+                if dbg.get(field) is not None:
+                    keys.append((field, int(float(dbg[field]) // 64)))
+            return keys
+
+        coverage = {}
+        def mark(row):
+            for key in coverage_keys(row):
+                coverage[key] = coverage.get(key, 0) + 1
+
+        for row in selected:
+            mark(row)
+        for _ in range(diversity_slots):
+            remaining = [r for r in ordered if str(r["file_name"]) not in used]
+            if not remaining:
+                break
+            row = min(remaining, key=lambda r: (
+                sum(coverage.get(k, 0) for k in coverage_keys(r)) / len(coverage_keys(r)),
+                -float(r["_stage2_norm"]), str(r["file_name"]),
+            ))
+            selected.append(row)
+            used.add(str(row["file_name"]))
+            mark(row)
+            diversity_admitted += 1
+        filler = [r for r in kept if str(r["file_name"]) not in used]
+        kept = selected + filler[:max(0, cap_n - len(selected))]
 
     kept_names = {str(r["file_name"]) for r in kept}
     skipped = [r for r in enriched if str(r["file_name"]) not in kept_names]
@@ -596,6 +629,8 @@ def apply_stage3_candidates_gating(
         "estimated_vlm_seconds_per_image": est_sec,
         "ambiguous_reserve": amb_reserve,
         "ambiguous_admitted": amb_admitted,
+        "max_candidates_effective": cap_n,
+        "diversity_admitted": diversity_admitted,
         "distribution": dist_meta,
         **gating_meta,
     }
@@ -609,7 +644,10 @@ def fake_result_stage1_reject(
     debug_info: Dict[str, Any],
 ) -> Dict[str, Any]:
     return {
-        "score": tech_score,
+        "score": 0.0,
+        "score_source": "technical",
+        "score_status": "rejected",
+        "candidate_priority": tech_score,
         "reason": f"Technical issue: {reason}",
         "tags": ["technical_issue"],
         "dimensions": {},
@@ -633,7 +671,10 @@ def fake_result_stage2_reject(
         if str(reject_detail).startswith("stage2_"):
             tags.append("stage2_prefilter")
     return {
-        "score": combined_score,
+        "score": 0.0,
+        "score_source": "heuristic",
+        "score_status": "rejected",
+        "candidate_priority": round(combined_score, 1),
         "reason": "Low quality score" if not reject_detail else f"Stage 2 filter: {reject_detail}",
         "tags": tags,
         "dimensions": {},
@@ -651,11 +692,14 @@ def fake_result_stage2_dedupe_skip(
     combined_score = tech_score * 0.6 + fast_score * 0.4
     norm = stage2_normalized_score(tech_score, fast_score)
     return {
-        "score": round(combined_score, 1),
-        "reason": "Near-duplicate frame (phash); VLM skipped",
+        "score": 0.0,
+        "score_source": "heuristic",
+        "score_status": "unscored",
+        "candidate_priority": round(combined_score, 1),
+        "reason": "Identical image content; VLM skipped",
         "tags": ["near_duplicate", "stage2_dedup"],
         "dimensions": {},
-        "weakness": "Burst / near-duplicate suppressed before Stage 3",
+        "weakness": "Identical decoded pixels suppressed before Stage 3",
         "debug_info": {**dict(debug_info or {}), "stage2_normalized": norm},
         "stage3_meta": {
             "outcome": "skipped_near_duplicate",
@@ -674,8 +718,11 @@ def fake_result_stage3_gated_skip(
     combined_score = tech_score * 0.6 + fast_score * 0.4
     norm = stage2_normalized_score(tech_score, fast_score)
     return {
-        "score": round(combined_score, 1),
-        "reason": "Stage3 skipped (Stage2 gating); heuristic score only",
+        "score": 0.0,
+        "score_source": "heuristic",
+        "score_status": "unscored",
+        "candidate_priority": round(combined_score, 1),
+        "reason": "Stage3 尚未评分（候选预算限制）",
         "tags": ["stage3_skipped_gating"],
         "dimensions": {},
         "weakness": "No VLM (stage3 gating)",
@@ -698,8 +745,11 @@ def fake_result_stage3_vlm_fallback(
     fallback_score = max(0.0, min(100.0, tech_score * 0.35 + 12.0))
     fallback_score = min(fallback_score, 52.0)
     return {
-        "score": round(fallback_score, 1),
-        "reason": f"VLM 不可用，已用技术分回退: {reason_txt}",
+        "score": 0.0,
+        "score_source": "heuristic",
+        "score_status": "unscored",
+        "candidate_priority": round(fallback_score, 1),
+        "reason": f"VLM 不可用，待重新评分: {reason_txt}",
         "tags": ["vlm_error"],
         "dimensions": {},
         "weakness": reason_txt,
@@ -715,6 +765,8 @@ def merge_vlm_and_technical_scores(
 ) -> Dict[str, Any]:
     """Apply technical + AI weights to Stage 3 output (mutates a copy of ``vlm_result``)."""
     out = dict(vlm_result)
+    out.setdefault("score_source", "vlm_fast" if "fast_ai_score" in out else "vlm_full")
+    out.setdefault("score_status", "scored")
     reconcile_stage3_result_from_legacy(out)
     technical_weight = float(config["evaluation"]["technical_weight"])
     ai_weight = float(config["evaluation"]["ai_weight"])
@@ -728,6 +780,20 @@ def merge_vlm_and_technical_scores(
     return out
 
 
+def _valid_stage3_score(result: Dict[str, Any] | None) -> bool:
+    if not result or result.get("error") or result.get("used_fallback_defaults"):
+        return False
+    meta = result.get("stage3_meta") or {}
+    if meta.get("outcome") in {"fallback_defaults", "parse_failed", "vlm_error"}:
+        return False
+    if meta.get("parse_status") == "fail" or meta.get("used_fallback_defaults"):
+        return False
+    try:
+        return math.isfinite(float(result["score"])) and 0 <= float(result["score"]) <= 100
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
 def finalize_stage3_dual_result(
     *,
     config: Dict[str, Any],
@@ -738,14 +804,19 @@ def finalize_stage3_dual_result(
 ) -> Dict[str, Any]:
     """
     Merge fast / full Stage3 VLM payloads (pre-``merge_vlm``) into one audit-ready dict.
-    When ``full_inner`` succeeds, it drives dimensions, highlight/gap, edits; optional ``fast_inner``
-    verdict is preserved under ``full_analysis.fast_verdict_bilingual``.
+    A valid fast pass always drives ranking. A valid full pass adds dimensions and
+    explanations, without switching the ranking estimator for selected frames.
     """
-    if full_inner and not full_inner.get("error"):
-        out = merge_vlm_and_technical_scores(config, full_inner, tech_score, debug_info)
+    fast_ok = _valid_stage3_score(fast_inner)
+    if _valid_stage3_score(full_inner):
+        ranking_inner = dict(full_inner)
+        if fast_ok:
+            ranking_inner["score"] = float(fast_inner["score"])
+            ranking_inner["score_source"] = "vlm_fast"
+        out = merge_vlm_and_technical_scores(config, ranking_inner, tech_score, debug_info)
         if not out.get("semantic_gate") and fast_inner:
             out["semantic_gate"] = fast_inner.get("semantic_gate")
-        fa: Dict[str, Any] = {}
+        fa: Dict[str, Any] = {"ai_score": float(full_inner["score"])}
         for k in (
             "dimensions",
             "dimensions_raw",
@@ -758,13 +829,14 @@ def finalize_stage3_dual_result(
             v = full_inner.get(k)
             if v:
                 fa[k] = v
-        if fast_inner and not fast_inner.get("error"):
+        if fast_ok:
             fv = fast_inner.get("verdict_bilingual") or fast_inner.get("reason_bilingual")
             if isinstance(fv, dict) and (fv.get("zh") or fv.get("en")):
                 fa["fast_verdict_bilingual"] = fv
         out["full_analysis"] = fa if fa else None
         sm = dict(out.get("stage3_meta") or {})
-        sm["stage3_mode"] = "fast_then_full"
+        sm["stage3_mode"] = "fast_then_full" if fast_ok else "full_only"
+        sm["full_analysis_status"] = "available"
         if fast_inner and fast_inner.get("stage3_meta"):
             sm["fast_stage3_meta"] = fast_inner["stage3_meta"]
         out["stage3_meta"] = sm
@@ -782,13 +854,21 @@ def finalize_stage3_dual_result(
             used_fallback_defaults=fb,
         )
         attach_stage3_result(out, fr)
+        if fast_ok and isinstance(fast_inner.get("stage3_result"), dict):
+            out["stage3_result"]["confidence"] = fast_inner["stage3_result"]["confidence"]
         assert_stage3_result_consistent(out)
         return out
 
-    assert fast_inner is not None
+    if not fast_ok:
+        return fake_result_stage3_vlm_fallback(
+            tech_score=tech_score, reason_txt="No valid Stage3 score", debug_info=debug_info,
+        )
     out = merge_vlm_and_technical_scores(config, fast_inner, tech_score, debug_info)
     sm = dict(out.get("stage3_meta") or {})
     sm["stage3_mode"] = "fast_only"
+    if full_inner is not None:
+        sm["full_analysis_status"] = "unavailable"
+        sm["full_stage3_meta"] = dict(full_inner.get("stage3_meta") or {})
     out["stage3_meta"] = sm
     v = (out.get("verdict") or out.get("reason") or "").strip()
     if v:

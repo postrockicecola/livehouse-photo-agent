@@ -49,9 +49,10 @@ from services.processor.stages.stage3_postprocess import (
     copy_dimensions_for_audit,
     weighted_ai_score,
 )
-from services.cache.stage3_cache import CACHE_HIT_META_KEY, Stage3PHashCache
+from services.cache.stage3_cache import CACHE_HIT_META_KEY, Stage3PHashCache, stage3_content_key
 from utils.pipeline_tracing import emit_stage3_partial_trace, make_image_trace_id, merge_inference_trace_attrs
 from utils.stage3_result import (
+    apply_blended_score_to_stage3_result,
     assert_stage3_result_consistent,
     attach_stage3_result,
     empty_dimension_slots_none,
@@ -526,26 +527,54 @@ def pick_full_inference_targets_after_fast(
     return set(unique_names[:max_full]), metrics
 
 
+def _stage3_cache_key(
+    config: Dict[str, Any], image_path: str, blur_eff: Optional[str],
+    stage1_features: Optional[Dict[str, Any]], *, mode: str,
+) -> str | None:
+    analysis_mode = stage3_analysis_mode(config)
+    features = {
+        k: v for k, v in (stage1_features or {}).items()
+        if k not in {"path", "phash", "width", "height", "orientation"}
+    }
+    return stage3_content_key(image_path, {
+        "scoring_version": "2026-11-scoring-v2",
+        "mode": mode,
+        "model": config.get("model"),
+        "stage3": config.get("stage3"),
+        "stage4_editing": config.get("stage4_editing"),
+        "evaluation": config.get("evaluation"),
+        "features": features,
+        "full_prompt": build_stage3_prompt(
+            blur_eff=blur_eff, stage1_features=stage1_features, analysis_mode=analysis_mode,
+        ),
+        "fast_prompt": build_stage3_fast_prompt(
+            blur_eff=blur_eff, stage1_features=stage1_features, analysis_mode=analysis_mode,
+        ),
+    })
+
+
 def try_stage3_cache_hit_raw(
     stage3_cache: Stage3PHashCache | None,
     image_phash: int,
     *,
     blur_eff: Optional[str],
     image_path: str,
+    config: Dict[str, Any],
+    stage1_features: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any] | None:
     """Return finalized Stage3 dict on cache hit, else ``None``."""
-    if stage3_cache is None or int(image_phash) == 0:
+    if stage3_cache is None:
         return None
-    cached_raw = stage3_cache.get_cached_result(int(image_phash))
+    key = _stage3_cache_key(config, image_path, blur_eff, stage1_features, mode="fast_first")
+    cached_raw = stage3_cache.get_cached_result(key)
     if cached_raw is None:
         return None
     hit_meta = dict(cached_raw.pop(CACHE_HIT_META_KEY, {}))
     logger.info(
-        "Stage3 VLM cache %s hit image=%s matched_phash=%s hamming=%s",
+        "Stage3 VLM cache %s hit image=%s content_key=%s",
         hit_meta.get("kind"),
         Path(image_path).name,
-        hit_meta.get("matched_phash"),
-        hit_meta.get("hamming"),
+        hit_meta.get("content_key"),
     )
     return _finalize_cache_hit_result(cached_raw, blur_eff=blur_eff, hit_meta=hit_meta)
 
@@ -950,7 +979,7 @@ def analyze_stage3_fast(
                 extra=_latency_breakdown_extra(dict(parse_note)),
                 prompt_profile=prompt_profile,
             ),
-            "error": False,
+            "error": used_fallback_defaults,
             "inference_degraded": bool(degraded_inf and outcome == "degraded_inference"),
         }
         attach_stage3_result(
@@ -961,6 +990,8 @@ def analyze_stage3_fast(
                 inference_degraded=bool(success.get("inference_degraded")),
             ),
         )
+        if used_fallback_defaults:
+            success["stage3_result"]["confidence"] = 0.0
         assert_stage3_result_consistent(success)
         return success
 
@@ -1104,18 +1135,16 @@ def analyze_with_dimensions(
             and first_entry
             and retry_count == 0
             and stage3_cache is not None
-            and image_phash is not None
-            and int(image_phash) != 0
         ):
-            cached_raw = stage3_cache.get_cached_result(int(image_phash))
+            cache_key = _stage3_cache_key(config, image_path, blur_eff, stage1_features, mode="full")
+            cached_raw = stage3_cache.get_cached_result(cache_key)
             if cached_raw is not None:
                 hit_meta = dict(cached_raw.pop(CACHE_HIT_META_KEY, {}))
                 logger.info(
-                    "Stage3 VLM cache %s hit image=%s matched_phash=%s hamming=%s",
+                    "Stage3 VLM cache %s hit image=%s content_key=%s",
                     hit_meta.get("kind"),
                     Path(image_path).name,
-                    hit_meta.get("matched_phash"),
-                    hit_meta.get("hamming"),
+                    hit_meta.get("content_key"),
                 )
                 cached_out = _finalize_cache_hit_result(cached_raw, blur_eff=blur_eff, hit_meta=hit_meta)
                 return _attach_stage4_editing_after_stage3(
@@ -1261,7 +1290,7 @@ def analyze_with_dimensions(
             used_fallback_defaults = True
             parse_note["used_fallback_defaults"] = True
             logger.warning(
-                "Stage3 parse exhausted — neutral fallback dimensions image=%s",
+                "Stage3 parse exhausted — full analysis unavailable image=%s",
                 Path(image_path).name,
             )
 
@@ -1337,7 +1366,7 @@ def analyze_with_dimensions(
                 extra=meta_extra,
                 prompt_profile=prompt_profile,
             ),
-            "error": False,
+            "error": used_fallback_defaults,
             "inference_degraded": bool(degraded_inf and outcome == "degraded_inference"),
         }
         success = _attach_stage4_editing_after_stage3(
@@ -1377,8 +1406,9 @@ def analyze_with_dimensions(
             ),
         )
         assert_stage3_result_consistent(success)
-        if stage3_cache is not None and image_phash is not None:
-            stage3_cache.store_result(int(image_phash), success)
+        if stage3_cache is not None:
+            cache_key = _stage3_cache_key(config, image_path, blur_eff, stage1_features, mode="full")
+            stage3_cache.store_result(cache_key, success)
         return success
 
     except Exception as e:
@@ -1521,6 +1551,8 @@ def run_stage3_fast_first(
             phash,
             blur_eff=blur_eff,
             image_path=file_path,
+            config=config,
+            stage1_features=debug_info,
         )
         if hit is not None:
             t_img0 = time.perf_counter()
@@ -2104,12 +2136,22 @@ def run_stage3_fast_first(
                 tech_score=tech_score,
                 debug_info=debug_info,
                 fast_inner=fr,
-                full_inner=None,
+                full_inner=full_r,
             )
             if full_r is not None and full_r.get("error"):
                 with hooks.progress_lock:
                     hooks.stats["vlm_fallback"] = hooks.stats.get("vlm_fallback", 0) + 1
 
+        if _s3cache is not None and full_r is not None and not full_r.get("error"):
+            # Store the unblended ranking score: cache hits blend exactly once, just
+            # like fresh inference. Full-only and fast-first have separate keys.
+            cached_inner = copy.deepcopy(merged)
+            cached_inner["score"] = float(fr["score"])
+            apply_blended_score_to_stage3_result(cached_inner, cached_inner["score"])
+            cache_key = _stage3_cache_key(
+                config, file_path, _blur_effective(None, debug_info), debug_info, mode="fast_first",
+            )
+            _s3cache.store_result(cache_key, cached_inner)
         hooks.append_audit_line(file_path, merged)
         if hooks.record_model_run is not None:
             try:

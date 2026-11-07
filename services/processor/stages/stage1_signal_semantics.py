@@ -67,7 +67,7 @@ def stage1_semantic_lines(stage1: dict[str, Any] | None) -> str:
         try:
             hv = float(hi)
             parts.append(
-                f"highlights={_bucket_unit_fraction(hv, low='controlled highlights', mid='bright highlights', high='highlight clipping risk')} "
+                f"highlights={_bucket_unit_fraction(hv, low='small bright area', mid='bright highlights', high='large bright area')} "
                 f"(highlight_frac={hv:.2f})"
             )
         except (TypeError, ValueError):
@@ -78,11 +78,26 @@ def stage1_semantic_lines(stage1: dict[str, Any] | None) -> str:
         try:
             sv = float(sh)
             parts.append(
-                f"shadows={_bucket_unit_fraction(sv, low='open shadows', mid='deep shadows', high='crushed shadow risk')} "
+                f"shadows={_bucket_unit_fraction(sv, low='small dark area', mid='deep shadows', high='large dark area')} "
                 f"(shadow_frac={sv:.2f})"
             )
         except (TypeError, ValueError):
             pass
+
+    for key in ("white_clip_frac", "black_clip_frac", "noise_sigma"):
+        if stage1.get(key) is not None:
+            try:
+                parts.append(f"{key}={float(stage1[key]):.3f}")
+            except (TypeError, ValueError):
+                pass
+    clips = stage1.get("channel_clip_frac")
+    if isinstance(clips, dict):
+        for channel in ("red", "green", "blue"):
+            try:
+                if float(clips.get(channel, 0)) >= 0.05:
+                    parts.append(f"{channel}_channel_clip_frac={float(clips[channel]):.3f}")
+            except (TypeError, ValueError):
+                pass
 
     contrast = stage1.get("contrast")
     if contrast is not None:

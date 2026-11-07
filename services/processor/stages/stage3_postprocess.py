@@ -128,7 +128,7 @@ def calibrate_dimension_scores(
     for k in STAGE3_DIM_KEYS:
         out[k] = _clamp_score(_f(raw_dimensions.get(k), 5.0), 0.0, 10.0)
 
-    meta: CalibrationMeta = {"caps": [], "p0_version": "2026-04-p0"}
+    meta: CalibrationMeta = {"caps": [], "p0_version": "2026-11-reference-scale-v2"}
 
     if not stage1:
         return out, meta
@@ -136,11 +136,11 @@ def calibrate_dimension_scores(
     bt = blur_type if blur_type is not None else stage1.get("blur_type")
     lap = _f(stage1.get("laplacian_var"))
     edges = _f(stage1.get("edge_ratio"))
-    hf = _f(stage1.get("highlight_frac"))
-    contrast = _f(stage1.get("contrast"))
+    hf = _f(stage1.get("white_clip_frac", stage1.get("highlight_frac")))
+    noise_sigma = _f(stage1.get("noise_sigma"))
 
     # --- focus_sharpness：与拉普拉斯/边缘一致 ---
-    if lap > 0:
+    if "laplacian_var" in stage1:
         if bt == "artistic_motion_blur" and edges >= 0.0035:
             soft_cap = min(10.0, 5.2 + min(4.5, lap / 42.0) + min(1.2, edges * 120.0))
         elif edges >= 0.006 and lap >= 45:
@@ -160,16 +160,16 @@ def calibrate_dimension_scores(
         cap_e = _clamp_score(cap_e, 0.0, 10.0)
         if out["exposure_control"] > cap_e:
             meta["caps"].append(
-                {"dimension": "exposure_control", "before": out["exposure_control"], "cap": cap_e, "reason": "stage1_highlight_frac"}
+                {"dimension": "exposure_control", "before": out["exposure_control"], "cap": cap_e, "reason": "stage1_white_clip_frac"}
             )
             out["exposure_control"] = cap_e
 
-    # --- noise_cleanliness：极低对比且边弱时，噪声维不宜打满 ---
-    if contrast < 7.0 and edges < 0.0045 and out["noise_cleanliness"] > 7.2:
-        cap_n = 6.0 + min(1.5, contrast / 10.0) + min(1.0, edges * 80.0)
+    # Low contrast is common in clean haze; only measured noise supports a noise cap.
+    if noise_sigma >= 12.0 and out["noise_cleanliness"] > 7.2:
+        cap_n = max(3.0, 7.2 - (noise_sigma - 12.0) / 10.0)
         if out["noise_cleanliness"] > cap_n:
             meta["caps"].append(
-                {"dimension": "noise_cleanliness", "before": out["noise_cleanliness"], "cap": cap_n, "reason": "stage1_low_contrast_edges"}
+                {"dimension": "noise_cleanliness", "before": out["noise_cleanliness"], "cap": cap_n, "reason": "stage1_measured_noise"}
             )
             out["noise_cleanliness"] = cap_n
 

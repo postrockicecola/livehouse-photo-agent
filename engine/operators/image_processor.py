@@ -10,10 +10,10 @@
   全黑/全白废片。其余情况一律 **放行**，用 ``tech_score`` 与 ``debug_info`` 记录惩罚。
 - **动感模糊** 仅在梯度方向性异常 **且** 边缘密度低于地板时才标为 motion blur，避免
   单向舞台光或线条被误判。
-- **曝光** 用亮度分位数与自适应高光/阴影占比，替代固定 230/30 直方图 bin。
+- **曝光** 用固定亮度阈值统计亮/暗区域，并单独报告黑白截断占比。
 - **欠曝 salvage**：对带 shadow 惩罚且结构仍在的片子做内存 EV 预览；通过则写入
   ``underexposure_salvage`` / ``effective_tech_score``，供 Stage2 门槛回补（不改原图像素）。
-- **构图** 用「高亮区域质心 + 与中心/三分点的距离」简化近似主体位置（无专用检测器时的工程折中）。
+- **候选优先级** 使用宽松的信息量平台；饱和度和高光质心不参与美学排序。
 
 性能：``assess_image_quality`` / ``fast_aesthetic_assessment`` / ``assess_composition`` 支持
 可选传入已解码的 ``img_bgr`` / ``gray``，避免同一路径重复 IO。
@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 # --- Stage1 缺省阈值（yaml 未写时生效；与 livehouse 场景对齐）---
 _STAGE1_FALLBACK: Dict[str, float] = {
+    "analysis_long_edge": 1024.0,
     # 拉普拉斯方差：仅在与极低 edge_ratio 同时出现时才硬拒绝（真正「糊成一片」）
     "severe_blur_lap_max": 10.0,
     "severe_blur_edge_max": 0.0012,
@@ -60,6 +61,8 @@ _STAGE1_FALLBACK: Dict[str, float] = {
     # 曝光：分位数 + 占比惩罚（不再硬拒）
     "highlight_percentile": 98.5,
     "shadow_percentile": 2.5,
+    "highlight_luma_threshold": 230.0,
+    "shadow_luma_threshold": 30.0,
     "highlight_mass_soft": 0.12,
     "highlight_mass_hard": 0.38,
     "shadow_mass_soft": 0.35,
@@ -223,18 +226,11 @@ class ImageProcessor:
     @staticmethod
     def _exposure_percentile_scores(gray: np.ndarray, q: Mapping[str, Any]) -> Dict[str, float]:
         """
-        Percentile-based highlight/shadow mass（适应舞台高光尾部拉长）。
-
-        返回 ``highlight_frac`` / ``shadow_frac`` 等供惩罚与 debug。
+        Measure bright/dark area separately from clipping and distribution tails.
         """
         g = gray.astype(np.float32)
-        ph = _cfg(q, "highlight_percentile")
-        ps = _cfg(q, "shadow_percentile")
-        hi = float(np.percentile(g, ph))
-        lo = float(np.percentile(g, ps))
-        # 自适应阈值：在分位点附近取带宽，避免固定 230/30 不适应 RAW/强灯
-        t_high = float(np.clip(hi + 4.0, 200.0, 255.0))
-        t_low = float(np.clip(lo - 4.0, 0.0, 55.0))
+        t_high = float(np.clip(_cfg(q, "highlight_luma_threshold"), 0.0, 255.0))
+        t_low = float(np.clip(_cfg(q, "shadow_luma_threshold"), 0.0, 255.0))
         highlight_frac = float(np.mean(g >= t_high))
         shadow_frac = float(np.mean(g <= t_low))
         p1, p50, p99 = (float(x) for x in np.percentile(g, [1, 50, 99]))
@@ -244,6 +240,8 @@ class ImageProcessor:
             "p99": p99,
             "highlight_frac": highlight_frac,
             "shadow_frac": shadow_frac,
+            "white_clip_frac": float(np.mean(g >= 254)),
+            "black_clip_frac": float(np.mean(g <= 1)),
             "t_high": t_high,
             "t_low": t_low,
         }
@@ -280,6 +278,32 @@ class ImageProcessor:
     @staticmethod
     def _laplacian_var(gray: np.ndarray) -> float:
         return float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
+    @staticmethod
+    def analysis_bgr(img_bgr: np.ndarray, q: Mapping[str, Any]) -> np.ndarray:
+        """Use one reference scale for blur/edge thresholds, including small previews."""
+        h, w = img_bgr.shape[:2]
+        target = max(64, int(_cfg(q, "analysis_long_edge")))
+        scale = target / float(max(h, w))
+        if max(h, w) == target:
+            return img_bgr
+        return cv2.resize(
+            img_bgr, (max(1, round(w * scale)), max(1, round(h * scale))),
+            interpolation=cv2.INTER_AREA if scale < 1 else cv2.INTER_CUBIC,
+        )
+
+    @staticmethod
+    def _noise_sigma(gray: np.ndarray) -> float:
+        """Robust high-frequency noise estimate; smooth regions avoid subject edges."""
+        if min(gray.shape) < 5:
+            return 0.0
+        g = gray.astype(np.float32)
+        kernel = np.array([[1, -2, 1], [-2, 4, -2], [1, -2, 1]], dtype=np.float32)
+        residual = cv2.filter2D(g, cv2.CV_32F, kernel)[1:-1, 1:-1]
+        smooth = cv2.GaussianBlur(g, (5, 5), 1.0)
+        gradient = cv2.magnitude(cv2.Sobel(smooth, cv2.CV_32F, 1, 0), cv2.Sobel(smooth, cv2.CV_32F, 0, 1))[1:-1, 1:-1]
+        flat = gradient <= np.percentile(gradient, 50)
+        return float(np.median(np.abs(residual[flat])) / (6.0 * 0.67449))
 
     @staticmethod
     def assess_composition(
@@ -400,24 +424,38 @@ class ImageProcessor:
                 debug_info["height"] = h
                 debug_info["orientation"] = ImageProcessor._orientation_from_wh(w, h)
 
-            gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-            laplacian_var = ImageProcessor._laplacian_var(gray)
+            analysis_bgr = ImageProcessor.analysis_bgr(img_bgr, q)
+            gray = cv2.cvtColor(analysis_bgr, cv2.COLOR_BGR2GRAY)
+            noise_sigma = ImageProcessor._noise_sigma(gray)
+            raw_laplacian = ImageProcessor._laplacian_var(gray)
+            # The 4-neighbour Laplacian has white-noise variance 20*sigma^2.
+            laplacian_var = max(0.0, raw_laplacian - 20.0 * noise_sigma ** 2)
             edge_ratio, _edges = ImageProcessor._edge_ratio(gray, q)
             grad_ratio, grad_extreme = ImageProcessor._motion_blur_flags(gray, q)
 
             debug_info["laplacian_var"] = laplacian_var
+            debug_info["laplacian_var_raw"] = raw_laplacian
+            debug_info["noise_sigma"] = noise_sigma
+            debug_info["analysis_width"] = gray.shape[1]
+            debug_info["analysis_height"] = gray.shape[0]
+            debug_info["quality_metrics_version"] = "reference-scale-v2"
             debug_info["gradient_ratio"] = grad_ratio
             debug_info["edge_ratio"] = edge_ratio
 
-            expo = ImageProcessor._exposure_percentile_scores(gray, q)
+            exposure_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+            expo = ImageProcessor._exposure_percentile_scores(exposure_gray, q)
             debug_info.update(expo)
+            debug_info["channel_clip_frac"] = {
+                channel: float(np.mean(img_bgr[:, :, i] >= 254))
+                for i, channel in enumerate(("blue", "green", "red"))
+            }
 
-            contrast = float(gray.std())
+            contrast = float(exposure_gray.std())
             debug_info["contrast"] = contrast
-            mean_brightness = float(gray.mean())
+            mean_brightness = float(exposure_gray.mean())
             debug_info["brightness"] = mean_brightness
 
-            blank, blank_reason = ImageProcessor._is_blank_or_extreme(gray, q)
+            blank, blank_reason = ImageProcessor._is_blank_or_extreme(exposure_gray, q)
             near_black_escape: str | None = None
             if blank:
                 if blank_reason == "Near-black frame":
@@ -455,7 +493,7 @@ class ImageProcessor:
                         )
 
                         dark_esc = try_dark_ev_structure_escape(
-                            gray=gray,
+                            gray=exposure_gray,
                             expo=expo,
                             edge_ratio=edge_ratio,
                             cfg=merge_salvage_config(q),
@@ -589,7 +627,7 @@ class ImageProcessor:
 
                 salvage_cfg = merge_salvage_config(q)
                 salvage = evaluate_underexposure_salvage(
-                    gray=gray,
+                    gray=exposure_gray,
                     penalties=penalties,
                     expo=expo,
                     edge_ratio=edge_ratio,
@@ -618,7 +656,7 @@ class ImageProcessor:
         gray: Optional[np.ndarray] = None,
     ) -> float:
         """
-        Stage 2 快速审美 proxy（0–100）：饱和度 + 对比 + 构图启发，不做硬拒。
+        Stage 2 candidate priority (0–100), independent of color saturation.
 
         与 Stage1 解耦阈值：失败时返回中性分并打日志，避免吞异常返回魔法常数。
         """
@@ -631,21 +669,11 @@ class ImageProcessor:
             if gray is None:
                 gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
 
-            hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
-            saturation = float(hsv[:, :, 1].mean())
-            color_vibrancy = saturation / 255.0 * 100.0
-
-            # 分位对比度比 raw std 更稳（抗极端高光像素）
+            # A broad viability plateau keeps haze/low-key/monochrome candidates.
+            # Bright-centroid placement is diagnostic only, never an admission bonus.
             p5, p95 = (float(x) for x in np.percentile(gray, [5, 95]))
             spread = max(0.0, p95 - p5)
-            technical_score = min(100.0, spread * 0.45)
-
-            comp = ImageProcessor.assess_composition(image_path, gray=gray, img_bgr=img_bgr)
-
-            fast_score = min(
-                100.0,
-                technical_score * 0.34 + color_vibrancy * 0.36 + comp * 0.22 + 10.0,
-            )
+            fast_score = 50.0 + 30.0 * min(1.0, spread / 40.0)
             return float(max(5.0, fast_score))
         except Exception as e:
             logger.warning("fast_aesthetic_assessment failed for %s: %s", image_path, e)

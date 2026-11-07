@@ -530,7 +530,7 @@ function LabInfoPanel({
 
         <div className="mt-3">
           <p className="text-[22px] font-extralight tabular-nums leading-none tracking-tight text-white/88">
-            {scoreText(item.overall_score)}
+            {item.score_status === "unscored" ? "待评分" : item.score_status === "rejected" ? "未通过初筛" : scoreText(item.overall_score)}
           </p>
           <p className="mt-1 text-[9px] font-light tabular-nums tracking-wide text-white/32">
             E {scoreText(item.energy)} · T {scoreText(item.technical)} · C {scoreText(item.composition)}

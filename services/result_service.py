@@ -246,12 +246,19 @@ def _read_live_audit_rows_cached(base_dir: str) -> list[dict]:
             "editing_suggestions",
             "semantic_gate",
             "stage3_meta",
+            "score_status",
+            "score_source",
+            "candidate_priority",
+            "stage3_result",
+            "full_analysis",
+            "editing_adjustments",
             "orientation",
             "width",
             "height",
         ):
             if entry.get(field) is not None:
                 row[field] = entry[field]
+        normalize_scores(row)
         latest[name] = row
 
     rows = list(latest.values())
@@ -316,12 +323,21 @@ def _f(x, default=0.0):
         return default
 
 
+def _is_unscored(entry: dict) -> bool:
+    outcome = (entry.get("stage3_meta") or {}).get("outcome", "")
+    return entry.get("score_status") == "unscored" or entry.get("analysis_pending") is True or outcome in {
+        "skipped_stage3_gating", "skipped_near_duplicate", "vlm_error", "fallback_defaults",
+    }
+
+
 def _sort_metric(entry: dict, sort: str) -> float:
     """Sort key aligned with normalize_scores (+ laplacian) without mutating the row."""
     scores = entry.get("scores") or {}
     if sort == "laplacian":
         return float(scores.get("laplacian", 0) or 0)
     if sort == "overall":
+        if _is_unscored(entry) or entry.get("score_status") == "rejected":
+            return -1.0
         overall = entry.get("overall_score", scores.get("overall"))
         return max(0.0, min(100.0, _f(overall, 0.0)))
     if sort == "energy":
@@ -347,6 +363,11 @@ def normalize_scores(entry: dict) -> dict:
     entry["composition"] = _f(scores.get("composition", entry.get("composition", 0)))
     overall = entry.get("overall_score", scores.get("overall"))
     entry["overall_score"] = max(0.0, min(100.0, _f(overall, 0.0)))
+    if _is_unscored(entry):
+        entry["score_status"] = "unscored"
+        entry["category"] = "unscored"
+        entry["overall_score"] = 0.0
+        entry["scores"] = {**scores, "overall": 0.0}
     return entry
 
 
@@ -658,4 +679,6 @@ def _compact_member(row: dict, base_dir: str) -> dict:
         "before_path_quoted": entry.get("before_path_quoted", ""),
         "overall_score": entry.get("overall_score", 0.0),
         "category": entry.get("category"),
+        "score_status": entry.get("score_status"),
+        "score_source": entry.get("score_source"),
     }

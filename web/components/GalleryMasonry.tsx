@@ -66,8 +66,8 @@ function sortKeyForTiebreak(item: GalleryItem): string {
 
 function sortItemsByScoreDesc(items: GalleryItem[]): GalleryItem[] {
   return [...items].sort((a, b) => {
-    const sa = Number(a.overall_score ?? 0);
-    const sb = Number(b.overall_score ?? 0);
+    const sa = (a.score_status === "unscored" || a.score_status === "rejected") ? -1 : Number(a.overall_score ?? 0);
+    const sb = (b.score_status === "unscored" || b.score_status === "rejected") ? -1 : Number(b.overall_score ?? 0);
     if (sb !== sa) return sb - sa;
     return sortKeyForTiebreak(a).localeCompare(sortKeyForTiebreak(b), "en");
   });
@@ -148,6 +148,7 @@ export function GalleryMasonry({
     const checked = selectedKeys.has(itemKey);
     const agentHighlighted = agentHighlightedKeys?.has(itemKey) ?? false;
     const score = Number(item.overall_score ?? 0);
+    const scoreLabel = item.score_status === "unscored" ? "待评分" : item.score_status === "rejected" ? "未通过初筛" : score.toFixed(1);
     const measured = measuredByKey.get(reactKey) ?? null;
     const orient = displayOrientation(item, measured);
     const members = item.group_members ?? [];
@@ -167,7 +168,7 @@ export function GalleryMasonry({
       >
         <button
           type="button"
-          aria-label={`打开预览：${item.file ?? "photo"}，评分 ${score.toFixed(1)}`}
+          aria-label={`打开预览：${item.file ?? "photo"}，评分 ${scoreLabel}`}
           className="gallery-tile-button relative block w-full border-0 bg-transparent p-0 text-left [&:focus-visible]:outline-none [&:focus-visible]:ring-1 [&:focus-visible]:ring-inset [&:focus-visible]:ring-white/25"
           onClick={() => onOpenLab(item)}
         >
@@ -184,9 +185,9 @@ export function GalleryMasonry({
               </p>
               <span
                 className="shrink-0 font-mono text-[10px] font-normal tabular-nums tracking-[0.12em] text-white/50"
-                title={`SCORE ${score.toFixed(1)}`}
+                title={`SCORE ${scoreLabel}`}
               >
-                {score.toFixed(1)}
+                {scoreLabel}
               </span>
             </div>
           </div>
@@ -239,12 +240,13 @@ export function GalleryMasonry({
             {members.map((m, mi) => {
               const msrc = buildGalleryPlainImageUrl(apiBase, m as GalleryItem);
               const mscore = Number(m.overall_score ?? 0);
+              const memberLabel = m.score_status === "unscored" ? "待评分" : m.score_status === "rejected" ? "未通过初筛" : mscore.toFixed(1);
               return (
                 <button
                   key={`${reactKey}\0m${mi}\0${m.file ?? m.path ?? mi}`}
                   type="button"
-                  aria-label={`打开同款：${m.file ?? "photo"}，评分 ${mscore.toFixed(1)}`}
-                  title={`${m.file ?? ""} · ${mscore.toFixed(1)}`}
+                  aria-label={`打开同款：${m.file ?? "photo"}，评分 ${memberLabel}`}
+                  title={`${m.file ?? ""} · ${memberLabel}`}
                   className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-[2px] border-0 bg-white/[0.03] p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
                   onClick={(e) => {
                     e.preventDefault();

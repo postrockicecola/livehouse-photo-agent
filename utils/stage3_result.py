@@ -49,7 +49,7 @@ def fast_confidence(*, inference_degraded: bool) -> float:
 
 def full_confidence(*, inference_degraded: bool, used_fallback_defaults: bool) -> float:
     if used_fallback_defaults:
-        return 0.72
+        return 0.0
     if inference_degraded:
         return 0.84
     return 0.92

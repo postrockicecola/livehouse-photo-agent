@@ -117,6 +117,12 @@ def build_analysis_results(
                     "laplacian": laplacian,
                 },
             }
+            for field in ("score_source", "score_status", "candidate_priority", "stage3_meta",
+                          "stage3_result", "full_analysis", "editing_adjustments"):
+                if audit_entry.get(field) is not None:
+                    row[field] = audit_entry[field]
+            if row.get("score_status") == "unscored":
+                row["category"] = "unscored"
             try:
                 ph = int(dbg.get("phash") or 0)
                 if ph:

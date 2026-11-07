@@ -1,4 +1,4 @@
-"""Stage 2 pre-gates (cheap CV) and near-duplicate suppression (perceptual pHash).
+"""Stage 2 pre-gates (cheap CV) and identical-content suppression.
 
 Livehouse policy: hard-reject only empty / unstructured severe blur / extreme blowout.
 Ambiguous concert frames (motion blur, backlight crush, no frontal face, haze, crowd
@@ -7,6 +7,7 @@ energy) pass with ``ambiguous_tags`` so Stage3 admission can reserve VLM slots.
 from __future__ import annotations
 
 import logging
+import hashlib
 import threading
 from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -18,6 +19,7 @@ from PIL import Image
 import imagehash
 
 from engine.operators.image_processor import ImageProcessor
+from utils.config_loader import ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +52,9 @@ def _get_face_cascade() -> Optional[cv2.CascadeClassifier]:
     global _face_cascade, _face_cascade_init_attempted
     if not _face_cascade_init_attempted:
         _face_cascade_init_attempted = True
+        if not hasattr(cv2, "CascadeClassifier") or not hasattr(cv2, "data"):
+            logger.warning("Haar cascade unavailable; face filter disabled")
+            return None
         path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         cc = cv2.CascadeClassifier(path)
         if cc.empty():
@@ -76,8 +81,8 @@ def image_dhash_int(img_bgr: np.ndarray) -> int:
 
 def image_phash_int(img_bgr: np.ndarray) -> int:
     """
-    64-bit perceptual hash (``imagehash.phash``); used for Stage3 VLM dedup / debug_info.phash.
-    Packing order matches flattened ``ImageHash.hash`` for Hamming XOR with cached entries.
+    64-bit perceptual hash (``imagehash.phash``); used for gallery grouping / debug_info.phash.
+    Packing order matches flattened ``ImageHash.hash`` for Hamming XOR when grouping images.
     """
     if img_bgr is None or img_bgr.size == 0:
         return 0
@@ -221,6 +226,15 @@ def assess_stage2_per_image(
         fs = ImageProcessor.fast_aesthetic_assessment(str(image_path), img_bgr=img_bgr)
         ph = image_phash_int(img_bgr) if want_phash else 0
         dbg_x["phash"] = ph
+        content = hashlib.sha256(str(img_bgr.shape).encode())
+        content.update(memoryview(np.ascontiguousarray(img_bgr)))
+        dbg_x["content_digest"] = content.hexdigest()
+
+        q = ConfigLoader.get_quality_thresholds(config)
+        analysis_bgr = ImageProcessor.analysis_bgr(img_bgr, q)
+        gray = cv2.cvtColor(analysis_bgr, cv2.COLOR_BGR2GRAY)
+        dbg_x["brightness"] = float(gray.mean())
+        dbg_x["saturation"] = float(cv2.cvtColor(analysis_bgr, cv2.COLOR_BGR2HSV)[:, :, 1].mean())
 
         if not enabled:
             return Stage2ImageResult(
@@ -231,19 +245,27 @@ def assess_stage2_per_image(
                 debug_extra=dbg_x,
             )
 
-        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
         bt = str(debug_info.get("blur_type") or "")
         edges = float(debug_info.get("edge_ratio", 0.0) or 0.0)
         contrast = float(debug_info.get("contrast", 0.0) or 0.0)
 
-        lv = float(ImageProcessor._laplacian_var(gray))
+        lv = debug_info.get("laplacian_var") if debug_info.get("quality_metrics_version") == "reference-scale-v2" else None
+        if lv is None:
+            noise_sigma = ImageProcessor._noise_sigma(gray)
+            lv = max(0.0, ImageProcessor._laplacian_var(gray) - 20.0 * noise_sigma ** 2)
+        lv = float(lv)
         dbg_x["stage2_laplacian_var"] = lv
 
         # Soft blur band (default) vs hard unstructured floor.
         soft_lap = float(pf.get("laplacian_var_min", 40.0) or 0.0)
         hard_lap = float(pf.get("laplacian_var_hard_min", 18.0) or 0.0)
         if hard_lap > 0.0 and lv < hard_lap:
-            if _structured_motion_escape(bt, edges):
+            if (
+                _structured_motion_escape(bt, edges)
+                or edges >= 0.0012
+                or debug_info.get("underexposure_salvage")
+                or debug_info.get("stage1_severe_blur_escape")
+            ):
                 ambiguous.append("soft_blur_structured")
             else:
                 ok = False
@@ -265,7 +287,8 @@ def assess_stage2_per_image(
 
         # Extreme blowout remains a hard reject; mild crush/blowout → ambiguous.
         hard_hf = pf.get("hard_highlight_frac")
-        if ok and hard_hf is not None and hf > float(hard_hf):
+        white_clip = float(debug_info.get("white_clip_frac", hf) or 0.0)
+        if ok and hard_hf is not None and white_clip > float(hard_hf):
             ok = False
             pre_reason = "stage2_extreme_overexposure"
         else:
@@ -383,14 +406,13 @@ def dedupe_eligible_rows_by_phash(
     config: Mapping[str, Any],
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], Dict[str, Any]]:
     """
-    Greedy near-duplicate suppression: process rows best-first (Stage2 norm), keep up to
-    ``keep_per_cluster`` images within ``max_hamming`` of a cluster representative.
+    Suppress only identical decoded pixels. pHash remains available for grouping after
+    VLM scoring; a similar burst frame can contain the best expression or gesture.
     """
     s = phash_dedup_settings(config)
     if not rows or not bool(s.get("enabled", False)):
         return [dict(r) for r in rows], [], {"enabled": False, "before": len(rows), "after": len(rows)}
 
-    max_h = int(s.get("max_hamming", 10) or 10)
     kpc = max(1, int(s.get("keep_per_cluster", 2) or 1))
 
     scored: List[Tuple[float, Dict[str, Any]]] = []
@@ -402,34 +424,26 @@ def dedupe_eligible_rows_by_phash(
         scored.append((n, d))
     scored.sort(key=lambda x: -x[0])
 
-    clusters: List[Dict[str, Any]] = []
+    clusters: Dict[str, int] = {}
     kept: List[Dict[str, Any]] = []
     removed: List[Dict[str, Any]] = []
 
     for _norm, r in scored:
-        ph = int(r.get("phash", 0) or 0)
-        found = -1
-        for i, c in enumerate(clusters):
-            if hamming_64(ph, int(c["hash"])) <= max_h:
-                found = i
-                break
-        if found < 0:
-            clusters.append({"hash": ph, "count": 1})
+        digest = str((r.get("debug_info") or {}).get("content_digest") or "")
+        if not digest:
+            kept.append(r)
+        elif clusters.get(digest, 0) < kpc:
+            clusters[digest] = clusters.get(digest, 0) + 1
             kept.append(r)
         else:
-            c = clusters[found]
-            if int(c["count"]) < kpc:
-                c["count"] += 1
-                kept.append(r)
-            else:
-                removed.append(r)
+            removed.append(r)
 
     diag = {
         "enabled": True,
         "before": len(rows),
         "after": len(kept),
         "removed_near_dup": len(removed),
-        "max_hamming": max_h,
+        "method": "content_digest",
         "keep_per_cluster": kpc,
     }
     return kept, removed, diag

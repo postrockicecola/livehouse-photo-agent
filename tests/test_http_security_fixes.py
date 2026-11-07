@@ -69,7 +69,7 @@ def test_stage3_cache_evicts_at_max_entries():
 
     cache = Stage3PHashCache(max_hamming=0, max_entries=3)
     for i in range(5):
-        cache.store_result(i + 1, {"score": float(i), "stage3_meta": {"outcome": "ok"}})
+        cache.store_result(f"{i + 1:064x}", {"score": float(i), "stage3_meta": {"outcome": "ok"}})
     assert cache.metrics_dict()["stage3_vlm_cache_entries"] == 3
     assert cache.metrics_dict()["stage3_vlm_cache_evictions"] >= 2
 
