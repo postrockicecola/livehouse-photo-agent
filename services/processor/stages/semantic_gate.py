@@ -21,6 +21,11 @@ _SUBJECTIVE_TYPES = frozenset(
     {"closed_eyes", "missed_moment", "bad_expression", "invalid_pose", "other"}
 )
 
+# Objective "subject is blocked" defects that justify a deterministic score penalty.
+# Subjective types (expression/timing) are intentionally excluded so intentional
+# silhouettes and readable motion blur are never penalized here.
+OCCLUSION_PENALTY_TYPES = frozenset({"heavy_occlusion", "no_clear_subject"})
+
 
 def _coerce_bool(value: Any) -> bool:
     if isinstance(value, bool):
@@ -150,3 +155,75 @@ def apply_semantic_gate_policy(
             tags.append(marker)
     out["tags"] = tags
     return out
+
+
+_DEFAULT_OCCLUSION_SEVERITY_WEIGHTS = {1: 0.15, 2: 0.55, 3: 1.00}
+
+
+def occlusion_penalty_settings(config: Mapping[str, Any]) -> dict[str, Any]:
+    raw = ((config.get("stage3") or {}).get("occlusion_penalty") or {})
+    weights_raw = raw.get("severity_weights")
+    weights: dict[int, float] = dict(_DEFAULT_OCCLUSION_SEVERITY_WEIGHTS)
+    if isinstance(weights_raw, Mapping):
+        parsed: dict[int, float] = {}
+        for k, v in weights_raw.items():
+            try:
+                parsed[int(k)] = float(v)
+            except (TypeError, ValueError):
+                continue
+        if parsed:
+            weights = parsed
+    return {
+        "enabled": bool(raw.get("enabled", True)),
+        "max_penalty": float(raw.get("max_penalty", 45.0)),
+        "min_confidence": float(raw.get("min_confidence", 0.50)),
+        "severity_weights": weights,
+    }
+
+
+def occlusion_score_penalty(
+    observation: Any,
+    config: Mapping[str, Any],
+) -> tuple[float, dict[str, Any]]:
+    """Graduated, deterministic penalty for occluded frames from the model's
+    ``semantic_gate`` observation. Returns ``(penalty_points, meta)``.
+
+    Keys off objective occlusion types only (mic/hand/head/instrument/gear blocking
+    the subject). Penalty scales with severity (0-3) and confidence; a confidence
+    floor avoids penalizing tentative reports. Works for fast-only frames (no 8-dim
+    rubric) because it reads the observation, not the dimensions.
+    """
+    settings = occlusion_penalty_settings(config)
+    meta: dict[str, Any] = {
+        "applied": False,
+        "penalty": 0.0,
+        "severity": 0,
+        "confidence": 0.0,
+        "types": [],
+        "policy_version": "occlusion_penalty.v1",
+    }
+    if not settings["enabled"]:
+        return 0.0, meta
+    norm = sanitize_semantic_observation(observation)
+    if norm is None or not norm["is_present"]:
+        return 0.0, meta
+    matched = [t for t in norm["types"] if t in OCCLUSION_PENALTY_TYPES]
+    if not matched:
+        return 0.0, meta
+
+    severity = int(norm["severity"])
+    confidence = float(norm["confidence"])
+    min_conf = settings["min_confidence"]
+    meta.update({"severity": severity, "confidence": round(confidence, 4), "types": matched})
+
+    sw = float(settings["severity_weights"].get(severity, 0.0))
+    if sw <= 0.0 or confidence < min_conf:
+        return 0.0, meta
+    denom = max(1e-6, 1.0 - min_conf)
+    cf = max(0.0, min(1.0, (confidence - min_conf) / denom))
+    penalty = round(float(settings["max_penalty"]) * sw * cf, 2)
+    if penalty <= 0.0:
+        return 0.0, meta
+    meta["applied"] = True
+    meta["penalty"] = penalty
+    return penalty, meta

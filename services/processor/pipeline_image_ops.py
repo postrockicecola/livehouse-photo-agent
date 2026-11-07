@@ -25,7 +25,10 @@ from utils.stage3_result import (
 )
 from engine.operators.image_processor import ImageProcessor
 from engine.operators.stage2_prefilter import row_ambiguous_tags
-from services.processor.stages.semantic_gate import apply_semantic_gate_policy
+from services.processor.stages.semantic_gate import (
+    apply_semantic_gate_policy,
+    occlusion_score_penalty,
+)
 
 # Stage3 admission presets when ``processing.pipeline_mode`` is set (fast | balanced | strict).
 # Omit ``pipeline_mode`` in YAML to keep using ``stage3_gating`` thresholds only (legacy).
@@ -780,7 +783,16 @@ def merge_vlm_and_technical_scores(
     ai_part = float(out["score"])
     final_score = ai_part * ai_weight + float(tech_score) * technical_weight
     final_score = max(0.0, min(100.0, final_score))
+    # Graduated occlusion downrank from the model's semantic_gate observation. Applied
+    # once here so fast / full / cache-hit paths all get it (cache stores the unblended
+    # score and re-merges on hit). Recorded in stage3_meta for audit.
+    occ_penalty, occ_meta = occlusion_score_penalty(out.get("semantic_gate"), config)
+    if occ_penalty > 0.0:
+        final_score = max(0.0, final_score - occ_penalty)
     out["score"] = round(final_score, 1)
+    stage3_meta = dict(out.get("stage3_meta") or {})
+    stage3_meta["occlusion_penalty"] = occ_meta
+    out["stage3_meta"] = stage3_meta
     apply_blended_score_to_stage3_result(out, float(out["score"]))
     out["debug_info"] = debug_info
     assert_stage3_result_consistent(out)

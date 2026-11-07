@@ -6,6 +6,7 @@ from services.processor.pipeline_image_ops import append_aesthetic_audit_line
 from services.processor.stages.semantic_gate import (
     apply_semantic_gate_policy,
     evaluate_semantic_gate,
+    occlusion_score_penalty,
     sanitize_semantic_observation,
 )
 
@@ -190,3 +191,55 @@ def test_hard_mode_routes_high_score_semantic_reject_to_trash(tmp_path) -> None:
     assert row["stage3_meta"]["provider"] == "openai"
     assert row["stage3_meta"]["model"] == "qwen3-vl-plus"
     assert "semantic_reject" in row["tags"]
+
+
+# --- occlusion penalty -------------------------------------------------------
+
+def _occ_config(**overrides) -> dict:
+    block = {"enabled": True, "max_penalty": 45.0, "min_confidence": 0.50,
+             "severity_weights": {1: 0.15, 2: 0.55, 3: 1.00}}
+    block.update(overrides)
+    return {"stage3": {"occlusion_penalty": block}}
+
+
+def _occ_obs(defect_type: str, severity: int, confidence: float) -> dict:
+    return {"is_present": True, "types": [defect_type], "severity": severity,
+            "confidence": confidence, "evidence": "subject blocked"}
+
+
+def test_occlusion_penalty_severity_confidence_matrix() -> None:
+    cfg = _occ_config()
+    cases = {
+        ("heavy_occlusion", 3, 1.0): 45.0,
+        ("heavy_occlusion", 3, 0.8): 27.0,
+        ("heavy_occlusion", 2, 0.8): 14.85,
+        ("heavy_occlusion", 1, 0.55): 0.68,
+        ("no_clear_subject", 3, 0.9): 36.0,
+    }
+    for (t, s, c), expected in cases.items():
+        penalty, meta = occlusion_score_penalty(_occ_obs(t, s, c), cfg)
+        assert penalty == expected, (t, s, c, penalty)
+        assert meta["applied"] is True
+        assert meta["penalty"] == expected
+
+
+def test_occlusion_penalty_floors_and_gating() -> None:
+    cfg = _occ_config()
+    # Below confidence floor → no penalty.
+    assert occlusion_score_penalty(_occ_obs("heavy_occlusion", 1, 0.49), cfg)[0] == 0.0
+    # Severity 0 → no weight → no penalty.
+    assert occlusion_score_penalty(_occ_obs("heavy_occlusion", 0, 0.9), cfg)[0] == 0.0
+    # Subjective-only defect type is never penalized here.
+    p, meta = occlusion_score_penalty(_occ_obs("closed_eyes", 3, 0.9), cfg)
+    assert p == 0.0 and meta["applied"] is False
+    # Not present / missing observation → no penalty.
+    assert occlusion_score_penalty(
+        {"is_present": False, "types": ["heavy_occlusion"], "severity": 3, "confidence": 1.0}, cfg
+    )[0] == 0.0
+    assert occlusion_score_penalty(None, cfg)[0] == 0.0
+
+
+def test_occlusion_penalty_disabled_knob() -> None:
+    cfg = _occ_config(enabled=False)
+    p, meta = occlusion_score_penalty(_occ_obs("heavy_occlusion", 3, 1.0), cfg)
+    assert p == 0.0 and meta["applied"] is False

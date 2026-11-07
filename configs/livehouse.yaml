@@ -370,6 +370,22 @@ stage3:
     subjective_min_severity: 3
     subjective_min_confidence: 0.90
 
+  # Graduated, deterministic downrank for occluded frames (mic stand / hand / head /
+  # instrument / stage gear blocking the subject). Keys off the semantic_gate
+  # observation and is applied once in merge_vlm_and_technical_scores, so it works for
+  # fast-only frames too (which have no 8-dim rubric). Independent of semantic_gate
+  # above (which stays "off"). penalty = max_penalty * severity_weight * confidence_ramp,
+  # subtracted from the final blended score. At max_penalty 45: sev3/conf0.8 → −27
+  # (a 90 drops to 63, below Selected 70); sev1 ≈ 0. Lower max_penalty to soften.
+  occlusion_penalty:
+    enabled: true
+    max_penalty: 45.0                # points subtracted at severity 3, confidence 1.0
+    min_confidence: 0.50             # below this, no penalty (tentative reports ignored)
+    severity_weights:
+      1: 0.15
+      2: 0.55
+      3: 1.00
+
 # Stage4: optional follow-up VLM for Lightroom/Photoshop editing_suggestions (after full Stage3 rubric).
 stage4_editing:
   enabled: true

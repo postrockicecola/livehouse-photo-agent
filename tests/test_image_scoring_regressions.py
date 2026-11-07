@@ -20,6 +20,7 @@ from services.processor.pipeline_image_ops import (
     append_aesthetic_audit_line, apply_stage3_candidates_gating,
     fake_result_stage1_reject, fake_result_stage2_reject,
     fake_result_stage3_gated_skip, finalize_stage3_dual_result,
+    merge_vlm_and_technical_scores,
 )
 from services.processor.reporting.gallery_integration import build_analysis_results
 from services.processor.stages.deep_analysis import (
@@ -327,3 +328,51 @@ def test_candidate_diversity_reserve_budget_and_determinism():
     assert apply_stage3_candidates_gating(rows, config=cfg)[0] == []
     cfg["processing"]["score_all_images"] = True
     assert len(apply_stage3_candidates_gating(rows, config=cfg)[0]) == len(rows)
+
+
+# --- occlusion penalty integration (fast / cache-hit / clean) -----------------
+
+def _occluded_fast_result(score: float, severity: int, confidence: float):
+    import copy
+    return copy.deepcopy({
+        "score": score,
+        "fast_ai_score": score,
+        "verdict": "ok",
+        "semantic_gate": {
+            "is_present": True,
+            "types": ["heavy_occlusion"],
+            "severity": severity,
+            "confidence": confidence,
+            "evidence": "mic stand blocks face",
+        },
+    })
+
+
+def test_merge_applies_occlusion_penalty_fast_result():
+    cfg = config()
+    merged = merge_vlm_and_technical_scores(
+        cfg, _occluded_fast_result(90.0, 3, 0.9), 90.0, {}
+    )
+    # blend 90*0.8+90*0.2=90; penalty 45*1.0*((0.9-0.5)/0.5)=36 -> 54
+    assert merged["score"] == 54.0
+    assert merged["score"] < 70  # drops out of the Selected collection
+    assert merged["stage3_meta"]["occlusion_penalty"]["applied"] is True
+    assert merged["stage3_meta"]["occlusion_penalty"]["penalty"] == 36.0
+
+
+def test_merge_cache_hit_blends_penalty_once():
+    cfg = config()
+    first = merge_vlm_and_technical_scores(cfg, _occluded_fast_result(90.0, 3, 0.9), 90.0, {})
+    # Fresh unblended result (as the cache stores it) → re-merge must match exactly.
+    second = merge_vlm_and_technical_scores(cfg, _occluded_fast_result(90.0, 3, 0.9), 90.0, {})
+    assert first["score"] == second["score"] == 54.0
+
+
+def test_merge_no_penalty_for_clean_frame():
+    cfg = config()
+    clean = {"score": 90.0, "fast_ai_score": 90.0, "verdict": "ok",
+             "semantic_gate": {"is_present": False, "types": [], "severity": 0,
+                               "confidence": 0.9, "evidence": ""}}
+    merged = merge_vlm_and_technical_scores(cfg, clean, 90.0, {})
+    assert merged["score"] == 90.0
+    assert merged["stage3_meta"]["occlusion_penalty"]["applied"] is False
