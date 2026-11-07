@@ -156,7 +156,7 @@ export default function HomePage() {
   );
   /** Per-file JPEG export intent from Lab strip（未设置时服务端仍对预览走默认胶片导出）. */
   const [exportByFile, setExportByFile] = useState<Record<string, GalleryExportItem>>({});
-  const [busy, setBusy] = useState<"export" | "enhance" | null>(null);
+  const [busy, setBusy] = useState<"export" | "enhance" | "lifestyle" | null>(null);
   const [actionMsg, setActionMsg] = useState<string>("");
   const [galleryBasePath, setGalleryBasePath] = useState<string | null>(null);
   const [queueBacklog, setQueueBacklog] = useState<QueueBacklogLite | null>(null);
@@ -235,9 +235,14 @@ export default function HomePage() {
   /** Single-photo scope attached to the current Agent vibe turn. */
   const vibePreviewFocusRef = useRef<string | null>(null);
   /** Last observed gallery totals for mid-job progressive refresh. */
-  const galleryPollTotalsRef = useRef<{ raw: number | null; count: number | null }>({
+  const galleryPollTotalsRef = useRef<{
+    raw: number | null;
+    count: number | null;
+    revision: number | null;
+  }>({
     raw: null,
     count: null,
+    revision: null,
   });
   const galleryPollRunningRef = useRef<boolean | null>(null);
   const [curationSaveState, setCurationSaveState] = useState<"idle" | "saving" | "saved" | "err">("idle");
@@ -310,6 +315,7 @@ export default function HomePage() {
         galleryPollTotalsRef.current = {
           raw: boot.totalRaw,
           count: boot.count,
+          revision: boot.resultsRevision,
         };
         setLoadSource(boot.loadSource);
         if (boot.activeBaseDir) {
@@ -364,12 +370,13 @@ export default function HomePage() {
           0,
           1,
           undefined,
-          galleryBurstDedupe,
+          false,
           gallerySort,
         );
         if (cancelled || !data) return;
         const raw = Number(data.total_raw ?? data.count ?? 0);
         const count = Number(data.count ?? 0);
+        const revision = Number(data.results_revision ?? 0);
         const running = Boolean(data.analysis_running);
         const prev = galleryPollTotalsRef.current;
         const wasRunning = galleryPollRunningRef.current;
@@ -377,13 +384,19 @@ export default function HomePage() {
           (prev.raw != null && raw > prev.raw) ||
           (prev.count != null && count > prev.count) ||
           ((prev.raw == null || prev.raw === 0) && raw > 0);
-        galleryPollTotalsRef.current = { raw, count };
+        const scoresChanged =
+          prev.revision != null && revision > 0 && revision !== prev.revision;
+        galleryPollTotalsRef.current = { raw, count, revision };
         galleryPollRunningRef.current = running;
         setAnalysisRunning(running);
         setEffectiveGallerySort(data.effective_sort ?? "overall");
         const runStateChanged = wasRunning != null && wasRunning !== running;
         // Avoid reload loops when totals are unchanged after bootstrap.
-        if ((grew && (prev.raw !== raw || prev.count !== count)) || runStateChanged) {
+        if (
+          (grew && (prev.raw !== raw || prev.count !== count)) ||
+          scoresChanged ||
+          runStateChanged
+        ) {
           setActionMsg(
             running
               ? `会话进行中：已发现 ${raw} 张预览，正在刷新画廊…`
@@ -395,18 +408,23 @@ export default function HomePage() {
         /* ignore transient poll errors */
       }
     };
-    const deferId = globalThis.setTimeout(() => {
-      void tick();
-    }, 2500);
-    const intervalId = globalThis.setInterval(() => {
-      void tick();
-    }, 8_000);
+    const pollMs = analysisRunning ? 2_000 : 30_000;
+    let timerId: ReturnType<typeof setTimeout>;
+    const runAndSchedule = async () => {
+      await tick();
+      if (!cancelled) {
+        timerId = globalThis.setTimeout(runAndSchedule, pollMs);
+      }
+    };
+    timerId = globalThis.setTimeout(
+      runAndSchedule,
+      analysisRunning ? 2_500 : 15_000,
+    );
     return () => {
       cancelled = true;
-      clearTimeout(deferId);
-      clearInterval(intervalId);
+      clearTimeout(timerId);
     };
-  }, [API_BASE, galleryBurstDedupe, gallerySort]);
+  }, [API_BASE, analysisRunning, gallerySort]);
 
   useEffect(() => {
     if (!paginated || !hasMore) return;
@@ -1182,25 +1200,29 @@ export default function HomePage() {
     }
   };
 
-  const onRunEnhance = async () => {
+  const onRunEnhance = async (analysisMode: "livehouse" | "lifestyle") => {
     if (SHOWCASE) {
       setActionMsg("Showcase 只读：AI 强化需本地 gallery_server。");
       return;
     }
-    setBusy("enhance");
+    setBusy(analysisMode === "lifestyle" ? "lifestyle" : "enhance");
     setActionMsg("");
     try {
       const sourceDir = (galleryBasePath || "").trim();
-      const qs = sourceDir
-        ? `?${new URLSearchParams({ source_dir: sourceDir })}`
-        : "";
+      const qs = `?${new URLSearchParams({
+        ...(sourceDir ? { source_dir: sourceDir } : {}),
+        score_all_images: "true",
+        analysis_mode: analysisMode,
+      })}`;
       const res = await fetch(`${API_BASE}/api/tasks/analyze${qs}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.detail ?? "任务提交失败");
       const id = data.job_id ?? data.run_task_id ?? data.task_id;
       const already = data.status === "already_running";
       setActionMsg(
-        already ? `分析已在进行: job ${id}` : `AI 强化任务已提交: job ${id}`,
+        already
+          ? `分析已在进行: job ${id}`
+          : `${analysisMode === "lifestyle" ? "生活人物" : "演出"}全量评分已提交: job ${id}`,
       );
     } catch (e: unknown) {
       setActionMsg(`任务提交失败: ${e instanceof Error ? e.message : "unknown"}`);
@@ -1623,12 +1645,21 @@ export default function HomePage() {
             </button>
             <button
               type="button"
-              onClick={onRunEnhance}
+              onClick={() => void onRunEnhance("livehouse")}
               disabled={busy !== null || SHOWCASE}
               title={SHOWCASE ? "Showcase 只读：AI 强化不可用" : undefined}
               className="rounded-[2px] border border-white/[0.05] bg-transparent px-2 py-1 text-[11px] text-white/55 transition-colors duration-150 ease-out hover:bg-white/[0.03] hover:text-white/75 disabled:opacity-35"
             >
               {busy === "enhance" ? "提交中…" : "AI 强化"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void onRunEnhance("lifestyle")}
+              disabled={busy !== null || SHOWCASE}
+              title={SHOWCASE ? "Showcase 只读：生活人物评分不可用" : "每张图片使用生活人物摄影 rubric 进行 VLM 评分"}
+              className="rounded-[2px] border border-emerald-300/15 bg-emerald-300/[0.04] px-2 py-1 text-[11px] text-emerald-100/65 transition-colors duration-150 ease-out hover:bg-emerald-300/[0.08] hover:text-emerald-50 disabled:opacity-35"
+            >
+              {busy === "lifestyle" ? "提交中…" : "生活人物全量评分"}
             </button>
             <button
               type="button"

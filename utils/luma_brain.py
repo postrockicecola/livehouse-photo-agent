@@ -917,9 +917,17 @@ def analyze_path_job_payload(
     max_workers: int | None = None,
     enable_checkpoint: bool = True,
     force_full_rerun: bool = False,
+    score_all_images: bool = False,
+    analysis_mode: str = "livehouse",
 ) -> dict[str, Any]:
     """Canonical ANALYZE_PATH dict stored in ``jobs.payload_json`` (read by ``tasks.run_job``)."""
-    if force_full_rerun:
+    analysis_mode = str(analysis_mode or "livehouse").strip().lower()
+    if analysis_mode not in {"livehouse", "lifestyle"}:
+        raise ValueError(f"unsupported analysis_mode: {analysis_mode}")
+    if analysis_mode == "lifestyle":
+        score_all_images = True
+        enable_checkpoint = False
+    if force_full_rerun or score_all_images:
         enable_checkpoint = False
     return {
         "source_dir": source_dir,
@@ -927,6 +935,8 @@ def analyze_path_job_payload(
         "max_workers": max_workers,
         "enable_checkpoint": enable_checkpoint,
         "force_full_rerun": bool(force_full_rerun),
+        "score_all_images": bool(score_all_images),
+        "analysis_mode": analysis_mode,
     }
 
 
@@ -938,6 +948,8 @@ def create_analyze_path_job(
     max_workers: int | None = None,
     enable_checkpoint: bool = True,
     force_full_rerun: bool = False,
+    score_all_images: bool = False,
+    analysis_mode: str = "livehouse",
     trace_id: str | None = None,
     namespace: str | None = None,
     project_key: str | None = None,
@@ -949,6 +961,8 @@ def create_analyze_path_job(
         max_workers=max_workers,
         enable_checkpoint=enable_checkpoint,
         force_full_rerun=force_full_rerun,
+        score_all_images=score_all_images,
+        analysis_mode=analysis_mode,
     )
     return create_job(
         conn,

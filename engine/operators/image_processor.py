@@ -150,7 +150,7 @@ class ImageProcessor:
 
     @staticmethod
     def _read_bgr(image_path: Union[str, Path]) -> Tuple[Optional[np.ndarray], Optional[str]]:
-        """Load BGR uint8 once; supports unicode paths via imdecode."""
+        """Load BGR uint8 once; use Pillow fallback for HEIC/HEIF."""
         p = str(image_path)
         try:
             img = cv2.imread(p)
@@ -160,9 +160,14 @@ class ImageProcessor:
             img = cv2.imdecode(data, cv2.IMREAD_COLOR)
             if img is not None:
                 return img, None
+            if Path(p).suffix.lower() in {".heic", ".heif"}:
+                from services.jpeg_exif_orientation import open_display_ready_image
+
+                pil_rgb = open_display_ready_image(p).convert("RGB")
+                return cv2.cvtColor(np.asarray(pil_rgb), cv2.COLOR_RGB2BGR), None
             return None, "Unable to read image"
-        except OSError as e:
-            logger.warning("OpenCV read failed for %s: %s", p, e)
+        except (OSError, ValueError) as e:
+            logger.warning("Image read failed for %s: %s", p, e)
             return None, f"Read error: {e}"
 
     @staticmethod

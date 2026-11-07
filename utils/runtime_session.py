@@ -65,6 +65,9 @@ def iter_candidate_archive_roots(*, base_dir: str | Path) -> list[Path]:
     if ar is not None:
         add(ar)
 
+    # Analysis also accepts folders not named Previews; match the writer's layout.
+    add(base_path.parent.parent)
+
     try:
         from utils.luma_brain import brain_connect
 

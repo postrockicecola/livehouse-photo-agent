@@ -4,6 +4,7 @@ import json
 import importlib.util
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
@@ -208,6 +209,41 @@ class ResultServiceTests(unittest.TestCase):
                 inj_lay.assert_not_called()
                 inj_ori.assert_not_called()
 
+    def test_load_gallery_page_drops_duplicate_rotation_for_upright_pixels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            previews = Path(tmp)
+            from PIL import Image
+
+            Image.new("RGB", (10, 20), (40, 40, 40)).save(previews / "upright.jpg", "JPEG")
+            Image.new("RGB", (20, 10), (40, 40, 40)).save(previews / "sensor.jpg", "JPEG")
+            rows = [
+                {
+                    "file": "upright.jpg",
+                    "path": "upright.jpg",
+                    "overall_score": 80,
+                    "orientation": "portrait",
+                    "rotate_degrees": -90,
+                },
+                {
+                    "file": "sensor.jpg",
+                    "path": "sensor.jpg",
+                    "overall_score": 70,
+                    "orientation": "portrait",
+                    "rotate_degrees": -90,
+                },
+            ]
+            (previews / "analysis_results.json").write_text(
+                json.dumps(rows),
+                encoding="utf-8",
+            )
+
+            sliced, *_ = load_gallery_page(
+                str(previews), "overall", 0, 10, lite=True, dedupe=False
+            )
+            by_name = {row["file"]: row for row in sliced}
+            self.assertNotIn("rotate_degrees", by_name["upright.jpg"])
+            self.assertEqual(by_name["sensor.jpg"]["rotate_degrees"], -90)
+
     def test_load_gallery_page_full_enrichment_when_lite_false(self):
         with tempfile.TemporaryDirectory() as tmp:
             previews = Path(tmp)
@@ -358,6 +394,45 @@ class ImageApiRouteTests(unittest.TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertEqual(resp.content, b"source-only")
             build_mock.assert_called_once()
+
+    def test_image_route_ignores_duplicate_quarter_turn_for_portrait_pixels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            from PIL import Image
+
+            tmp_path = Path(tmp)
+            src = tmp_path / "portrait.jpg"
+            cached = tmp_path / "cached.jpg"
+            Image.new("RGB", (10, 20), (40, 40, 40)).save(src, "JPEG")
+            cached.write_bytes(b"cached-bytes")
+
+            with patch("api.gallery_routes._runtime_base_dir", return_value=str(tmp_path)):
+                with patch(
+                    "api.gallery_routes.ImageService.build_cached_image",
+                    return_value=cached,
+                ) as build_mock:
+                    resp = self.client.get(
+                        "/image",
+                        params={"path": str(src), "rotate": -90, "auto_orient": 0},
+                    )
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(build_mock.call_args.kwargs["rotate"], 0)
+
+    def test_runtime_base_dir_serializes_concurrent_discovery(self):
+        from api import gallery_routes
+
+        with tempfile.TemporaryDirectory() as tmp:
+            gallery_routes._gallery_runtime_ttl_cache = None
+            with patch(
+                "api.gallery_routes._resolve_runtime_base_dir",
+                return_value=tmp,
+            ) as resolve_mock:
+                with ThreadPoolExecutor(max_workers=16) as pool:
+                    resolved = list(pool.map(lambda _: gallery_routes._runtime_base_dir(), range(32)))
+
+            self.assertEqual(resolved, [tmp] * 32)
+            resolve_mock.assert_called_once()
+            gallery_routes._gallery_runtime_ttl_cache = None
 
 
 if __name__ == "__main__":

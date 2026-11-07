@@ -20,6 +20,7 @@ from services.edit_adjustments import EditAdjustments
 AUTOMATED_VARIANT_ID = "film_automated"
 
 FILM_VARIANT_IDS: tuple[str, ...] = (
+    "film_default",
     "film_livehouse",
     "film_cinestill_800t",
     "film_cinestill_50d",
@@ -213,17 +214,28 @@ def resolve_film_sources_for_export(
     return out
 
 
-def load_rgb_u8(image_path: Path, *, raw_half_size: bool = False) -> np.ndarray:
+def load_rgb_u8(
+    image_path: Path,
+    *,
+    raw_half_size: bool = False,
+    preserve_raw_highlights: bool = False,
+) -> np.ndarray:
     ext = image_path.suffix.lower()
     if ext in _RAW_EXT:
         import rawpy  # type: ignore
 
         with rawpy.imread(str(image_path)) as raw:
+            raw_options: dict[str, object] = {}
+            if preserve_raw_highlights:
+                # LibRaw's default clips roughly the brightest 1%; concert
+                # spotlights often put a performer's face inside that region.
+                raw_options["auto_bright_thr"] = 0.001
             return raw.postprocess(
                 use_camera_wb=True,
                 no_auto_bright=False,
                 half_size=raw_half_size,
                 output_bps=8,
+                **raw_options,
             )
 
     from services.jpeg_exif_orientation import open_display_ready_image
@@ -243,6 +255,7 @@ def _apply_variant(
     from op_kernel import (
         apply_black_mist_film,
         apply_cinestill_800t,
+        apply_film_default,
         apply_film_cinestill_50d,
         apply_film_ektar_100,
         apply_film_fuji_400h,
@@ -288,6 +301,7 @@ def _apply_variant(
     )
 
     fn_map: dict[str, Callable[[np.ndarray], np.ndarray]] = {
+        "film_default": apply_film_default,
         "film_cinestill_800t": apply_cinestill_800t,
         "film_cinestill_50d": apply_film_cinestill_50d,
         "film_cold_v2": apply_livehouse_cold_film_v2,
@@ -406,6 +420,7 @@ def apply_grade_intensity(
 
 _STYLE_BRIGHTNESS_BIAS_EV: dict[str, float] = {
     # Preserve the intended mood while keeping all presets inside a common readability envelope.
+    "film_default": 0.18,
     "film_gold_200": -0.08,
     "film_expired_slide": -0.10,
     "film_wong_kar_wai": -0.08,
@@ -546,7 +561,11 @@ def render_film_to_cache(
         return out
 
     rgb = _downscale_rgb_for_film_work(
-        load_rgb_u8(src_path, raw_half_size=raw_half_size),
+        load_rgb_u8(
+            src_path,
+            raw_half_size=raw_half_size,
+            preserve_raw_highlights=variant_id == "film_default",
+        ),
         max_side,
         variant_id,
     )

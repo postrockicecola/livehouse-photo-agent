@@ -14,6 +14,7 @@ import os
 import shutil
 import subprocess
 import threading
+import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -44,13 +45,16 @@ from services.film_render_service import (
 )
 from services.edit_adjustments import EditAdjustments, parse_edit_adjustments_response
 from services.image_service import ImageService
+from services.jpeg_exif_orientation import rotation_needed_for_pixels
 from services.optical_params import OpticalConsoleParams, parse_optical_console
 from services.path_service import PathResolver
 from services.result_service import (
+    gallery_results_revision,
     load_gallery_page,
     read_orientation_degrees_from_raw,
 )
 from utils.http_security import require_ops_auth
+from utils.image_formats import SUPPORTED_IMAGE_SUFFIXES
 from utils.logging_context import new_trace_id
 from utils.luma_brain import brain_connect, create_analyze_path_job, get_job
 
@@ -73,12 +77,34 @@ _EMBEDDING_SLOTS = threading.BoundedSemaphore(
 
 # ``_runtime_base_dir`` is hot; cache until session ref or results JSON mtimes change.
 _gallery_active_dir_cache: tuple[tuple[str, float, float, float], str] | None = None
+_gallery_runtime_ttl_cache: tuple[float, str] | None = None
+_gallery_runtime_cache_lock = threading.Lock()
 
 
 def configure_gallery_routes(base_dir: str) -> None:
-    global BASE_DIR, _gallery_active_dir_cache
-    BASE_DIR = base_dir
+    global BASE_DIR
+    with _gallery_runtime_cache_lock:
+        BASE_DIR = base_dir
+        _clear_gallery_runtime_cache_unlocked()
+
+
+def _clear_gallery_runtime_cache_unlocked() -> None:
+    global _gallery_active_dir_cache, _gallery_runtime_ttl_cache
     _gallery_active_dir_cache = None
+    _gallery_runtime_ttl_cache = None
+
+
+def clear_gallery_runtime_cache() -> None:
+    with _gallery_runtime_cache_lock:
+        _clear_gallery_runtime_cache_unlocked()
+
+
+def _activate_analysis_directory(base_dir: str) -> None:
+    from utils.runtime_session import write_latest_session_pointer
+
+    if write_latest_session_pointer(base_dir) is None:
+        raise HTTPException(status_code=500, detail="failed to activate analysis directory")
+    configure_gallery_routes(base_dir)
 
 
 def _embedding_capacity():
@@ -283,23 +309,30 @@ def _analysis_results_has_entries(dir_path: str) -> bool:
 
 
 def _previews_dir_has_images(dir_path: str, *, limit: int = 32) -> bool:
-    """True if Previews (or classified subfolders) contain any JPEG/PNG preview files."""
+    """True if Previews (or classified subfolders) contain a supported image."""
     root = Path(dir_path)
     if not root.is_dir():
         return False
-    exts = {".jpg", ".jpeg", ".png"}
     checked = 0
     try:
         for child in root.iterdir():
             if checked >= limit:
                 break
             checked += 1
-            if child.is_file() and child.suffix.lower() in exts and not child.name.startswith("._"):
+            if (
+                child.is_file()
+                and child.suffix.lower() in SUPPORTED_IMAGE_SUFFIXES
+                and not child.name.startswith("._")
+            ):
                 return True
             if child.is_dir() and child.name.startswith(("AI_", "best", "keep", "trash")):
                 try:
                     for f in child.iterdir():
-                        if f.is_file() and f.suffix.lower() in exts and not f.name.startswith("._"):
+                        if (
+                            f.is_file()
+                            and f.suffix.lower() in SUPPORTED_IMAGE_SUFFIXES
+                            and not f.name.startswith("._")
+                        ):
                             return True
                 except OSError:
                     continue
@@ -308,7 +341,7 @@ def _previews_dir_has_images(dir_path: str, *, limit: int = 32) -> bool:
     return False
 
 
-def _runtime_base_dir() -> str:
+def _resolve_runtime_base_dir() -> str:
     """Resolve active Previews directory for JSON + ``/image``.
 
     **Override:** set env ``LIVEHOUSE_GALLERY_PREVIEWS_DIR`` to an absolute Previews path to
@@ -372,6 +405,28 @@ def _runtime_base_dir() -> str:
 
         logging.getLogger(__name__).exception("gallery runtime base dir resolve failed; using BASE_DIR")
     return base
+
+
+def _runtime_base_dir() -> str:
+    """Thread-safe hot-path cache around active-session discovery.
+
+    A Gallery page can issue dozens of image requests at once. Without this guard every
+    request scans runtime pointers and opens SQLite, exhausting Uvicorn concurrency while
+    SQLite serializes connection open/close.
+    """
+    global _gallery_runtime_ttl_cache
+    now = time.monotonic()
+    cached = _gallery_runtime_ttl_cache
+    if cached is not None and now - cached[0] < 1.0 and os.path.isdir(cached[1]):
+        return cached[1]
+    with _gallery_runtime_cache_lock:
+        now = time.monotonic()
+        cached = _gallery_runtime_ttl_cache
+        if cached is not None and now - cached[0] < 1.0 and os.path.isdir(cached[1]):
+            return cached[1]
+        resolved = _resolve_runtime_base_dir()
+        _gallery_runtime_ttl_cache = (now, resolved)
+        return resolved
 
 
 def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | None]:
@@ -589,6 +644,7 @@ def get_image(
     eff_rotate = rotate
     if rotate == 0 and auto_orient:
         eff_rotate = _auto_capture_rotation(img_path_abs)
+    eff_rotate = rotation_needed_for_pixels(img_path_abs, eff_rotate)
     image_service = ImageService(Path(_runtime_base_dir()))
     cached = image_service.build_cached_image(
         Path(img_path_abs), rotate=eff_rotate, max_side=max_side, ev=ev
@@ -665,7 +721,9 @@ def get_film_render(
 
     cache_root = runtime_dir(base_dir, create=True) / "film_render_cache"
     # Bust disk cache when a variant's grade changes (same variant id, new look).
-    if variant == "film_cold_v2":
+    if variant == "film_default":
+        lab_film_cache_extra = "defaultFilm5"
+    elif variant == "film_cold_v2":
         lab_film_cache_extra = "warmOrange7"
     elif variant == "film_cold_v4":
         lab_film_cache_extra = "cinemaClassic3"
@@ -690,6 +748,7 @@ def get_film_render(
     eff_rotate = rotate
     if rotate == 0:
         eff_rotate = _auto_capture_rotation(str(src_abs))
+    eff_rotate = rotation_needed_for_pixels(src_abs, eff_rotate)
     if not _FILM_RENDER_SLOTS.acquire(blocking=False):
         raise HTTPException(
             status_code=429,
@@ -1464,6 +1523,15 @@ def enqueue_analysis(
     source_dir: str | None = Query(default=None),
     max_workers: int | None = Query(default=None),
     enable_checkpoint: bool = Query(default=True),
+    score_all_images: bool = Query(
+        default=False,
+        description="Bypass Stage1/2/dedupe admission so every discovered image reaches remote Stage3.",
+    ),
+    analysis_mode: str = Query(
+        default="livehouse",
+        pattern="^(livehouse|lifestyle)$",
+        description="livehouse performance scoring or lifestyle everyday-people scoring.",
+    ),
     _ops: None = Depends(require_ops_auth),
 ):
     """
@@ -1474,6 +1542,18 @@ def enqueue_analysis(
     resolved = (source_dir or "").strip() or str(_runtime_base_dir() or "").strip()
     if not resolved:
         raise HTTPException(status_code=400, detail="source_dir is required")
+    source_path = Path(resolved).expanduser().resolve()
+    if not source_path.is_dir():
+        raise HTTPException(status_code=400, detail="source_dir must be an existing directory")
+    resolved = str(source_path)
+    analysis_mode = analysis_mode.strip().lower()
+    if analysis_mode == "lifestyle":
+        score_all_images = True
+    if score_all_images:
+        enable_checkpoint = False
+    # Make an explicitly requested folder visible to /gallery immediately, before
+    # analysis_results.json exists or the first remote score completes.
+    _activate_analysis_directory(resolved)
 
     from utils.studio_sessions import find_brain_session_id, find_runnable_analyze_job_id
 
@@ -1505,6 +1585,8 @@ def enqueue_analysis(
             config_path=config_path,
             max_workers=max_workers,
             enable_checkpoint=enable_checkpoint,
+            score_all_images=score_all_images,
+            analysis_mode=analysis_mode,
             trace_id=trace_id,
         )
     except Exception:
@@ -1525,6 +1607,8 @@ def enqueue_analysis(
         "task_id": task.id,
         "task_name": "tasks.run_job",
         "source_dir": resolved,
+        "score_all_images": score_all_images,
+        "analysis_mode": analysis_mode,
     }
 
 
@@ -1621,7 +1705,7 @@ def get_gallery_results(
         dedupe=dedupe if not analysis_running else False,
     )
     film_prewarm_task_id = None
-    if offset == 0 and total > 0:
+    if offset == 0 and limit > 1 and total > 0:
         film_prewarm_task_id = try_enqueue_gallery_cinestill_prewarm(source_dir=active)
     from services.taste_profile import read_taste_profile
 
@@ -1638,6 +1722,7 @@ def get_gallery_results(
         "analysis_running": analysis_running,
         "analysis_job_id": analysis_job_id,
         "analysis_job_status": analysis_job_status,
+        "results_revision": gallery_results_revision(active),
         "taste_personalized": taste_active,
         "offset": start,
         "limit": limit,

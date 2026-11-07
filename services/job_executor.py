@@ -249,6 +249,8 @@ class JobExecutor:
                 job_id=job_id,
                 worker_id=worker_id,
                 session_id=pipeline_session_id,
+                score_all_images=bool(payload.get("score_all_images", False)),
+                analysis_mode=str(payload.get("analysis_mode") or "livehouse"),
             )
             with long_task_heartbeat(wm, status="ONLINE"):
                 if force_full_rerun:
@@ -445,6 +447,8 @@ class JobExecutor:
                 job_id=job_id,
                 worker_id=worker_id,
                 session_id=int(session_id) if session_id is not None else None,
+                score_all_images=bool(payload.get("score_all_images", False)),
+                analysis_mode=str(payload.get("analysis_mode") or "livehouse"),
             )
 
             stage_result: dict[str, Any] = {}

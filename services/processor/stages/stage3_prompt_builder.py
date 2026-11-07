@@ -5,7 +5,10 @@ from typing import Any
 
 from services.processor.stages.stage1_signal_semantics import stage1_semantic_lines
 from services.processor.stages.stage3_prompt_registry import (
+    LIFESTYLE_PROMPT_VERSION,
     PROMPT_VERSION,
+    compose_lifestyle_stage3_fast_prompt,
+    compose_lifestyle_stage3_full_prompt,
     compose_stage3_defect_head_prompt,
     compose_stage3_semantic_compact_prompt,
     compose_stage3_fast_prompt,
@@ -15,6 +18,12 @@ from services.processor.stages.stage3_prompt_registry import (
 
 # Re-export for benchmarks, meta, and A/B hooks.
 STAGE3_PROMPT_VERSION = PROMPT_VERSION
+STAGE3_LIFESTYLE_PROMPT_VERSION = LIFESTYLE_PROMPT_VERSION
+
+
+def stage3_analysis_mode(config: dict[str, Any] | None) -> str:
+    raw = ((config or {}).get("processing") or {}).get("analysis_mode")
+    return "lifestyle" if str(raw or "").strip().lower() == "lifestyle" else "livehouse"
 
 
 def stage1_compact_line(stage1: dict[str, Any] | None) -> str:
@@ -38,7 +47,12 @@ def stage1_compact_line(stage1: dict[str, Any] | None) -> str:
     return stage1_semantic_lines(stage1)
 
 
-def build_stage3_fast_prompt(*, blur_eff: str | None, stage1_features: dict[str, Any] | None) -> str:
+def build_stage3_fast_prompt(
+    *,
+    blur_eff: str | None,
+    stage1_features: dict[str, Any] | None,
+    analysis_mode: str = "livehouse",
+) -> str:
     """Production fast-pass prompt: one 0–100 score + tags + semantic_gate (no 8 dims).
 
     Example::
@@ -52,7 +66,12 @@ def build_stage3_fast_prompt(*, blur_eff: str | None, stage1_features: dict[str,
         #    - appends "Image signals: sharpness=moderate sharpness ..."
         #    - appends "Note: possible motion blur."
     """
-    return compose_stage3_fast_prompt(
+    compose = (
+        compose_lifestyle_stage3_fast_prompt
+        if analysis_mode == "lifestyle"
+        else compose_stage3_fast_prompt
+    )
+    return compose(
         blur_eff=blur_eff,
         stage1_features=stage1_features,
         stage1_line_fn=stage1_semantic_lines,
@@ -93,6 +112,7 @@ def build_stage3_prompt(
     blur_eff: str | None,
     stage1_features: dict[str, Any] | None,
     strict_retry: bool = False,
+    analysis_mode: str = "livehouse",
 ) -> str:
     """Production full-pass prompt: 8 dimension scores + bilingual aspects + semantic_gate.
 
@@ -111,7 +131,12 @@ def build_stage3_prompt(
         # -> same contract without the filled-shape exemplar;
         #    ends with "Previous output was invalid JSON. Re-emit corrected JSON only..."
     """
-    return compose_stage3_full_prompt(
+    compose = (
+        compose_lifestyle_stage3_full_prompt
+        if analysis_mode == "lifestyle"
+        else compose_stage3_full_prompt
+    )
+    return compose(
         blur_eff=blur_eff,
         stage1_features=stage1_features,
         stage1_line_fn=stage1_semantic_lines,

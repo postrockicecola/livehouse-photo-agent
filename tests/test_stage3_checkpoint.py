@@ -204,3 +204,23 @@ def test_rescored_image_leaves_one_category_copy(tmp_path: Path):
     append_aesthetic_audit_line(**common, ai_data={"score": 95.0, "tags": ["keeper"]})
     assert (src / "best" / "a.jpg").exists()
     assert not (src / "trash" / "a.jpg").exists()
+
+
+def test_score_all_payload_reprocesses_old_stage1_reject(tmp_path, monkeypatch):
+    from services.processor import pipeline_stage_runner
+    from utils.luma_brain import analyze_path_job_payload
+
+    src = _layout(tmp_path)
+    (src / "old.jpg").write_bytes(b"jpg")
+    _write_audit(src, [{"image": "old.jpg", "score": 10, "tags": ["stage1_reject"]}])
+    runner = _runner(src)
+    monkeypatch.setattr(
+        pipeline_stage_runner, "assess_stage1_opencv",
+        lambda *args: (True, "", 70.0, {}),
+    )
+    # Ordinary resume still skips completed rejects.
+    assert runner.run_stage1_filter()["checkpoint_skipped"] == 1
+    payload = analyze_path_job_payload(source_dir=str(src), score_all_images=True)
+    result = runner.run_stage1_filter(enable_checkpoint=payload["enable_checkpoint"])
+    assert result["checkpoint_skipped"] == 0
+    assert result["stage1_pass"] == 1

@@ -28,9 +28,11 @@ from infra.metrics import record_stage3_early_exit_counts
 from utils.config_loader import ConfigLoader
 from engine.operators.stage2_prefilter import hamming_64, phash_dedup_settings
 from services.processor.stages.stage3_prompt_builder import (
+    STAGE3_LIFESTYLE_PROMPT_VERSION,
     STAGE3_PROMPT_VERSION,
     build_stage3_fast_prompt,
     build_stage3_prompt,
+    stage3_analysis_mode,
 )
 from services.processor.stages.stage3_output_validation import (
     classify_parse_failure,
@@ -741,6 +743,12 @@ def analyze_stage3_fast(
     assert acc is not None
 
     blur_eff = _blur_effective(blur_type, stage1_features)
+    analysis_mode = stage3_analysis_mode(config)
+    prompt_profile = (
+        f"{STAGE3_LIFESTYLE_PROMPT_VERSION}_fast"
+        if analysis_mode == "lifestyle"
+        else STAGE3_FAST_PROMPT_PROFILE
+    )
 
     def _elapsed_ms() -> float:
         return (time.perf_counter() - t_wall0) * 1000.0
@@ -774,7 +782,11 @@ def analyze_stage3_fast(
         return out
 
     try:
-        prompt_primary = build_stage3_fast_prompt(blur_eff=blur_eff, stage1_features=stage1_features)
+        prompt_primary = build_stage3_fast_prompt(
+            blur_eff=blur_eff,
+            stage1_features=stage1_features,
+            analysis_mode=analysis_mode,
+        )
         if prefetched_primary_response is not None:
             response = prefetched_primary_response
             iw0 = time.perf_counter()
@@ -839,7 +851,7 @@ def analyze_stage3_fast(
                     latency_ms=_elapsed_ms(),
                     outcome="vlm_error",
                     extra=_latency_breakdown_extra({"error_detail": str(response.get("error", ""))[:300]}),
-                    prompt_profile=STAGE3_FAST_PROMPT_PROFILE,
+                    prompt_profile=prompt_profile,
                 ),
                 "error": True,
             }
@@ -852,7 +864,11 @@ def analyze_stage3_fast(
 
         if not parsed:
             prompt_retry = (
-                build_stage3_fast_prompt(blur_eff=blur_eff, stage1_features=stage1_features)
+                build_stage3_fast_prompt(
+                    blur_eff=blur_eff,
+                    stage1_features=stage1_features,
+                    analysis_mode=analysis_mode,
+                )
                 + '\nEmit only: {"score":<number 0-100>,"verdict":"<one line>",'
                 '"tags":["t1","t2"],"mood_tags":["孤独"],'
                 '"semantic_gate":{"is_present":<boolean>,"types":[],'
@@ -932,7 +948,7 @@ def analyze_stage3_fast(
                 latency_ms=_elapsed_ms(),
                 outcome=outcome,
                 extra=_latency_breakdown_extra(dict(parse_note)),
-                prompt_profile=STAGE3_FAST_PROMPT_PROFILE,
+                prompt_profile=prompt_profile,
             ),
             "error": False,
             "inference_degraded": bool(degraded_inf and outcome == "degraded_inference"),
@@ -995,7 +1011,7 @@ def analyze_stage3_fast(
                 extra=_latency_breakdown_extra(
                     {"error_type": type(e).__name__, "error_msg": str(e)[:400]}
                 ),
-                prompt_profile=STAGE3_FAST_PROMPT_PROFILE,
+                prompt_profile=prompt_profile,
             ),
             "error": True,
         }
@@ -1045,6 +1061,12 @@ def analyze_with_dimensions(
     assert acc is not None
 
     blur_eff = _blur_effective(blur_type, stage1_features)
+    analysis_mode = stage3_analysis_mode(config)
+    prompt_profile = (
+        STAGE3_LIFESTYLE_PROMPT_VERSION
+        if analysis_mode == "lifestyle"
+        else STAGE3_PROMPT_PROFILE
+    )
 
     def _elapsed_ms() -> float:
         return (time.perf_counter() - t_wall0) * 1000.0
@@ -1110,7 +1132,12 @@ def analyze_with_dimensions(
                     from_cache_hit=True,
                 )
 
-        prompt_primary = build_stage3_prompt(blur_eff=blur_eff, stage1_features=stage1_features, strict_retry=False)
+        prompt_primary = build_stage3_prompt(
+            blur_eff=blur_eff,
+            stage1_features=stage1_features,
+            strict_retry=False,
+            analysis_mode=analysis_mode,
+        )
 
         if prefetched_primary_response is not None:
             response = prefetched_primary_response
@@ -1174,6 +1201,7 @@ def analyze_with_dimensions(
                     latency_ms=_elapsed_ms(),
                     outcome="vlm_error",
                     extra=_latency_breakdown_extra({"error_detail": str(response.get("error", ""))[:300]}),
+                    prompt_profile=prompt_profile,
                 ),
                 "error": True,
             }
@@ -1193,7 +1221,12 @@ def analyze_with_dimensions(
                 len(clean_json),
                 parse_kind,
             )
-            prompt_retry = build_stage3_prompt(blur_eff=blur_eff, stage1_features=stage1_features, strict_retry=True)
+            prompt_retry = build_stage3_prompt(
+                blur_eff=blur_eff,
+                stage1_features=stage1_features,
+                strict_retry=True,
+                analysis_mode=analysis_mode,
+            )
             iw2 = time.perf_counter()
             retry_md = dict(inference_extra_metadata or {})
             retry_md["num_predict"] = 512
@@ -1302,6 +1335,7 @@ def analyze_with_dimensions(
                 latency_ms=_elapsed_ms(),
                 outcome=outcome,
                 extra=meta_extra,
+                prompt_profile=prompt_profile,
             ),
             "error": False,
             "inference_degraded": bool(degraded_inf and outcome == "degraded_inference"),
@@ -1393,6 +1427,7 @@ def analyze_with_dimensions(
                 extra=_latency_breakdown_extra(
                     {"error_type": type(e).__name__, "error_msg": str(e)[:400]}
                 ),
+                prompt_profile=prompt_profile,
             ),
             "error": True,
         }
@@ -1454,6 +1489,7 @@ def run_stage3_fast_first(
 
     if not tasks3:
         return
+    analysis_mode = stage3_analysis_mode(config)
 
     log.debug(
         "run_stage3_fast_first inference_dispatch_parallel batch=%s mw3_hint=%s",
@@ -1647,7 +1683,11 @@ def run_stage3_fast_first(
         _idx, _tot_s3, file_name, file_path, _ts, debug_info, queue_priority, _cache = t
         blur_type = (debug_info or {}).get("blur_type")
         blur_eff = _blur_effective(blur_type, debug_info)
-        prompt_primary = build_stage3_fast_prompt(blur_eff=blur_eff, stage1_features=debug_info)
+        prompt_primary = build_stage3_fast_prompt(
+            blur_eff=blur_eff,
+            stage1_features=debug_info,
+            analysis_mode=analysis_mode,
+        )
         itid_ff = make_image_trace_id(str(hooks.trace_id or "job"), file_name)
         inf_md_ff = merge_inference_trace_attrs(
             None,
@@ -1848,7 +1888,12 @@ def run_stage3_fast_first(
             _, _, file_name, file_path, _, debug_info, queue_priority, stage3_cache = task
             blur_t = (debug_info or {}).get("blur_type")
             blur_eff = _blur_effective(blur_t, debug_info)
-            prompt_primary = build_stage3_prompt(blur_eff=blur_eff, stage1_features=debug_info, strict_retry=False)
+            prompt_primary = build_stage3_prompt(
+                blur_eff=blur_eff,
+                stage1_features=debug_info,
+                strict_retry=False,
+                analysis_mode=analysis_mode,
+            )
             itid_fu = make_image_trace_id(str(hooks.trace_id or "job"), file_name)
             inf_md_fu = merge_inference_trace_attrs(
                 None,

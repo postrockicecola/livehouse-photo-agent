@@ -49,7 +49,7 @@ def _gallery_base_dir() -> str:
 def _clear_gallery_runtime_cache() -> None:
     from api import gallery_routes
 
-    gallery_routes._gallery_active_dir_cache = None  # noqa: SLF001
+    gallery_routes.clear_gallery_runtime_cache()
 
 
 def _archive_root(explicit: str | None = None) -> Path:

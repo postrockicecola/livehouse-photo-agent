@@ -11,8 +11,12 @@ from typing import cast
 from urllib.parse import quote
 
 from services.image_service import read_exif_orientation_tag
-from services.jpeg_exif_orientation import sync_gallery_entry_display_dimensions
+from services.jpeg_exif_orientation import (
+    rotation_needed_for_pixels,
+    sync_gallery_entry_display_dimensions,
+)
 from services.path_service import PathResolver
+from utils.image_formats import SUPPORTED_IMAGE_SUFFIXES
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +90,7 @@ def _discover_gallery_rows_from_disk(base_dir: str) -> list[dict]:
     rows: list[dict] = []
 
     def push_file(f: Path) -> None:
-        if f.suffix.lower() not in (".jpg", ".jpeg", ".png"):
+        if f.suffix.lower() not in SUPPORTED_IMAGE_SUFFIXES:
             return
         name = f.name
         if name.startswith("._"):
@@ -166,6 +170,109 @@ def merge_json_and_disk_gallery_rows(json_rows: list[dict], disk_rows: list[dict
         by_name[name] = row
         order.append(name)
     return [by_name[n] for n in order]
+
+
+_AUDIT_ROWS_CACHE: dict[str, tuple[int, list[dict]]] = {}
+
+
+def gallery_results_revision(base_dir: str) -> int:
+    """Monotonic-ish file revision for progressive gallery polling."""
+    revision = 0
+    for name in ("analysis_results.json", "aesthetic_audit.jsonl"):
+        try:
+            revision = max(revision, (Path(base_dir) / name).stat().st_mtime_ns)
+        except OSError:
+            continue
+    return revision
+
+
+def _read_live_audit_rows_cached(base_dir: str) -> list[dict]:
+    """Map the append-only per-image audit into lightweight gallery score rows."""
+    audit_path = (Path(base_dir) / "aesthetic_audit.jsonl").resolve()
+    key = str(audit_path)
+    try:
+        revision = audit_path.stat().st_mtime_ns
+    except OSError:
+        _AUDIT_ROWS_CACHE.pop(key, None)
+        return []
+    cached = _AUDIT_ROWS_CACHE.get(key)
+    if cached and cached[0] == revision:
+        return cached[1]
+
+    latest: dict[str, dict] = {}
+    try:
+        lines = audit_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    for line in lines:
+        try:
+            entry = json.loads(line)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(entry, dict):
+            continue
+        name = str(entry.get("file_name") or entry.get("image") or "").strip()
+        if not name:
+            continue
+        dimensions = entry.get("dimensions") if isinstance(entry.get("dimensions"), dict) else {}
+
+        def mean_dims(keys: tuple[str, ...]) -> float:
+            values = [_f(dimensions.get(k)) for k in keys if dimensions.get(k) is not None]
+            return round(sum(values) / len(values), 2) if values else 0.0
+
+        score = max(0.0, min(100.0, _f(entry.get("overall_score", entry.get("score")))))
+        row = {
+            "file": name,
+            "overall_score": score,
+            "energy": mean_dims(("moment_peak", "atmosphere_impact")),
+            "technical": mean_dims(
+                ("focus_sharpness", "exposure_control", "noise_cleanliness")
+            ),
+            "composition": mean_dims(
+                ("composition_framing", "light_color_character")
+            ),
+            "scores": {"overall": score},
+            "analysis_pending": False,
+        }
+        for field in (
+            "reason",
+            "reason_bilingual",
+            "weakness",
+            "weakness_bilingual",
+            "tags",
+            "mood_tags",
+            "dimensions",
+            "dimension_comments",
+            "editing_suggestions",
+            "semantic_gate",
+            "stage3_meta",
+            "orientation",
+            "width",
+            "height",
+        ):
+            if entry.get(field) is not None:
+                row[field] = entry[field]
+        latest[name] = row
+
+    rows = list(latest.values())
+    _AUDIT_ROWS_CACHE[key] = (revision, rows)
+    return rows
+
+
+def _overlay_live_audit_rows(rows: list[dict], audit_rows: list[dict]) -> list[dict]:
+    if not audit_rows:
+        return rows
+    by_name = {_row_basename(row): dict(row) for row in rows if _row_basename(row)}
+    order = [_row_basename(row) for row in rows if _row_basename(row)]
+    for live in audit_rows:
+        name = _row_basename(live)
+        if not name:
+            continue
+        if name not in by_name:
+            order.append(name)
+            by_name[name] = {}
+        by_name[name].update(live)
+    return [by_name[name] for name in order]
 
 
 # Absolute path ``analysis_results.json`` -> (mtime, rows). Rows are **never** mutated once cached.
@@ -276,6 +383,22 @@ def resolve_paths(entry: dict, base_dir: str) -> dict:
     return entry
 
 
+def reconcile_rotation_with_pixels(entry: dict) -> dict:
+    """Remove stale RAW quarter-turn metadata when exported JPEG pixels are already upright."""
+    path = entry.get("path")
+    try:
+        rotation = int(entry.get("rotate_degrees") or 0)
+    except (TypeError, ValueError):
+        rotation = 0
+    if path and rotation:
+        needed = rotation_needed_for_pixels(path, rotation)
+        if needed:
+            entry["rotate_degrees"] = needed
+        else:
+            entry.pop("rotate_degrees", None)
+    return entry
+
+
 def inject_layout(entry: dict) -> dict:
     path = entry.get("path") or ""
     if not path or not os.path.isfile(path):
@@ -375,6 +498,7 @@ def inject_orientation(entry: dict, resolver: PathResolver) -> dict:
             return entry
 
         raw_deg = _read_raw_orientation_degrees(str(raw_path))
+        raw_deg = rotation_needed_for_pixels(p, raw_deg)
         if not raw_deg:
             entry.pop("rotate_degrees", None)
             sync_gallery_entry_display_dimensions(entry)
@@ -433,6 +557,9 @@ def load_gallery_page(
     disk_rows = _discover_gallery_rows_from_disk(base_dir)
     # Always union: scored JSON rows win; unscored on-disk previews fill gaps mid-job.
     rows_ro = merge_json_and_disk_gallery_rows(json_rows, disk_rows)
+    rows_ro = _overlay_live_audit_rows(
+        rows_ro, _read_live_audit_rows_cached(base_dir)
+    )
     total_raw = len(rows_ro)
 
     from utils.config_loader import ConfigLoader
@@ -499,6 +626,7 @@ def load_gallery_page(
             entry = dict(rows_ro[idx])
             normalize_scores(entry)
             resolve_paths(entry, base_dir)
+            reconcile_rotation_with_pixels(entry)
             entry.setdefault("algorithm_version", "V3.2 Masterpiece")
             if not lite and resolver is not None:
                 inject_layout(entry)

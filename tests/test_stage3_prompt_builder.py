@@ -4,7 +4,9 @@ from __future__ import annotations
 from services.processor.stages.stage1_signal_semantics import stage1_semantic_lines
 from services.processor.stages.stage3_output_validation import sanitize_stage3_parsed
 from services.processor.stages.stage3_prompt_builder import (
+    STAGE3_LIFESTYLE_PROMPT_VERSION,
     STAGE3_PROMPT_VERSION,
+    build_stage3_fast_prompt,
     build_stage3_prompt,
     build_stage3_semantic_compact_prompt,
     build_stage3_semantic_first_prompt,
@@ -15,6 +17,27 @@ from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 def test_prompt_version_is_explicit() -> None:
     assert STAGE3_PROMPT_VERSION == "stage3_v9_route_b"
+    assert STAGE3_LIFESTYLE_PROMPT_VERSION == "stage3_lifestyle_v1"
+
+
+def test_lifestyle_prompts_use_everyday_people_rubric() -> None:
+    full = build_stage3_prompt(
+        blur_eff=None,
+        stage1_features=None,
+        analysis_mode="lifestyle",
+    )
+    fast = build_stage3_fast_prompt(
+        blur_eff=None,
+        stage1_features=None,
+        analysis_mode="lifestyle",
+    )
+    for prompt in (full, fast):
+        assert "everyday lifestyle portrait or candid people photograph" in prompt
+        assert "authentic expression" in prompt
+        assert "scoring a livehouse" not in prompt
+        assert '"semantic_gate"' in prompt
+    assert "family connection" in fast
+    assert "atmosphere_impact" in full
 
 
 def test_semantic_first_ab_prompt_inspects_gate_before_scoring() -> None:

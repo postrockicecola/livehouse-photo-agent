@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -52,6 +56,7 @@ func main() {
 	loadDotEnvPreview()
 	baseDir := flag.String("base-dir", defaultBaseDir(), "Archive root or a single session dir")
 	workers := flag.Int("workers", max(2, runtime.NumCPU()/2), "Concurrent extraction workers")
+	overwrite := flag.Bool("overwrite", false, "Re-extract and replace existing previews")
 	flag.Parse()
 
 	rawDirs, err := findRawDirs(*baseDir)
@@ -107,7 +112,7 @@ func main() {
 				}
 				dstFile := filepath.Join(dstDir, dstName)
 
-				if _, err := os.Stat(dstFile); err == nil {
+				if _, err := os.Stat(dstFile); err == nil && !*overwrite {
 					atomic.AddInt64(&ok, 1)
 					return
 				}
@@ -187,6 +192,9 @@ func findRawDirs(root string) ([]string, error) {
 			return nil
 		}
 		base := info.Name()
+		if strings.EqualFold(base, "Previews") {
+			return filepath.SkipDir
+		}
 		if base == "RAW" || base == "Raw" || base == "raw" {
 			dirs = append(dirs, path)
 			return nil
@@ -215,11 +223,76 @@ func copyFile(src, dst string) error {
 }
 
 func extractPreviewJPEG(src, dst string) error {
+	orientation, err := rawOrientation(src)
+	if err != nil {
+		return err
+	}
 	return atomicWriteFile(dst, func(out *os.File) error {
-		cmd := exec.Command("exiftool", "-PreviewImage", "-b", src)
-		cmd.Stdout = out
-		return cmd.Run()
+		preview, err := exec.Command("exiftool", "-PreviewImage", "-b", src).Output()
+		if err != nil {
+			return err
+		}
+		if orientation == 1 {
+			_, err = out.Write(preview)
+			return err
+		}
+		decoded, err := jpeg.Decode(bytes.NewReader(preview))
+		if err != nil {
+			return fmt.Errorf("decode embedded preview: %w", err)
+		}
+		return jpeg.Encode(out, orientImage(decoded, orientation), &jpeg.Options{Quality: 95})
 	})
+}
+
+func rawOrientation(path string) (int, error) {
+	out, err := exec.Command("exiftool", "-n", "-s3", "-Orientation", path).Output()
+	if err != nil {
+		return 0, fmt.Errorf("read RAW orientation: %w", err)
+	}
+	value := strings.TrimSpace(string(out))
+	if value == "" {
+		return 1, nil
+	}
+	orientation, err := strconv.Atoi(value)
+	if err != nil || orientation < 1 || orientation > 8 {
+		return 1, nil
+	}
+	return orientation, nil
+}
+
+func orientImage(src image.Image, orientation int) image.Image {
+	bounds := src.Bounds()
+	width, height := bounds.Dx(), bounds.Dy()
+	outWidth, outHeight := width, height
+	if orientation >= 5 && orientation <= 8 {
+		outWidth, outHeight = height, width
+	}
+	dst := image.NewRGBA(image.Rect(0, 0, outWidth, outHeight))
+	for y := 0; y < outHeight; y++ {
+		for x := 0; x < outWidth; x++ {
+			var sourceX, sourceY int
+			switch orientation {
+			case 2:
+				sourceX, sourceY = width-1-x, y
+			case 3:
+				sourceX, sourceY = width-1-x, height-1-y
+			case 4:
+				sourceX, sourceY = x, height-1-y
+			case 5:
+				sourceX, sourceY = y, x
+			case 6:
+				sourceX, sourceY = y, height-1-x
+			case 7:
+				sourceX, sourceY = width-1-y, height-1-x
+			case 8:
+				sourceX, sourceY = width-1-y, x
+			default:
+				sourceX, sourceY = x, y
+			}
+			dst.Set(x, y, src.At(bounds.Min.X+sourceX, bounds.Min.Y+sourceY))
+		}
+	}
+	return dst
 }
 
 func atomicWriteFile(dst string, write func(*os.File) error) (err error) {

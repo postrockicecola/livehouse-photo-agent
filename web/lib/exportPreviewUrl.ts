@@ -8,6 +8,7 @@ import {
 
 const FILM_VARIANT_LABELS: Record<string, string> = {
   film_automated: "Automated · AI 智能修图",
+  film_default: "Film · Default",
   film_livehouse: "Film · Livehouse",
   film_cinestill_800t: "Film · Cinestill 800T",
   film_cinestill_50d: "Film · Cinestill 50D",

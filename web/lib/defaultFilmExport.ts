@@ -2,7 +2,7 @@ import type { GalleryExportItem, GalleryItem } from "@/components/types";
 
 /** Default film strip / batch-export grade (must match ``FILM_VARIANT_IDS`` + Lab presets). */
 /** Aligns with homepage gallery default (`GALLERY_HOME_FILM_VARIANT`). */
-export const DEFAULT_FILM_VARIANT = "film_cinestill_800t" as const;
+export const DEFAULT_FILM_VARIANT = "film_default" as const;
 
 /** Basename for API / 磁盘查找（``file`` 字段）。 */
 export function catalogBasenameForExport(item: GalleryItem): string | null {

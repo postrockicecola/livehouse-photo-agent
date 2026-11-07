@@ -9,6 +9,7 @@ from utils.repo_paths import repo_root
 from engine.operators.image_processor import ImageProcessor
 from services.processor.reporting.audit_io import load_audit_jsonl
 from utils.atomic_files import atomic_write_text
+from utils.image_formats import SUPPORTED_IMAGE_SUFFIXES
 from utils.stage3_dimensions import STAGE3_DIM_KEYS
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ def build_analysis_results(
             continue
 
         for image_file in folder_path.glob("*.*"):
-            if image_file.suffix.lower() not in (".jpg", ".jpeg", ".png"):
+            if image_file.suffix.lower() not in SUPPORTED_IMAGE_SUFFIXES:
                 continue
 
             audit_entry = audit_data.get(image_file.name, {})

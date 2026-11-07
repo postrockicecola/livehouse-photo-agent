@@ -4,6 +4,7 @@ from __future__ import annotations
 from utils.stage3_dimensions import STAGE3_DIM_KEYS, STAGE3_DIM_PROMPT_LINES
 
 PROMPT_VERSION = "stage3_v9_route_b"
+LIFESTYLE_PROMPT_VERSION = "stage3_lifestyle_v1"
 
 # Token estimates (~4 chars/token, rough) for prompt budgeting.
 PROMPT_BLOCK_TOKEN_HINTS: dict[str, int] = {
@@ -94,6 +95,45 @@ PROMPT_BLOCKS: dict[str, str] = {
     ),
 }
 
+LIFESTYLE_DOMAIN = (
+    "You are scoring an everyday lifestyle portrait or candid people photograph.\n"
+    "This is explicitly NOT a concert, livehouse, stage, or performance scene. "
+    "Judge ordinary life, family, friends, travel, street portraits, and natural human interaction.\n"
+    "Prioritize authentic expression, relationship, body language, environmental context, "
+    "natural timing, and emotional truth. Do not invent a backstory or performance semantics.\n"
+)
+
+LIFESTYLE_SCORING_BEHAVIOR = (
+    "Scoring guide — use the whole 0–10 range:\n"
+    "  0–2 unusable: no readable person or irrecoverable technical failure\n"
+    "  3–4 weak: awkward expression/timing, distracting obstruction, or failed framing\n"
+    "  5–6 usable: clear everyday record without a compelling moment\n"
+    "  7–8 strong: authentic expression, good connection, and purposeful visual context\n"
+    "  9–10 exceptional: rare, emotionally resonant, portfolio-grade lifestyle photograph\n"
+    "Do not reward dramatic color or contrast by itself. Reserve high scores for visible human "
+    "connection, natural expression, meaningful gesture, and composition that supports the person.\n"
+    "Do not give all eight dimensions the same value; score visible evidence in this frame.\n"
+)
+
+LIFESTYLE_TAGS_BEHAVIOR = (
+    "Tags: use concrete everyday people-photography phrases such as candid interaction, "
+    "quiet portrait, family connection, natural window light, environmental portrait, playful gesture, "
+    "awkward expression, distracting background, or intimate moment.\n"
+    "Mood_tags must come from visible expression, body language, light, and spatial relationships. "
+    "Never use concert, stage, performer, audience, crowd-energy, or live-music tags.\n"
+)
+
+LIFESTYLE_DIM_PROMPT_LINES: dict[str, str] = {
+    "focus_sharpness": "face/eyes and important gesture readability; intentional softness is acceptable only when expressive.",
+    "exposure_control": "skin-tone exposure, highlight/shadow detail, and natural dynamic-range handling.",
+    "noise_cleanliness": "noise, artifacts, oversharpening, or destructive denoise; texture may remain natural.",
+    "composition_framing": "person placement, background control, horizon, visual balance, and intentional crops.",
+    "light_color_character": "natural or shaped light, believable skin color, color harmony, and emotional tone.",
+    "moment_peak": "authentic expression, gesture, interaction, and decisive everyday timing.",
+    "atmosphere_impact": "emotional truth, relationship, sense of place, intimacy, and lived-in narrative.",
+    "deliverable_subject": "person is usable and respectfully represented: expression, pose, eyes, occlusion, and background distractions.",
+}
+
 # v6 shipped a filled example -- concrete scores plus concrete Chinese aspect text --
 # and the model copied it instead of reading it as shape. Measured over 236 eval
 # frames: 60% reproduced at least 6 of the 8 numbers bit-identically, 78% returned the
@@ -123,8 +163,9 @@ PROMPT_BLOCKS["retry"] = (
 )
 
 
-def _dimension_rubric_block() -> str:
-    lines = [f"{i}) {key}: {STAGE3_DIM_PROMPT_LINES[key]}" for i, key in enumerate(STAGE3_DIM_KEYS, 1)]
+def _dimension_rubric_block(lines_by_key: dict[str, str] | None = None) -> str:
+    source = lines_by_key or STAGE3_DIM_PROMPT_LINES
+    lines = [f"{i}) {key}: {source[key]}" for i, key in enumerate(STAGE3_DIM_KEYS, 1)]
     return "Dimensions:\n" + "\n".join(lines) + "\n"
 
 
@@ -232,6 +273,77 @@ def compose_stage3_fast_prompt(
         f"Emit exactly this shape, filling every <...> from the image:\n{schema}\n"
         f"{stage1_line}"
         f"{blur_note}"
+    )
+
+
+def compose_lifestyle_stage3_full_prompt(
+    *,
+    blur_eff: str | None,
+    stage1_features: dict | None,
+    stage1_line_fn,
+    strict_retry: bool = False,
+    include_exemplar: bool = True,
+) -> str:
+    parts = [
+        LIFESTYLE_DOMAIN,
+        PROMPT_BLOCKS["contract_tier_a"],
+        PROMPT_BLOCKS["contract_tier_b"],
+        PROMPT_BLOCKS["contract_tier_c"],
+        LIFESTYLE_SCORING_BEHAVIOR,
+        LIFESTYLE_TAGS_BEHAVIOR,
+        PROMPT_BLOCKS["semantic_gate_behavior"],
+    ]
+    if include_exemplar and not strict_retry:
+        parts.append(
+            "Emit exactly this shape. Fill every placeholder only from THIS image:\n"
+            f"{STAGE3_COMPACT_EXEMPLAR}\n"
+        )
+    stage1_line = stage1_line_fn(stage1_features)
+    blur_note = ""
+    if blur_eff in ("artistic_motion_blur", "motion_blur", "slight_blur"):
+        blur_note = (
+            "Note: motion softness is acceptable only when the person, expression, "
+            "or interaction remains intentionally readable.\n"
+        )
+    retry = build_retry_suffix() if strict_retry else ""
+    return (
+        "\n".join(parts)
+        + "\n"
+        + stage1_line
+        + blur_note
+        + _dimension_rubric_block(LIFESTYLE_DIM_PROMPT_LINES)
+        + retry
+    )
+
+
+def compose_lifestyle_stage3_fast_prompt(
+    *,
+    blur_eff: str | None,
+    stage1_features: dict | None,
+    stage1_line_fn,
+) -> str:
+    schema = (
+        '{"score":<integer 0-100>,"verdict":"<one short English line about THIS frame>",'
+        '"dimensions":{},"tags":["<visible everyday people-photography phrase>","..."],'
+        '"mood_tags":["<visible atmosphere label>","..."],'
+        '"semantic_gate":{"is_present":<true or false>,"types":["<allowed type or empty>"],'
+        '"severity":<0-3>,"confidence":<0-1>,"evidence":"<visible fact or empty>"}}'
+    )
+    stage1_line = stage1_line_fn(stage1_features)
+    blur_note = ""
+    if blur_eff in ("artistic_motion_blur", "motion_blur", "slight_blur"):
+        blur_note = "Note: judge motion softness by human readability and emotional intent.\n"
+    return (
+        f"{LIFESTYLE_DOMAIN}"
+        f"{PROMPT_BLOCKS['contract_tier_a']}"
+        "Structure: score (integer 0-100), verdict, empty dimensions object, tags, mood_tags, "
+        "and semantic_gate. Score bands: 0–25 unusable, 26–45 weak, 46–65 usable, "
+        "66–85 strong, 86–100 rare.\n"
+        f"{LIFESTYLE_SCORING_BEHAVIOR}"
+        f"{LIFESTYLE_TAGS_BEHAVIOR}"
+        f"{PROMPT_BLOCKS['semantic_gate_behavior']}"
+        f"Emit exactly this shape, filling every placeholder from the image:\n{schema}\n"
+        f"{stage1_line}{blur_note}"
     )
 
 

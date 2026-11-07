@@ -1,4 +1,4 @@
-"""Background Cinestill cache warmup for homepage gallery (``film_render_cache``)."""
+"""Background default-film cache warmup for homepage gallery (``film_render_cache``)."""
 from __future__ import annotations
 
 import logging
@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 _prewarm_last_enqueued: dict[str, float] = {}
 _prewarm_lock = threading.Lock()
 
-GALLERY_CINESTILL_VARIANT = "film_cinestill_800t"
+GALLERY_CINESTILL_VARIANT = "film_default"
 # Keep in sync with ``web/lib/galleryDisplayUrl.ts`` ``GALLERY_FILM_THUMB_MAX_SIDE``.
 GALLERY_CINESTILL_MAX_SIDE = 720
-# Match ``api/gallery_routes.get_film_render`` for non-special variants.
-GALLERY_CINESTILL_CACHE_EXTRA = "displayReady1"
+# Match ``api/gallery_routes.get_film_render``.
+GALLERY_CINESTILL_CACHE_EXTRA = "defaultFilm5"
 
 
 def _env_truthy(name: str, default: str = "1") -> bool:
@@ -95,7 +95,7 @@ def _prewarm_one(
 
 
 def run_gallery_cinestill_prewarm(previews_base_dir: str) -> dict[str, Any]:
-    """Render Cinestill thumbs for all gallery rows (sorted by score desc)."""
+    """Render default-film thumbs for all gallery rows (sorted by score desc)."""
     base = Path(previews_base_dir).expanduser().resolve()
     if not base.is_dir():
         return {"ok": False, "error": "previews_base_not_found", "previews_base": str(base)}

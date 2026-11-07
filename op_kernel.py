@@ -3114,6 +3114,125 @@ def _film_emulation_grade(
     return (np.clip(img, 0, 1) * 255).astype(np.uint8)
 
 
+def apply_film_default(img_rgb: np.ndarray) -> np.ndarray:
+    """Adaptive warm vintage default — bright gloss, shaped blacks, visible grain."""
+    img = img_rgb.astype(np.float32) / 255.0
+    h, w = img.shape[:2]
+    eps = 1e-6
+
+    # Read robust scene levels once so exposure and the tone regions respond to
+    # each frame instead of applying a fixed lift to both dark clubs and daylight.
+    lum = _lh_luminance(img)
+    row_step = max(1, h // 512)
+    col_step = max(1, w // 512)
+    sample = lum[
+        ::row_step,
+        ::col_step,
+    ]
+    sample_rgb = img[::row_step, ::col_step]
+    p05, p25, p50, p90, p98 = np.percentile(
+        sample, (5.0, 25.0, 50.0, 90.0, 98.0)
+    ).astype(np.float32)
+    channel_medians = np.median(sample_rgb.reshape(-1, 3), axis=0)
+    median_magenta = float(
+        (channel_medians[0] + channel_medians[2]) * 0.5 - channel_medians[1]
+    )
+    magenta_scene = float(np.clip((median_magenta - 0.10) / 0.26, 0.0, 1.0))
+
+    target_mid = 0.40
+    exposure_ev = float(np.clip(np.log2(target_mid / max(float(p50), 0.06)), -0.08, 0.72))
+    # Keep bright stage lamps textured while still allowing a useful lift.
+    highlight_limit_ev = float(np.log2(0.90 / max(float(p98), 0.18)))
+    exposure_ev = min(exposure_ev, max(-0.08, highlight_limit_ev))
+    img *= 2.0 ** exposure_ev
+    exposure_over = np.maximum(img - 0.70, 0.0)
+    exposure_shoulder = 0.70 + 0.30 * (1.0 - np.exp(-exposure_over / 0.30))
+    img = np.where(img > 0.70, exposure_shoulder, img)
+
+    # Warmer color temperature: red/gold rises, blue recedes. The green gain
+    # keeps skin and practical lights luminous rather than simply orange.
+    img *= np.array([1.090, 1.025, 0.900], dtype=np.float32)[None, None, :]
+    warm_over = np.maximum(img - 0.76, 0.0)
+    warm_shoulder = 0.76 + 0.24 * (1.0 - np.exp(-warm_over / 0.24))
+    img = np.where(img > 0.76, warm_shoulder, img)
+    img = np.clip(img, 0.0, 1.0)
+
+    if magenta_scene > 0.0:
+        # Single-color magenta LEDs can leave almost no green-channel signal.
+        # Compress only that cast and restore a little green separation rather
+        # than globally neutralizing intentional stage color.
+        lum = _lh_luminance(img)
+        pixel_magenta = np.clip(
+            ((img[:, :, 0] + img[:, :, 2]) * 0.5 - img[:, :, 1] - 0.04) / 0.36,
+            0.0,
+            1.0,
+        )
+        cast_weight = magenta_scene * (0.30 + 0.70 * pixel_magenta)
+        gray = lum[:, :, None]
+        img = gray + (img - gray) * (1.0 - 0.55 * cast_weight[:, :, None])
+        img[:, :, 1] += cast_weight * (0.040 + 0.045 * lum)
+        img = np.clip(img, 0.0, 1.0)
+
+    lum = _lh_luminance(img)
+    shadows, _mids, highlights = _lh_tone_masks(lum, eps)
+    whites = np.clip((lum - 0.76) / 0.24, 0.0, 1.0) ** 0.82
+    blacks = np.clip((0.20 - lum) / 0.20, 0.0, 1.0) ** 1.10
+
+    # Open blocked shadows, but deepen a flat bright frame. Blacks follow the
+    # same scene-aware rule so every image retains an anchor without crushing.
+    shadow_delta = float(np.clip((0.17 - float(p25)) * 0.30, -0.030, 0.045))
+    black_delta = float(np.clip((0.075 - float(p05)) * 0.22, -0.020, 0.016))
+    highlight_delta = float(np.clip(0.040 + (0.70 - float(p90)) * 0.08, 0.025, 0.065))
+    white_delta = float(np.clip(0.025 + (0.86 - float(p98)) * 0.07, 0.015, 0.045))
+    tone_delta = (
+        shadows * shadow_delta
+        + blacks * black_delta
+        + highlights * highlight_delta
+        + whites * white_delta
+    )
+    img = np.clip(img + tone_delta[:, :, None], 0.0, 1.0)
+
+    # A warm, broad highlight bloom supplies the requested glossy white areas
+    # without turning the whole image hazy.
+    lum = _lh_luminance(img)
+    bright = np.clip((lum - 0.68) / 0.32, 0.0, 1.0) ** 1.25
+    glow = cv2.GaussianBlur(img * bright[:, :, None], (0, 0), 12.0)
+    img = np.clip(
+        img + glow * np.array([0.055, 0.042, 0.026], dtype=np.float32)[None, None, :],
+        0.0,
+        1.0,
+    )
+
+    # Stronger print character: restrained color, a lifted toe, and gentle edge falloff.
+    if magenta_scene > 0.0:
+        lum = _lh_luminance(img)
+        local = lum - cv2.GaussianBlur(lum, (0, 0), 8.0)
+        mid_weight = np.clip(1.0 - np.abs(lum - 0.42) / 0.40, 0.0, 1.0)
+        img += (local * mid_weight * (0.30 * magenta_scene))[:, :, None]
+        img = np.clip(img, 0.0, 1.0)
+    gray = _lh_luminance(img)[:, :, None]
+    img = gray + (img - gray) * 0.94
+    img = np.clip((img - 0.48) * 1.055 + 0.48, 0.0, 1.0)
+    img = img * 0.978 + 0.022
+    y, x = np.indices((h, w), dtype=np.float32)
+    dist = np.sqrt(((x - w * 0.5) / max(w * 0.5, 1.0)) ** 2 + ((y - h * 0.5) / max(h * 0.5, 1.0)) ** 2)
+    vignette = 1.0 - np.clip(dist, 0.0, 1.0) ** 1.45 * 0.075
+    img *= vignette[:, :, None]
+    lum = _lh_luminance(img)
+    shadows, _mids, _highlights = _lh_tone_masks(lum, eps)
+    img = _apply_film_grain(
+        img,
+        lum,
+        0.64,
+        h,
+        w,
+        shadows=shadows,
+        seed=100,
+        eps=eps,
+    )
+    return (np.clip(img, 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)
+
+
 def apply_film_portra_400(img_rgb: np.ndarray) -> np.ndarray:
     """Kodak Portra 400 — soft contrast, warm skin, gentle highlights."""
     return _film_emulation_grade(

@@ -2,7 +2,7 @@ import type { GalleryItem } from "@/components/types";
 import { filmSourcePathQuotedForItem } from "@/lib/defaultFilmExport";
 
 /** Homepage masonry default look (on-demand ``/api/lab/film-render``, disk-cached server-side). */
-export const GALLERY_HOME_FILM_VARIANT = "film_cinestill_800t" as const;
+export const GALLERY_HOME_FILM_VARIANT = "film_default" as const;
 
 /** 首页胶片缩略图（略小于 Lab，减轻 ``film-render`` 算力）。 */
 export const GALLERY_FILM_THUMB_MAX_SIDE = 720;
@@ -64,7 +64,8 @@ export function buildGalleryPlainImageUrl(
   if (staticPath) return staticPath;
   const path = filmPathQueryValue(pq);
   const rot = rotateQuery(Number(item.rotate_degrees ?? 0));
-  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}${salvageEvQuery(item)}`;
+  const autoOrient = item.orientation ? "&auto_orient=0" : "";
+  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}${autoOrient}${salvageEvQuery(item)}&display_v=4`;
 }
 
 /** Cinestill ``film-render``（需显影源路径；无路径时返回 null，由调用方用原图）。 */

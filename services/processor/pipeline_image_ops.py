@@ -295,7 +295,11 @@ def assess_stage1_opencv(
         file_path,
         quality_cfg,
     )
-    if bool((config.get("processing") or {}).get("eval_force_stage3", False)):
+    processing_cfg = config.get("processing") or {}
+    if bool(
+        processing_cfg.get("eval_force_stage3", False)
+        or processing_cfg.get("score_all_images", False)
+    ):
         debug_info = dict(debug_info or {})
         debug_info["stage1_eval_original_passed"] = bool(passes_quality)
         debug_info["stage1_eval_original_reason"] = str(reason)
@@ -444,6 +448,19 @@ def apply_stage3_candidates_gating(
 
     Returns ``(kept_rows, skipped_rows, diagnostics)``.
     """
+    if bool((config.get("processing") or {}).get("score_all_images", False)):
+        rows = [dict(r) for r in eligible_rows]
+        before = len(rows)
+        return rows, [], {
+            "before": before,
+            "after": before,
+            "skipped": 0,
+            "gating_source": "score_all_images",
+            "pipeline_mode": None,
+            "stage3_inferences_saved": 0,
+            "estimated_gpu_seconds_saved": 0.0,
+        }
+
     thresh, ratio, gating_meta = resolve_stage3_gating_params(config)
     sg = stage3_gating_settings(config)
     if str(gating_meta.get("gating_source") or "") == "delivery_mode":

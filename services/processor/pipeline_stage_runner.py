@@ -84,6 +84,7 @@ from services.processor.pipeline_log_display import (
     stage3_fallback_flag,
 )
 from services.processor.aesthetic_pipeline import AestheticPipeline
+from utils.image_formats import SUPPORTED_IMAGE_SUFFIXES
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,7 @@ def list_source_images(source_dir: Path) -> List[str]:
     return sorted(
         p.name
         for p in source_dir.iterdir()
-        if p.is_file() and p.suffix.lower() in (".jpg", ".jpeg", ".png")
+        if p.is_file() and p.suffix.lower() in SUPPORTED_IMAGE_SUFFIXES
     )
 
 
@@ -306,6 +307,8 @@ class PipelineStageRunner:
         job_id: int | None,
         worker_id: int,
         session_id: int | None = None,
+        score_all_images: bool = False,
+        analysis_mode: str = "livehouse",
     ) -> None:
         self.config_path = config_path
         self.source_dir = Path(source_dir)
@@ -313,6 +316,12 @@ class PipelineStageRunner:
         self.job_id = job_id
         self.worker_id = worker_id
         self.session_id = session_id
+        self.analysis_mode = (
+            "lifestyle"
+            if str(analysis_mode or "").strip().lower() == "lifestyle"
+            else "livehouse"
+        )
+        self.score_all_images = bool(score_all_images) or self.analysis_mode == "lifestyle"
         self.file_lock = Lock()
         self._config: Dict[str, Any] | None = None
         self._folders: Dict[str, Path] | None = None
@@ -326,6 +335,9 @@ class PipelineStageRunner:
         if self._config is not None:
             return
         cfg, _, folders, logs = bootstrap_pipeline_layout(self.config_path, str(self.source_dir))
+        if self.score_all_images:
+            cfg.setdefault("processing", {})["score_all_images"] = True
+        cfg.setdefault("processing", {})["analysis_mode"] = self.analysis_mode
         self._config = cfg
         self._folders = folders
         self._log_paths = logs
@@ -386,7 +398,7 @@ class PipelineStageRunner:
                 p.unlink()
                 cleared["staged"].append(name)
 
-        img_exts = {".jpg", ".jpeg", ".png"}
+        img_exts = SUPPORTED_IMAGE_SUFFIXES
         for cat, folder in self.folders.items():
             n = 0
             if folder.is_dir():
@@ -451,6 +463,11 @@ class PipelineStageRunner:
                 session_id=self.session_id,
                 worker_id=self.worker_id,
             )
+            if self.score_all_images:
+                self._pipe.config.setdefault("processing", {})["score_all_images"] = True
+            self._pipe.config.setdefault("processing", {})[
+                "analysis_mode"
+            ] = self.analysis_mode
         return self._pipe
 
     def run_prepare_input(self) -> Dict[str, Any]:
@@ -611,6 +628,9 @@ class PipelineStageRunner:
 
         lock = Lock()
         rejected = 0
+        score_all_images = bool(
+            (self.config.get("processing") or {}).get("score_all_images", False)
+        )
         ts = self._pipeline_trace_session()
 
         def handle_row(row: Dict[str, Any]) -> None:
@@ -631,7 +651,7 @@ class PipelineStageRunner:
             fs = s2.fast_score
             merged_dbg = {**debug_info, **s2.debug_extra}
 
-            if not passes_stage2_thresholds(
+            if not score_all_images and not passes_stage2_thresholds(
                 self.config, tech_score, fs, debug_info=merged_dbg
             ):
                 with lock:
@@ -659,7 +679,7 @@ class PipelineStageRunner:
                     flush_image_trace(ts, rec, segment="stage2")
                 return
 
-            if not s2.prefilter_ok:
+            if not score_all_images and not s2.prefilter_ok:
                 with lock:
                     rejected += 1
                 fak = fake_result_stage2_reject(
@@ -739,7 +759,13 @@ class PipelineStageRunner:
 
         eligible.sort(key=lambda x: str(x["file_name"]))
         pre_dedupe_n = len(eligible)
-        eligible, removed_dedup, dedup_diag = dedupe_eligible_rows_by_phash(eligible, self.config)
+        if score_all_images:
+            removed_dedup = []
+            dedup_diag = {"enabled": False, "reason": "score_all_images"}
+        else:
+            eligible, removed_dedup, dedup_diag = dedupe_eligible_rows_by_phash(
+                eligible, self.config
+            )
         if dedup_diag.get("enabled"):
             log_pipeline_reduction_metrics(
                 stage="stage2_after_phash_dedup",
@@ -882,7 +908,11 @@ class PipelineStageRunner:
     ) -> Dict[str, Any]:
         t_inf0 = time.perf_counter()
         pipe = self._lazy_pipeline_for_vlm()
-        stage3_cache = stage3_cache_from_config(pipe.config)
+        stage3_cache = (
+            None
+            if getattr(self, "analysis_mode", "livehouse") == "lifestyle"
+            else stage3_cache_from_config(pipe.config)
+        )
         sd = staged_state_dir(self.source_dir)
         m2 = sd / ELIGIBLE_AFTER_S2
         incoming = _read_jsonl(m2)

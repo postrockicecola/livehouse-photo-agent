@@ -137,6 +137,7 @@ const CURATED_STYLE_PRESETS: StylePresetDefinition[] = [
 
 /** ``op_kernel`` film looks — rendered on demand via ``GET /api/lab/film-render`` (must match backend ``FILM_VARIANT_IDS``). */
 const FILM_STYLE_PRESETS = [
+  { id: "film_default", label: "Film · Default" },
   { id: "film_livehouse", label: "Film · Livehouse" },
   { id: "film_cinestill_800t", label: "Film · Cinestill 800T" },
   { id: "film_cinestill_50d", label: "Film · Cinestill 50D" },
@@ -353,10 +354,8 @@ function stripEntryEnabled(e: StyleStripEntry): boolean {
   return Boolean(e.pathQuoted?.trim());
 }
 
-/** 主预览初始选中：Cinestill 800T → 会话 vibe → 其余胶片（不含原图默认）。 */
+/** 主预览初始选中：Default → 会话 vibe → 其余胶片（不含原图默认）。 */
 function pickDefaultSelectedId(entries: StyleStripEntry[], sessionFilmVariant?: string | null): string {
-  const cine = entries.find((e) => e.id === "film_cinestill_800t" && stripEntryEnabled(e));
-  if (cine) return cine.id;
   const primary = entries.find((e) => e.id === DEFAULT_FILM_VARIANT && stripEntryEnabled(e));
   if (primary) return primary.id;
   const sv = (sessionFilmVariant ?? "").trim();

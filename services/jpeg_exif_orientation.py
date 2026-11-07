@@ -20,6 +20,9 @@ import os
 logger = logging.getLogger(__name__)
 
 from PIL import Image, ImageOps
+from utils.image_formats import register_heif_opener
+
+register_heif_opener()
 
 # Prefer Image.Transpose (Pillow 9+); fall back to legacy int constants.
 try:
@@ -203,6 +206,21 @@ def _raw_orientation_degrees(raw_path_str: str) -> int:
     return {6: 90, 8: -90, 3: 180}.get(n or 1, 0)
 
 
+def rotation_needed_for_pixels(path: str | Path, degrees: int) -> int:
+    """Drop a RAW quarter-turn when the JPEG pixels are already portrait/upright."""
+    degrees = int(degrees or 0)
+    if abs(degrees) != 90:
+        return degrees
+    try:
+        with Image.open(path) as im:
+            width, height = im.size
+        if height > width:
+            return 0
+    except Exception:
+        pass
+    return degrees
+
+
 def resolve_capture_rotation_degrees(jpeg_path: str | Path) -> int:
     """Degrees needed to upright a strip-exported preview whose rotation lives only in the RAW.
 
@@ -217,7 +235,7 @@ def resolve_capture_rotation_degrees(jpeg_path: str | Path) -> int:
         raw = _find_raw_sibling(str(p))
         if not raw:
             return 0
-        return _raw_orientation_degrees(raw)
+        return rotation_needed_for_pixels(p, _raw_orientation_degrees(raw))
     except Exception:
         logger.warning("resolve_capture_rotation_degrees failed for %s", p, exc_info=True)
         return 0

@@ -26,6 +26,7 @@ export type GalleryBootstrap = {
   error: string | null;
   loadSource: GalleryLoadSource;
   analysisRunning: boolean;
+  resultsRevision: number;
   effectiveSort: GallerySort | "default";
 };
 
@@ -143,6 +144,7 @@ function bootstrapFromResultsPayload(
     error: null,
     loadSource: "results_api",
     analysisRunning: Boolean(data.analysis_running),
+    resultsRevision: num(data.results_revision, 0),
     effectiveSort:
       data.effective_sort === "default" ||
       data.effective_sort === "personalized" ||
@@ -178,6 +180,7 @@ async function bootstrapFromAnalysisJson(
       error: apiError,
       loadSource: "analysis_json",
       analysisRunning: false,
+      resultsRevision: 0,
       effectiveSort: "overall",
     };
   } catch {
@@ -232,6 +235,7 @@ export async function bootstrapGallery(
     error: apiError ?? (aborted ? "请求已取消或超时" : null),
     loadSource: "none",
     analysisRunning: false,
+    resultsRevision: 0,
     effectiveSort: "overall",
   };
 }
@@ -250,6 +254,7 @@ export async function fetchGalleryResultsPage(
   count?: number;
   total_raw?: number;
   analysis_running?: boolean;
+  results_revision?: number;
   effective_sort?: GallerySort | "default";
 }> {
   return fetchJson(galleryResultsUrl(apiBase, offset, limit, true, dedupe, sort), signal);
