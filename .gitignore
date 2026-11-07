@@ -27,6 +27,7 @@ runtime/
 dump.rdb
 web/dump.rdb
 pipeline.log
+pipeline.log.*
 luma_brain.db
 
 # Local studio ingest config (machine-specific paths); commit studio_ingest.example.json instead

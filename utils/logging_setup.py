@@ -12,6 +12,7 @@ import logging
 import os
 import sys
 from datetime import datetime, timezone
+from logging.handlers import RotatingFileHandler
 from typing import Any, TextIO
 
 # Canonical dimensions for AI-infra correlation (JSON logs: all keys; text logs: only set keys).
@@ -62,6 +63,16 @@ def _env_bool(name: str, default: bool = False) -> bool:
     if not v:
         return default
     return v in {"1", "true", "yes", "on"}
+
+
+def _env_int(name: str, default: int) -> int:
+    v = os.environ.get(name, "").strip()
+    if not v:
+        return default
+    try:
+        return int(v)
+    except ValueError:
+        return default
 
 
 def _coerce_field(key: str, value: Any) -> Any:
@@ -194,13 +205,21 @@ def configure_logging(
 
 
 def attach_file_handler(path: str, *, json_lines: bool | None = None, encoding: str = "utf-8") -> None:
-    """Append a file handler with the same formatter (deduped by path)."""
+    """Append a size-rotating file handler with the same formatter (deduped by path).
+
+    Rotation caps disk use (default ~250MB = 50MB × 5 backups); override via
+    ``LIVEHOUSE_LOG_MAX_BYTES`` / ``LIVEHOUSE_LOG_BACKUPS`` (0 bytes = never rotate).
+    """
     ap = os.path.abspath(path)
     if ap in _ATTACHED_FILES:
         return
     if json_lines is None:
         json_lines = _env_bool("LIVEHOUSE_LOG_JSON")
-    fh = logging.FileHandler(path, encoding=encoding)
+    max_bytes = _env_int("LIVEHOUSE_LOG_MAX_BYTES", 50 * 1024 * 1024)
+    backup_count = _env_int("LIVEHOUSE_LOG_BACKUPS", 5)
+    fh = RotatingFileHandler(
+        path, maxBytes=max(0, max_bytes), backupCount=max(0, backup_count), encoding=encoding
+    )
     fh.setFormatter(create_formatter(json_lines=json_lines))
     logging.getLogger().addHandler(fh)
     _ATTACHED_FILES.add(ap)

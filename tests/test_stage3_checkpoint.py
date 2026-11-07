@@ -216,7 +216,7 @@ def test_score_all_payload_reprocesses_old_stage1_reject(tmp_path, monkeypatch):
     runner = _runner(src)
     monkeypatch.setattr(
         pipeline_stage_runner, "assess_stage1_opencv",
-        lambda *args: (True, "", 70.0, {}),
+        lambda *args, **kwargs: (True, "", 70.0, {}),
     )
     # Ordinary resume still skips completed rejects.
     assert runner.run_stage1_filter()["checkpoint_skipped"] == 1

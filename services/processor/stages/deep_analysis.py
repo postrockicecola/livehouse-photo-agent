@@ -532,9 +532,12 @@ def _stage3_cache_key(
     stage1_features: Optional[Dict[str, Any]], *, mode: str,
 ) -> str | None:
     analysis_mode = stage3_analysis_mode(config)
+    # Reuse the decoded-pixel digest computed once in Stage2 so the cache key does not
+    # re-read the file per candidate; excluded from ``features`` since it is the key base.
+    content_digest = (stage1_features or {}).get("content_digest")
     features = {
         k: v for k, v in (stage1_features or {}).items()
-        if k not in {"path", "phash", "width", "height", "orientation"}
+        if k not in {"path", "phash", "width", "height", "orientation", "content_digest"}
     }
     return stage3_content_key(image_path, {
         "scoring_version": "2026-11-scoring-v2",
@@ -550,7 +553,7 @@ def _stage3_cache_key(
         "fast_prompt": build_stage3_fast_prompt(
             blur_eff=blur_eff, stage1_features=stage1_features, analysis_mode=analysis_mode,
         ),
-    })
+    }, content_digest=content_digest)
 
 
 def try_stage3_cache_hit_raw(

@@ -51,6 +51,7 @@ from services.scheduler.priority_queue import (
     reorder_stage3_work_by_fast_score,
     vlm_priority_for_rank,
 )
+from engine.operators.image_processor import ImageProcessor
 from engine.operators.stage2_prefilter import (
     assess_stage2_per_image,
     dedupe_eligible_rows_by_phash,
@@ -513,7 +514,7 @@ class PipelineStageRunner:
         el_lock = Lock()
         ts = self._pipeline_trace_session()
 
-        def assess_one(file_name: str) -> Tuple[str, bool, str, float, Dict[str, Any]]:
+        def assess_one(file_name: str) -> Tuple[str, bool, str, float, Dict[str, Any], Optional[Dict[str, Any]]]:
             rec = ts.recorder(file_name) if ts else None
             t0 = time.perf_counter()
             fp = str(self.source_dir / file_name)
@@ -521,9 +522,35 @@ class PipelineStageRunner:
             reason = ""
             tech_score = 0.0
             debug_info: Dict[str, Any] = {}
+            stage2_pre: Optional[Dict[str, Any]] = None
             try:
-                ok, reason, tech_score, debug_info = assess_stage1_opencv(self.config, fp)
-                return file_name, ok, reason, tech_score, debug_info
+                # Decode once here and reuse the array for both the Stage1 gate and the
+                # Stage2 per-image assessment, so passing frames are not decoded twice
+                # across the two stages. Stage2 can still run standalone (re-decodes when
+                # ``stage2_precomputed`` is absent from the eligible row).
+                img_bgr, _read_err = ImageProcessor._read_bgr(fp)
+                ok, reason, tech_score, debug_info = assess_stage1_opencv(
+                    self.config, fp, img_bgr=img_bgr
+                )
+                if ok and img_bgr is not None:
+                    try:
+                        s2 = assess_stage2_per_image(
+                            fp,
+                            self.config,
+                            tech_score=tech_score,
+                            debug_info=debug_info,
+                            img_bgr=img_bgr,
+                        )
+                        stage2_pre = {
+                            "fast_score": float(s2.fast_score),
+                            "phash": int(s2.phash),
+                            "prefilter_ok": bool(s2.prefilter_ok),
+                            "prefilter_reason": s2.prefilter_reason,
+                            "debug_extra": s2.debug_extra,
+                        }
+                    except Exception:
+                        stage2_pre = None  # Stage2 falls back to its own decode.
+                return file_name, ok, reason, tech_score, debug_info, stage2_pre
             finally:
                 if rec:
                     rec.add_span(
@@ -543,7 +570,7 @@ class PipelineStageRunner:
             for fut in as_completed(futs):
                 fn = futs[fut]
                 try:
-                    file_name, ok, reason, tech_score, debug_info = fut.result()
+                    file_name, ok, reason, tech_score, debug_info, stage2_pre = fut.result()
                 except Exception:
                     rejects += 1
                     fak = fake_result_stage1_reject(
@@ -593,6 +620,7 @@ class PipelineStageRunner:
                                 "file_name": file_name,
                                 "tech_score": tech_score,
                                 "debug_info": debug_info,
+                                "stage2_precomputed": stage2_pre,
                             }
                         )
 
@@ -642,14 +670,28 @@ class PipelineStageRunner:
             rec = ts.recorder(file_name) if ts else None
             t0 = time.perf_counter()
 
-            s2 = assess_stage2_per_image(
-                fp,
-                self.config,
-                tech_score=tech_score,
-                debug_info=debug_info,
-            )
-            fs = s2.fast_score
-            merged_dbg = {**debug_info, **s2.debug_extra}
+            # Reuse the Stage2 result computed during Stage1 (single decode); fall back to
+            # a standalone decode when running Stage2 on its own / legacy checkpoints.
+            pre = row.get("stage2_precomputed")
+            if isinstance(pre, dict):
+                fs = float(pre.get("fast_score", 0.0))
+                s2_phash = int(pre.get("phash", 0) or 0)
+                prefilter_ok = bool(pre.get("prefilter_ok", True))
+                prefilter_reason = pre.get("prefilter_reason")
+                debug_extra = dict(pre.get("debug_extra") or {})
+            else:
+                s2 = assess_stage2_per_image(
+                    fp,
+                    self.config,
+                    tech_score=tech_score,
+                    debug_info=debug_info,
+                )
+                fs = s2.fast_score
+                s2_phash = int(s2.phash)
+                prefilter_ok = s2.prefilter_ok
+                prefilter_reason = s2.prefilter_reason
+                debug_extra = s2.debug_extra
+            merged_dbg = {**debug_info, **debug_extra}
 
             if not score_all_images and not passes_stage2_thresholds(
                 self.config, tech_score, fs, debug_info=merged_dbg
@@ -679,14 +721,14 @@ class PipelineStageRunner:
                     flush_image_trace(ts, rec, segment="stage2")
                 return
 
-            if not score_all_images and not s2.prefilter_ok:
+            if not score_all_images and not prefilter_ok:
                 with lock:
                     rejected += 1
                 fak = fake_result_stage2_reject(
                     tech_score=tech_score,
                     fast_score=fs,
                     debug_info=merged_dbg,
-                    reject_detail=str(s2.prefilter_reason or "stage2_prefilter"),
+                    reject_detail=str(prefilter_reason or "stage2_prefilter"),
                 )
                 append_aesthetic_audit_line(
                     config=self.config,
@@ -711,7 +753,7 @@ class PipelineStageRunner:
                 "tech_score": tech_score,
                 "fast_score": fs,
                 "debug_info": merged_dbg,
-                "phash": int(s2.phash),
+                "phash": s2_phash,
             }
             with lock:
                 eligible.append(row_out)
@@ -1272,7 +1314,12 @@ class PipelineStageRunner:
 
         if use_fast_first:
             logger.info("stage3 runner: fast_first dual-mode (batch n=%s)", n_work)
-            mq = int((pipe.config.get("model") or {}).get("max_inference_queue_size", 16) or 16)
+            # Use the resolved Stage3 (Route B merged) admission size the inference client
+            # was actually built with, not the raw top-level ``model`` block (=1 for local
+            # Ollama safety), so this hint reflects real cloud in-flight capacity.
+            mq = int(getattr(pipe, "_max_inference_queue_size", 0) or 0)
+            if mq <= 0:
+                mq = int((pipe.config.get("model") or {}).get("max_inference_queue_size", 16) or 16)
             pool_workers_ff = max(1, min(mw, mq, n_work))
             tasks3_ff: List[Tuple[Any, ...]] = []
             for rank, (_jid, row) in enumerate(work_items, start=1):

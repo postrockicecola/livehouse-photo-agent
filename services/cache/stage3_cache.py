@@ -19,22 +19,36 @@ from utils.json_safe import json_safe
 
 logger = logging.getLogger(__name__)
 
-CACHE_JSON_VERSION = 3
-CACHE_HASH_ALGO = "sha256.content+scoring-v2"
+CACHE_JSON_VERSION = 4
+CACHE_HASH_ALGO = "sha256.content+scoring-v3"
 
 # Ephemeral key attached to returned dicts; stripped on store.
 CACHE_HIT_META_KEY = "__stage3_cache_meta__"
 
 
-def stage3_content_key(image_path: str, context: Mapping[str, Any]) -> str | None:
-    """Fail closed on unreadable files; include prompts, model and calibration inputs."""
+def stage3_content_key(
+    image_path: str,
+    context: Mapping[str, Any],
+    *,
+    content_digest: str | None = None,
+) -> str | None:
+    """Key by image identity + scoring context.
+
+    ``content_digest`` (hex of the decoded-pixel SHA-256 computed once in Stage2) is
+    reused when available to avoid re-reading the file per candidate; identical decoded
+    pixels are the same image for a visual VLM score. Falls back to streaming the file
+    bytes (fail closed on unreadable files). Only perceptual hashes are unsafe for reuse.
+    """
     digest = hashlib.sha256()
-    try:
-        with open(image_path, "rb") as image_file:
-            for chunk in iter(lambda: image_file.read(1024 * 1024), b""):
-                digest.update(chunk)
-    except OSError:
-        return None
+    if content_digest:
+        digest.update(b"pixels:" + str(content_digest).encode())
+    else:
+        try:
+            with open(image_path, "rb") as image_file:
+                for chunk in iter(lambda: image_file.read(1024 * 1024), b""):
+                    digest.update(chunk)
+        except OSError:
+            return None
     digest.update(b"\0" + json.dumps(json_safe(context), sort_keys=True, ensure_ascii=False).encode())
     return digest.hexdigest()
 

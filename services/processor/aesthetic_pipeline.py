@@ -198,6 +198,27 @@ class AestheticPipeline:
         stage1_image_count = int(r1.get("stage1_pass", 0)) + int(r1.get("stage1_reject", 0))
         stage2_image_count = int(r2.get("total_in", 0))
         stage3_image_count = int(r3.get("total_in", 0))
+
+        # Per-run performance summary (reuses stage return dicts; no new infra).
+        cache_metrics = r3.get("stage3_vlm_cache") or {}
+        vlm_fallback = int(r3.get("vlm_fallback", 0))
+        cloud_scored = max(0, int(self.stats["processed"]) - vlm_fallback)
+        run_summary = {
+            "total_images": total,
+            "stage1_in": stage1_image_count,
+            "stage2_in": stage2_image_count,
+            "stage3_in": stage3_image_count,
+            "processed": int(self.stats["processed"]),
+            "stage1_wall_ms": int(r1.get("inference_wall_ms", 0)),
+            "stage2_wall_ms": int(r2.get("inference_wall_ms", 0)),
+            "stage3_wall_ms": int(r3.get("inference_wall_ms", 0)),
+            "total_wall_sec": round(elapsed, 1),
+            "vlm_cloud_scored": cloud_scored,
+            "vlm_local_fallback": vlm_fallback,
+            "cache_hit_rate": cache_metrics.get("stage3_vlm_cache_hit_rate"),
+            "cache_saved_inferences": cache_metrics.get("stage3_vlm_cache_saved_inferences"),
+        }
+        logger.info("pipeline run summary | %s", run_summary)
         return {
             "total": total,
             "processed": self.stats["processed"],

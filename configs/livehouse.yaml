@@ -283,7 +283,7 @@ processing:
     enabled: true
     max_hamming: 0                 # Route B fail-closed: never reuse a semantic pass for a merely similar image
     max_entries: 4096              # LRU cap — prevents unbounded growth across long sessions
-    persist_path: null             # e.g. ".luma_pipeline_staged/stage3_vlm_cache.json" to survive restarts
+    persist_path: ".luma_pipeline_staged/stage3_vlm_cache.json"  # survive restarts; key is content+context hash so cross-session reuse is safe
     load_on_start: true            # when persist_path is set, merge on cache construction
 
   # Reduce Stage3 calls: after Stage2 + dedupe, sort by normalized score, then threshold + top fraction.
@@ -323,9 +323,13 @@ stage3:
     # Cross-API failover owns the second chance; avoid multiplying provider retries.
     max_retries: 0
     retry_delay: 1.0
-    max_concurrent_requests: 2
-    # Admission slots ≈ workers. Larger values admit many cloud jobs before 2 workers drain them.
-    max_inference_queue_size: 4
+    # Cloud (DashScope) in-flight requests. Independent of the local Ollama fallback
+    # lane below (fallback.max_concurrent_requests stays 1 for 24GB OOM safety); raising
+    # this only parallelizes cloud calls. Drop to 6 if DashScope returns 429s.
+    max_concurrent_requests: 8
+    # Admission slots ≈ 2× workers so futures don't block on admission.acquire before
+    # the workers drain them. Candidate pool is capped (max_candidates_limit:120), so 16 is safe.
+    max_inference_queue_size: 16
     queue_wait_timeout_seconds: 300
     inference_hard_timeout_seconds: 240
     thumbnail_max_side: 1600

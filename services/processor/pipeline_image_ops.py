@@ -287,8 +287,14 @@ def append_aesthetic_audit_line(
 def assess_stage1_opencv(
     config: Dict[str, Any],
     file_path: str,
+    *,
+    img_bgr=None,
 ) -> Tuple[bool, str, float, Dict[str, Any]]:
-    """OpenCV gate (blur / exposure / contrast). Returns (passed, reason, tech_score, debug_info)."""
+    """OpenCV gate (blur / exposure / contrast). Returns (passed, reason, tech_score, debug_info).
+
+    ``img_bgr``: pre-decoded BGR array to reuse (avoids a second decode when the caller
+    already read the image); falls back to decoding ``file_path`` when None.
+    """
     quality_cfg = dict(ConfigLoader.get_quality_thresholds(config) or {})
     # Allow processing.underexposure_salvage to override nested salvage knobs.
     proc_salvage = (config.get("processing") or {}).get("underexposure_salvage")
@@ -300,6 +306,7 @@ def assess_stage1_opencv(
     passes_quality, reason, tech_score, debug_info = ImageProcessor.assess_image_quality(
         file_path,
         quality_cfg,
+        img_bgr=img_bgr,
     )
     processing_cfg = config.get("processing") or {}
     if bool(
