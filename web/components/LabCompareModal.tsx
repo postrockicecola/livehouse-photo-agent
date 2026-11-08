@@ -9,6 +9,7 @@ import {
   type CurationLikeReason,
 } from "@/lib/galleryCuration";
 import type { GalleryExportItem, GalleryItem } from "./types";
+import { galleryScoreLabel } from "@/lib/galleryScoreLabel";
 import { OpticalConsolePanel } from "./OpticalConsolePanel";
 import {
   OPTICAL_NEUTRAL,
@@ -213,8 +214,6 @@ type StyleStripEntry = {
   /** Numeric grade params for ``film_automated`` (sent as ``&adjust=<json>``). */
   adjust?: Record<string, number> | null;
   score?: number;
-  /** Display EV lift for underexposure-salvage Original strip. */
-  salvageEv?: number;
 };
 
 function buildStyleEntries(item: GalleryItem): StyleStripEntry[] {
@@ -224,13 +223,8 @@ function buildStyleEntries(item: GalleryItem): StyleStripEntry[] {
 
   const rows: StyleStripEntry[] = [];
 
-  const salvageEv =
-    item.underexposure_salvage && Number(item.salvage_ev) > 0
-      ? Number(item.salvage_ev)
-      : undefined;
-
   if (originalQ) {
-    rows.push({ id: "original", label: "Original", pathQuoted: originalQ, salvageEv });
+    rows.push({ id: "original", label: "Original", pathQuoted: originalQ });
   }
 
   if (!originalQ && mainQ) {
@@ -239,7 +233,6 @@ function buildStyleEntries(item: GalleryItem): StyleStripEntry[] {
       label: "Original",
       pathQuoted: mainQ,
       score: item.overall_score,
-      salvageEv,
     });
   }
 
@@ -373,15 +366,10 @@ function buildImageUrl(
   pathQuoted: string,
   maxSide: number,
   rotateDeg = 0,
-  salvageEv?: number,
 ) {
   const path = filmPathQueryValue(pathQuoted);
   const rot = rotateDeg ? `&rotate=${rotateDeg}` : "";
-  const ev =
-    salvageEv != null && Number(salvageEv) > 0
-      ? `&ev=${Math.min(8, Math.round(Number(salvageEv) * 1000) / 1000)}`
-      : "";
-  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}${ev}`;
+  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}&display_v=5`;
 }
 
 /** Normalize ``path`` query segment: single encode layer for FastAPI (works with urllib-quoted + raw paths). */
@@ -428,7 +416,7 @@ function resolveStripImageUrl(
   if (entry.filmVariant) {
     return buildFilmRenderUrl(apiBase, pq, entry.filmVariant, maxSide, rotateDeg, null, entry.adjust ?? null);
   }
-  return buildImageUrl(apiBase, pq, maxSide, rotateDeg, entry.salvageEv);
+  return buildImageUrl(apiBase, pq, maxSide, rotateDeg);
 }
 
 function stripPlainImageUrl(
@@ -439,7 +427,7 @@ function stripPlainImageUrl(
 ): string | null {
   const pq = entry.pathQuoted?.trim();
   if (!pq) return null;
-  return buildImageUrl(apiBase, pq, maxSide, rotateDeg, entry.salvageEv);
+  return buildImageUrl(apiBase, pq, maxSide, rotateDeg);
 }
 
 function stripFilmImageUrl(
@@ -530,7 +518,7 @@ function LabInfoPanel({
 
         <div className="mt-3">
           <p className="text-[22px] font-extralight tabular-nums leading-none tracking-tight text-white/88">
-            {item.score_status === "unscored" ? "待评分" : item.score_status === "rejected" ? "未通过初筛" : scoreText(item.overall_score)}
+            {galleryScoreLabel(item)}
           </p>
           <p className="mt-1 text-[9px] font-light tabular-nums tracking-wide text-white/32">
             E {scoreText(item.energy)} · T {scoreText(item.technical)} · C {scoreText(item.composition)}
@@ -1303,7 +1291,7 @@ export function LabCompareModal({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex flex-col outline-none"
+      className="luma-overlay-in fixed inset-0 z-50 flex flex-col outline-none"
       role="dialog"
       aria-modal="true"
       aria-label="风格对比"

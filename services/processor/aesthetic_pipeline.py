@@ -45,12 +45,16 @@ class AestheticPipeline:
         photo_id: int | None = None,
         worker_id: int | None = None,
         pipeline_mode: str | None = None,
+        score_all_images: bool = False,
     ):
         self._config_path = config_path if config_path is not None else "configs/livehouse.yaml"
         self.config = ConfigLoader.load(self._config_path)
 
         if source_dir:
             self.config["paths"]["source_dir"] = source_dir
+
+        if score_all_images:
+            self.config.setdefault("processing", {})["score_all_images"] = True
 
         if pipeline_mode is not None and str(pipeline_mode).strip():
             self.config.setdefault("processing", {})["pipeline_mode"] = str(pipeline_mode).strip()
@@ -178,6 +182,7 @@ class AestheticPipeline:
             job_id=self.job_id,
             worker_id=int(self.worker_id) if self.worker_id is not None else 0,
             session_id=self.session_id,
+            score_all_images=bool((self.config.get("processing") or {}).get("score_all_images", False)),
         )
         runner.run_prepare_input()
         r1 = runner.run_stage1_filter(max_workers=max_workers, enable_checkpoint=enable_checkpoint)
@@ -202,7 +207,12 @@ class AestheticPipeline:
         # Per-run performance summary (reuses stage return dicts; no new infra).
         cache_metrics = r3.get("stage3_vlm_cache") or {}
         vlm_fallback = int(r3.get("vlm_fallback", 0))
-        cloud_scored = max(0, int(self.stats["processed"]) - vlm_fallback)
+        vlm_scored = max(0, int(r3.get("processed", 0)) - vlm_fallback)
+        cache_hits = int(cache_metrics.get("stage3_vlm_cache_saved_inferences", 0) or 0)
+        cloud_scored = (
+            max(0, vlm_scored - cache_hits)
+            if self.model_provider.lower() in {"openai", "vllm"} else 0
+        )
         run_summary = {
             "total_images": total,
             "stage1_in": stage1_image_count,
@@ -214,6 +224,8 @@ class AestheticPipeline:
             "stage3_wall_ms": int(r3.get("inference_wall_ms", 0)),
             "total_wall_sec": round(elapsed, 1),
             "vlm_cloud_scored": cloud_scored,
+            "vlm_scored": vlm_scored,
+            "vlm_checkpoint_skipped": int(r3.get("checkpoint_skipped", 0)),
             "vlm_local_fallback": vlm_fallback,
             "cache_hit_rate": cache_metrics.get("stage3_vlm_cache_hit_rate"),
             "cache_saved_inferences": cache_metrics.get("stage3_vlm_cache_saved_inferences"),

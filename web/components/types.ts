@@ -44,6 +44,8 @@ export type GalleryGroupMember = {
   overall_score?: number;
   score_status?: "scored" | "unscored" | "rejected";
   score_source?: string;
+  stage3_meta?: { outcome?: string };
+  analysis_pending?: boolean;
   category?: string;
   rotate_degrees?: number;
 };
@@ -68,6 +70,8 @@ export type GalleryItem = {
   overall_score?: number;
   score_status?: "scored" | "unscored" | "rejected";
   score_source?: string;
+  stage3_meta?: { outcome?: string };
+  analysis_pending?: boolean;
   energy?: number;
   technical?: number;
   composition?: number;
@@ -77,7 +81,7 @@ export type GalleryItem = {
   reason_bilingual?: { en?: string; zh?: string };
   tags?: string[];
   category?: string;
-  /** Stage1 underexposure salvage — gallery shows EV-lifted ``/image?ev=``. */
+  /** Stage1 underexposure salvage metadata (analysis only; originals retain their brightness). */
   underexposure_salvage?: boolean;
   /** Display EV for salvage-normalized thumbs (``2**ev``). */
   salvage_ev?: number;

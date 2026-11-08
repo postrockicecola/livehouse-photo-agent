@@ -681,4 +681,6 @@ def _compact_member(row: dict, base_dir: str) -> dict:
         "category": entry.get("category"),
         "score_status": entry.get("score_status"),
         "score_source": entry.get("score_source"),
+        "stage3_meta": entry.get("stage3_meta"),
+        "analysis_pending": entry.get("analysis_pending", False),
     }

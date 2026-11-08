@@ -25,6 +25,7 @@ from utils.stage3_result import (
 )
 from engine.operators.image_processor import ImageProcessor
 from engine.operators.stage2_prefilter import row_ambiguous_tags
+from services.processor.candidate_admission import select_candidates
 from services.processor.stages.semantic_gate import (
     apply_semantic_gate_policy,
     occlusion_score_penalty,
@@ -448,7 +449,10 @@ def apply_stage3_candidates_gating(
     batch_input_scale_n: int | None = None,
 ) -> tuple[list[Dict[str, Any]], list[Dict[str, Any]], Dict[str, Any]]:
     """
-    Optional Stage3 admission after Stage 2 passes: ``stage3_threshold`` (0–1 normalized)
+    ``coverage_budget`` uses one budget across the whole eligible pool with burst caps
+    and independent admission lanes. Explicit pipeline modes supply its budget ratio.
+
+    Legacy admission after Stage 2 passes: ``stage3_threshold`` (0–1 normalized)
     then optional ``top_k_ratio`` slice on the remaining pool (sorted best-first).
 
     When ``processing.pipeline_mode`` is set, thresholds come from mode presets; otherwise
@@ -479,6 +483,13 @@ def apply_stage3_candidates_gating(
 
     thresh, ratio, gating_meta = resolve_stage3_gating_params(config)
     sg = stage3_gating_settings(config)
+    if sg.get("strategy", "legacy") == "coverage_budget":
+        return select_candidates(
+            eligible_rows, settings=sg.get("candidate_selection") or {},
+            mode_ratio=(ratio if ratio is not None else 1.0) if gating_meta.get("pipeline_mode") else None,
+            mode=gating_meta.get("pipeline_mode"),
+            seconds_per_image=_stage3_estimated_seconds_per_image(config),
+        )
     if str(gating_meta.get("gating_source") or "") == "delivery_mode":
         dyn_on = bool(sg.get("dynamic_batch_gating", False))
     else:

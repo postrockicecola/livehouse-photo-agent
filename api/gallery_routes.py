@@ -430,7 +430,7 @@ def _runtime_base_dir() -> str:
 
 
 def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | None]:
-    """Return whether the active gallery still has queued/running analysis work."""
+    """Report executing work separately from jobs still waiting for a worker."""
     from utils.studio_sessions import (
         RUNNABLE_ANALYZE_STATUSES,
         find_brain_session_id,
@@ -438,6 +438,8 @@ def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | 
     )
 
     conn = None
+    waiting_job = (False, None, None)
+    executing = {"CLAIMED", "PREPROCESSING", "INFERENCING", "POSTPROCESSING"}
     try:
         conn = brain_connect()
         session_id = find_brain_session_id(conn, previews_dir)
@@ -448,10 +450,13 @@ def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | 
         )
         if job_id is not None:
             row = conn.execute("SELECT status FROM jobs WHERE id = ?", (job_id,)).fetchone()
-            return True, job_id, str(row["status"]) if row is not None else None
+            status = str(row["status"]) if row is not None else None
+            if status in executing:
+                return True, job_id, status
+            waiting_job = (False, job_id, status)
 
-        # Staged pipelines use one PIPELINE_STAGE row per step. Any runnable row
-        # means the complete gallery score order is not final yet.
+        # Staged pipelines use one PIPELINE_STAGE row per step. Prefer an
+        # executing stage over its queued successors.
         if session_id is not None:
             placeholders = ",".join("?" * len(RUNNABLE_ANALYZE_STATUSES))
             row = conn.execute(
@@ -461,13 +466,15 @@ def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | 
                 WHERE session_id = ?
                   AND job_type = 'PIPELINE_STAGE'
                   AND status IN ({placeholders})
-                ORDER BY COALESCE(stage_order, 0) ASC, id ASC
+                ORDER BY CASE WHEN status IN ('QUEUED', 'FAILED_RETRYABLE') THEN 1 ELSE 0 END,
+                         COALESCE(stage_order, 0) ASC, id ASC
                 LIMIT 1
                 """,
                 (session_id, *RUNNABLE_ANALYZE_STATUSES),
             ).fetchone()
             if row is not None:
-                return True, int(row["id"]), str(row["status"])
+                status = str(row["status"])
+                return status in executing, int(row["id"]), status
     except Exception:
         import logging
 
@@ -479,7 +486,7 @@ def _gallery_analysis_state(previews_dir: str) -> tuple[bool, int | None, str | 
     finally:
         if conn is not None:
             conn.close()
-    return False, None, None
+    return waiting_job
 
 
 def _gallery_path_roots() -> list[Path]:
@@ -1695,7 +1702,7 @@ def get_gallery_results(
 ):
     active = _runtime_base_dir()
     analysis_running, analysis_job_id, analysis_job_status = _gallery_analysis_state(active)
-    effective_sort = "default" if analysis_running else sort
+    effective_sort = sort
     items, total, start, end, has_more, total_raw = load_gallery_page(
         active,
         effective_sort,

@@ -6,14 +6,14 @@ import {
   useEffect,
   useMemo,
   useState,
+  type CSSProperties,
   type SyntheticEvent,
 } from "react";
 import { gallerySelectionKey } from "@/lib/defaultFilmExport";
 import { buildGalleryPlainImageUrl } from "@/lib/galleryDisplayUrl";
+import { galleryScoreLabel } from "@/lib/galleryScoreLabel";
 import {
   GALLERY_MASONRY_MAX_CLASS,
-  splitIntoNMasonryColumns,
-  useGalleryMasonryColumnCount,
 } from "@/lib/galleryLayout";
 import type { GalleryItem } from "./types";
 
@@ -87,7 +87,6 @@ export function GalleryMasonry({
   agentHighlightedKeys,
   onToggleSelect,
 }: Props) {
-  const columnCount = useGalleryMasonryColumnCount();
   const sortedItems = useMemo(
     () => (preserveOrder ? items : sortItemsByScoreDesc(items)),
     [items, preserveOrder],
@@ -132,23 +131,13 @@ export function GalleryMasonry({
     });
   }, []);
 
-  const columns = useMemo(
-    () =>
-      splitIntoNMasonryColumns(sortedItems, columnCount, (item) => {
-        const { w, h } = apiLayoutHint(item);
-        return { w, h, orientation: item.orientation };
-      }),
-    [sortedItems, columnCount],
-  );
-
   const renderTile = (placed: PlacedItem) => {
     const { item, index } = placed;
     const itemKey = gallerySelectionKey(item, index) || `item-${index}`;
     const reactKey = stableItemKey(item, index);
     const checked = selectedKeys.has(itemKey);
     const agentHighlighted = agentHighlightedKeys?.has(itemKey) ?? false;
-    const score = Number(item.overall_score ?? 0);
-    const scoreLabel = item.score_status === "unscored" ? "待评分" : item.score_status === "rejected" ? "未通过初筛" : score.toFixed(1);
+    const scoreLabel = galleryScoreLabel(item);
     const measured = measuredByKey.get(reactKey) ?? null;
     const orient = displayOrientation(item, measured);
     const members = item.group_members ?? [];
@@ -169,7 +158,7 @@ export function GalleryMasonry({
         <button
           type="button"
           aria-label={`打开预览：${item.file ?? "photo"}，评分 ${scoreLabel}`}
-          className="gallery-tile-button relative block w-full border-0 bg-transparent p-0 text-left [&:focus-visible]:outline-none [&:focus-visible]:ring-1 [&:focus-visible]:ring-inset [&:focus-visible]:ring-white/25"
+          className="gallery-tile-button relative block w-full border-0 bg-transparent p-0 text-left [&:focus-visible]:outline-none [&:focus-visible]:ring-1 [&:focus-visible]:ring-inset [&:focus-visible]:ring-[var(--luma-focus)]"
           onClick={() => onOpenLab(item)}
         >
           <GalleryTileImage
@@ -184,7 +173,7 @@ export function GalleryMasonry({
                 {captionFromFile(item.file)}
               </p>
               <span
-                className="shrink-0 font-mono text-[10px] font-normal tabular-nums tracking-[0.12em] text-white/50"
+                className="shrink-0 font-mono text-[10px] font-medium tabular-nums tracking-[0.12em] text-[var(--luma-accent-warm)]"
                 title={`SCORE ${scoreLabel}`}
               >
                 {scoreLabel}
@@ -239,8 +228,7 @@ export function GalleryMasonry({
           <div className="flex flex-wrap gap-[6px] bg-black/40 p-[6px]">
             {members.map((m, mi) => {
               const msrc = buildGalleryPlainImageUrl(apiBase, m as GalleryItem);
-              const mscore = Number(m.overall_score ?? 0);
-              const memberLabel = m.score_status === "unscored" ? "待评分" : m.score_status === "rejected" ? "未通过初筛" : mscore.toFixed(1);
+              const memberLabel = galleryScoreLabel(m);
               return (
                 <button
                   key={`${reactKey}\0m${mi}\0${m.file ?? m.path ?? mi}`}
@@ -278,13 +266,27 @@ export function GalleryMasonry({
   return (
     <section
       aria-label="作品列表"
-      className={`gallery-shell mx-auto grid w-full min-w-0 ${GALLERY_MASONRY_MAX_CLASS} grid-cols-1 items-start gap-[6px] px-[clamp(14px,3.5vw,44px)] min-[520px]:grid-cols-2 sm:gap-2`}
+      className={`gallery-shell mx-auto flex w-full min-w-0 ${GALLERY_MASONRY_MAX_CLASS} flex-col gap-[6px] px-[clamp(14px,3.5vw,44px)] sm:gap-2`}
     >
-      {columns.map((col, ci) => (
-        <div key={ci} className="flex min-w-0 flex-col gap-[6px] sm:gap-2">
-          {col.map(renderTile)}
-        </div>
-      ))}
+      {Array.from({ length: Math.ceil(sortedItems.length / 2) }, (_, rowIndex) => {
+        const start = rowIndex * 2;
+        const row = sortedItems.slice(start, start + 2);
+        const columns = row.length === 2
+          ? row.map((item, offset) => {
+              const measured = measuredByKey.get(stableItemKey(item, start + offset)) ?? null;
+              return `${tileAspectRatio(item, measured)}fr`;
+            }).join(" ")
+          : "1fr 1fr";
+        return (
+          <div
+            key={stableItemKey(row[0], start)}
+            className="grid min-w-0 grid-cols-1 items-start gap-[6px] min-[520px]:[grid-template-columns:var(--gallery-row-columns)] sm:gap-2"
+            style={{ "--gallery-row-columns": columns } as CSSProperties}
+          >
+            {row.map((item, offset) => renderTile({ item, index: start + offset }))}
+          </div>
+        );
+      })}
     </section>
   );
 }
@@ -292,16 +294,15 @@ export function GalleryMasonry({
 function tileAspectRatio(
   item: GalleryItem,
   measured: IntrinsicSize | null,
-): string | undefined {
+): number {
   if (measured && measured.w > 0 && measured.h > 0) {
-    return `${measured.w} / ${measured.h}`;
+    return measured.w / measured.h;
   }
   const { w, h } = apiLayoutHint(item);
-  if (w > 0 && h > 0) return `${w} / ${h}`;
+  if (w > 0 && h > 0) return w / h;
   const o = String(item.orientation ?? "").toLowerCase();
-  if (o === "portrait") return "2 / 3";
-  if (o === "landscape") return "3 / 2";
-  return "3 / 2";
+  if (o === "portrait") return 2 / 3;
+  return 3 / 2;
 }
 
 function GalleryTileImage({

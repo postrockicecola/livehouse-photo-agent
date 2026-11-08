@@ -355,6 +355,36 @@ class ImageApiRouteTests(unittest.TestCase):
         app.include_router(router)
         cls.client = TestClient(app)
 
+    def test_gallery_keeps_score_order_during_analysis_and_across_pages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            previews = Path(tmp)
+            rows = [
+                {"file": "001.jpg", "overall_score": 20, "score_status": "scored"},
+                {"file": "002.jpg", "overall_score": 0, "score_status": "unscored",
+                 "stage3_meta": {"outcome": "skipped_stage3_gating"}},
+                {"file": "003.jpg", "overall_score": 95, "score_status": "scored"},
+                {"file": "004.jpg", "overall_score": 60, "score_status": "scored"},
+            ]
+            for row in rows:
+                (previews / row["file"]).write_bytes(b"jpeg")
+                row["path"] = str(previews / row["file"])
+            (previews / "analysis_results.json").write_text(json.dumps(rows))
+            with (
+                patch("api.gallery_routes._runtime_base_dir", return_value=tmp),
+                patch("api.gallery_routes._gallery_analysis_state", return_value=(True, 42, "RUNNING")),
+                patch("api.gallery_routes.try_enqueue_gallery_cinestill_prewarm", return_value=None),
+            ):
+                pages = [self.client.get("/api/gallery/results", params={
+                    "sort": "overall", "offset": offset, "limit": 2, "dedupe": False,
+                }) for offset in (0, 2)]
+            for page in pages:
+                self.assertEqual(page.status_code, 200)
+                self.assertEqual(page.json()["effective_sort"], "overall")
+            self.assertEqual(
+                [row["file"] for page in pages for row in page.json()["items"]],
+                ["003.jpg", "004.jpg", "001.jpg", "002.jpg"],
+            )
+
     def test_image_route_returns_cached_file_when_available(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)

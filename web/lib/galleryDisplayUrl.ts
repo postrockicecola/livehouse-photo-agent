@@ -44,15 +44,7 @@ function staticPublicPath(pathOrQuoted: string): string | null {
   return null;
 }
 
-/** Underexposure-salvage display EV query (``/image?ev=``). */
-export function salvageEvQuery(item: Pick<GalleryItem, "underexposure_salvage" | "salvage_ev">): string {
-  if (!item.underexposure_salvage) return "";
-  const ev = Number(item.salvage_ev ?? 0);
-  if (!(ev > 0) || !Number.isFinite(ev)) return "";
-  return `&ev=${Math.min(8, Math.round(ev * 1000) / 1000)}`;
-}
-
-/** 原始预览 JPEG（回退用）；欠曝 salvage 时附带 ``ev`` 显示归一化提亮。 */
+/** Original preview JPEG. Analysis salvage EV must not alter the displayed original. */
 export function buildGalleryPlainImageUrl(
   apiBase: string,
   item: GalleryItem,
@@ -65,7 +57,7 @@ export function buildGalleryPlainImageUrl(
   const path = filmPathQueryValue(pq);
   const rot = rotateQuery(Number(item.rotate_degrees ?? 0));
   const autoOrient = item.orientation ? "&auto_orient=0" : "";
-  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}${autoOrient}${salvageEvQuery(item)}&display_v=4`;
+  return `${apiBase}/image?path=${path}&max_side=${maxSide}${rot}${autoOrient}&display_v=5`;
 }
 
 /** Cinestill ``film-render``（需显影源路径；无路径时返回 null，由调用方用原图）。 */

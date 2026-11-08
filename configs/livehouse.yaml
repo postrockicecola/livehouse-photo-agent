@@ -286,8 +286,21 @@ processing:
     persist_path: ".luma_pipeline_staged/stage3_vlm_cache.json"  # survive restarts; key is content+context hash so cross-session reuse is safe
     load_on_start: true            # when persist_path is set, merge on cache construction
 
-  # Reduce Stage3 calls: after Stage2 + dedupe, sort by normalized score, then threshold + top fraction.
+  # Unified Stage3 budget after Stage2 + exact-content dedupe; legacy remains selectable.
   stage3_gating:
+    strategy: coverage_budget        # legacy restores threshold + top-k admission below
+    candidate_selection:
+      budget_ratio: 0.20             # Fraction of ALL Stage2 eligible images
+      min_candidates: 48
+      group_budget_ratio: 0.25       # Budget floor relative to burst-group count
+      # max_candidates: 500          # Optional explicit cost cap; legacy caps do not apply
+      representatives_per_burst: 2   # Soft cap, relaxed only to fill the budget
+      burst_gap_seconds: 2.5
+      burst_hash_distance: 10
+      coverage_time_bins: 24
+      lane_weights: {quality: 0.80, coverage: 0.10, ambiguous: 0.07, exploration: 0.03}
+    # Explicit pipeline_mode uses its ratio as the single budget (without the floors above).
+    # Legacy strategy settings:
     dynamic_batch_gating: true        # scale top-k by job size + distribution-based threshold
     stage3_threshold: 0.60            # slightly looser so haze/motion keepers stay in pool
     top_k_ratio: 0.28                 # multiplied by batch scale (>1000 → tighter); see max_candidates

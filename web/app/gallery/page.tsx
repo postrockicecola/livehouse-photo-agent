@@ -65,24 +65,6 @@ const GALLERY_BURST_DEDUPE_PREF_KEY = "livehouse.galleryBurstDedupe";
 const GALLERY_SORT_TASTE_PREF_KEY = "livehouse.gallerySortPersonalized";
 const GALLERY_SORT_DIVERSE_PREF_KEY = "livehouse.gallerySortDiverse";
 
-function readGalleryDiversePref(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return localStorage.getItem(GALLERY_SORT_DIVERSE_PREF_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function readGallerySortPersonalizedPref(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return localStorage.getItem(GALLERY_SORT_TASTE_PREF_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
 function readGalleryBurstDedupePref(): boolean {
   if (typeof window === "undefined") return true;
   try {
@@ -136,7 +118,6 @@ export default function HomePage() {
   const [bootstrapErr, setBootstrapErr] = useState<string | null>(null);
   const [loadSource, setLoadSource] = useState<GalleryLoadSource>("none");
   const [analysisRunning, setAnalysisRunning] = useState(false);
-  const [effectiveGallerySort, setEffectiveGallerySort] = useState<GallerySort | "default">("overall");
   const [reloadNonce, setReloadNonce] = useState(0);
   const [toolsOpen, setToolsOpen] = useState(false);
 
@@ -165,8 +146,8 @@ export default function HomePage() {
   const [useSessionVibeForExport, setUseSessionVibeForExport] = useState(false);
   const [vibeBusy, setVibeBusy] = useState(false);
   const [galleryBurstDedupe, setGalleryBurstDedupe] = useState(readGalleryBurstDedupePref);
-  const [gallerySortPersonalized, setGallerySortPersonalized] = useState(readGallerySortPersonalizedPref);
-  const [galleryDiverse, setGalleryDiverse] = useState(readGalleryDiversePref);
+  const [gallerySortPersonalized, setGallerySortPersonalized] = useState(false);
+  const [galleryDiverse, setGalleryDiverse] = useState(false);
   const [tasteProfile, setTasteProfile] = useState<TasteProfile | null>(null);
   const [tasteMsg, setTasteMsg] = useState("");
 
@@ -310,7 +291,6 @@ export default function HomePage() {
         setDatasetTotal(boot.count);
         setDatasetTotalRaw(boot.totalRaw);
         setAnalysisRunning(boot.analysisRunning);
-        setEffectiveGallerySort(boot.effectiveSort);
         galleryPollRunningRef.current = boot.analysisRunning;
         galleryPollTotalsRef.current = {
           raw: boot.totalRaw,
@@ -347,7 +327,6 @@ export default function HomePage() {
         setDatasetTotal(0);
         setLoadSource("none");
         setAnalysisRunning(false);
-        setEffectiveGallerySort("overall");
       } finally {
         if (!dead) setLoadingItems(false);
       }
@@ -389,7 +368,6 @@ export default function HomePage() {
         galleryPollTotalsRef.current = { raw, count, revision };
         galleryPollRunningRef.current = running;
         setAnalysisRunning(running);
-        setEffectiveGallerySort(data.effective_sort ?? "overall");
         const runStateChanged = wasRunning != null && wasRunning !== running;
         // Avoid reload loops when totals are unchanged after bootstrap.
         if (
@@ -1294,7 +1272,7 @@ export default function HomePage() {
             ) : null}
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="text-[10px] text-white/30">
-                {analysisRunning || effectiveGallerySort === "default" ? "处理中 · 默认顺序" : "排序"}
+                {analysisRunning ? "处理中 · 评分实时更新" : "排序"}
               </span>
               <div
                 className="inline-flex rounded-[4px] border border-white/[0.08] p-0.5"
@@ -1579,7 +1557,7 @@ export default function HomePage() {
                 items={showAgentOnly ? agentResultItems : items}
                 apiBase={API_BASE}
                 preserveOrder={
-                  showAgentOnly || analysisRunning || effectiveGallerySort === "default"
+                  showAgentOnly || gallerySort !== "overall"
                 }
                 onOpenLab={setModal}
                 selectedKeys={selectedKeys}

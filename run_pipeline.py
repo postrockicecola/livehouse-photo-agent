@@ -113,6 +113,7 @@ class RunOptions:
     max_workers: int | None
     no_checkpoint: bool
     pipeline_mode: str | None = None
+    score_all_images: bool = False
 
 
 @dataclass(frozen=True)
@@ -242,6 +243,7 @@ def build_pipeline(payload: BuildPipelineInput) -> AestheticPipeline:
         config_path=payload.options.config_path,
         source_dir=str(payload.source_dir),
         pipeline_mode=payload.options.pipeline_mode,
+        score_all_images=payload.options.score_all_images,
     )
 
 
@@ -643,7 +645,11 @@ def main() -> None:
         help="Stage3 门控预设：fast（更少 VLM）| balanced | strict（更高召回）| "
         "delivery（交付快览：严控 Stage3 数量、FAST+少量 FULL、静默日志）",
     )
-    parser.add_argument("--no-checkpoint", action="store_true", help="不做断点续跑，全部重算")
+    parser.add_argument("--no-checkpoint", action="store_true", help="不做断点续跑；仍遵守候选筛选并允许评分缓存")
+    parser.add_argument(
+        "--score-all-images", action="store_true",
+        help="全部可解码照片进入模型评分，跳过初筛淘汰、去重和候选预算（增加 API 用量）",
+    )
     parser.add_argument(
         "--no-serve",
         action="store_true",
@@ -675,6 +681,7 @@ def main() -> None:
         max_workers=args.max_workers,
         no_checkpoint=args.no_checkpoint,
         pipeline_mode=args.mode,
+        score_all_images=args.score_all_images,
     )
     run_result = run_pipeline(cfg, run_options)
     meta = run_result["meta"]

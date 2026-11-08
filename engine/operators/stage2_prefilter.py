@@ -9,6 +9,8 @@ from __future__ import annotations
 import logging
 import hashlib
 import threading
+import calendar
+from datetime import datetime
 from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -117,7 +119,30 @@ def phash_dedup_settings(config: Mapping[str, Any]) -> Dict[str, Any]:
 
 def need_phash_for_pipeline(config: Mapping[str, Any]) -> bool:
     p = phash_dedup_settings(config)
-    return bool(p.get("enabled", False))
+    return bool(p.get("enabled", False)) or _coverage_admission_enabled(config)
+
+
+def _coverage_admission_enabled(config: Mapping[str, Any]) -> bool:
+    return ((config.get("processing") or {}).get("stage3_gating") or {}).get("strategy") == "coverage_budget"
+
+
+def read_capture_time(image_path: str) -> float | None:
+    """Read EXIF headers only; use a timezone-independent camera clock for burst intervals."""
+    try:
+        with Image.open(image_path) as image:
+            exif = image.getexif()
+            camera = exif.get_ifd(34665) if 34665 in exif else {}
+            value = camera.get(36867) or exif.get(36867) or exif.get(306)
+            if not value:
+                return None
+            date = datetime.strptime(str(value).strip("\x00 "), "%Y:%m:%d %H:%M:%S")
+            subsecond = str(camera.get(37521) or exif.get(37521) or "").strip("\x00 ")
+            fraction = float("0." + subsecond) if subsecond.isdigit() else 0.0
+            return float(calendar.timegm(date.timetuple())) + fraction
+    except Exception:
+        # Optional metadata must never reject a decodable image (including malformed EXIF).
+        logger.debug("Capture time unavailable for %s", image_path, exc_info=True)
+        return None
 
 
 def row_ambiguous_tags(row: Mapping[str, Any]) -> List[str]:
@@ -235,6 +260,9 @@ def assess_stage2_per_image(
         gray = cv2.cvtColor(analysis_bgr, cv2.COLOR_BGR2GRAY)
         dbg_x["brightness"] = float(gray.mean())
         dbg_x["saturation"] = float(cv2.cvtColor(analysis_bgr, cv2.COLOR_BGR2HSV)[:, :, 1].mean())
+        if _coverage_admission_enabled(config):
+            dbg_x["capture_time"] = read_capture_time(image_path)
+            dbg_x["aspect_ratio"] = float(img_bgr.shape[1] / img_bgr.shape[0])
 
         if not enabled:
             return Stage2ImageResult(
