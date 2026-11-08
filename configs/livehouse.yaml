@@ -130,16 +130,20 @@ model:
 # EVALUATION WEIGHTS & DIMENSIONS
 # ==============================================================
 evaluation:
-  # Default weights (8-dim Stage 3; sum normalized at runtime if needed)
+  # Default weights (8-dim Stage 3; sum normalized at runtime if needed).
+  # Tilted toward the livehouse-defining dims (moment / atmosphere / light), matching the
+  # rubric's "moment_peak + atmosphere_impact are crucial" — a technically clean but flat
+  # frame should not out-rank a slightly-soft peak moment. Technical/delivery dims still
+  # carry real weight so broken frames lose. Validate changes with scripts/eval before shipping.
   default_weights:
-    focus_sharpness: 0.125
-    exposure_control: 0.125
-    noise_cleanliness: 0.125
-    composition_framing: 0.125
-    light_color_character: 0.125
-    moment_peak: 0.125
-    atmosphere_impact: 0.125
-    deliverable_subject: 0.125
+    focus_sharpness: 0.11
+    exposure_control: 0.10
+    noise_cleanliness: 0.10
+    composition_framing: 0.12
+    light_color_character: 0.14
+    moment_peak: 0.17
+    atmosphere_impact: 0.15
+    deliverable_subject: 0.11
 
   # Artistic motion blur: mood + moment over tack-sharp technicals
   artistic_motion_blur_weights:

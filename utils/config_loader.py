@@ -84,14 +84,14 @@ class ConfigLoader:
         },
         "evaluation": {
             "default_weights": {
-                "focus_sharpness": 0.125,
-                "exposure_control": 0.125,
-                "noise_cleanliness": 0.125,
-                "composition_framing": 0.125,
-                "light_color_character": 0.125,
-                "moment_peak": 0.125,
-                "atmosphere_impact": 0.125,
-                "deliverable_subject": 0.125,
+                "focus_sharpness": 0.11,
+                "exposure_control": 0.10,
+                "noise_cleanliness": 0.10,
+                "composition_framing": 0.12,
+                "light_color_character": 0.14,
+                "moment_peak": 0.17,
+                "atmosphere_impact": 0.15,
+                "deliverable_subject": 0.11,
             },
             "artistic_motion_blur_weights": {
                 "focus_sharpness": 0.07,
