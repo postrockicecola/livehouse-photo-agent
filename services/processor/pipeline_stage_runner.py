@@ -36,6 +36,7 @@ from services.pipeline_inference_dispatch import plan_stage3_inference_dispatch
 from services.processor.stages.deep_analysis import (
     Stage3FastFirstHooks,
     analyze_with_dimensions,
+    build_stage3_token_summary,
     run_stage3_fast_first,
     stage3_strategy_settings,
 )
@@ -987,6 +988,7 @@ class PipelineStageRunner:
         errs: List[str] = []
         tally = Lock()
         stage3_early_exit_payload: Dict[str, Any] | None = None
+        stage3_token_summary: Dict[str, Any] | None = None
 
         total = len(incoming)
 
@@ -1395,6 +1397,9 @@ class PipelineStageRunner:
             fb = int(stats_ff.get("vlm_fallback", 0))
             fcb = int(stats_ff.get("fallback_count", 0))
             inference_ms = int((time.perf_counter() - t_inf0) * 1000)
+            stage3_token_summary = build_stage3_token_summary(pipe.config, stats_ff)
+            if stage3_token_summary is not None:
+                logger.info("stage3 token/cost | %s", stage3_token_summary)
         elif budget_sched is not None:
             deferred_budget_tail: List[Dict[str, Any]] = []
             for i, (_jid, row) in enumerate(work_items):
@@ -1460,6 +1465,8 @@ class PipelineStageRunner:
             out["errors_sample"] = errs[:10]
         if stage3_early_exit_payload is not None:
             out["stage3_early_exit"] = stage3_early_exit_payload
+        if stage3_token_summary is not None:
+            out["stage3_tokens"] = stage3_token_summary
         return out
 
     def run_write_artifact(self) -> Dict[str, Any]:

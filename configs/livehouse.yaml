@@ -350,6 +350,12 @@ stage3:
     # rank, smaller is fine. Lowered from 1600; raise toward 2048 only if detail is lost.
     thumbnail_max_side: 1280          # full dimensional pass
     thumbnail_max_side_fast: 896      # fast ranking pass (defaults to min(896, full) if omitted)
+    # Optional: token pricing for the per-run cost estimate logged as "stage3 token/cost".
+    # Tokens are always summarized; cost is added only when a rate is set. Use your DashScope rate.
+    # pricing:
+    #   input_per_1m: 1.5     # price per 1M input (prompt) tokens
+    #   output_per_1m: 4.5    # price per 1M output (completion) tokens
+    #   currency: "CNY"
     # Retryable failures only (timeout/transport/429/5xx) fail over to local Ollama.
     # Auth and request errors (400/401/403) remain visible instead of being masked.
     fallback:

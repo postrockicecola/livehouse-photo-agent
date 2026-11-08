@@ -1508,6 +1508,96 @@ def _append_stage3_latency_stats(hooks: Stage3FastFirstHooks, fast_s: float, ful
     record_stage3_latency_lists(hooks.stats, fast_s, full_s)
 
 
+def accumulate_stage3_token_usage(
+    stats: Dict[str, Any],
+    lock: Any,
+    metadata: Any,
+    *,
+    mode: str,
+) -> None:
+    """Tally one VLM call's token usage into ``stats`` split by ``mode`` ('fast'/'full').
+
+    Reads the OpenAI/Ollama-shaped keys the providers emit (``prompt_eval_count`` /
+    ``eval_count``). Counts every cloud (and local-fallback) call exactly once at the raw
+    response boundary, so fast-pass tokens of top-k frames aren't lost by downstream merges.
+    """
+    if not isinstance(metadata, Mapping):
+        return
+
+    def _int(*keys: str) -> int:
+        for k in keys:
+            v = metadata.get(k)
+            if v is not None:
+                try:
+                    return max(0, int(v))
+                except (TypeError, ValueError):
+                    return 0
+        return 0
+
+    pt = _int("prompt_eval_count", "prompt_tokens")
+    ct = _int("eval_count", "completion_tokens")
+    if pt <= 0 and ct <= 0:
+        return
+    m = "full" if str(mode).lower() == "full" else "fast"
+    with lock:
+        stats[f"stage3_prompt_tokens_{m}"] = int(stats.get(f"stage3_prompt_tokens_{m}", 0)) + pt
+        stats[f"stage3_completion_tokens_{m}"] = int(stats.get(f"stage3_completion_tokens_{m}", 0)) + ct
+        stats[f"stage3_calls_{m}"] = int(stats.get(f"stage3_calls_{m}", 0)) + 1
+
+
+def build_stage3_token_summary(
+    config: Mapping[str, Any],
+    stats: Mapping[str, Any],
+) -> Dict[str, Any] | None:
+    """Aggregate fast/full VLM token usage into a run summary; add cost if pricing is set.
+
+    Returns ``None`` when no tokens were recorded (e.g. all cache hits / non-fast-first path).
+    Pricing is optional: ``stage3.route_b.pricing.{input_per_1m,output_per_1m,currency}``.
+    """
+    pf = int(stats.get("stage3_prompt_tokens_fast", 0) or 0)
+    cf = int(stats.get("stage3_completion_tokens_fast", 0) or 0)
+    pfu = int(stats.get("stage3_prompt_tokens_full", 0) or 0)
+    cfu = int(stats.get("stage3_completion_tokens_full", 0) or 0)
+    prompt_total = pf + pfu
+    completion_total = cf + cfu
+    if prompt_total == 0 and completion_total == 0:
+        return None
+    out: Dict[str, Any] = {
+        "fast_calls": int(stats.get("stage3_calls_fast", 0) or 0),
+        "full_calls": int(stats.get("stage3_calls_full", 0) or 0),
+        "prompt_tokens_fast": pf,
+        "completion_tokens_fast": cf,
+        "prompt_tokens_full": pfu,
+        "completion_tokens_full": cfu,
+        "prompt_tokens": prompt_total,
+        "completion_tokens": completion_total,
+        "total_tokens": prompt_total + completion_total,
+    }
+    route_b = ((config.get("stage3") or {}).get("route_b") or {})
+    pricing = route_b.get("pricing") if isinstance(route_b, Mapping) else None
+    if isinstance(pricing, Mapping):
+        def _price(key: str) -> float | None:
+            v = pricing.get(key)
+            if v is None:
+                return None
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return None
+        in_price = _price("input_per_1m")
+        out_price = _price("output_per_1m")
+        if in_price is not None or out_price is not None:
+            cost = 0.0
+            if in_price is not None:
+                cost += prompt_total / 1_000_000.0 * in_price
+            if out_price is not None:
+                cost += completion_total / 1_000_000.0 * out_price
+            out["estimated_cost"] = round(cost, 4)
+            if pricing.get("currency"):
+                out["currency"] = str(pricing.get("currency"))
+    return out
+
+
 def run_stage3_fast_first(
     inference_client: Stage3InferenceClient,
     config: Dict[str, Any],
@@ -1769,6 +1859,7 @@ def run_stage3_fast_first(
         t_fast_wall0 = time.perf_counter()
         raw = fut.result()
         md_rw = raw.get("metadata") or {}
+        accumulate_stage3_token_usage(hooks.stats, hooks.progress_lock, md_rw, mode="fast")
         if isinstance(md_rw, dict) and md_rw.get("queue_wait_sec") is not None:
             qw_accum.append(float(md_rw.get("queue_wait_sec") or 0.0))
 
@@ -1976,6 +2067,7 @@ def run_stage3_fast_first(
             t_full_wall0 = time.perf_counter()
             raw = fut.result()
             md_rw = raw.get("metadata") or {}
+            accumulate_stage3_token_usage(hooks.stats, hooks.progress_lock, md_rw, mode="full")
             if isinstance(md_rw, dict) and md_rw.get("queue_wait_sec") is not None:
                 qw_full.append(float(md_rw.get("queue_wait_sec") or 0.0))
 

@@ -230,6 +230,13 @@ class AestheticPipeline:
             "cache_hit_rate": cache_metrics.get("stage3_vlm_cache_hit_rate"),
             "cache_saved_inferences": cache_metrics.get("stage3_vlm_cache_saved_inferences"),
         }
+        tokens = r3.get("stage3_tokens")
+        if isinstance(tokens, dict):
+            run_summary["cloud_total_tokens"] = tokens.get("total_tokens")
+            run_summary["cloud_prompt_tokens"] = tokens.get("prompt_tokens")
+            run_summary["cloud_completion_tokens"] = tokens.get("completion_tokens")
+            if tokens.get("estimated_cost") is not None:
+                run_summary["cloud_estimated_cost"] = tokens.get("estimated_cost")
         logger.info("pipeline run summary | %s", run_summary)
         return {
             "total": total,
