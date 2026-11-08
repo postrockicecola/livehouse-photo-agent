@@ -55,6 +55,27 @@ def test_route_b_forces_json_mode_and_high_resolution() -> None:
     assert metadata["vlm_thumbnail_max_side"] == 1600
 
 
+def test_route_b_fast_pass_uses_smaller_thumbnail() -> None:
+    config = {
+        "stage3": {
+            "route_b": {
+                "enabled": True,
+                "thumbnail_max_side": 1280,
+                "thumbnail_max_side_fast": 896,
+            }
+        }
+    }
+    full = stage3_inference_request_metadata(config, mode="full")
+    fast = stage3_inference_request_metadata(config, mode="fast")
+    assert full["vlm_thumbnail_max_side"] == 1280
+    assert fast["vlm_thumbnail_max_side"] == 896
+    # Fast defaults to min(896, full) when no explicit fast override.
+    cfg_no_fast = {"stage3": {"route_b": {"enabled": True, "thumbnail_max_side": 1024}}}
+    assert stage3_inference_request_metadata(cfg_no_fast, mode="fast")["vlm_thumbnail_max_side"] == 896
+    cfg_small = {"stage3": {"route_b": {"enabled": True, "thumbnail_max_side": 768}}}
+    assert stage3_inference_request_metadata(cfg_small, mode="fast")["vlm_thumbnail_max_side"] == 768
+
+
 def test_openai_cloud_provider_is_discoverable() -> None:
     spec = get_provider_spec("openai")
     assert spec is not None

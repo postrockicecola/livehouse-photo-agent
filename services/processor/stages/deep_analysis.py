@@ -363,8 +363,15 @@ def stage3_strategy_settings(config: Dict[str, Any]) -> Dict[str, Any]:
 def stage3_inference_request_metadata(
     config: Mapping[str, Any],
     extra: Mapping[str, Any] | None = None,
+    *,
+    mode: str = "full",
 ) -> Dict[str, Any]:
-    """Attach Route-B transport constraints without leaking provider concerns into prompts."""
+    """Attach Route-B transport constraints without leaking provider concerns into prompts.
+
+    ``mode`` picks the image resolution sent to the cloud VLM: the fast pass only needs a
+    quick rank, so it uses a smaller thumbnail than the full dimensional pass. Image tokens
+    scale with pixel area, so this is the main cloud cost/latency lever.
+    """
     out = dict(extra or {})
     out.setdefault("json_mode", True)
     model_cfg = config.get("model") if isinstance(config.get("model"), Mapping) else {}
@@ -377,13 +384,21 @@ def stage3_inference_request_metadata(
     if not isinstance(route_b, Mapping) or not bool(route_b.get("enabled", False)):
         return out
     out["json_mode"] = True
-    try:
-        out["vlm_thumbnail_max_side"] = max(
-            768,
-            min(2048, int(route_b.get("thumbnail_max_side") or 1600)),
+
+    def _side(raw: Any, default: int) -> int:
+        try:
+            return max(640, min(2048, int(raw)))
+        except (TypeError, ValueError):
+            return default
+
+    full_side = _side(route_b.get("thumbnail_max_side"), 1280)
+    if str(mode).lower() == "fast":
+        raw_fast = route_b.get("thumbnail_max_side_fast")
+        out["vlm_thumbnail_max_side"] = (
+            _side(raw_fast, min(896, full_side)) if raw_fast is not None else min(896, full_side)
         )
-    except (TypeError, ValueError):
-        out["vlm_thumbnail_max_side"] = 1600
+    else:
+        out["vlm_thumbnail_max_side"] = full_side
     return out
 
 
@@ -765,6 +780,7 @@ def analyze_stage3_fast(
     inference_extra_metadata = stage3_inference_request_metadata(
         config,
         inference_extra_metadata,
+        mode="fast",
     )
     first_entry = _wall_t0 is None
     if first_entry:
@@ -1085,6 +1101,7 @@ def analyze_with_dimensions(
     inference_extra_metadata = stage3_inference_request_metadata(
         config,
         inference_extra_metadata,
+        mode="full",
     )
     first_entry = _wall_t0 is None
     if first_entry:

@@ -345,7 +345,11 @@ stage3:
     max_inference_queue_size: 16
     queue_wait_timeout_seconds: 300
     inference_hard_timeout_seconds: 240
-    thumbnail_max_side: 1600
+    # Cloud VLM image size. Image tokens scale ~linearly with pixel area, so this is the
+    # main cloud cost/latency lever. full = dimensional pass (needs detail); fast = quick
+    # rank, smaller is fine. Lowered from 1600; raise toward 2048 only if detail is lost.
+    thumbnail_max_side: 1280          # full dimensional pass
+    thumbnail_max_side_fast: 896      # fast ranking pass (defaults to min(896, full) if omitted)
     # Retryable failures only (timeout/transport/429/5xx) fail over to local Ollama.
     # Auth and request errors (400/401/403) remain visible instead of being masked.
     fallback:
