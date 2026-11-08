@@ -23,6 +23,8 @@ from __future__ import annotations
 import base64
 import io
 import logging
+import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
 
@@ -31,6 +33,16 @@ import numpy as np
 from PIL import Image
 
 logger = logging.getLogger(__name__)
+
+# Decoded+EXIF-oriented RGB image cache for VLM base64 encoding.
+# The expensive, size-independent work (open + RAW-sibling orientation resolution) is shared
+# across the fast and full Stage3 passes (different thumbnail sizes) and across retries.
+# Entries are capped to ``_ORIENTED_CACHE_MAX_SIDE`` px so memory stays bounded
+# (~5MB/entry × _ORIENTED_CACHE_MAX_ENTRIES). Thread-safe; callers get a private copy.
+_ORIENTED_CACHE_MAX_SIDE = 1536
+_ORIENTED_CACHE_MAX_ENTRIES = 6
+_oriented_img_cache: "OrderedDict[tuple, Image.Image]" = OrderedDict()
+_oriented_img_cache_lock = threading.Lock()
 
 # --- Stage1 缺省阈值（yaml 未写时生效；与 livehouse 场景对齐）---
 _STAGE1_FALLBACK: Dict[str, float] = {
@@ -680,6 +692,63 @@ class ImageProcessor:
             return 40.0
 
     @staticmethod
+    def _decode_oriented_rgb(image_path: str) -> "Image.Image":
+        """Open + EXIF/RAW-sibling orient + normalize to RGB (size-independent, the costly part)."""
+        from services.jpeg_exif_orientation import (
+            open_display_ready_image,
+            resolve_capture_rotation_degrees,
+        )
+
+        img = open_display_ready_image(image_path, resolve_capture_rotation_degrees(image_path))
+        if img.mode in ("RGBA", "LA"):
+            bg = Image.new("RGB", img.size, (255, 255, 255))
+            bg.paste(img, mask=img.split()[-1])
+            return bg
+        if img.mode == "P":
+            if "transparency" in img.info:
+                t = img.convert("RGBA")
+                bg = Image.new("RGB", t.size, (255, 255, 255))
+                bg.paste(t, mask=t.split()[-1])
+                return bg
+            return img.convert("RGB")
+        if img.mode != "RGB":
+            return img.convert("RGB")
+        return img
+
+    @staticmethod
+    def _oriented_rgb_cached(image_path: str) -> "Image.Image":
+        """Return an oriented RGB image (≤ cache cap) reusing a decode across passes/retries.
+
+        Returns a private copy so callers may resize/encode without mutating the shared entry.
+        Falls back to a fresh decode when the file can't be stat'd.
+        """
+        p = str(image_path)
+        try:
+            st = Path(p).stat()
+            key = (str(Path(p).resolve()), st.st_mtime_ns, st.st_size)
+        except OSError:
+            key = None
+
+        if key is not None:
+            with _oriented_img_cache_lock:
+                hit = _oriented_img_cache.get(key)
+                if hit is not None:
+                    _oriented_img_cache.move_to_end(key)
+                    return hit.copy()
+
+        # Cold miss: decode outside the lock (concurrent cold misses just decode twice).
+        img = ImageProcessor._decode_oriented_rgb(p)
+        capped = img.copy()
+        capped.thumbnail((_ORIENTED_CACHE_MAX_SIDE, _ORIENTED_CACHE_MAX_SIDE))
+        if key is not None:
+            with _oriented_img_cache_lock:
+                _oriented_img_cache[key] = capped
+                _oriented_img_cache.move_to_end(key)
+                while len(_oriented_img_cache) > _ORIENTED_CACHE_MAX_ENTRIES:
+                    _oriented_img_cache.popitem(last=False)
+        return capped.copy()
+
+    @staticmethod
     def get_optimized_base64(
         image_path: str,
         max_size: Tuple[int, int] = (768, 768),
@@ -690,31 +759,16 @@ class ImageProcessor:
 
         旋转语义与画廊 `/image` 一致：EXIF 优先；EXIF 缺失时回退 RAW 同名文件的
         Orientation（strip-export 的竖拍预览否则会以横躺像素送进 VLM）。
+
+        解码+朝向校正的结果走进程内 LRU 缓存，使同一张图的 fast/full 两档分辨率与重试
+        共享一次解码；请求尺寸大于缓存上限时回退到实时解码（保持原行为）。
         """
         p = str(image_path)
         try:
-            from services.jpeg_exif_orientation import (
-                open_display_ready_image,
-                resolve_capture_rotation_degrees,
-            )
-
-            img = open_display_ready_image(p, resolve_capture_rotation_degrees(p))
-            if img.mode in ("RGBA", "LA"):
-                bg = Image.new("RGB", img.size, (255, 255, 255))
-                bg.paste(img, mask=img.split()[-1])
-                img = bg
-            elif img.mode == "P":
-                if "transparency" in img.info:
-                    t = img.convert("RGBA")
-                    bg = Image.new("RGB", t.size, (255, 255, 255))
-                    bg.paste(t, mask=t.split()[-1])
-                    img = bg
-                else:
-                    img = img.convert("RGB")
-            elif img.mode == "L":
-                img = img.convert("RGB")
-            elif img.mode != "RGB":
-                img = img.convert("RGB")
+            if max(int(max_size[0]), int(max_size[1])) > _ORIENTED_CACHE_MAX_SIDE:
+                img = ImageProcessor._decode_oriented_rgb(p)
+            else:
+                img = ImageProcessor._oriented_rgb_cached(p)
             img.thumbnail(max_size)
             buf = io.BytesIO()
             img.save(buf, format="JPEG", quality=int(max(1, min(100, quality))))
